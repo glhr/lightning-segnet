@@ -43,6 +43,7 @@ class FreiburgDataLoader():
         else:
             self.path = path + 'test/'
 
+        self.train = train
         self.filenames = []
         for img in glob.glob(self.path + 'GT_color/*.png'):
             img = img.split("/")[-1].split("_")[0]
@@ -108,7 +109,7 @@ class FreiburgDataLoader():
         suffixes = {
             'depth': "_Clipped_redict_depth_gray.png",
             "rgb": "_Clipped.jpg",
-            "gt": "_mask.png"
+            "gt": "_mask.png" if self.train else "_Clipped.png"
         }
 
         try:
@@ -124,6 +125,7 @@ class FreiburgDataLoader():
             imgRGB = np.array(pilRGB)[:, :, ::-1]
             imgDep = np.array(pilDep)[:, :, ::-1]
 
+            print(self.path + "GT_color/" + a + suffixes['gt'])
             imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
             resize = (480,360)
             modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
