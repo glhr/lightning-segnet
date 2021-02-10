@@ -53,19 +53,19 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=100, check_val_every_n_epoch=1)
+trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
 # trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_72/checkpoints/epoch=1-step=101.ckpt")
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_73/checkpoints/epoch=5-step=405.ckpt")
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
 ds = FreiburgDataLoader(train=False)
 dl = DataLoader(ds, batch_size=1)
 for i,batch in enumerate(dl):
-    ds.result_to_image(batch[1].squeeze(), i)
+    # ds.result_to_image(batch[1].squeeze(), i)
     y_hat = trained_model(batch[0])
     y_hat = torch.argmin(y_hat.squeeze(), dim=0)
     print(y_hat.shape)
     result = y_hat
-    # ds.result_to_image(y_hat, i)
+    ds.result_to_image(y_hat, i)

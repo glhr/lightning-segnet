@@ -81,18 +81,23 @@ class FreiburgDataLoader():
         mask = torch.squeeze(mask)  # remove 1
 
         # check the present values in the mask, 0 and 255 in my case
-        # print('unique values rgb    ', torch.unique(mask))
+        print('unique values rgb    ', torch.unique(mask))
         # -> unique values rgb     tensor([  0, 255], dtype=torch.uint8)
 
         class_mask = mask
         class_mask = class_mask.permute(2, 0, 1).contiguous()
+        # print(class_mask)
         h, w = class_mask.shape[1], class_mask.shape[2]
+        print(h,w)
         mask_out = torch.zeros(h, w, dtype=torch.long)
 
         for k in self.mapping:
             idx = (class_mask == torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
+            # print(k)
             validx = (idx.sum(0) == 3)
+
             mask_out[validx] = torch.tensor(self.mapping[k], dtype=torch.long)
+
             #print(mask_out[validx])
 
         # check the present values after mapping, in my case 0, 1, 2, 3
@@ -130,16 +135,21 @@ class FreiburgDataLoader():
 
             print(self.path + "GT_color/" + a + suffixes['gt'])
             try:
-                imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
-            except AttributeError:
+                # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+                imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
+            except (AttributeError,IOError):
                 suffixes['gt'] = "_Clipped.png"
-                imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+                # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+                imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
+            imgGT = np.array(imgGT)[:, :, ::-1]
+
             resize = (480,360)
             modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
             modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
             modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
+            print(modGT.shape)
             modGT = self.mask_to_class_rgb(modGT)
-            # print(modGT.shape)
+
             modRGB = modRGB[: , :, 2]
 
             # modGT = np.where(modGT == 16, 6, modGT)
