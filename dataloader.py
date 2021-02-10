@@ -36,8 +36,6 @@ class FreiburgDataLoader():
         }
         print(self.mapping)
 
-        self.num_labels = 7 # len(np.unique(classes[:, 3]))
-
         if train:
             self.path = path + 'train/'
         else:
@@ -63,11 +61,15 @@ class FreiburgDataLoader():
         :param iter: The name of the file to save it to
         :return:
         """
-        b = result.cpu().numpy()
+        # result = result.squeeze(0)
+        b = result.detach().cpu().numpy()
+        # b = result.cpu().detach().numpy()
         bs = b.shape
+        print(bs,np.max(b))
         data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
         for y in range(bs[0]):
             for x in range(bs[1]):
+                # if b[y, x]>0: print(b[y, x])
                 data[y, x] = self.get_color(b[y, x])
 
         img = Image.fromarray(data, 'RGB')
@@ -91,9 +93,10 @@ class FreiburgDataLoader():
             idx = (class_mask == torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
             validx = (idx.sum(0) == 3)
             mask_out[validx] = torch.tensor(self.mapping[k], dtype=torch.long)
+            #print(mask_out[validx])
 
         # check the present values after mapping, in my case 0, 1, 2, 3
-        # print('unique values mapped ', torch.unique(mask_out))
+        print('unique values mapped ', torch.unique(mask_out))
         # -> unique values mapped  tensor([0, 1, 2, 3])
 
         return mask_out
@@ -109,7 +112,7 @@ class FreiburgDataLoader():
         suffixes = {
             'depth': "_Clipped_redict_depth_gray.png",
             "rgb": "_Clipped.jpg",
-            "gt": "_mask.png" if self.train else "_Clipped.png"
+            "gt": "_mask.png"
         }
 
         try:
@@ -126,7 +129,11 @@ class FreiburgDataLoader():
             imgDep = np.array(pilDep)[:, :, ::-1]
 
             print(self.path + "GT_color/" + a + suffixes['gt'])
-            imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+            try:
+                imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+            except AttributeError:
+                suffixes['gt'] = "_Clipped.png"
+                imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
             resize = (480,360)
             modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
             modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
