@@ -53,8 +53,8 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
-# trainer.fit(segnet_model)
+trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=500, check_val_every_n_epoch=5)
+trainer.fit(segnet_model)
 
 trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_73/checkpoints/epoch=5-step=405.ckpt")
 # prints the learning_rate you used in this checkpoint
