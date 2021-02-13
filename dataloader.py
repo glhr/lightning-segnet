@@ -30,6 +30,7 @@ class FreiburgDataLoader():
         for x in classes:
             x = [int(i) for i in x[1:]]
             self.color_map[x[3]] = [x[0], x[1], x[2]]
+        print(self.color_map)
 
         self.mapping = {
             tuple(rgb):i for i,rgb in self.color_map.items()
@@ -61,16 +62,19 @@ class FreiburgDataLoader():
         :param iter: The name of the file to save it to
         :return:
         """
-        # result = result.squeeze(0)
         b = result.detach().cpu().numpy()
         # b = result.cpu().detach().numpy()
         bs = b.shape
-        print(bs,np.max(b))
+        # print(bs,np.max(b))
         data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
+        colors = set()
         for y in range(bs[0]):
             for x in range(bs[1]):
                 # if b[y, x]>0: print(b[y, x])
                 data[y, x] = self.get_color(b[y, x])
+                colors.add(b[y, x])
+
+        # print(colors)
 
         img = Image.fromarray(data, 'RGB')
         img.save('results/ssma ' + str(iter + 1) + '.png')
@@ -78,30 +82,32 @@ class FreiburgDataLoader():
     def mask_to_class_rgb(self, mask):
         # print('----mask->rgb----')
         mask = torch.from_numpy(np.array(mask))
-        mask = torch.squeeze(mask)  # remove 1
+        # mask = torch.squeeze(mask)  # remove 1
 
         # check the present values in the mask, 0 and 255 in my case
-        print('unique values rgb    ', torch.unique(mask))
+        # print('unique values rgb    ', torch.unique(mask))
         # -> unique values rgb     tensor([  0, 255], dtype=torch.uint8)
 
         class_mask = mask
         class_mask = class_mask.permute(2, 0, 1).contiguous()
-        # print(class_mask)
+        # print('unique values rgb    ', torch.unique(class_mask))
         h, w = class_mask.shape[1], class_mask.shape[2]
-        print(h,w)
+        # print(h,w)
         mask_out = torch.zeros(h, w, dtype=torch.long)
 
         for k in self.mapping:
+            # print(torch.unique(class_mask), torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
             idx = (class_mask == torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
-            # print(k)
+            # print(idx)
             validx = (idx.sum(0) == 3)
+            # print(validx[0])
 
             mask_out[validx] = torch.tensor(self.mapping[k], dtype=torch.long)
 
             #print(mask_out[validx])
 
         # check the present values after mapping, in my case 0, 1, 2, 3
-        print('unique values mapped ', torch.unique(mask_out))
+        # print('unique values mapped ', torch.unique(mask_out))
         # -> unique values mapped  tensor([0, 1, 2, 3])
 
         return mask_out
@@ -133,7 +139,7 @@ class FreiburgDataLoader():
             imgRGB = np.array(pilRGB)[:, :, ::-1]
             imgDep = np.array(pilDep)[:, :, ::-1]
 
-            print(self.path + "GT_color/" + a + suffixes['gt'])
+            # print(self.path + "GT_color/" + a + suffixes['gt'])
             try:
                 # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
                 imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
@@ -147,7 +153,9 @@ class FreiburgDataLoader():
             modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
             modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
             modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
-            print(modGT.shape)
+            # print(modGT.shape)
+            # print(modGT[0][0])
+            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
             modGT = self.mask_to_class_rgb(modGT)
 
             modRGB = modRGB[: , :, 2]

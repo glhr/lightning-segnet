@@ -20,7 +20,7 @@ class LitSegNet(pl.LightningModule):
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
-        print(x.shape)
+        # print(x.shape)
         embedding = self.model(x)
         return embedding
 
@@ -53,10 +53,10 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=500, check_val_every_n_epoch=5)
+trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
 # trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_73/checkpoints/epoch=5-step=405.ckpt")
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=316-step=24408.ckpt")
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
@@ -66,6 +66,7 @@ for i,batch in enumerate(dl):
     # ds.result_to_image(batch[1].squeeze(), i)
     y_hat = trained_model(batch[0])
     y_hat = torch.argmax(y_hat.squeeze(), dim=0)
-    print(y_hat.shape)
+    # print(y_hat.shape)
     result = y_hat
     ds.result_to_image(y_hat, i)
+    if i > 10: break
