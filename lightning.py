@@ -15,6 +15,7 @@ import numpy as np
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument('--bs', type=int, default=16)
+parser.add_argument('--gpu', type=int, default=1)
 args = parser.parse_args()
 
 class LitSegNet(pl.LightningModule):
@@ -58,7 +59,7 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
+trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
 trainer.fit(segnet_model)
 
 trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=316-step=24408.ckpt")
