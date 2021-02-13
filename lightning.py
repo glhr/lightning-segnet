@@ -12,11 +12,16 @@ from dataloader import FreiburgDataLoader
 
 import numpy as np
 
+from argparse import ArgumentParser
+parser = ArgumentParser()
+parser.add_argument('--bs', type=int, default=16)
+args = parser.parse_args()
+
 class LitSegNet(pl.LightningModule):
 
     def __init__(self):
         super().__init__()
-        self.model = SegNet(num_classes=6)
+        self.model = SegNet(num_classes=7)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -42,19 +47,19 @@ class LitSegNet(pl.LightningModule):
     def train_dataloader(self):
         # REQUIRED
         dl = FreiburgDataLoader(train=True)
-        return DataLoader(dl, batch_size=3)
+        return DataLoader(dl, batch_size=args.bs)
 
     def val_dataloader(self):
         # OPTIONAL
         dl = FreiburgDataLoader(train=False)
-        return DataLoader(dl, batch_size=3)
+        return DataLoader(dl, batch_size=args.bs)
 
 
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
 trainer = pl.Trainer(gpus=0, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
-# trainer.fit(segnet_model)
+trainer.fit(segnet_model)
 
 trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=316-step=24408.ckpt")
 # prints the learning_rate you used in this checkpoint
