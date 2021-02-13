@@ -36,7 +36,8 @@ class LitSegNet(pl.LightningModule):
         x, y = batch
         # x = x.view(x.size(0), -1)
         x_hat = self.model(x)
-        loss = F.nll_loss(x_hat, y)
+        x_hat = torch.softmax(x_hat, dim=1)
+        loss = F.cross_entropy(x_hat, y)
         # Logging to TensorBoard by default
         self.log('train_loss', loss)
         return loss
