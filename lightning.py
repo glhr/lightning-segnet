@@ -46,6 +46,14 @@ class LitSegNet(pl.LightningModule):
         self.log('train_loss', loss)
         return loss
 
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        x_hat = self.model(x)
+        x_hat = torch.softmax(x_hat, dim=1)
+        loss = F.cross_entropy(x_hat, y)
+        self.log('val_loss', loss)
+        return loss
+
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
         return optimizer
@@ -64,10 +72,10 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5, logger=wandb_logger)
+trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5, logger=wandb_logger, log_every_n_steps=10)
 if args.train: trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=33-step=504.ckpt")
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=99-step=1499.ckpt")
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
