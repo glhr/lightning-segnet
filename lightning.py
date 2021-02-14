@@ -16,7 +16,10 @@ import numpy as np
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument('--bs', type=int, default=16)
+parser.add_argument('--lr', type=int, default=0.1)
+parser.add_argument('--momentum', type=int, default=0.9)
 parser.add_argument('--gpu', type=int, default=1)
+parser.add_argument('--optim', type=str, default="SGD")
 parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--epochs', type=int, default=1000)
 args = parser.parse_args()
@@ -27,7 +30,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 checkpoint_callback = ModelCheckpoint(
     dirpath='lightning_logs',
-    filename='{epoch}-{val_loss:.2f}-{other_metric:.2f}',
+    filename='{epoch}-{val_loss:.2f}',
     verbose=True,
     monitor='val_loss',
     mode='min'
@@ -35,9 +38,10 @@ checkpoint_callback = ModelCheckpoint(
 
 class LitSegNet(pl.LightningModule):
 
-    def __init__(self):
+    def __init__(self, num_classes=7, lr=0.1, momentum=0.9, bs=16, optim='SGD'):
         super().__init__()
-        self.model = SegNet(num_classes=7)
+        self.save_hyperparameters()
+        self.model = SegNet(num_classes=self.hparams.num_classes)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -66,18 +70,21 @@ class LitSegNet(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
+        if self.hparams.optim == "SGD":
+            optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.lr, momentum=self.hparams.momentum)
+        else:
+            optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
 
     def train_dataloader(self):
         # REQUIRED
         dl = FreiburgDataLoader(train=True)
-        return DataLoader(dl, batch_size=args.bs)
+        return DataLoader(dl, batch_size=self.hparams.bs)
 
     def val_dataloader(self):
         # OPTIONAL
         dl = FreiburgDataLoader(train=False)
-        return DataLoader(dl, batch_size=args.bs)
+        return DataLoader(dl, batch_size=self.hparams.bs)
 
 
 segnet_model = LitSegNet()
