@@ -6,6 +6,7 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
 from dataloader import FreiburgDataLoader
@@ -16,7 +17,10 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument('--bs', type=int, default=16)
 parser.add_argument('--gpu', type=int, default=1)
+parser.add_argument('--train', action='store_true', default=False)
 args = parser.parse_args()
+
+wandb_logger = WandbLogger(project='segnet-freiburg')
 
 class LitSegNet(pl.LightningModule):
 
@@ -60,10 +64,10 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5)
-trainer.fit(segnet_model)
+trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5, logger=wandb_logger)
+if args.train: trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=316-step=24408.ckpt")
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=33-step=504.ckpt")
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
