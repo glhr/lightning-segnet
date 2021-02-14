@@ -18,6 +18,7 @@ parser = ArgumentParser()
 parser.add_argument('--bs', type=int, default=16)
 parser.add_argument('--gpu', type=int, default=1)
 parser.add_argument('--train', action='store_true', default=False)
+parser.add_argument('--epochs', type=int, default=1000)
 args = parser.parse_args()
 
 wandb_logger = WandbLogger(project='segnet-freiburg')
@@ -72,7 +73,7 @@ class LitSegNet(pl.LightningModule):
 segnet_model = LitSegNet()
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=100, check_val_every_n_epoch=5, logger=wandb_logger, log_every_n_steps=10)
+trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=args.epochs, check_val_every_n_epoch=5, logger=wandb_logger, log_every_n_steps=10)
 if args.train: trainer.fit(segnet_model)
 
 trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=99-step=1499.ckpt")
