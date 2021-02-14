@@ -15,14 +15,14 @@ import numpy as np
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
-parser.add_argument('--bs', type=int, default=16)
-parser.add_argument('--lr', type=int, default=0.1)
-parser.add_argument('--momentum', type=int, default=0.9)
-parser.add_argument('--gpu', type=int, default=1)
-parser.add_argument('--optim', type=str, default="SGD")
+
+
+
 parser.add_argument('--train', action='store_true', default=False)
-parser.add_argument('--epochs', type=int, default=1000)
-args = parser.parse_args()
+
+parser.add_argument('--gpus', type=int, default=1)
+parser.add_argument('--max_epochs', type=int, default=1000)
+
 
 wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
 
@@ -38,9 +38,19 @@ checkpoint_callback = ModelCheckpoint(
 
 class LitSegNet(pl.LightningModule):
 
-    def __init__(self, num_classes=7, lr=0.1, momentum=0.9, bs=16, optim='SGD'):
+    @staticmethod
+    def add_model_specific_args(parent_parser):
+        parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--bs', type=int, default=16)
+        parser.add_argument('--lr', type=int, default=0.1)
+        parser.add_argument('--momentum', type=int, default=0.9)
+        parser.add_argument('--optim', type=str, default="SGD")
+        parser.add_argument('--num_classes', type=int, default=7)
+        return parser
+
+    def __init__(self, conf, **kwargs):
         super().__init__()
-        self.save_hyperparameters()
+        self.save_hyperparameters(conf)
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
     def forward(self, x):
@@ -86,14 +96,19 @@ class LitSegNet(pl.LightningModule):
         dl = FreiburgDataLoader(train=False)
         return DataLoader(dl, batch_size=self.hparams.bs)
 
+parser = LitSegNet.add_model_specific_args(parser)
+args = parser.parse_args()
 
-segnet_model = LitSegNet()
+print(args)
+segnet_model = LitSegNet(conf=args)
+
+wandb_logger.log_hyperparams(segnet_model.hparams)
 
 # most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer(gpus=args.gpu, min_epochs=1, max_epochs=args.epochs, check_val_every_n_epoch=5, logger=wandb_logger, log_every_n_steps=10, checkpoint_callback=checkpoint_callback)
+trainer = pl.Trainer.from_argparse_args(args, check_val_every_n_epoch=5, log_every_n_steps=10, logger=wandb_logger, checkpoint_callback=checkpoint_callback)
 if args.train: trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/version_97506/checkpoints/epoch=99-step=1499.ckpt")
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/epoch=219-val_loss=1.36.ckpt", conf=args)
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
