@@ -24,7 +24,7 @@ parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
 
 
-wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
+
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 
@@ -102,11 +102,12 @@ args = parser.parse_args()
 print(args)
 segnet_model = LitSegNet(conf=args)
 
-wandb_logger.log_hyperparams(segnet_model.hparams)
+if args.train:
+    wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
+    wandb_logger.log_hyperparams(segnet_model.hparams)
 
-# most basic trainer, uses good defaults (1 gpu)
-trainer = pl.Trainer.from_argparse_args(args, check_val_every_n_epoch=5, log_every_n_steps=10, logger=wandb_logger, checkpoint_callback=checkpoint_callback)
-if args.train: trainer.fit(segnet_model)
+    trainer = pl.Trainer.from_argparse_args(args, check_val_every_n_epoch=5, log_every_n_steps=10, logger=wandb_logger, checkpoint_callback=checkpoint_callback)
+    trainer.fit(segnet_model)
 
 trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/epoch=219-val_loss=1.36.ckpt", conf=args)
 # prints the learning_rate you used in this checkpoint
