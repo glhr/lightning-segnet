@@ -112,7 +112,7 @@ trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/e
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
-ds = FreiburgDataLoader(train=False)
+ds = FreiburgDataLoader(train=False, modalities=["rgb"])
 dl = DataLoader(ds, batch_size=1)
 for i,batch in enumerate(dl):
     # ds.result_to_image(batch[1].squeeze(), i)

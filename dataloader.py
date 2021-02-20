@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class FreiburgDataLoader():
 
-    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/"):
+    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["ir"]):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -25,6 +25,7 @@ class FreiburgDataLoader():
         """
         self.path = path
         self.color_map = {}
+        self.modalities = modalities
         classes = np.loadtxt(path + "classes.txt", dtype=str)
         print(classes)
         for x in classes:
@@ -131,7 +132,7 @@ class FreiburgDataLoader():
 
         return mask_out
 
-    def sample(self, sample_id, modalities=["rgb"], augment=False):
+    def sample(self, sample_id, augment=False):
         """
         Samples a single image
         :param sample_id: The ID of the image
@@ -142,22 +143,28 @@ class FreiburgDataLoader():
         suffixes = {
             'depth': "_Clipped_redict_depth_gray.png",
             "rgb": "_Clipped.jpg",
-            "gt": "_mask.png"
+            "gt": "_mask.png",
+            "ir": ".tif"
         }
 
         try:
             # print(a)
             pilRGB = Image.open(self.path + "rgb/" + a + suffixes['rgb']).convert('RGB')
             pilDep = Image.open(self.path + "depth_gray/" + a + suffixes['depth']).convert('RGB')
+            pilIR = Image.open(self.path + "nir_gray/" + a + suffixes['ir']).convert('RGB')
+
             widthRGB, heightRGB = pilRGB.size
             widthDep, heightDep = pilDep.size
+            widthIR, heightIR = pilIR.size
 
             if augment:
                 pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
                 pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
+                pilIR = self.data_augmentation(pilIR, img_height=heightIR, img_width=widthIR)
 
             imgRGB = np.array(pilRGB)
             imgDep = np.array(pilDep)
+            imgIR = np.array(pilIR)
 
             # print(self.path + "GT_color/" + a + suffixes['gt'])
             try:
@@ -172,6 +179,7 @@ class FreiburgDataLoader():
             resize = (480,360)
             modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
             modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
+            modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
             modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
             # print(modGT.shape)
             # print(modGT[0][0])
@@ -180,13 +188,15 @@ class FreiburgDataLoader():
 
             modRGB = modRGB[: , :, 2]
             modDepth = modDepth[: , :, 2]
+            modIR = modIR[: , :, 2]
 
             imgs = []
             img = {
                 'rgb': modRGB,
-                'depth': modDepth
+                'depth': modDepth,
+                'ir': modIR
             }
-            for mod in modalities:
+            for mod in self.modalities:
                 imgs.append(img[mod].copy())
 
             return torch.from_numpy(np.array(imgs)).float(), modGT
