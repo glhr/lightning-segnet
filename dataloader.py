@@ -24,20 +24,20 @@ class FreiburgDataLoader():
         :param date: The signature/date of the model
         """
         self.path = path
-        self.color_map = {}
+        self.idx_to_color, self.color_to_idx, self.class_to_idx = {}, {}, {}
         self.modalities = modalities
         classes = np.loadtxt(path + "classes.txt", dtype=str)
         print(classes)
+        self.idx_to_color['objects'] = self.idx_to_color.get('objects', dict())
+        self.class_to_idx['objects'] = self.class_to_idx.get('objects', dict())
+        self.color_to_idx['objects'] = self.color_to_idx.get('objects', dict())
         for x in classes:
-            x = [int(i) for i in x[1:]]
-            self.color_map[x[3]] = [x[0], x[1], x[2]]
-        print(self.color_map)
+            x = [int(i) if i.isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = [x[1], x[2], x[3]]
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        self.mapping = {
-            tuple(rgb):i for i,rgb in self.color_map.items()
-        }
-        print(self.mapping)
-
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.color_to_idx['objects'])
         if train:
             self.path = path + 'train/'
         else:
@@ -53,17 +53,47 @@ class FreiburgDataLoader():
 
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
-    def get_color(self, x):
-        return self.color_map[x]
+    def remap_classes(self, color_to_idx):
+        objclass_to_driveidx = {
+            'void': 0,
+            'road': 3,
+            'grass': 2,
+            'vegetation': 1,
+            'tree': 1,
+            'sky': 1,
+            'obstacle': 1
+        }
+        idx_to_color_new = {
+            0: (0,0,0),
+            1: (255,0,0),
+            2: (255,255,0),
+            3: (0,255,0)
+        }
+        color_to_idx_new = dict()
+        conversion = dict()
+        for cls,new_idx in objclass_to_driveidx.items():
+            old_idx = self.class_to_idx["objects"][cls]
+            # print(old_idx)
+            for k,v in color_to_idx.items():
+                # print(cls,k,v,old_idx,v==old_idx,new_idx)
+                if v==old_idx:
+                    color_to_idx_new[k] = new_idx
+                    conversion[old_idx] = idx_to_color_new[new_idx]
 
-    def labels_to_color(self, labels):
+        # print(conversion)
+        return color_to_idx_new, idx_to_color_new, conversion
+
+    def get_color(self, x, mode="objects"):
+        return self.idx_to_color[mode][x]
+
+    def labels_to_color(self, labels, mode="objects"):
         bs = labels.shape
         data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
         colors = set()
         for y in range(bs[0]):
             for x in range(bs[1]):
                 # if b[y, x]>0: print(b[y, x])
-                data[y, x] = self.get_color(labels[y, x])
+                data[y, x] = self.get_color(labels[y, x], mode=mode)
                 colors.add(labels[y, x])
         return data
 
@@ -78,13 +108,14 @@ class FreiburgDataLoader():
         # b = result.cpu().detach().numpy()
 
         # print(bs,np.max(b))
-        data = self.labels_to_color(b)
+        data = self.labels_to_color(b, mode="convert")
 
         # print(colors)
-        concat = [data]
+        concat = []
         if gt is not None:
             gt = gt.detach().cpu().numpy()
-            concat.append(self.labels_to_color(gt))
+            concat.append(self.labels_to_color(gt, mode="objects"))
+            concat.append(self.labels_to_color(gt, mode="convert"))
 
         if orig is not None:
             orig = orig.squeeze().detach().cpu().numpy()
@@ -99,7 +130,7 @@ class FreiburgDataLoader():
         img = Image.fromarray(data, 'RGB')
         img.save('results/segnet_' + str(iter + 1) + '.png')
 
-    def mask_to_class_rgb(self, mask):
+    def mask_to_class_rgb(self, mask, mode="objects"):
         # print('----mask->rgb----')
         mask = torch.from_numpy(np.array(mask))
         # mask = torch.squeeze(mask)  # remove 1
@@ -115,14 +146,15 @@ class FreiburgDataLoader():
         # print(h,w)
         mask_out = torch.zeros(h, w, dtype=torch.long)
 
-        for k in self.mapping:
+        for k in self.color_to_idx[mode]:
+            # print(k)
             # print(torch.unique(class_mask), torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
             idx = (class_mask == torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
             # print(idx)
             validx = (idx.sum(0) == 3)
             # print(validx[0])
 
-            mask_out[validx] = torch.tensor(self.mapping[k], dtype=torch.long)
+            mask_out[validx] = torch.tensor(self.color_to_idx[mode][k], dtype=torch.long)
 
             #print(mask_out[validx])
 

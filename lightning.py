@@ -22,7 +22,7 @@ parser.add_argument('--train', action='store_true', default=False)
 
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
-
+parser.add_argument('--test_samples', type=int, default=10)
 
 
 
@@ -116,10 +116,10 @@ trained_model.eval()
 ds = FreiburgDataLoader(train=False, modalities=["rgb"])
 dl = DataLoader(ds, batch_size=1)
 for i,batch in enumerate(dl):
+    if i >= args.test_samples: break
     # ds.result_to_image(batch[1].squeeze(), i)
     y_hat = trained_model(batch[0])
     y_hat = torch.argmax(y_hat.squeeze(), dim=0)
     # print(y_hat.shape)
     result = y_hat
     ds.result_to_image(y_hat, i, orig=batch[0], gt=batch[1].squeeze())
-    if i > 10: break
