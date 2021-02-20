@@ -55,7 +55,7 @@ class FreiburgDataLoader():
     def get_color(self, x):
         return self.color_map[x]
 
-    def result_to_image(self, result, iter):
+    def result_to_image(self, result, iter, orig=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
@@ -75,9 +75,16 @@ class FreiburgDataLoader():
                 colors.add(b[y, x])
 
         # print(colors)
+        if orig is not None:
+            orig = orig.squeeze().detach().cpu().numpy()
+            orig = (orig*255).astype(np.uint8)
+            if orig.shape[-1] != 3:
+                orig = np.stack((orig,)*3, axis=-1)
+                # print(np.min(orig),np.max(orig))
+            data = np.concatenate((orig,data), axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        img.save('results/ssma ' + str(iter + 1) + '.png')
+        img.save('results/segnet_' + str(iter + 1) + '.png')
 
     def mask_to_class_rgb(self, mask):
         # print('----mask->rgb----')
@@ -112,7 +119,7 @@ class FreiburgDataLoader():
 
         return mask_out
 
-    def sample(self, sample_id):
+    def sample(self, sample_id, modalities=["rgb"], augment=False):
         """
         Samples a single image
         :param sample_id: The ID of the image
@@ -133,11 +140,12 @@ class FreiburgDataLoader():
             widthRGB, heightRGB = pilRGB.size
             widthDep, heightDep = pilDep.size
 
-            pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
-            pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
+            if augment:
+                pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
+                pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
 
-            imgRGB = np.array(pilRGB)[:, :, ::-1]
-            imgDep = np.array(pilDep)[:, :, ::-1]
+            imgRGB = np.array(pilRGB)
+            imgDep = np.array(pilDep)
 
             # print(self.path + "GT_color/" + a + suffixes['gt'])
             try:
@@ -159,24 +167,17 @@ class FreiburgDataLoader():
             modGT = self.mask_to_class_rgb(modGT)
 
             modRGB = modRGB[: , :, 2]
+            modDepth = modDepth[: , :, 2]
 
-            # modGT = np.where(modGT == 16, 6, modGT)
-            # modGT = np.where(modGT == 18, 8, modGT)
-            # modGT = np.where(modGT == 19, 8, modGT)
-            # modGT = np.where(modGT == 20, 8, modGT)
-            #
-            # modGT = np.where(modGT == 15, 9, modGT)
-            # modGT = np.where(modGT == 14, 9, modGT)
-            #
-            # modGT = np.where(modGT == 12, 11, modGT)
-            # modGT = np.where(modGT == 17, 11, modGT)
-            #
-            # modGT = np.where(modGT == 21, 2, modGT)
-            # modGT = np.where(modGT == 13, 3, modGT)
-            # modGT = np.where(modGT == 22, 3, modGT)
+            imgs = []
+            img = {
+                'rgb': modRGB,
+                'depth': modDepth
+            }
+            for mod in modalities:
+                imgs.append(img[mod].copy())
 
-            # opencv saves it as BGR instead of RGB
-            return torch.from_numpy(modRGB).float().unsqueeze(0), modGT
+            return torch.from_numpy(np.array(imgs)).float(), modGT
         except IOError as e:
             print("Error loading " + a, e)
         return False, False, False
@@ -212,4 +213,7 @@ class FreiburgDataLoader():
 
     def __getitem__(self, idx):
         # print(self.sample(idx))
-        return self.sample(idx)
+        if self.train:
+            return self.sample(idx, augment=True)
+        else:
+            return self.sample(idx, augment=False)
