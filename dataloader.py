@@ -11,47 +11,59 @@ import glob
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-
-class FreiburgDataLoader():
-
-    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"]):
-        """
-        Initializes the data loader
-        :param path: the path to the data
-        :param num_examples: The number of examples to use
-        :param train_size: The size (in percentage) of the train set
-        :param test_size: The size (in percentage) of the test set
-        :param date: The signature/date of the model
-        """
-        self.path = path
+class MMDataLoader():
+    def __init__(self, modalities):
         self.idx_to_color, self.color_to_idx, self.class_to_idx = {}, {}, {}
         self.modalities = modalities
-        classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+
         self.idx_to_color['objects'] = self.idx_to_color.get('objects', dict())
         self.class_to_idx['objects'] = self.class_to_idx.get('objects', dict())
         self.color_to_idx['objects'] = self.color_to_idx.get('objects', dict())
-        for x in classes:
-            x = [int(i) if i.isdigit() else i for i in x]
-            self.idx_to_color['objects'][x[4]] = [x[1], x[2], x[3]]
-            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
-            self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.color_to_idx['objects'])
-        if train:
-            self.path = path + 'train/'
-        else:
-            self.path = path + 'test/'
-
-        self.train = train
         self.filenames = []
-        for img in glob.glob(self.path + 'GT_color/*.png'):
-            img = img.split("/")[-1].split("_")[0]
-            # print(img)
-            self.filenames.append(img)
-        # print(self.filenames)
 
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
+
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False):
+        imgGT = np.array(imgGT)[:, :, ::-1]
+
+        widthRGB, heightRGB = pilRGB.size
+        widthDep, heightDep = pilDep.size
+        widthIR, heightIR = pilIR.size
+
+        if augment:
+            pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
+            pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
+            pilIR = self.data_augmentation(pilIR, img_height=heightIR, img_width=widthIR)
+
+        imgRGB = np.array(pilRGB)
+        imgDep = np.array(pilDep)
+        imgIR = np.array(pilIR)
+
+        resize = (480,360)
+        modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
+        modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
+        modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
+        modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
+        # print(modGT.shape)
+        # print(modGT[0][0])
+        modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
+        modGT = self.mask_to_class_rgb(modGT)
+
+        modRGB = modRGB[: , :, 2]
+        modDepth = modDepth[: , :, 2]
+        modIR = modIR[: , :, 2]
+
+        imgs = []
+        img = {
+            'rgb': modRGB,
+            'depth': modDepth,
+            'ir': modIR
+        }
+        for mod in self.modalities:
+            imgs.append(img[mod].copy())
+
+        return torch.from_numpy(np.array(imgs)).float(), modGT
 
     def remap_classes(self, color_to_idx):
         objclass_to_driveidx = {
@@ -97,39 +109,6 @@ class FreiburgDataLoader():
                 colors.add(labels[y, x])
         return data
 
-    def result_to_image(self, result, iter, orig=None, gt=None):
-        """
-        Converts the output of the network to an actual image
-        :param result: The output of the network (with torch.argmax)
-        :param iter: The name of the file to save it to
-        :return:
-        """
-        b = result.detach().cpu().numpy()
-        # b = result.cpu().detach().numpy()
-
-        # print(bs,np.max(b))
-        data = self.labels_to_color(b, mode="convert")
-
-        # print(colors)
-        concat = []
-        if gt is not None:
-            gt = gt.detach().cpu().numpy()
-            concat.append(self.labels_to_color(gt, mode="objects"))
-            concat.append(self.labels_to_color(gt, mode="convert"))
-
-        if orig is not None:
-            orig = orig.squeeze().detach().cpu().numpy()
-            orig = (orig*255).astype(np.uint8)
-            if orig.shape[-1] != 3:
-                orig = np.stack((orig,)*3, axis=-1)
-                # print(np.min(orig),np.max(orig))
-                concat = [orig] + concat
-
-        data = np.concatenate(concat, axis=1)
-
-        img = Image.fromarray(data, 'RGB')
-        img.save('results/segnet_' + str(iter + 1) + '.png')
-
     def mask_to_class_rgb(self, mask, mode="objects"):
         # print('----mask->rgb----')
         mask = torch.from_numpy(np.array(mask))
@@ -164,77 +143,38 @@ class FreiburgDataLoader():
 
         return mask_out
 
-    def sample(self, sample_id, augment=False):
+    def result_to_image(self, result, iter, orig=None, gt=None):
         """
-        Samples a single image
-        :param sample_id: The ID of the image
+        Converts the output of the network to an actual image
+        :param result: The output of the network (with torch.argmax)
+        :param iter: The name of the file to save it to
         :return:
         """
-        a = self.filenames[sample_id]
+        b = result.detach().cpu().numpy()
+        # b = result.cpu().detach().numpy()
 
-        suffixes = {
-            'depth': "_Clipped_redict_depth_gray.png",
-            "rgb": "_Clipped.jpg",
-            "gt": "_mask.png",
-            "ir": ".tif"
-        }
+        # print(bs,np.max(b))
+        data = self.labels_to_color(b, mode="convert")
 
-        try:
-            # print(a)
-            pilRGB = Image.open(self.path + "rgb/" + a + suffixes['rgb']).convert('RGB')
-            pilDep = Image.open(self.path + "depth_gray/" + a + suffixes['depth']).convert('RGB')
-            pilIR = Image.open(self.path + "nir_gray/" + a + suffixes['ir']).convert('RGB')
+        # print(colors)
+        concat = []
+        if gt is not None:
+            gt = gt.detach().cpu().numpy()
+            concat.append(self.labels_to_color(gt, mode="objects"))
+            concat.append(self.labels_to_color(gt, mode="convert"))
 
-            widthRGB, heightRGB = pilRGB.size
-            widthDep, heightDep = pilDep.size
-            widthIR, heightIR = pilIR.size
+        if orig is not None:
+            orig = orig.squeeze().detach().cpu().numpy()
+            orig = (orig*255).astype(np.uint8)
+            if orig.shape[-1] != 3:
+                orig = np.stack((orig,)*3, axis=-1)
+                # print(np.min(orig),np.max(orig))
+                concat = [orig] + concat
 
-            if augment:
-                pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
-                pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
-                pilIR = self.data_augmentation(pilIR, img_height=heightIR, img_width=widthIR)
+        data = np.concatenate(concat, axis=1)
 
-            imgRGB = np.array(pilRGB)
-            imgDep = np.array(pilDep)
-            imgIR = np.array(pilIR)
-
-            # print(self.path + "GT_color/" + a + suffixes['gt'])
-            try:
-                # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
-                imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
-            except (AttributeError,IOError):
-                suffixes['gt'] = "_Clipped.png"
-                # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
-                imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
-            imgGT = np.array(imgGT)[:, :, ::-1]
-
-            resize = (480,360)
-            modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-            modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
-            modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-            modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
-            # print(modGT.shape)
-            # print(modGT[0][0])
-            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
-            modGT = self.mask_to_class_rgb(modGT)
-
-            modRGB = modRGB[: , :, 2]
-            modDepth = modDepth[: , :, 2]
-            modIR = modIR[: , :, 2]
-
-            imgs = []
-            img = {
-                'rgb': modRGB,
-                'depth': modDepth,
-                'ir': modIR
-            }
-            for mod in self.modalities:
-                imgs.append(img[mod].copy())
-
-            return torch.from_numpy(np.array(imgs)).float(), modGT
-        except IOError as e:
-            print("Error loading " + a, e)
-        return False, False, False
+        img = Image.fromarray(data, 'RGB')
+        img.save('results/segnet_' + str(iter + 1) + '.png')
 
     def data_augmentation(self, mods, img_height=360, img_width=480):
         """
@@ -271,3 +211,72 @@ class FreiburgDataLoader():
             return self.sample(idx, augment=True)
         else:
             return self.sample(idx, augment=False)
+
+class FreiburgDataLoader(MMDataLoader):
+
+    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"]):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        print(classes)
+
+        for x in classes:
+            x = [int(i) if i.isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = [x[1], x[2], x[3]]
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.color_to_idx['objects'])
+
+        if train:
+            self.path = path + 'train/'
+        else:
+            self.path = path + 'test/'
+
+        self.train = train
+
+        for img in glob.glob(self.path + 'GT_color/*.png'):
+            img = img.split("/")[-1].split("_")[0]
+            # print(img)
+            self.filenames.append(img)
+        # print(self.filenames)
+
+    def sample(self, sample_id, augment=False):
+        """
+        Samples a single image
+        :param sample_id: The ID of the image
+        :return:
+        """
+        a = self.filenames[sample_id]
+
+        suffixes = {
+            'depth': "_Clipped_redict_depth_gray.png",
+            "rgb": "_Clipped.jpg",
+            "gt": "_mask.png",
+            "ir": ".tif"
+        }
+
+        try:
+            # print(a)
+            pilRGB = Image.open(self.path + "rgb/" + a + suffixes['rgb']).convert('RGB')
+            pilDep = Image.open(self.path + "depth_gray/" + a + suffixes['depth']).convert('RGB')
+            pilIR = Image.open(self.path + "nir_gray/" + a + suffixes['ir']).convert('RGB')
+
+            # print(self.path + "GT_color/" + a + suffixes['gt'])
+            try:
+                # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+                imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
+            except (AttributeError,IOError):
+                suffixes['gt'] = "_Clipped.png"
+                # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+                imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
+
+            return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, augment)
+        except IOError as e:
+            print("Error loading " + a, e)
+        return False, False, False
