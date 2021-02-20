@@ -120,5 +120,5 @@ for i,batch in enumerate(dl):
     y_hat = torch.argmax(y_hat.squeeze(), dim=0)
     # print(y_hat.shape)
     result = y_hat
-    ds.result_to_image(y_hat, i, orig=batch[0])
+    ds.result_to_image(y_hat, i, orig=batch[0], gt=batch[1].squeeze())
     if i > 10: break

@@ -55,7 +55,18 @@ class FreiburgDataLoader():
     def get_color(self, x):
         return self.color_map[x]
 
-    def result_to_image(self, result, iter, orig=None):
+    def labels_to_color(self, labels):
+        bs = labels.shape
+        data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
+        colors = set()
+        for y in range(bs[0]):
+            for x in range(bs[1]):
+                # if b[y, x]>0: print(b[y, x])
+                data[y, x] = self.get_color(labels[y, x])
+                colors.add(labels[y, x])
+        return data
+
+    def result_to_image(self, result, iter, orig=None, gt=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
@@ -64,24 +75,25 @@ class FreiburgDataLoader():
         """
         b = result.detach().cpu().numpy()
         # b = result.cpu().detach().numpy()
-        bs = b.shape
+
         # print(bs,np.max(b))
-        data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
-        colors = set()
-        for y in range(bs[0]):
-            for x in range(bs[1]):
-                # if b[y, x]>0: print(b[y, x])
-                data[y, x] = self.get_color(b[y, x])
-                colors.add(b[y, x])
+        data = self.labels_to_color(b)
 
         # print(colors)
+        concat = [data]
+        if gt is not None:
+            gt = gt.detach().cpu().numpy()
+            concat.append(self.labels_to_color(gt))
+
         if orig is not None:
             orig = orig.squeeze().detach().cpu().numpy()
             orig = (orig*255).astype(np.uint8)
             if orig.shape[-1] != 3:
                 orig = np.stack((orig,)*3, axis=-1)
                 # print(np.min(orig),np.max(orig))
-            data = np.concatenate((orig,data), axis=1)
+                concat = [orig] + concat
+
+        data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
         img.save('results/segnet_' + str(iter + 1) + '.png')
