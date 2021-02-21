@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
-from dataloader import FreiburgDataLoader
+from dataloader import FreiburgDataLoader, CityscapesDataLoader
 
 import numpy as np
 

@@ -12,7 +12,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MMDataLoader():
-    def __init__(self, modalities):
+    def __init__(self, modalities, name):
+        self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx = {}, {}, {}
         self.modalities = modalities
 
@@ -24,57 +25,68 @@ class MMDataLoader():
 
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False):
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
         imgGT = np.array(imgGT)[:, :, ::-1]
 
-        widthRGB, heightRGB = pilRGB.size
-        widthDep, heightDep = pilDep.size
-        widthIR, heightIR = pilIR.size
+        if pilRGB is not None: widthRGB, heightRGB = pilRGB.size
+        if pilDep is not None: widthDep, heightDep = pilDep.size
+        if pilIR is not None: widthIR, heightIR = pilIR.size
 
         if augment:
-            pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
-            pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
-            pilIR = self.data_augmentation(pilIR, img_height=heightIR, img_width=widthIR)
+            if pilRGB is not None: pilRGB = self.data_augmentation(pilRGB, img_height=heightRGB, img_width=widthRGB)
+            if pilDep is not None: pilDep = self.data_augmentation(pilDep, img_height=heightDep, img_width=widthDep)
+            if pilIR is not None: pilIR = self.data_augmentation(pilIR, img_height=heightIR, img_width=widthIR)
 
-        imgRGB = np.array(pilRGB)
-        imgDep = np.array(pilDep)
-        imgIR = np.array(pilIR)
+        if pilRGB is not None: imgRGB = np.array(pilRGB)
+        if pilDep is not None: imgDep = np.array(pilDep)
+        if pilIR is not None: imgIR = np.array(pilIR)
 
         resize = (480,360)
-        modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-        modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
-        modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
+        if pilRGB is not None: modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
+        if pilDep is not None: modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
+        if pilIR is not None: modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
         modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
         # print(modGT.shape)
         # print(modGT[0][0])
-        modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
-        modGT = self.mask_to_class_rgb(modGT)
 
-        modRGB = modRGB[: , :, 2]
-        modDepth = modDepth[: , :, 2]
-        modIR = modIR[: , :, 2]
+        if color_GT:
+            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
+            modGT = self.mask_to_class_rgb(modGT)
+
+        if pilRGB is not None: modRGB = modRGB[: , :, 2]
+        if pilDep is not None: modDepth = modDepth[: , :, 2]
+        if pilIR is not None: modIR = modIR[: , :, 2]
 
         imgs = []
         img = {
-            'rgb': modRGB,
-            'depth': modDepth,
-            'ir': modIR
+            'rgb': modRGB if pilRGB is not None else None,
+            'depth': modDepth if pilDep is not None else None,
+            'ir': modIR if pilIR is not None else None
         }
         for mod in self.modalities:
-            imgs.append(img[mod].copy())
+            if img[mod] is not None:
+                imgs.append(img[mod].copy())
 
         return torch.from_numpy(np.array(imgs)).float(), modGT
 
     def remap_classes(self, color_to_idx):
-        objclass_to_driveidx = {
-            'void': 0,
-            'road': 3,
-            'grass': 2,
-            'vegetation': 1,
-            'tree': 1,
-            'sky': 1,
-            'obstacle': 1
-        }
+
+        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate']
+        void = ['void','unlabeled','egovehicle','outofroi','static','rectificationborder']
+        driveable = ['road','path','ground','bridge','tunnel']
+        between = ['grass','terrain','sidewalk','parking','railtrack']
+        objclass_to_driveidx = dict()
+
+        for i in undriveable:
+            objclass_to_driveidx[i] = 1
+        for i in driveable:
+            objclass_to_driveidx[i] = 3
+        for i in between:
+            objclass_to_driveidx[i] = 2
+        for i in void:
+            objclass_to_driveidx[i] = 0
+        print(objclass_to_driveidx)
         idx_to_color_new = {
             0: (0,0,0),
             1: (255,0,0),
@@ -84,19 +96,26 @@ class MMDataLoader():
         color_to_idx_new = dict()
         conversion = dict()
         for cls,new_idx in objclass_to_driveidx.items():
-            old_idx = self.class_to_idx["objects"][cls]
-            # print(old_idx)
-            for k,v in color_to_idx.items():
-                # print(cls,k,v,old_idx,v==old_idx,new_idx)
-                if v==old_idx:
-                    color_to_idx_new[k] = new_idx
-                    conversion[old_idx] = idx_to_color_new[new_idx]
+            try:
+                old_idx = self.class_to_idx["objects"][cls]
+                # print(old_idx)
+                for k,v in color_to_idx.items():
+                    # print(cls,k,v,old_idx,v==old_idx,new_idx)
+                    if v==old_idx:
+                        color_to_idx_new[k] = new_idx
+                        conversion[old_idx] = idx_to_color_new[new_idx]
+            except KeyError:
+                pass
 
-        # print(conversion)
+        print(conversion)
         return color_to_idx_new, idx_to_color_new, conversion
 
     def get_color(self, x, mode="objects"):
-        return self.idx_to_color[mode][x]
+        try:
+            return self.idx_to_color[mode][x]
+        except KeyError:
+            if mode=="objects": print(f"mapping {x} to black")
+            return (0,0,255)
 
     def labels_to_color(self, labels, mode="objects"):
         bs = labels.shape
@@ -106,7 +125,7 @@ class MMDataLoader():
             for x in range(bs[1]):
                 # if b[y, x]>0: print(b[y, x])
                 data[y, x] = self.get_color(labels[y, x], mode=mode)
-                colors.add(labels[y, x])
+                # colors.add(labels[y, x])
         return data
 
     def mask_to_class_rgb(self, mask, mode="objects"):
@@ -174,7 +193,7 @@ class MMDataLoader():
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        img.save('results/segnet_' + str(iter + 1) + '.png')
+        img.save(f'results/segnet_{self.name}' + str(iter + 1) + '.png')
 
     def data_augmentation(self, mods, img_height=360, img_width=480):
         """
@@ -219,7 +238,7 @@ class FreiburgDataLoader(MMDataLoader):
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities)
+        super().__init__(modalities, name="freiburg")
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -247,11 +266,6 @@ class FreiburgDataLoader(MMDataLoader):
         # print(self.filenames)
 
     def sample(self, sample_id, augment=False):
-        """
-        Samples a single image
-        :param sample_id: The ID of the image
-        :return:
-        """
         a = self.filenames[sample_id]
 
         suffixes = {
@@ -277,6 +291,72 @@ class FreiburgDataLoader(MMDataLoader):
                 imgGT = Image.open(self.path + "GT_color/" + a + suffixes['gt']).convert('RGB')
 
             return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, augment)
+        except IOError as e:
+            print("Error loading " + a, e)
+        return False, False, False
+
+class CityscapesDataLoader(MMDataLoader):
+
+    def __init__(self, train=True, path = "../../datasets/cityscapes/", modalities=["rgb"]):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, name="cityscapes")
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        print(classes)
+
+        for x in classes:
+            x = [int(i) if i.isdigit() or "-" in i else i for i in x]
+            self.idx_to_color['objects'][x[4]] = [x[1], x[2], x[3]]
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        print(self.class_to_idx['objects'])
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.color_to_idx['objects'])
+
+        if train:
+            self.split_path = 'train/'
+        else:
+            self.split_path = 'val/'
+
+        self.train = train
+        self.city = "frankfurt"
+        self.city_ids = {
+            "frankfurt": "000294",
+            "berlin": "000019"
+        }
+
+        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'{self.city}/*.png'):
+            img = '_'.join(img.split("/")[-1].split("_")[1:3])
+            # print(img)
+            self.filenames.append(img)
+        # print(self.filenames)
+
+    def sample(self, sample_id, augment=False):
+        a = self.filenames[sample_id]
+
+        suffixes = {
+            'depth': "_Clipped_redict_depth_gray.png",
+            "rgb": "_Clipped.jpg",
+            "gt": "_mask.png"
+        }
+
+        id_digits = len(str(sample_id))
+        fill_zeros = "0" * (6-id_digits)
+        file_id = fill_zeros + str(sample_id)
+
+        try:
+            # print(a)
+            pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+            pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_disparity.png").convert('RGB')
+            imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_gtFine_color.png").convert('RGB')
+            # print(np.unique(imgGT))
+
+            return self.prepare_data(pilRGB, pilDep, None, imgGT, augment, color_GT=True)
         except IOError as e:
             print("Error loading " + a, e)
         return False, False, False
