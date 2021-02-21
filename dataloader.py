@@ -26,7 +26,10 @@ class MMDataLoader():
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
-        imgGT = np.array(imgGT)[:, :, ::-1]
+        if color_GT:
+            imgGT = np.array(imgGT)[:, :, ::-1]
+        else:
+            imgGT = np.array(imgGT)
 
         if pilRGB is not None: widthRGB, heightRGB = pilRGB.size
         if pilDep is not None: widthDep, heightDep = pilDep.size
@@ -52,6 +55,7 @@ class MMDataLoader():
         if color_GT:
             modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
             modGT = self.mask_to_class_rgb(modGT)
+        # print(modGT.shape)
 
         if pilRGB is not None: modRGB = modRGB[: , :, 2]
         if pilDep is not None: modDepth = modDepth[: , :, 2]
@@ -69,11 +73,11 @@ class MMDataLoader():
 
         return torch.from_numpy(np.array(imgs)).float(), modGT
 
-    def remap_classes(self, color_to_idx):
+    def remap_classes(self, idx_to_color):
 
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate']
-        void = ['void','unlabeled','egovehicle','outofroi','static','rectificationborder']
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static']
+        void = ['void','egovehicle','outofroi','rectificationborder','unlabeled']
         driveable = ['road','path','ground','bridge','tunnel']
         between = ['grass','terrain','sidewalk','parking','railtrack']
         objclass_to_driveidx = dict()
@@ -99,12 +103,13 @@ class MMDataLoader():
             try:
                 old_idx = self.class_to_idx["objects"][cls]
                 # print(old_idx)
-                for k,v in color_to_idx.items():
+                for v,k in idx_to_color.items():
                     # print(cls,k,v,old_idx,v==old_idx,new_idx)
                     if v==old_idx:
                         color_to_idx_new[k] = new_idx
                         conversion[old_idx] = idx_to_color_new[new_idx]
             except KeyError:
+                # print(cls, new_idx)
                 pass
 
         print(conversion)
@@ -246,11 +251,11 @@ class FreiburgDataLoader(MMDataLoader):
 
         for x in classes:
             x = [int(i) if i.isdigit() else i for i in x]
-            self.idx_to_color['objects'][x[4]] = [x[1], x[2], x[3]]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.color_to_idx['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.path = path + 'train/'
@@ -310,13 +315,14 @@ class CityscapesDataLoader(MMDataLoader):
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
-            self.idx_to_color['objects'][x[4]] = [x[1], x[2], x[3]]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print(self.class_to_idx['objects'])
+        print("class to idx: ", self.class_to_idx['objects'])
+        print("color to idx: ", self.color_to_idx['objects'].values())
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.color_to_idx['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.split_path = 'train/'
@@ -353,10 +359,10 @@ class CityscapesDataLoader(MMDataLoader):
             # print(a)
             pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
             pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_disparity.png").convert('RGB')
-            imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_gtFine_color.png").convert('RGB')
+            imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
             # print(np.unique(imgGT))
 
-            return self.prepare_data(pilRGB, pilDep, None, imgGT, augment, color_GT=True)
+            return self.prepare_data(pilRGB, pilDep, None, imgGT, augment, color_GT=False)
         except IOError as e:
             print("Error loading " + a, e)
         return False, False, False
