@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 class MMDataLoader():
     def __init__(self, modalities, name):
         self.name = name
-        self.idx_to_color, self.color_to_idx, self.class_to_idx = {}, {}, {}
+        self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.modalities = modalities
 
         self.idx_to_color['objects'] = self.idx_to_color.get('objects', dict())
@@ -99,6 +99,7 @@ class MMDataLoader():
         }
         color_to_idx_new = dict()
         conversion = dict()
+        idx_to_idx = dict()
         for cls,new_idx in objclass_to_driveidx.items():
             try:
                 old_idx = self.class_to_idx["objects"][cls]
@@ -108,12 +109,13 @@ class MMDataLoader():
                     if v==old_idx:
                         color_to_idx_new[k] = new_idx
                         conversion[old_idx] = idx_to_color_new[new_idx]
+                        idx_to_idx[old_idx] = new_idx
             except KeyError:
                 # print(cls, new_idx)
                 pass
 
         print(conversion)
-        return color_to_idx_new, idx_to_color_new, conversion
+        return color_to_idx_new, idx_to_color_new, conversion, idx_to_idx
 
     def get_color(self, x, mode="objects"):
         try:
@@ -125,13 +127,19 @@ class MMDataLoader():
     def labels_to_color(self, labels, mode="objects"):
         bs = labels.shape
         data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
-        colors = set()
-        for y in range(bs[0]):
-            for x in range(bs[1]):
-                # if b[y, x]>0: print(b[y, x])
-                data[y, x] = self.get_color(labels[y, x], mode=mode)
-                # colors.add(labels[y, x])
+
+        for idx in np.unique(labels):
+            data[labels==idx] = self.get_color(idx, mode=mode)
         return data
+
+    def labels_obj_to_aff(self, labels):
+        # print(self.idx_to_idx["convert"])
+
+        new_labels = torch.zeros_like(labels)
+
+        for old_idx in torch.unique(labels):
+            new_labels[labels==old_idx] = self.idx_to_idx["convert"][old_idx.item()]
+        return new_labels
 
     def mask_to_class_rgb(self, mask, mode="objects"):
         # print('----mask->rgb----')
@@ -167,28 +175,35 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, result, iter, orig=None, gt=None):
+    def result_to_image(self, result, iter, orig=None, gt=None, proba=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
         :param iter: The name of the file to save it to
         :return:
         """
-        b = result.detach().cpu().numpy()
-        # b = result.cpu().detach().numpy()
 
         # print(bs,np.max(b))
-        data = self.labels_to_color(b, mode="objects")
+        if torch.is_tensor(result): result = result.detach().cpu().numpy()
+        data = self.labels_to_color(result, mode="affordances")
 
         # print(colors)
-        concat = []
+        concat = [data]
+        if proba is not None:
+            if torch.is_tensor(proba): proba = proba.detach().cpu().numpy()
+            # print(np.unique(proba))
+            proba = (proba*255).astype(np.uint8)
+            proba = np.stack((proba,)*3, axis=-1)
+            concat.append(proba)
+
         if gt is not None:
-            gt = gt.detach().cpu().numpy()
-            concat.append(self.labels_to_color(gt, mode="objects"))
-            concat.append(self.labels_to_color(gt, mode="convert"))
+            if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
+            # concat.append(self.labels_to_color(gt, mode="objects"))
+            concat.append(self.labels_to_color(gt, mode="affordances"))
+
 
         if orig is not None:
-            orig = orig.squeeze().detach().cpu().numpy()
+            if torch.is_tensor(orig): orig = orig.squeeze().detach().cpu().numpy()
             orig = (orig*255).astype(np.uint8)
             if orig.shape[-1] != 3:
                 orig = np.stack((orig,)*3, axis=-1)
@@ -255,7 +270,7 @@ class FreiburgDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.idx_to_color['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"] = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.path = path + 'train/'
@@ -322,7 +337,7 @@ class CityscapesDataLoader(MMDataLoader):
         print("class to idx: ", self.class_to_idx['objects'])
         print("color to idx: ", self.color_to_idx['objects'].values())
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.idx_to_color['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"] = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.split_path = 'train/'
