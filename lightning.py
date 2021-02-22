@@ -23,7 +23,7 @@ parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=10)
-
+parser.add_argument('--checkpoint', default="lightning_logs/epoch=219-val_loss=1.36.ckpt")
 
 
 from pytorch_lightning.callbacks import ModelCheckpoint
@@ -43,17 +43,18 @@ class LitSegNet(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--bs', type=int, default=16)
-        parser.add_argument('--lr', type=int, default=0.1)
+        parser.add_argument('--lr', type=float, default=0.1)
         parser.add_argument('--momentum', type=int, default=0.9)
         parser.add_argument('--optim', type=str, default="SGD")
-        parser.add_argument('--num_classes', type=int, default=7)
+        parser.add_argument('--num_classes', type=int, default=4)
+        parser.add_argument('--workers', type=int, default=8)
         return parser
 
     def __init__(self, conf, **kwargs):
         super().__init__()
 
         self.save_hyperparameters(conf)
-        self.metric = IoU(num_classes=self.hparams.num_classes)
+        self.metric = IoU(num_classes=self.hparams.num_classes, ignore_index=0)
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
     def forward(self, x):
@@ -69,19 +70,21 @@ class LitSegNet(pl.LightningModule):
         # x = x.view(x.size(0), -1)
         x_hat = self.model(x)
         x_hat = torch.softmax(x_hat, dim=1)
-        loss = F.cross_entropy(x_hat, y)
+        loss = F.cross_entropy(x_hat, y, ignore_index=0)
         iou = self.metric(x_hat, y)
         # Logging to TensorBoard by default
         self.log('train_loss', loss)
+        self.log('train_iou', iou)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
         x_hat = torch.softmax(x_hat, dim=1)
-        loss = F.cross_entropy(x_hat, y)
+        loss = F.cross_entropy(x_hat, y, ignore_index=0)
         iou = self.metric(x_hat, y)
         self.log('val_loss', loss)
+        self.log('val_iou', iou)
         return loss
 
     def configure_optimizers(self):
@@ -94,12 +97,12 @@ class LitSegNet(pl.LightningModule):
     def train_dataloader(self):
         # REQUIRED
         dl = FreiburgDataLoader(train=True)
-        return DataLoader(dl, batch_size=self.hparams.bs)
+        return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers)
 
     def val_dataloader(self):
         # OPTIONAL
         dl = FreiburgDataLoader(train=False)
-        return DataLoader(dl, batch_size=self.hparams.bs)
+        return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers)
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
@@ -114,7 +117,7 @@ if args.train:
     trainer = pl.Trainer.from_argparse_args(args, check_val_every_n_epoch=5, log_every_n_steps=10, logger=wandb_logger, checkpoint_callback=checkpoint_callback)
     trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/epoch=219-val_loss=1.36.ckpt", conf=args)
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.checkpoint, conf=args)
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()

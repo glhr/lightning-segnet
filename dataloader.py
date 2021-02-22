@@ -60,6 +60,8 @@ class MMDataLoader():
         if pilRGB is not None: modRGB = modRGB[: , :, 2]
         if pilDep is not None: modDepth = modDepth[: , :, 2]
         if pilIR is not None: modIR = modIR[: , :, 2]
+        
+        modGT = self.labels_obj_to_aff(modGT)
 
         imgs = []
         img = {
@@ -119,7 +121,7 @@ class MMDataLoader():
                         color_to_idx_new[k] = new_idx
                         conversion[old_idx] = idx_to_color_new[new_idx]
                         idx_to_idx[old_idx] = new_idx
-                        if old_idx > 0: idx_mappings[new_idx].add(old_idx)
+                        if old_idx >= 0: idx_mappings[new_idx].add(old_idx)
             except KeyError:
                 # print(cls, new_idx)
                 pass
@@ -272,7 +274,7 @@ class MMDataLoader():
     def __getitem__(self, idx):
         # print(self.sample(idx))
         if self.train:
-            return self.sample(idx, augment=True)
+            return self.sample(idx, augment=False)
         else:
             return self.sample(idx, augment=False)
 
