@@ -82,6 +82,13 @@ class MMDataLoader():
         between = ['grass','terrain','sidewalk','parking','railtrack']
         objclass_to_driveidx = dict()
 
+        idx_mappings = {
+            0: set(),
+            1: set(),
+            2: set(),
+            3: set()
+        }
+
         for i in undriveable:
             objclass_to_driveidx[i] = 1
         for i in driveable:
@@ -90,6 +97,8 @@ class MMDataLoader():
             objclass_to_driveidx[i] = 2
         for i in void:
             objclass_to_driveidx[i] = 0
+
+
         print(objclass_to_driveidx)
         idx_to_color_new = {
             0: (0,0,0),
@@ -110,12 +119,15 @@ class MMDataLoader():
                         color_to_idx_new[k] = new_idx
                         conversion[old_idx] = idx_to_color_new[new_idx]
                         idx_to_idx[old_idx] = new_idx
+                        if old_idx > 0: idx_mappings[new_idx].add(old_idx)
             except KeyError:
                 # print(cls, new_idx)
                 pass
 
+        idx_mappings = {k:list(v) for k,v in idx_mappings.items()}
+        print(idx_mappings)
         print(conversion)
-        return color_to_idx_new, idx_to_color_new, conversion, idx_to_idx
+        return color_to_idx_new, idx_to_color_new, conversion, idx_to_idx, idx_mappings
 
     def get_color(self, x, mode="objects"):
         try:
@@ -132,14 +144,27 @@ class MMDataLoader():
             data[labels==idx] = self.get_color(idx, mode=mode)
         return data
 
-    def labels_obj_to_aff(self, labels):
-        # print(self.idx_to_idx["convert"])
+    def labels_obj_to_aff(self, labels, proba=False):
+        if proba:
+            labels = labels.squeeze()
+            print(labels.shape)
+            s = labels.shape
+            new_proba = torch.zeros((4, s[1], s[2]))
+            # print(new_proba.shape)
+            # print(new_proba[3])
+            for idx in self.idx_mappings.keys():
+                indices = [i for i in self.idx_mappings[idx] if i < labels.shape[0]]
+                select = torch.index_select(labels,dim=0,index=torch.LongTensor(indices))
+                # print(select.shape)
+                new_proba[idx] = torch.sum(select,dim=0,keepdim=True)
+            # print(new_proba.shape)
+            return new_proba
+        else:
+            new_labels = torch.zeros_like(labels)
 
-        new_labels = torch.zeros_like(labels)
-
-        for old_idx in torch.unique(labels):
-            new_labels[labels==old_idx] = self.idx_to_idx["convert"][old_idx.item()]
-        return new_labels
+            for old_idx in torch.unique(labels):
+                new_labels[labels==old_idx] = self.idx_to_idx["convert"][old_idx.item()]
+            return new_labels
 
     def mask_to_class_rgb(self, mask, mode="objects"):
         # print('----mask->rgb----')
@@ -270,7 +295,7 @@ class FreiburgDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"] = self.remap_classes(self.idx_to_color['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.path = path + 'train/'
@@ -337,7 +362,7 @@ class CityscapesDataLoader(MMDataLoader):
         print("class to idx: ", self.class_to_idx['objects'])
         print("color to idx: ", self.color_to_idx['objects'].values())
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"] = self.remap_classes(self.idx_to_color['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.split_path = 'train/'
@@ -400,7 +425,7 @@ class KittiDataLoader(MMDataLoader):
         print("class to idx: ", self.class_to_idx['objects'])
         print("color to idx: ", self.color_to_idx['objects'].values())
 
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.idx_to_color['objects'])
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
         if train:
             self.split_path = 'training/'

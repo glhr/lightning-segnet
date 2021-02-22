@@ -118,7 +118,7 @@ trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/e
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
-ds = FreiburgDataLoader(train=True, modalities=["rgb"])
+ds = FreiburgDataLoader(train=False, modalities=["rgb"])
 dl = DataLoader(ds, batch_size=1)
 for i,batch in enumerate(dl):
     if i >= args.test_samples: break
@@ -127,17 +127,20 @@ for i,batch in enumerate(dl):
     # ds.result_to_image(batch[1].squeeze(), i)
     pred = trained_model(sample)
     pred = torch.softmax(pred, dim=1)
-
     pred_cls = torch.argmax(pred.squeeze(), dim=0)
-    pred_proba = pred.squeeze()[0]
+
+
     # print(pred_proba.shape)
 
     # print(y_hat.shape)
 
-    pred_cls = ds.labels_obj_to_aff(pred_cls)
+    pred = ds.labels_obj_to_aff(pred, proba=True)
+    pred_aff = torch.argmax(pred.squeeze(), dim=0)
+
     target = ds.labels_obj_to_aff(target.squeeze())
-    ds.result_to_image(pred_cls, i, orig=sample, gt=target)
+
+    ds.result_to_image(pred_aff, i, orig=sample, gt=target, proba= pred.squeeze()[1])
 
     iou_full = IoU(num_classes=4)
     iou_nobg = IoU(num_classes=4, ignore_index=0)
-    print("--> IoU:",iou_full(pred_cls, target).item(), "| w/o bg:", iou_nobg(pred_cls, target).item())
+    print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
