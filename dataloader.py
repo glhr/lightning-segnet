@@ -178,7 +178,7 @@ class MMDataLoader():
         # b = result.cpu().detach().numpy()
 
         # print(bs,np.max(b))
-        data = self.labels_to_color(b, mode="convert")
+        data = self.labels_to_color(b, mode="objects")
 
         # print(colors)
         concat = []
@@ -351,15 +351,63 @@ class CityscapesDataLoader(MMDataLoader):
             "gt": "_mask.png"
         }
 
-        id_digits = len(str(sample_id))
-        fill_zeros = "0" * (6-id_digits)
-        file_id = fill_zeros + str(sample_id)
-
         try:
             # print(a)
             pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
             pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_disparity.png").convert('RGB')
             imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
+            # print(np.unique(imgGT))
+
+            return self.prepare_data(pilRGB, pilDep, None, imgGT, augment, color_GT=False)
+        except IOError as e:
+            print("Error loading " + a, e)
+        return False, FalseFalse, False
+
+class KittiDataLoader(MMDataLoader):
+
+    def __init__(self, train=True, path = "../../datasets/kitti/", modalities=["rgb"]):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, name="kitti")
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        print(classes)
+
+        for x in classes:
+            x = [int(i) if i.isdigit() or "-" in i else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        print("class to idx: ", self.class_to_idx['objects'])
+        print("color to idx: ", self.color_to_idx['objects'].values())
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"] = self.remap_classes(self.idx_to_color['objects'])
+
+        if train:
+            self.split_path = 'training/'
+        else:
+            self.split_path = 'testing/'
+
+        self.train = train
+
+        for img in glob.glob(self.path + "data_semantics/" + self.split_path + "semantic/*.png"):
+            img = img.split("/")[-1]
+            # print(img)
+            self.filenames.append(img)
+        # print(self.filenames)
+
+    def sample(self, sample_id, augment=False):
+        a = self.filenames[sample_id]
+
+        try:
+            # print(a)
+            pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
+            pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('RGB')
+            imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
             # print(np.unique(imgGT))
 
             return self.prepare_data(pilRGB, pilDep, None, imgGT, augment, color_GT=False)

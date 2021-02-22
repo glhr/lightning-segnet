@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
-from dataloader import FreiburgDataLoader, CityscapesDataLoader
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader
 
 import numpy as np
 
@@ -27,6 +27,7 @@ parser.add_argument('--test_samples', type=int, default=10)
 
 
 from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.metrics.classification import IoU
 
 checkpoint_callback = ModelCheckpoint(
     dirpath='lightning_logs',
@@ -50,7 +51,9 @@ class LitSegNet(pl.LightningModule):
 
     def __init__(self, conf, **kwargs):
         super().__init__()
+
         self.save_hyperparameters(conf)
+        self.metric = IoU(num_classes=self.hparams.num_classes)
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
     def forward(self, x):
@@ -67,6 +70,7 @@ class LitSegNet(pl.LightningModule):
         x_hat = self.model(x)
         x_hat = torch.softmax(x_hat, dim=1)
         loss = F.cross_entropy(x_hat, y)
+        iou = self.metric(x_hat, y)
         # Logging to TensorBoard by default
         self.log('train_loss', loss)
         return loss
@@ -76,6 +80,7 @@ class LitSegNet(pl.LightningModule):
         x_hat = self.model(x)
         x_hat = torch.softmax(x_hat, dim=1)
         loss = F.cross_entropy(x_hat, y)
+        iou = self.metric(x_hat, y)
         self.log('val_loss', loss)
         return loss
 
@@ -113,13 +118,18 @@ trained_model = LitSegNet.load_from_checkpoint(checkpoint_path="lightning_logs/e
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
-ds = CityscapesDataLoader(train=False, modalities=["rgb"])
+ds = KittiDataLoader(train=True, modalities=["rgb"])
 dl = DataLoader(ds, batch_size=1)
 for i,batch in enumerate(dl):
     if i >= args.test_samples: break
+    target = batch[1]
+    sample = batch[0]
     # ds.result_to_image(batch[1].squeeze(), i)
-    y_hat = trained_model(batch[0])
-    y_hat = torch.argmax(y_hat.squeeze(), dim=0)
+    pred = trained_model(sample)
+    pred = torch.softmax(pred, dim=1)
+    pred = torch.argmax(pred.squeeze(), dim=0)
+    metric = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
+    # print("--> IoU:",metric(pred, target).item())
     # print(y_hat.shape)
-    result = y_hat
-    ds.result_to_image(y_hat, i, orig=batch[0], gt=batch[1].squeeze())
+
+    ds.result_to_image(pred, i, orig=sample, gt=target.squeeze())
