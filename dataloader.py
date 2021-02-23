@@ -154,7 +154,7 @@ class MMDataLoader():
     def labels_obj_to_aff(self, labels, proba=False):
         if proba:
             labels = labels.squeeze()
-            print(labels.shape)
+            # print(labels.shape)
             s = labels.shape
             new_proba = torch.zeros((4, s[1], s[2]))
             # print(new_proba.shape)

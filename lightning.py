@@ -148,6 +148,9 @@ for i,batch in enumerate(dl):
 
     ds.result_to_image(pred_aff, i, orig=sample, gt=target, proba= pred.squeeze()[1])
 
-    iou_full = IoU(num_classes=trained_model.hparams.num_classes)
-    iou_nobg = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
-    print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
+    try:
+        iou_full = IoU(num_classes=trained_model.hparams.num_classes)
+        iou_nobg = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
+        print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
+    except Exception as e:
+        print("Skipping IoU calculation: ", e)
