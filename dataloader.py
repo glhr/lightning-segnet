@@ -207,7 +207,7 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, result, iter, orig=None, gt=None, proba=None):
+    def result_to_image(self, result, iter, orig=None, gt=None, proba=None, test=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
@@ -227,6 +227,14 @@ class MMDataLoader():
             proba = (proba*255).astype(np.uint8)
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
+            
+        if test is not None:
+            if torch.is_tensor(test): test = test.detach().cpu().numpy()
+            print(np.unique(test))
+            test = test/np.max(test)
+            test = (test*255).astype(np.uint8)
+            test = np.stack((test,)*3, axis=-1)
+            concat.append(test)
 
         if gt is not None:
             if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()

@@ -154,9 +154,11 @@ for i,batch in enumerate(dl):
     target = target.squeeze()
     if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
 
-    # print("pred",pred_aff.shape,"target",target.shape)
+    print("pred",pred.shape,"target",target.shape)
+    
+    test = pred.squeeze()[1] * 0 + pred.squeeze()[2] * 1 + pred.squeeze()[3] * 2
 
-    ds.result_to_image(pred_aff, i, orig=sample, gt=target, proba= pred.squeeze()[1])
+    ds.result_to_image(pred_aff, i, orig=sample, gt=target, test= test)
 
     try:
         iou_full = IoU(num_classes=trained_model.hparams.num_classes)
