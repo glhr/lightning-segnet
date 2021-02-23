@@ -14,7 +14,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MMDataLoader():
-    def __init__(self, modalities, name):
+    def __init__(self, modalities, name, mode):
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.modalities = modalities
@@ -27,30 +27,27 @@ class MMDataLoader():
 
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
+        self.mode = mode
+
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
 
-        if pilRGB is not None: widthRGB, heightRGB = pilRGB.size
-        if pilDep is not None: widthDep, heightDep = pilDep.size
-        if pilIR is not None: widthIR, heightIR = pilIR.size
-
-        if augment:
-            img_dict = {
-                'rgb': pilRGB,
-                'depth': pilDep,
-                'ir': pilIR,
-                'mask': imgGT
-                }
-            transformed_imgs = self.data_augmentation(img_dict, img_height=heightIR, img_width=widthIR)
-            pilRGB, pilDep, pilIR, imgGT = transformed_imgs['rgb'], transformed_imgs['depth'], transformed_imgs['ir'], transformed_imgs['mask']
-            
-        if color_GT:
-            imgGT = np.array(imgGT)[:, :, ::-1]
-        else:
-            imgGT = np.array(imgGT)
+        imgGT = np.array(imgGT)
 
         if pilRGB is not None: imgRGB = np.array(pilRGB)
         if pilDep is not None: imgDep = np.array(pilDep)
         if pilIR is not None: imgIR = np.array(pilIR)
+
+        if augment:
+            img_dict = {
+                'image': imgRGB,
+                # 'depth': imgDep,
+                # 'ir': imgIR,
+                'mask': imgGT
+                }
+            transformed_imgs = self.data_augmentation(img_dict)
+            imgRGB, imgGT = transformed_imgs['image'], transformed_imgs['mask']
+
+        if color_GT: imgGT = imgGT[:, :, ::-1]
 
         resize = (480,360)
         if pilRGB is not None: modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
@@ -68,8 +65,8 @@ class MMDataLoader():
         if pilRGB is not None: modRGB = modRGB[: , :, 2]
         if pilDep is not None: modDepth = modDepth[: , :, 2]
         if pilIR is not None: modIR = modIR[: , :, 2]
-        
-        modGT = self.labels_obj_to_aff(modGT)
+
+        if self.mode == "affordances": modGT = self.labels_obj_to_aff(modGT)
 
         imgs = []
         img = {
@@ -220,7 +217,7 @@ class MMDataLoader():
 
         # print(bs,np.max(b))
         if torch.is_tensor(result): result = result.detach().cpu().numpy()
-        data = self.labels_to_color(result, mode="affordances")
+        data = self.labels_to_color(result, mode=self.mode)
 
         # print(colors)
         concat = [data]
@@ -234,7 +231,7 @@ class MMDataLoader():
         if gt is not None:
             if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
             # concat.append(self.labels_to_color(gt, mode="objects"))
-            concat.append(self.labels_to_color(gt, mode="affordances"))
+            concat.append(self.labels_to_color(gt, mode=self.mode))
 
 
         if orig is not None:
@@ -248,21 +245,22 @@ class MMDataLoader():
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        img.save(f'results/segnet_{self.name}' + str(iter + 1) + '.png')
+        img.save(f'results/segnet_{self.name}_{self.mode}-' + str(iter + 1) + '.png')
 
-    def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=1):
+    def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
+        rand_crop = np.random.uniform(low=0.8, high=0.9)
         transform = A.Compose([
-            A.RandomRotation(limit=10, p=p),
-            A.RandomScale(limit=0.5, p=p),
+            A.Rotate(limit=10, p=p),
             A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
+            A.RandomScale(scale_limit=0.5, p=p),
             A.HorizontalFlip(p=p),
             A.RandomBrightnessContrast(p=p)
-            ],
-            additional_targets={'rgb': 'image', 'depth': 'image', 'ir': 'image', 'mask':'mask'}
+            ]
+            # additional_targets={'rgb': 'image', 'mask':'mask'}
         )
-            
-        transformed = transform(rgb=imgs['rgb'], depth=imgs['depth'], ir=imgs['ir'], mask=imgs['mask'])
-        
+
+        transformed = transform(image=imgs['image'], mask=imgs['mask'])
+
         return transformed
 
     def sample(self, sample_id, augment=False):
@@ -287,12 +285,12 @@ class MMDataLoader():
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"]):
+    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances"):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="freiburg")
+        super().__init__(modalities, name="freiburg", mode=mode)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -318,7 +316,7 @@ class FreiburgDataLoader(MMDataLoader):
             # print(img)
             self.filenames.append(img)
         # print(self.filenames)
-        
+
         self.suffixes = {
             'depth': "_Clipped_redict_depth_gray.png",
             "rgb": "_Clipped.jpg",
@@ -326,7 +324,7 @@ class FreiburgDataLoader(MMDataLoader):
             "ir": ".tif"
         }
         self.color_GT = True
-    
+
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
         pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('RGB')
@@ -341,17 +339,17 @@ class FreiburgDataLoader(MMDataLoader):
             self.suffixes['gt'] = "_mask.png"
             # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
             imgGT = Image.open(self.path + "GT_color/" + self.filenames[sample_id] + self.suffixes['gt']).convert('RGB')
-            
+
         return pilRGB, pilDep, pilIR, imgGT
 
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/cityscapes/", modalities=["rgb"]):
+    def __init__(self, train=True, path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances"):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="cityscapes")
+        super().__init__(modalities, name="cityscapes", mode=mode)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -385,9 +383,9 @@ class CityscapesDataLoader(MMDataLoader):
             # print(img)
             self.filenames.append(img)
         # print(self.filenames)
-        
+
         self.color_GT = False
-        
+
     def get_image_pairs(self, sample_id):
 
         pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
@@ -399,12 +397,12 @@ class CityscapesDataLoader(MMDataLoader):
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/kitti/", modalities=["rgb"]):
+    def __init__(self, train=True, path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances"):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="kitti")
+        super().__init__(modalities, name="kitti", mode=mode)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -434,7 +432,7 @@ class KittiDataLoader(MMDataLoader):
             self.filenames.append(img)
         # print(self.filenames)
         self.color_GT = False
-        
+
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
         pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('RGB')

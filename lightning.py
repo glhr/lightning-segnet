@@ -48,6 +48,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--optim', type=str, default="SGD")
         parser.add_argument('--num_classes', type=int, default=4)
         parser.add_argument('--workers', type=int, default=8)
+        parser.add_argument('--mode', default="affordances")
         return parser
 
     def __init__(self, conf, **kwargs):
@@ -96,12 +97,12 @@ class LitSegNet(pl.LightningModule):
 
     def train_dataloader(self):
         # REQUIRED
-        dl = FreiburgDataLoader(train=True)
+        dl = FreiburgDataLoader(train=True, mode=self.hparams.mode)
         return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers)
 
     def val_dataloader(self):
         # OPTIONAL
-        dl = FreiburgDataLoader(train=False)
+        dl = FreiburgDataLoader(train=False, mode=self.hparams.mode)
         return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers)
 
 parser = LitSegNet.add_model_specific_args(parser)
@@ -121,7 +122,7 @@ trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.checkpoint, 
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
-ds = FreiburgDataLoader(train=False, modalities=["ir"])
+ds = CityscapesDataLoader(train=False, modalities=["rgb"], mode=trained_model.hparams.mode)
 dl = DataLoader(ds, batch_size=1, num_workers=trained_model.hparams.workers)
 for i,batch in enumerate(dl):
     if i >= args.test_samples: break
@@ -137,13 +138,16 @@ for i,batch in enumerate(dl):
 
     # print(y_hat.shape)
 
-    #pred = ds.labels_to_aff(pred, proba=True)
+    if trained_model.hparams.mode == "convert": pred = ds.labels_obj_to_aff(pred, proba=True)
     pred_aff = torch.argmax(pred.squeeze(), dim=0)
 
     target = target.squeeze()
+    if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
+
+    # print("pred",pred_aff.shape,"target",target.shape)
 
     ds.result_to_image(pred_aff, i, orig=sample, gt=target, proba= pred.squeeze()[1])
 
-    iou_full = IoU(num_classes=4)
-    iou_nobg = IoU(num_classes=4, ignore_index=0)
+    iou_full = IoU(num_classes=trained_model.hparams.num_classes)
+    iou_nobg = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
     print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
