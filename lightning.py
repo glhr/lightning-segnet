@@ -121,8 +121,8 @@ trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.checkpoint, 
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
-ds = FreiburgDataLoader(train=False, modalities=["rgb"])
-dl = DataLoader(ds, batch_size=1)
+ds = FreiburgDataLoader(train=False, modalities=["ir"])
+dl = DataLoader(ds, batch_size=1, num_workers=trained_model.hparams.workers)
 for i,batch in enumerate(dl):
     if i >= args.test_samples: break
     target = batch[1]
@@ -137,10 +137,10 @@ for i,batch in enumerate(dl):
 
     # print(y_hat.shape)
 
-    pred = ds.labels_obj_to_aff(pred, proba=True)
+    #pred = ds.labels_to_aff(pred, proba=True)
     pred_aff = torch.argmax(pred.squeeze(), dim=0)
 
-    target = ds.labels_obj_to_aff(target.squeeze())
+    target = target.squeeze()
 
     ds.result_to_image(pred_aff, i, orig=sample, gt=target, proba= pred.squeeze()[1])
 
