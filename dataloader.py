@@ -260,7 +260,7 @@ class MMDataLoader():
         transform = A.Compose([
             A.Rotate(limit=10, p=p),
             A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-            A.RandomScale(scale_limit=0.5, p=p),
+            A.RandomScale(scale_limit=0.2, p=p),
             A.HorizontalFlip(p=p),
             A.RandomBrightnessContrast(p=p)
             ]
@@ -289,7 +289,7 @@ class MMDataLoader():
         if self.train:
             return self.sample(idx, augment=True)
         else:
-            return self.sample(idx, augment=True)
+            return self.sample(idx, augment=False)
 
 class FreiburgDataLoader(MMDataLoader):
 

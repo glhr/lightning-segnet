@@ -23,8 +23,8 @@ parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=10)
-parser.add_argument('--checkpoint', default="lightning_logs/epoch=219-val_loss=1.36.ckpt")
-
+parser.add_argument('--test_checkpoint', default="lightning_logs/epoch=219-val_loss=1.36.ckpt")
+parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.metrics.classification import IoU
@@ -34,7 +34,8 @@ checkpoint_callback = ModelCheckpoint(
     filename='{epoch}-{val_loss:.2f}',
     verbose=True,
     monitor='val_loss',
-    mode='min'
+    mode='min',
+    save_last = True
 )
 
 class LitSegNet(pl.LightningModule):
@@ -81,8 +82,8 @@ class LitSegNet(pl.LightningModule):
         loss = F.cross_entropy(x_hat, y, ignore_index=0)
         iou = self.metric(x_hat, y)
         # Logging to TensorBoard by default
-        self.log('train_loss', loss)
-        self.log('train_iou', iou)
+        self.log('train_loss', loss, on_epoch=True)
+        self.log('train_iou', iou, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -91,8 +92,8 @@ class LitSegNet(pl.LightningModule):
         x_hat = torch.softmax(x_hat, dim=1)
         loss = F.cross_entropy(x_hat, y, ignore_index=0)
         iou = self.metric(x_hat, y)
-        self.log('val_loss', loss)
-        self.log('val_iou', iou)
+        self.log('val_loss', loss, on_epoch=True)
+        self.log('val_iou', iou, on_epoch=True)
         return loss
 
     def configure_optimizers(self):
@@ -107,12 +108,12 @@ class LitSegNet(pl.LightningModule):
 
     def train_dataloader(self):
         # REQUIRED
-        dl = get_dataset(train=True)
+        dl = self.get_dataset(train=True)
         return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
 
     def val_dataloader(self):
         # OPTIONAL
-        dl = get_dataset(train=False)
+        dl = self.get_dataset(train=False)
         return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
 
 parser = LitSegNet.add_model_specific_args(parser)
@@ -125,7 +126,12 @@ if args.train:
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
     wandb_logger.log_hyperparams(segnet_model.hparams)
 
-    trainer = pl.Trainer.from_argparse_args(args, check_val_every_n_epoch=5, log_every_n_steps=10, logger=wandb_logger, checkpoint_callback=checkpoint_callback)
+    trainer = pl.Trainer.from_argparse_args(args,
+    	check_val_every_n_epoch=1,
+    	# ~ log_every_n_steps=10,
+    	logger=wandb_logger,
+    	checkpoint_callback=checkpoint_callback,
+    	resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
 trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.checkpoint, conf=args)
