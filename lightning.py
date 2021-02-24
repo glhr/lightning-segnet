@@ -59,7 +59,7 @@ class LitSegNet(pl.LightningModule):
         self.save_hyperparameters(conf)
         self.metric = IoU(num_classes=self.hparams.num_classes, ignore_index=0)
         self.model = SegNet(num_classes=self.hparams.num_classes)
-        
+
         self.datasets = {
             "freiburg": FreiburgDataLoader,
             "cityscapes": CityscapesDataLoader,
@@ -102,9 +102,9 @@ class LitSegNet(pl.LightningModule):
         else:
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
-        
+
     def get_dataset(self, train=False):
-        return self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode)
+        return self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode, modalities=["rgb"])
 
     def train_dataloader(self):
         # REQUIRED
@@ -134,7 +134,7 @@ if args.train:
     	resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.checkpoint, conf=args)
+trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, conf=args)
 # prints the learning_rate you used in this checkpoint
 
 trained_model.eval()
@@ -161,10 +161,10 @@ for i,batch in enumerate(dl):
     if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
 
     print("pred",pred.shape,"target",target.shape)
-    
+
     test = pred.squeeze()[1] * 0 + pred.squeeze()[2] * 1 + pred.squeeze()[3] * 2
 
-    ds.result_to_image(pred_aff, i, orig=sample, gt=target, test= test)
+    ds.result_to_image(pred_aff, i, orig=sample, gt=target)
 
     try:
         iou_full = IoU(num_classes=trained_model.hparams.num_classes)
