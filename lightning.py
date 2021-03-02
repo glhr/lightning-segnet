@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
+from losses import SORDLoss, flatten_tensors
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader
 
 import numpy as np
@@ -65,6 +66,7 @@ class LitSegNet(pl.LightningModule):
             "cityscapes": CityscapesDataLoader,
             "kitti": KittiDataLoader
         }
+        self.sord = SORDLoss(n_classes = self.hparams.num_classes)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -78,8 +80,14 @@ class LitSegNet(pl.LightningModule):
         x, y = batch
         # x = x.view(x.size(0), -1)
         x_hat = self.model(x)
+        # ~ x_hat, y = flatten_tensors(x_hat, y)
+        # ~ x_hat = torch.nn.LogSoftmax(dim=-1)(x_hat)
+        
+        #
+        #loss = F.cross_entropy(x_hat, y, ignore_index=0)
+        loss = self.sord(x_hat, y)
+        
         x_hat = torch.softmax(x_hat, dim=1)
-        loss = F.cross_entropy(x_hat, y, ignore_index=0)
         iou = self.metric(x_hat, y)
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True)
@@ -89,8 +97,13 @@ class LitSegNet(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
+        # ~ x_hat, y = flatten_tensors(x_hat, y)
+        # ~ x_hat = torch.nn.LogSoftmax(dim=-1)(x_hat)
+        
+        #
+        #loss = F.cross_entropy(x_hat, y, ignore_index=0)
+        loss = self.sord(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
-        loss = F.cross_entropy(x_hat, y, ignore_index=0)
         iou = self.metric(x_hat, y)
         self.log('val_loss', loss, on_epoch=True)
         self.log('val_iou', iou, on_epoch=True)
