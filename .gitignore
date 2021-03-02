@@ -94,3 +94,5 @@ ENV/
 results/
 
 wandb/
+
+lightning_logs/
