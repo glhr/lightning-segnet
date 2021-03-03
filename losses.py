@@ -55,8 +55,8 @@ class DLDLLoss(nn.Module):
 
 
 def flatten_tensors(inp, target):
-        print(inp.shape, target.shape)
-        print(inp, target)
+        # ~ print(inp.shape, target.shape)
+        # ~ print(inp, target)
         target = target.long()
         num_classes = inp.size()[1]
 

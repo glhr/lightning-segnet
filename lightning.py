@@ -17,6 +17,9 @@ import numpy as np
 from argparse import ArgumentParser
 parser = ArgumentParser()
 
+from datetime import datetime
+
+timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
 
 parser.add_argument('--train', action='store_true', default=False)
@@ -24,20 +27,12 @@ parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=10)
-parser.add_argument('--test_checkpoint', default="lightning_logs/epoch=219-val_loss=1.36.ckpt")
+parser.add_argument('--test_checkpoint', default="lightning_logs/test.ckpt")
 parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
+parser.add_argument('--prefix', default=None)
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.metrics.classification import IoU
-
-checkpoint_callback = ModelCheckpoint(
-    dirpath='lightning_logs',
-    filename='{epoch}-{val_loss:.2f}',
-    verbose=True,
-    monitor='val_loss',
-    mode='min',
-    save_last = True
-)
 
 class LitSegNet(pl.LightningModule):
 
@@ -52,6 +47,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--workers', type=int, default=8)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
+        parser.add_argument('--loss', default="ce")
         return parser
 
     def __init__(self, conf, **kwargs):
@@ -67,25 +63,28 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader
         }
         self.sord = SORDLoss(n_classes = self.hparams.num_classes)
+        self.ce = nn.CrossEntropyLoss(ignore_index=0)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
         # print(x.shape)
         embedding = self.model(x)
         return embedding
+        
+    def compute_loss(self, x_hat, y, loss="ce"):
+        if loss == "ce":
+            return self.ce(x_hat, y)
+        elif loss == "sord":
+            return self.sord(x_hat, y)
+            
 
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
-        # x = x.view(x.size(0), -1)
         x_hat = self.model(x)
-        # ~ x_hat, y = flatten_tensors(x_hat, y)
-        # ~ x_hat = torch.nn.LogSoftmax(dim=-1)(x_hat)
         
-        #
-        #loss = F.cross_entropy(x_hat, y, ignore_index=0)
-        loss = self.sord(x_hat, y)
+        loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
         
         x_hat = torch.softmax(x_hat, dim=1)
         iou = self.metric(x_hat, y)
@@ -97,12 +96,8 @@ class LitSegNet(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y = batch
         x_hat = self.model(x)
-        # ~ x_hat, y = flatten_tensors(x_hat, y)
-        # ~ x_hat = torch.nn.LogSoftmax(dim=-1)(x_hat)
+        loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
         
-        #
-        #loss = F.cross_entropy(x_hat, y, ignore_index=0)
-        loss = self.sord(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
         iou = self.metric(x_hat, y)
         self.log('val_loss', loss, on_epoch=True)
@@ -135,53 +130,70 @@ args = parser.parse_args()
 print(args)
 segnet_model = LitSegNet(conf=args)
 
+if args.prefix is None:
+    args.prefix = f"{timestamp}-{segnet_model.hparams.dataset}-c{segnet_model.hparams.num_classes}-{segnet_model.hparams.loss}"
+print(args.prefix)
+
+checkpoint_callback = ModelCheckpoint(
+    dirpath='lightning_logs',
+    filename= args.prefix + '-{epoch}-{val_loss:.4f}',
+    verbose=True,
+    monitor='val_loss',
+    mode='min',
+    save_last = True
+)
+checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
+
 if args.train:
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
     wandb_logger.log_hyperparams(segnet_model.hparams)
 
     trainer = pl.Trainer.from_argparse_args(args,
-    	check_val_every_n_epoch=1,
-    	# ~ log_every_n_steps=10,
-    	logger=wandb_logger,
-    	checkpoint_callback=checkpoint_callback,
-    	resume_from_checkpoint=args.train_checkpoint)
+        check_val_every_n_epoch=1,
+        # ~ log_every_n_steps=10,
+        logger=wandb_logger,
+        checkpoint_callback=checkpoint_callback,
+        resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
-trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, conf=args)
-# prints the learning_rate you used in this checkpoint
+try:
+    trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, conf=args)
+    # prints the learning_rate you used in this checkpoint
 
-trained_model.eval()
-ds = trained_model.get_dataset(train=False)
-dl = DataLoader(ds, batch_size=1, num_workers=trained_model.hparams.workers, shuffle=True)
-for i,batch in enumerate(dl):
-    if i >= args.test_samples: break
-    target = batch[1]
-    sample = batch[0]
-    # ds.result_to_image(batch[1].squeeze(), i)
-    pred = trained_model(sample)
-    pred = torch.softmax(pred, dim=1)
-    pred_cls = torch.argmax(pred.squeeze(), dim=0)
+    trained_model.eval()
+    ds = trained_model.get_dataset(train=False)
+    dl = DataLoader(ds, batch_size=1, num_workers=trained_model.hparams.workers, shuffle=True)
+    for i,batch in enumerate(dl):
+        if i >= args.test_samples: break
+        target = batch[1]
+        sample = batch[0]
+        # ds.result_to_image(batch[1].squeeze(), i)
+        pred = trained_model(sample)
+        pred = torch.softmax(pred, dim=1)
+        pred_cls = torch.argmax(pred.squeeze(), dim=0)
 
 
-    # print(pred_proba.shape)
+        # print(pred_proba.shape)
 
-    # print(y_hat.shape)
+        # print(y_hat.shape)
 
-    if trained_model.hparams.mode == "convert": pred = ds.labels_obj_to_aff(pred, proba=True)
-    pred_aff = torch.argmax(pred.squeeze(), dim=0)
+        if trained_model.hparams.mode == "convert": pred = ds.labels_obj_to_aff(pred, proba=True)
+        pred_aff = torch.argmax(pred.squeeze(), dim=0)
 
-    target = target.squeeze()
-    if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
+        target = target.squeeze()
+        if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
 
-    print("pred",pred.shape,"target",target.shape)
+        print("pred",pred.shape,"target",target.shape)
 
-    test = pred.squeeze()[1] * 0 + pred.squeeze()[2] * 1 + pred.squeeze()[3] * 2
+        test = pred.squeeze()[1] * 0 + pred.squeeze()[2] * 1 + pred.squeeze()[3] * 2
 
-    ds.result_to_image(pred_aff, i, orig=sample, gt=target)
+        ds.result_to_image(pred_aff, i, orig=sample, gt=target, test=test, filename_prefix=args.test_checkpoint.split("/")[-1].replace(".ckpt",""))
 
-    try:
-        iou_full = IoU(num_classes=trained_model.hparams.num_classes)
-        iou_nobg = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
-        print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
-    except Exception as e:
-        print("Skipping IoU calculation: ", e)
+        try:
+            iou_full = IoU(num_classes=trained_model.hparams.num_classes)
+            iou_nobg = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
+            print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
+        except Exception as e:
+            print("Skipping IoU calculation: ", e)
+except FileNotFoundError as e:
+    print(e)

@@ -207,13 +207,15 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, result, iter, orig=None, gt=None, proba=None, test=None):
+    def result_to_image(self, result, iter, orig=None, gt=None, proba=None, test=None, filename_prefix=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
         :param iter: The name of the file to save it to
         :return:
         """
+        if filename_prefix is None:
+            filename_prefix = self.name
 
         # print(bs,np.max(b))
         if torch.is_tensor(result): result = result.detach().cpu().numpy()
@@ -253,7 +255,7 @@ class MMDataLoader():
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        img.save(f'results/segnet_{self.name}_{self.mode}-' + str(iter + 1) + '.png')
+        img.save(f'results/{filename_prefix}_{self.mode}-' + str(iter + 1) + '.png')
 
     def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
         rand_crop = np.random.uniform(low=0.8, high=0.9)
