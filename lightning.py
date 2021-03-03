@@ -10,7 +10,7 @@ from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
 from losses import SORDLoss, flatten_tensors
-from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader
+from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader
 
 import numpy as np
 
@@ -18,6 +18,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 
 from datetime import datetime
+from plotting import plot_confusion_matrix
 
 timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
@@ -32,7 +33,7 @@ parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
 
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.metrics.classification import IoU
+from pytorch_lightning.metrics.classification import IoU, ConfusionMatrix
 
 class LitSegNet(pl.LightningModule):
 
@@ -50,7 +51,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--loss', default="ce")
         return parser
 
-    def __init__(self, conf, **kwargs):
+    def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__()
 
         self.save_hyperparameters(conf)
@@ -65,27 +66,35 @@ class LitSegNet(pl.LightningModule):
         self.sord = SORDLoss(n_classes = self.hparams.num_classes)
         self.ce = nn.CrossEntropyLoss(ignore_index=0)
 
+        self.test_checkpoint = test_checkpoint
+        self.ds = self.get_dataset(train=False)
+        self.test_max = test_max
+
+        num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
+        self.CM = ConfusionMatrix(num_classes=num_cls, normalize='none')
+        self.IoU = IoU(num_classes=num_cls, ignore_index=0)
+
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
         # print(x.shape)
         embedding = self.model(x)
         return embedding
-        
+
     def compute_loss(self, x_hat, y, loss="ce"):
         if loss == "ce":
             return self.ce(x_hat, y)
         elif loss == "sord":
             return self.sord(x_hat, y)
-            
+
 
     def training_step(self, batch, batch_idx):
         # training_step defined the train loop.
         # It is independent of forward
         x, y = batch
         x_hat = self.model(x)
-        
+
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
-        
+
         x_hat = torch.softmax(x_hat, dim=1)
         iou = self.metric(x_hat, y)
         # Logging to TensorBoard by default
@@ -97,12 +106,61 @@ class LitSegNet(pl.LightningModule):
         x, y = batch
         x_hat = self.model(x)
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
-        
+
         x_hat = torch.softmax(x_hat, dim=1)
         iou = self.metric(x_hat, y)
         self.log('val_loss', loss, on_epoch=True)
         self.log('val_iou', iou, on_epoch=True)
         return loss
+
+    def reduce_cm(self, cms):
+
+        labels= ["impossible","possible","preferable"]
+
+        cms = torch.reshape(cms, (-1,4,4))
+        cm = torch.sum(cms,dim=0,keepdim=False)
+
+        cm = cm[1:, 1:]
+        print(cm)
+        cm = cm / cm.sum(axis=1, keepdim=True)
+        plot_confusion_matrix(cm.numpy(), labels=labels, filename=self.test_checkpoint)
+        return 0
+
+    def test_step(self, batch, batch_idx):
+        sample, target = batch
+
+        if self.test_max is None or batch_idx < self.test_max:
+            pred = self.model(sample)
+            pred = torch.softmax(pred, dim=1)
+
+            if self.hparams.mode == "convert": pred = self.ds.labels_obj_to_aff(pred, proba=True)
+            pred_cls = torch.argmax(pred, dim=1)
+
+            target = target.squeeze()
+            if self.hparams.mode == "convert": target = self.ds.labels_obj_to_aff(target)
+
+            # print("pred",pred_cls.shape,"target",target.shape)
+
+            for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
+                # print(p.shape)
+                test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
+
+                self.ds.result_to_image(c, batch_idx+i, orig=o, gt=t, test=test, filename_prefix=self.test_checkpoint)
+
+
+
+            cm = self.CM(pred_cls, target)
+            # print(cm.shape)
+            iou = self.IoU(pred_cls, target)
+
+
+            self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+            self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+            return pred
+
+    # def test_epoch_end(self, outputs):
+    #     print(outputs)
+    #     pass
 
     def configure_optimizers(self):
         if self.hparams.optim == "SGD":
@@ -123,6 +181,11 @@ class LitSegNet(pl.LightningModule):
         # OPTIONAL
         dl = self.get_dataset(train=False)
         return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
+
+    def test_dataloader(self):
+        # OPTIONAL
+        dl = self.get_dataset(train=False)
+        return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
@@ -156,44 +219,59 @@ if args.train:
         resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
-try:
-    trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, conf=args)
-    # prints the learning_rate you used in this checkpoint
+else:
+    trainer = pl.Trainer.from_argparse_args(args)
+    trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
+    trainer.test(trained_model)
 
-    trained_model.eval()
-    ds = trained_model.get_dataset(train=False)
-    dl = DataLoader(ds, batch_size=1, num_workers=trained_model.hparams.workers, shuffle=True)
-    for i,batch in enumerate(dl):
-        if i >= args.test_samples: break
-        target = batch[1]
-        sample = batch[0]
-        # ds.result_to_image(batch[1].squeeze(), i)
-        pred = trained_model(sample)
-        pred = torch.softmax(pred, dim=1)
-        pred_cls = torch.argmax(pred.squeeze(), dim=0)
-
-
-        # print(pred_proba.shape)
-
-        # print(y_hat.shape)
-
-        if trained_model.hparams.mode == "convert": pred = ds.labels_obj_to_aff(pred, proba=True)
-        pred_aff = torch.argmax(pred.squeeze(), dim=0)
-
-        target = target.squeeze()
-        if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
-
-        print("pred",pred.shape,"target",target.shape)
-
-        test = pred.squeeze()[1] * 0 + pred.squeeze()[2] * 1 + pred.squeeze()[3] * 2
-
-        ds.result_to_image(pred_aff, i, orig=sample, gt=target, test=test, filename_prefix=args.test_checkpoint.split("/")[-1].replace(".ckpt",""))
-
-        try:
-            iou_full = IoU(num_classes=trained_model.hparams.num_classes)
-            iou_nobg = IoU(num_classes=trained_model.hparams.num_classes, ignore_index=0)
-            print("--> IoU:",iou_full(pred_aff, target).item(), "| w/o bg:", iou_nobg(pred_aff, target).item())
-        except Exception as e:
-            print("Skipping IoU calculation: ", e)
-except FileNotFoundError as e:
-    print(e)
+# try:
+#     trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
+#     # prints the learning_rate you used in this checkpoint
+#
+#     trained_model.eval()
+#     ds = trained_model.get_dataset(train=False)
+#     dl = DataLoader(ds, batch_size=3, num_workers=trained_model.hparams.workers, shuffle=False)
+#     for b,batch in enumerate(dl):
+#         if b >= args.test_samples: break
+#         target = batch[1]
+#         sample = batch[0]
+#         # ds.result_to_image(batch[1].squeeze(), i)
+#         pred = trained_model(sample)
+#         pred = torch.softmax(pred, dim=1)
+#         #pred_cls = torch.argmax(pred.squeeze(), dim=0)
+#
+#
+#         # print(pred_proba.shape)
+#
+#         # print(y_hat.shape)
+#
+#         if trained_model.hparams.mode == "convert": pred = ds.labels_obj_to_aff(pred, proba=True)
+#         pred_cls = torch.argmax(pred, dim=1)
+#
+#         target = target.squeeze()
+#         if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
+#
+#         print("pred",pred_cls.shape,"target",target.shape)
+#
+#         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
+#             print(p.shape)
+#             test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
+#
+#             ds.result_to_image(c, i, orig=o, gt=t, test=test, filename_prefix=args.test_checkpoint.split("/")[-1].replace(".ckpt",""))
+#
+#         num_cls = 4 if trained_model.hparams.mode == "convert" else trained_model.hparams.num_classes
+#         try:
+#             iou_full = IoU(num_classes=num_cls)
+#             iou_nobg = IoU(num_classes=num_cls, ignore_index=0)
+#             print("--> IoU:",iou_full(pred_cls, target).item(), "| w/o bg:", iou_nobg(pred_cls, target).item())
+#         except Exception as e:
+#             print("Skipping IoU calculation: ", e)
+#
+#         from plotting import plot_confusion_matrix
+#         metric = ConfusionMatrix(num_classes=num_cls, normalize='true')
+#         cm = metric(pred_cls, target).numpy()
+#         cm = cm[1:, 1:]
+#         print(cm)
+#         plot_confusion_matrix(cm)
+# except FileNotFoundError as e:
+#     print(e)

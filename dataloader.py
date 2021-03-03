@@ -153,17 +153,20 @@ class MMDataLoader():
 
     def labels_obj_to_aff(self, labels, proba=False):
         if proba:
-            labels = labels.squeeze()
+            # labels = labels.squeeze()
             # print(labels.shape)
             s = labels.shape
-            new_proba = torch.zeros((4, s[1], s[2]))
+            new_proba = torch.zeros((labels.shape[0], 4, s[2], s[3]))
             # print(new_proba.shape)
             # print(new_proba[3])
             for idx in self.idx_mappings.keys():
-                indices = [i for i in self.idx_mappings[idx] if i < labels.shape[0]]
-                select = torch.index_select(labels,dim=0,index=torch.LongTensor(indices))
+                indices = [i for i in self.idx_mappings[idx] if i < labels.shape[1]]
+                # print(indices)
+                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices))
                 # print(select.shape)
-                new_proba[idx] = torch.sum(select,dim=0,keepdim=True)
+                s = torch.sum(select,dim=1,keepdim=True)
+                # print(s.shape)
+                new_proba[:,idx] = s.squeeze(1)
             # print(new_proba.shape)
             return new_proba
         else:
@@ -229,10 +232,10 @@ class MMDataLoader():
             proba = (proba*255).astype(np.uint8)
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
-            
+
         if test is not None:
             if torch.is_tensor(test): test = test.detach().cpu().numpy()
-            print(np.unique(test))
+            # print(np.unique(test))
             test = test/np.max(test)
             test = (test*255).astype(np.uint8)
             test = np.stack((test,)*3, axis=-1)
