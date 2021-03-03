@@ -27,7 +27,7 @@ parser.add_argument('--train', action='store_true', default=False)
 
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
-parser.add_argument('--test_samples', type=int, default=10)
+parser.add_argument('--test_samples', type=int, default=None)
 parser.add_argument('--test_checkpoint', default="lightning_logs/test.ckpt")
 parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
@@ -144,10 +144,9 @@ class LitSegNet(pl.LightningModule):
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
                 # print(p.shape)
                 test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
-
-                self.ds.result_to_image(c, batch_idx+i, orig=o, gt=t, test=test, filename_prefix=self.test_checkpoint)
-
-
+                iter = batch_idx*self.hparams.bs + i
+                self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, filename_prefix=self.test_checkpoint)
+                self.ds.result_to_image(iter=batch_idx+i, orig=o, gt=t, filename_prefix="ref")
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
@@ -158,9 +157,6 @@ class LitSegNet(pl.LightningModule):
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             return pred
 
-    # def test_epoch_end(self, outputs):
-    #     print(outputs)
-    #     pass
 
     def configure_optimizers(self):
         if self.hparams.optim == "SGD":
@@ -223,55 +219,3 @@ else:
     trainer = pl.Trainer.from_argparse_args(args)
     trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
     trainer.test(trained_model)
-
-# try:
-#     trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
-#     # prints the learning_rate you used in this checkpoint
-#
-#     trained_model.eval()
-#     ds = trained_model.get_dataset(train=False)
-#     dl = DataLoader(ds, batch_size=3, num_workers=trained_model.hparams.workers, shuffle=False)
-#     for b,batch in enumerate(dl):
-#         if b >= args.test_samples: break
-#         target = batch[1]
-#         sample = batch[0]
-#         # ds.result_to_image(batch[1].squeeze(), i)
-#         pred = trained_model(sample)
-#         pred = torch.softmax(pred, dim=1)
-#         #pred_cls = torch.argmax(pred.squeeze(), dim=0)
-#
-#
-#         # print(pred_proba.shape)
-#
-#         # print(y_hat.shape)
-#
-#         if trained_model.hparams.mode == "convert": pred = ds.labels_obj_to_aff(pred, proba=True)
-#         pred_cls = torch.argmax(pred, dim=1)
-#
-#         target = target.squeeze()
-#         if trained_model.hparams.mode == "convert": target = ds.labels_obj_to_aff(target)
-#
-#         print("pred",pred_cls.shape,"target",target.shape)
-#
-#         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-#             print(p.shape)
-#             test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
-#
-#             ds.result_to_image(c, i, orig=o, gt=t, test=test, filename_prefix=args.test_checkpoint.split("/")[-1].replace(".ckpt",""))
-#
-#         num_cls = 4 if trained_model.hparams.mode == "convert" else trained_model.hparams.num_classes
-#         try:
-#             iou_full = IoU(num_classes=num_cls)
-#             iou_nobg = IoU(num_classes=num_cls, ignore_index=0)
-#             print("--> IoU:",iou_full(pred_cls, target).item(), "| w/o bg:", iou_nobg(pred_cls, target).item())
-#         except Exception as e:
-#             print("Skipping IoU calculation: ", e)
-#
-#         from plotting import plot_confusion_matrix
-#         metric = ConfusionMatrix(num_classes=num_cls, normalize='true')
-#         cm = metric(pred_cls, target).numpy()
-#         cm = cm[1:, 1:]
-#         print(cm)
-#         plot_confusion_matrix(cm)
-# except FileNotFoundError as e:
-#     print(e)

@@ -210,7 +210,7 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, result, iter, orig=None, gt=None, proba=None, test=None, filename_prefix=None):
+    def result_to_image(self, iter, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, filename_prefix=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
@@ -221,30 +221,33 @@ class MMDataLoader():
             filename_prefix = self.name
 
         # print(bs,np.max(b))
-        if torch.is_tensor(result): result = result.detach().cpu().numpy()
-        data = self.labels_to_color(result, mode=self.mode)
+        concat = []
 
-        # print(colors)
-        concat = [data]
-        if proba is not None:
-            if torch.is_tensor(proba): proba = proba.detach().cpu().numpy()
-            # print(np.unique(proba))
-            proba = (proba*255).astype(np.uint8)
-            proba = np.stack((proba,)*3, axis=-1)
-            concat.append(proba)
-
-        if test is not None:
-            if torch.is_tensor(test): test = test.detach().cpu().numpy()
-            # print(np.unique(test))
-            test = test/np.max(test)
-            test = (test*255).astype(np.uint8)
-            test = np.stack((test,)*3, axis=-1)
-            concat.append(test)
+        if pred_cls is not None:
+            if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
+            data = self.labels_to_color(pred_cls, mode=self.mode)
+            concat.append(data)
 
         if gt is not None:
             if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
             # concat.append(self.labels_to_color(gt, mode="objects"))
             concat.append(self.labels_to_color(gt, mode=self.mode))
+
+        if pred_proba is not None:
+            if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
+            # print(np.unique(proba))
+            proba = pred_proba/np.max(pred_proba)
+            proba = (proba*255).astype(np.uint8)
+            proba = np.stack((proba,)*3, axis=-1)
+            concat.append(proba)
+
+        # if pred_test is not None:
+        #     if torch.is_tensor(test): test = test.detach().cpu().numpy()
+        #     # print(np.unique(test))
+        #     test = test/np.max(test)
+        #     test = (test*255).astype(np.uint8)
+        #     test = np.stack((test,)*3, axis=-1)
+        #     concat.append(test)
 
 
         if orig is not None:
@@ -258,7 +261,7 @@ class MMDataLoader():
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        img.save(f'results/{filename_prefix}_{self.mode}-' + str(iter + 1) + '.png')
+        img.save(f'results/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
         rand_crop = np.random.uniform(low=0.8, high=0.9)
