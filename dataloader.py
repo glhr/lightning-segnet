@@ -236,7 +236,7 @@ class MMDataLoader():
         if pred_proba is not None:
             if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
             # print(np.unique(proba))
-            proba = pred_proba/np.max(pred_proba)
+            proba = pred_proba/2
             proba = (proba*255).astype(np.uint8)
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)

@@ -86,19 +86,19 @@ class SORDLoss(nn.Module):
         self.num_classes = n_classes
 
     def forward(self, output, target, debug=False):
-        
+
         #flatten label and prediction tensors
         if debug: print("output",output)
         output, target = flatten_tensors(output, target)
         output = torch.nn.LogSoftmax(dim=-1)(output)
-        
+
         if debug: print("output",output)
         ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
         if debug: print("ranks",ranks)
         target = target.unsqueeze(1).repeat(1, self.num_classes)
         if debug: print("target",target)
         soft_target = -nn.L1Loss(reduction='none')(target, ranks)  # should be of size N x num_classes
-        if debug: print("soft target",soft_target)
+        if debug: print("l1 target",soft_target)
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: print("soft target",soft_target)
         return nn.KLDivLoss(reduction='mean')(output, soft_target)
@@ -144,25 +144,25 @@ class OTLoss(nn.Module):
 if __name__ == '__main__':
     ce = nn.CrossEntropyLoss()
     sord = SORDLoss(n_classes = 3)
-    
+
     input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
     target = torch.tensor([[[1]],[[1]]])
     # ~ output = ce(input, target)
     # ~ print(input,target,output)
     # ~ output.backward()
 
-    
-    # ~ input = torch.tensor([[-1.1, 3.2, 0.5]], requires_grad=True)
-    # ~ target = torch.tensor([2], dtype=torch.long)
+
+    input = torch.tensor([[0.0, 1.0, 0.0]], requires_grad=True)
+    target = torch.tensor([0], dtype=torch.long)
     # ~ print(target, input, "CE ->", output)
     # ~ input = torch.randn(1, 3, requires_grad=True)
     # ~ target = torch.empty(1, dtype=torch.long).random_(3)
-    
+
     output = ce(input, target)
     output.backward()
     print(target, input, "CE ->", output)
-    
+
     # ~ input, target = flatten_tensors(input, target)
     # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
-    loss = sord(input, target, debug=False)
+    loss = sord(input, target, debug=True)
     print("SORD ->", loss)
