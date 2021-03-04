@@ -10,7 +10,7 @@ from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
 from losses import SORDLoss, flatten_tensors
-from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader
+from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 
 import numpy as np
 
@@ -61,7 +61,8 @@ class LitSegNet(pl.LightningModule):
         self.datasets = {
             "freiburg": FreiburgDataLoader,
             "cityscapes": CityscapesDataLoader,
-            "kitti": KittiDataLoader
+            "kitti": KittiDataLoader,
+            "own": OwnDataLoader
         }
         self.sord = SORDLoss(n_classes = self.hparams.num_classes)
         self.ce = nn.CrossEntropyLoss(ignore_index=0)
@@ -136,7 +137,8 @@ class LitSegNet(pl.LightningModule):
             if self.hparams.mode == "convert": pred = self.ds.labels_obj_to_aff(pred, proba=True)
             pred_cls = torch.argmax(pred, dim=1)
 
-            target = target.squeeze()
+            if len(target) > 1:
+                target = target.squeeze()
             if self.hparams.mode == "convert": target = self.ds.labels_obj_to_aff(target)
 
             # print("pred",pred_cls.shape,"target",target.shape)
@@ -145,13 +147,12 @@ class LitSegNet(pl.LightningModule):
                 # print(p.shape)
                 test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
                 iter = batch_idx*self.hparams.bs + i
-                self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, filename_prefix=self.test_checkpoint)
-                self.ds.result_to_image(iter=batch_idx+i, orig=o, gt=t, filename_prefix="ref")
+                self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"{self.test_checkpoint}")
+                self.ds.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
             iou = self.IoU(pred_cls, target)
-
 
             self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
@@ -166,6 +167,7 @@ class LitSegNet(pl.LightningModule):
         return optimizer
 
     def get_dataset(self, train=False):
+        train = True if self.hparams.dataset == "kitti" else train
         return self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode, modalities=["rgb"])
 
     def train_dataloader(self):

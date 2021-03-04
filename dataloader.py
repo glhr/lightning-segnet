@@ -28,6 +28,7 @@ class MMDataLoader():
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
         self.mode = mode
+        self.affordance_labels = False
 
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
 
@@ -61,12 +62,14 @@ class MMDataLoader():
             modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
             modGT = self.mask_to_class_rgb(modGT)
         # print(modGT.shape)
+        else:
+            modGT = torch.tensor(modGT, dtype=torch.long)
 
         if pilRGB is not None: modRGB = modRGB[: , :, 2]
         if pilDep is not None: modDepth = modDepth[: , :, 2]
         if pilIR is not None: modIR = modIR[: , :, 2]
 
-        if self.mode == "affordances": modGT = self.labels_obj_to_aff(modGT)
+        if self.mode == "affordances" and not self.affordance_labels: modGT = self.labels_obj_to_aff(modGT)
 
         imgs = []
         img = {
@@ -145,6 +148,7 @@ class MMDataLoader():
 
     def labels_to_color(self, labels, mode="objects"):
         bs = labels.shape
+        # print(bs)
         data = np.zeros((bs[0], bs[1], 3), dtype=np.uint8)
 
         for idx in np.unique(labels):
@@ -210,7 +214,7 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, iter, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, filename_prefix=None):
+    def result_to_image(self, iter, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, folder=None, filename_prefix=None):
         """
         Converts the output of the network to an actual image
         :param result: The output of the network (with torch.argmax)
@@ -261,7 +265,8 @@ class MMDataLoader():
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        img.save(f'results/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+        folder = "" if folder is None else folder
+        img.save(f'results/{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
         rand_crop = np.random.uniform(low=0.8, high=0.9)
@@ -446,7 +451,7 @@ class KittiDataLoader(MMDataLoader):
             img = img.split("/")[-1]
             # print(img)
             self.filenames.append(img)
-        # print(self.filenames)
+        print(self.filenames)
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
@@ -454,3 +459,44 @@ class KittiDataLoader(MMDataLoader):
         pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('RGB')
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
         return pilRGB, pilDep, None, imgGT
+
+
+class OwnDataLoader(MMDataLoader):
+    def __init__(self, train=True, path = "../../datasets/own/", modalities=["rgb"], mode="affordances"):
+        super().__init__(modalities, name="own", mode=mode)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        print(classes)
+
+        for x in classes:
+            x = [int(i) if i.isdigit() or "-" in i else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        print("class to idx: ", self.class_to_idx['objects'])
+        print("color to idx: ", self.color_to_idx['objects'].values())
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if train:
+            self.split_path = 'training/'
+        else:
+            self.split_path = 'testing/'
+
+        self.train = train
+
+        for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
+            img = img.split("/")[-1]
+            # print(img)
+            self.filenames.append(img)
+        print(self.filenames)
+        self.color_GT = False
+        self.affordance_labels = True
+
+    def get_image_pairs(self, sample_id):
+        pilRGB = Image.open(self.path + self.split_path + "rgb/" + f"{self.filenames[sample_id]}").convert('RGB')
+        width, height = pilRGB.size
+        imgGT = Image.new('L', (width, height))
+        return pilRGB, None, None, imgGT
