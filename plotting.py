@@ -2,11 +2,12 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot_confusion_matrix(array, labels=None, filename=None):
+def plot_confusion_matrix(array, labels=None, filename=None, folder=""):
     l = len(array)
     df_cm = pd.DataFrame(array, range(l), range(l))
 
-    plt.figure(figsize=(6,6))
+    scale = len(labels)*2
+    plt.figure(figsize=(scale,scale))
 
     sn.set(font_scale=1.4) # for label size
 
@@ -20,5 +21,6 @@ def plot_confusion_matrix(array, labels=None, filename=None):
     plt.xlabel("Prediction")
     plt.tight_layout()
 
-    f = f"lightning_logs/{filename}-cm.png" if filename is not None else "cm.png"
+    f = f"{filename}-cm.png" if filename is not None else "cm.png"
+    f = f"{folder}/{f}" if len(folder) else f
     plt.savefig(f)

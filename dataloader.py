@@ -28,7 +28,9 @@ class MMDataLoader():
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
         self.mode = mode
-        self.affordance_labels = False
+        self.has_affordance_labels = False
+
+        self.cls_labels = ["void", "impossible","possible","preferable"]
 
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
 
@@ -69,7 +71,7 @@ class MMDataLoader():
         if pilDep is not None: modDepth = modDepth[: , :, 2]
         if pilIR is not None: modIR = modIR[: , :, 2]
 
-        if self.mode == "affordances" and not self.affordance_labels: modGT = self.labels_obj_to_aff(modGT)
+        if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
 
         imgs = []
         img = {
@@ -317,11 +319,18 @@ class FreiburgDataLoader(MMDataLoader):
         classes = np.loadtxt(path + "classes.txt", dtype=str)
         print(classes)
 
+        if self.mode == "objects":
+            self.cls_labels = [0]*len(classes)
+
         for x in classes:
             x = [int(i) if i.isdigit() else i for i in x]
             self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
+            if self.mode == "objects":
+                self.cls_labels[x[4]] = x[0].lower()
+
+        print(self.cls_labels)
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
@@ -493,7 +502,7 @@ class OwnDataLoader(MMDataLoader):
             self.filenames.append(img)
         print(self.filenames)
         self.color_GT = False
-        self.affordance_labels = True
+        self.has_affordance_labels = True
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + self.split_path + "rgb/" + f"{self.filenames[sample_id]}").convert('RGB')

@@ -71,9 +71,9 @@ class LitSegNet(pl.LightningModule):
         self.ds = self.get_dataset(train=False)
         self.test_max = test_max
 
-        num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
-        self.CM = ConfusionMatrix(num_classes=num_cls, normalize='none')
-        self.IoU = IoU(num_classes=num_cls, ignore_index=0)
+        self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
+        self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
+        self.IoU = IoU(num_classes=self.num_cls, ignore_index=0)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -116,15 +116,20 @@ class LitSegNet(pl.LightningModule):
 
     def reduce_cm(self, cms):
 
-        labels= ["impossible","possible","preferable"]
+        labels = self.ds.cls_labels
 
-        cms = torch.reshape(cms, (-1,4,4))
+        cms = torch.reshape(cms, (-1,self.num_cls,self.num_cls))
         cm = torch.sum(cms,dim=0,keepdim=False)
 
+        # ignore void class
         cm = cm[1:, 1:]
+        labels.pop(0)
+
         print(cm)
-        cm = cm / cm.sum(axis=1, keepdim=True)
-        plot_confusion_matrix(cm.numpy(), labels=labels, filename=self.test_checkpoint)
+
+        cm = cm / cm.sum(axis=1, keepdim=True) # normalize confusion matrix
+
+        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"results/{self.hparams.dataset}")
         return 0
 
     def test_step(self, batch, batch_idx):
@@ -148,7 +153,7 @@ class LitSegNet(pl.LightningModule):
                 test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
                 iter = batch_idx*self.hparams.bs + i
                 self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"{self.test_checkpoint}")
-                self.ds.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
+                self.ds.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
