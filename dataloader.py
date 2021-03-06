@@ -139,11 +139,15 @@ class MMDataLoader():
         idx_mappings = {k:list(v) for k,v in idx_mappings.items()}
         print(idx_mappings)
         print(conversion)
+        print("idx_to_idx", idx_to_idx)
         return color_to_idx_new, idx_to_color_new, conversion, idx_to_idx, idx_mappings
 
     def get_color(self, x, mode="objects"):
         try:
-            return self.idx_to_color[mode][x]
+            if mode in ["affordances","convert"]:
+                return self.idx_to_color["affordances"][x]
+            else:
+                return self.idx_to_color[mode][x]
         except KeyError:
             if mode=="objects": print(f"mapping {x} to black")
             return (0,0,255)
@@ -155,6 +159,7 @@ class MMDataLoader():
 
         for idx in np.unique(labels):
             data[labels==idx] = self.get_color(idx, mode=mode)
+            # print(idx, "->", self.get_color(idx, mode=mode))
         return data
 
     def labels_obj_to_aff(self, labels, proba=False):
@@ -180,6 +185,7 @@ class MMDataLoader():
 
             for old_idx in torch.unique(labels):
                 new_labels[labels==old_idx] = self.idx_to_idx["convert"][old_idx.item()]
+                # print(old_idx,"->",self.idx_to_idx["convert"][old_idx.item()])
             return new_labels
 
     def mask_to_class_rgb(self, mask, mode="objects"):

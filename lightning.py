@@ -152,8 +152,10 @@ class LitSegNet(pl.LightningModule):
                 # print(p.shape)
                 test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
                 iter = batch_idx*self.hparams.bs + i
-                self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"{self.test_checkpoint}")
+                self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"proba-{self.test_checkpoint}")
+                self.ds.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.hparams.dataset}", filename_prefix=f"cls-{self.test_checkpoint}")
                 self.ds.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
+                self.ds.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.hparams.dataset}", filename_prefix=f"orig")
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
