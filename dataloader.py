@@ -95,28 +95,28 @@ class MMDataLoader():
         objclass_to_driveidx = dict()
 
         idx_mappings = {
+            -1: set(),
             0: set(),
             1: set(),
-            2: set(),
-            3: set()
+            2: set()
         }
 
         for i in undriveable:
-            objclass_to_driveidx[i] = 1
-        for i in driveable:
-            objclass_to_driveidx[i] = 3
-        for i in between:
-            objclass_to_driveidx[i] = 2
-        for i in void:
             objclass_to_driveidx[i] = 0
+        for i in driveable:
+            objclass_to_driveidx[i] = 2
+        for i in between:
+            objclass_to_driveidx[i] = 1
+        for i in void:
+            objclass_to_driveidx[i] = -1
 
 
         print(objclass_to_driveidx)
         idx_to_color_new = {
-            0: (0,0,0),
-            1: (255,0,0),
-            2: (255,255,0),
-            3: (0,255,0)
+            -1: (0,0,0),
+            0: (255,0,0),
+            1: (255,255,0),
+            2: (0,255,0)
         }
         color_to_idx_new = dict()
         conversion = dict()

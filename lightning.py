@@ -33,7 +33,9 @@ parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
 
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.metrics.classification import IoU, ConfusionMatrix
+from pytorch_lightning.metrics.classification import IoU
+
+from metrics import ConfusionMatrix
 
 class LitSegNet(pl.LightningModule):
 
@@ -55,7 +57,9 @@ class LitSegNet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(conf)
-        self.metric = IoU(num_classes=self.hparams.num_classes, ignore_index=0)
+        self.ignore_index = -1
+
+        self.metric = IoU(num_classes=self.hparams.num_classes, ignore_index=self.ignore_index)
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
         self.datasets = {
@@ -65,15 +69,15 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader
         }
         self.sord = SORDLoss(n_classes = self.hparams.num_classes)
-        self.ce = nn.CrossEntropyLoss(ignore_index=0)
+        self.ce = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
 
         self.test_checkpoint = test_checkpoint
         self.ds = self.get_dataset(train=False)
         self.test_max = test_max
 
-        self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
-        self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
-        self.IoU = IoU(num_classes=self.num_cls, ignore_index=0)
+        self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
+        self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none', ignore_index=self.ignore_index)
+        self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.ignore_index)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -118,12 +122,14 @@ class LitSegNet(pl.LightningModule):
 
         labels = self.ds.cls_labels
 
-        cms = torch.reshape(cms, (-1,self.num_cls,self.num_cls))
+        cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
         cm = torch.sum(cms,dim=0,keepdim=False)
 
         # ignore void class
-        cm = cm[1:, 1:]
-        labels.pop(0)
+        # cm = cm[1:, 1:]
+        # cm = np.delete(cm, self.ignore_index, 0)
+        if len(labels) > self.num_cls:
+            labels.pop(0)
 
         print(cm)
 
@@ -159,9 +165,9 @@ class LitSegNet(pl.LightningModule):
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
-            iou = self.IoU(pred_cls, target)
+            #iou = self.IoU(pred_cls, target)
 
-            self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+            #self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             return pred
 
