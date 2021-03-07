@@ -25,6 +25,7 @@ from segnet import SegNet
 from losses import SORDLoss, flatten_tensors
 from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
+from utils import *
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -88,6 +89,9 @@ class LitSegNet(pl.LightningModule):
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none', ignore_index=self.ignore_index)
         self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.ignore_index)
 
+        self.result_folder = f"results/{self.hparams.dataset}"
+        create_folder(self.result_folder)
+
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
         # print(x.shape)
@@ -145,7 +149,7 @@ class LitSegNet(pl.LightningModule):
 
         cm = cm / cm.sum(axis=1, keepdim=True) # normalize confusion matrix
 
-        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"results/{self.hparams.dataset}")
+        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
         return 0
 
     def test_step(self, batch, batch_idx):
@@ -168,10 +172,10 @@ class LitSegNet(pl.LightningModule):
                 # print(p.shape)
                 test = p.squeeze()[0] * 0 + p.squeeze()[1] * 1 + p.squeeze()[2] * 2
                 iter = batch_idx*self.hparams.bs + i
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"proba-{self.test_checkpoint}")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.hparams.dataset}", filename_prefix=f"cls-{self.test_checkpoint}")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.hparams.dataset}", filename_prefix=f"orig")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.result_folder}", filename_prefix=f"proba-{self.test_checkpoint}")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"cls-{self.test_checkpoint}")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)

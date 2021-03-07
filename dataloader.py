@@ -275,7 +275,7 @@ class MMDataLoader():
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
-        img.save(f'results/{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+        img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
         rand_crop = np.random.uniform(low=0.8, high=0.9)
