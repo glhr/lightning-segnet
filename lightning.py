@@ -6,7 +6,7 @@ import numpy as np
 np.random.seed(RANDOM_SEED)
 
 import torch
-torch.set_deterministic(True)
+#torch.set_deterministic(True)
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed(RANDOM_SEED)
 
@@ -149,7 +149,7 @@ class LitSegNet(pl.LightningModule):
 
         cm = cm / cm.sum(axis=1, keepdim=True) # normalize confusion matrix
 
-        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
+        plot_confusion_matrix(cm.detach().cpu().numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
         return 0
 
     def test_step(self, batch, batch_idx):
