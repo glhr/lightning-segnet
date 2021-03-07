@@ -4,7 +4,7 @@ from torch import nn
 import torch.nn.functional as F
 from torchvision import transforms
 from torchvision.datasets import MNIST
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
@@ -71,7 +71,7 @@ class LitSegNet(pl.LightningModule):
         self.ce = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
 
         self.test_checkpoint = test_checkpoint
-        self.ds = self.get_dataset(train=False)
+        self.train_set, self.val_set, self.test_set = self.get_dataset()
         self.test_max = test_max
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
@@ -119,7 +119,7 @@ class LitSegNet(pl.LightningModule):
 
     def reduce_cm(self, cms):
 
-        labels = self.ds.cls_labels
+        labels = self.train_set.dataset.cls_labels
 
         cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
         cm = torch.sum(cms,dim=0,keepdim=False)
@@ -144,12 +144,12 @@ class LitSegNet(pl.LightningModule):
             pred = self.model(sample)
             pred = torch.softmax(pred, dim=1)
 
-            if self.hparams.mode == "convert": pred = self.ds.labels_obj_to_aff(pred, proba=True)
+            if self.hparams.mode == "convert": pred = self.test_set.dataset.labels_obj_to_aff(pred, proba=True)
             pred_cls = torch.argmax(pred, dim=1)
 
             if len(target) > 1:
                 target = target.squeeze()
-            if self.hparams.mode == "convert": target = self.ds.labels_obj_to_aff(target)
+            if self.hparams.mode == "convert": target = self.test_set.dataset.labels_obj_to_aff(target)
 
             # print("pred",pred_cls.shape,"target",target.shape)
 
@@ -157,10 +157,10 @@ class LitSegNet(pl.LightningModule):
                 # print(p.shape)
                 test = p.squeeze()[0] * 0 + p.squeeze()[1] * 1 + p.squeeze()[2] * 2
                 iter = batch_idx*self.hparams.bs + i
-                self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"proba-{self.test_checkpoint}")
-                self.ds.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.hparams.dataset}", filename_prefix=f"cls-{self.test_checkpoint}")
-                self.ds.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
-                self.ds.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.hparams.dataset}", filename_prefix=f"orig")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"proba-{self.test_checkpoint}")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.hparams.dataset}", filename_prefix=f"cls-{self.test_checkpoint}")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.hparams.dataset}", filename_prefix=f"ref")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.hparams.dataset}", filename_prefix=f"orig")
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
@@ -178,24 +178,34 @@ class LitSegNet(pl.LightningModule):
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
 
-    def get_dataset(self, train=False):
-        train = True if self.hparams.dataset == "kitti" else train
-        return self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode, modalities=["rgb"])
+    def get_dataset(self):
+        if self.hparams.dataset == "freiburg": # these don't have an explicit val set
+            train_set = self.datasets[self.hparams.dataset](train=True, mode=self.hparams.mode, modalities=["rgb"])
+            test_set = Subset(self.datasets[self.hparams.dataset](train=False, mode=self.hparams.mode, modalities=["rgb"]))
+            total_len = len(train_set)
+            val_len = int(0.1*total_len)
+            train_len = total_len - val_len
+            train_set, val_set = random_split(train_set, [train_len, val_len])
+            return train_set, val_set, test_set
+        elif self.hparams.dataset == "kitti":
+            train_set = self.datasets[self.hparams.dataset](train=True, mode=self.hparams.mode, modalities=["rgb"])
+            total_len = len(train_set)
+            val_len = int(0.1*total_len)
+            train_len = total_len - val_len*2
+            train_set, val_set, test_set = random_split(train_set, [train_len, val_len, val_len])
+            return train_set, val_set, test_set
+        else:
+            train_set = self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode, modalities=["rgb"])
+            raise NotImplementedError
 
     def train_dataloader(self):
-        # REQUIRED
-        dl = self.get_dataset(train=True)
-        return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
+        return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
 
     def val_dataloader(self):
-        # OPTIONAL
-        dl = self.get_dataset(train=False)
-        return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
+        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
 
     def test_dataloader(self):
-        # OPTIONAL
-        dl = self.get_dataset(train=False)
-        return DataLoader(dl, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
+        return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
