@@ -89,8 +89,15 @@ class SORDLoss(nn.Module):
 
         #flatten label and prediction tensors
         if debug: print("output",output)
+        # print(torch.unique(target))
         output, target = flatten_tensors(output, target)
         output = torch.nn.LogSoftmax(dim=-1)(output)
+
+        mask = target.ge(0)
+        # print(mask, mask.shape)
+        # print(output.shape,target.shape)
+        output = output[mask]
+        target = target[mask]
 
         if debug: print("output",output)
         ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
@@ -152,15 +159,15 @@ if __name__ == '__main__':
     # ~ output.backward()
 
 
-    input = torch.tensor([[0.0, 1.0, 0.0]], requires_grad=True)
-    target = torch.tensor([0], dtype=torch.long)
+    input = torch.tensor([[0.0, 1.0, 0.0],[0.0, 1.0, 0.0]], requires_grad=True)
+    target = torch.tensor([-1,1], dtype=torch.long)
     # ~ print(target, input, "CE ->", output)
     # ~ input = torch.randn(1, 3, requires_grad=True)
     # ~ target = torch.empty(1, dtype=torch.long).random_(3)
 
-    output = ce(input, target)
-    output.backward()
-    print(target, input, "CE ->", output)
+    #output = ce(input, target)
+    #output.backward()
+    #print(target, input, "CE ->", output)
 
     # ~ input, target = flatten_tensors(input, target)
     # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
