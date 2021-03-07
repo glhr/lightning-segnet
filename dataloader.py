@@ -14,7 +14,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MMDataLoader():
-    def __init__(self, modalities, name, mode):
+    def __init__(self, modalities, name, mode, augment):
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.modalities = modalities
@@ -25,6 +25,7 @@ class MMDataLoader():
 
         self.filenames = []
 
+        self.augment = augment
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
         self.mode = mode
@@ -307,19 +308,19 @@ class MMDataLoader():
 
     def __getitem__(self, idx):
         # print(self.sample(idx))
-        if self.train:
+        if self.augment:
             return self.sample(idx, augment=True)
         else:
             return self.sample(idx, augment=False)
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="freiburg", mode=mode)
+        super().__init__(modalities, name="freiburg", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -340,12 +341,12 @@ class FreiburgDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.path = path + 'train/'
         else:
             self.path = path + 'test/'
 
-        self.train = train
+        self.augment = augment
 
         for img in glob.glob(self.path + 'GT_color/*.png'):
             img = img.split("/")[-1].split("_")[0]
@@ -380,12 +381,12 @@ class FreiburgDataLoader(MMDataLoader):
 
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="cityscapes", mode=mode)
+        super().__init__(modalities, name="cityscapes", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -402,12 +403,14 @@ class CityscapesDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.split_path = 'train/'
-        else:
+        elif set == "val":
             self.split_path = 'val/'
+        elif set == "test":
+            self.split_path = 'test/'
 
-        self.train = train
+        self.augment = augment
         self.city = "frankfurt"
         self.city_ids = {
             "frankfurt": "000294",
@@ -433,12 +436,12 @@ class CityscapesDataLoader(MMDataLoader):
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="kitti", mode=mode)
+        super().__init__(modalities, name="kitti", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -455,12 +458,12 @@ class KittiDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.split_path = 'training/'
         else:
             self.split_path = 'testing/'
 
-        self.train = train
+        self.augment = augment
 
         for img in glob.glob(self.path + "data_semantics/" + self.split_path + "semantic/*.png"):
             img = img.split("/")[-1]
@@ -477,7 +480,7 @@ class KittiDataLoader(MMDataLoader):
 
 
 class OwnDataLoader(MMDataLoader):
-    def __init__(self, train=True, path = "../../datasets/own/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
         super().__init__(modalities, name="own", mode=mode)
         self.path = path
 
@@ -495,12 +498,12 @@ class OwnDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.split_path = 'training/'
         else:
             self.split_path = 'testing/'
 
-        self.train = train
+        self.augment = augment
 
         for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
             img = img.split("/")[-1]

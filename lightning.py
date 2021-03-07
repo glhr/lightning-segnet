@@ -1,5 +1,18 @@
+RANDOM_SEED = 2
+
 import os
+
+import numpy as np
+np.random.seed(RANDOM_SEED)
+
 import torch
+torch.set_deterministic(True)
+torch.manual_seed(RANDOM_SEED)
+torch.cuda.manual_seed(RANDOM_SEED)
+
+import random
+random.seed(RANDOM_SEED)
+
 from torch import nn
 import torch.nn.functional as F
 from torchvision import transforms
@@ -11,14 +24,12 @@ from pytorch_lightning.loggers import WandbLogger
 from segnet import SegNet
 from losses import SORDLoss, flatten_tensors
 from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
-
-import numpy as np
+from plotting import plot_confusion_matrix
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
 
 from datetime import datetime
-from plotting import plot_confusion_matrix
 
 timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
@@ -112,7 +123,7 @@ class LitSegNet(pl.LightningModule):
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
         iou = self.IoU(pred_cls, y)
-        
+
         self.log('val_loss', loss, on_epoch=True)
         self.log('val_iou', iou, on_epoch=True)
         return loss
@@ -189,24 +200,27 @@ class LitSegNet(pl.LightningModule):
             train_set, val_set = random_split(train_set, [train_len, val_len])
             return train_set, val_set, test_set
         elif self.hparams.dataset == "kitti":
-            train_set = self.datasets[self.hparams.dataset](train=True, mode=self.hparams.mode, modalities=["rgb"])
+            train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
+            val_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             total_len = len(train_set)
             val_len = int(0.1*total_len)
             train_len = total_len - val_len*2
-            train_set, val_set, test_set = random_split(train_set, [train_len, val_len, val_len])
+            train_set,_,_ = random_split(train_set, [train_len, val_len, val_len])
+            _,val_set,test_set = random_split(val_set, [train_len, val_len, val_len])
+            # print(test_set[0])
             return train_set, val_set, test_set
         else:
             train_set = self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode, modalities=["rgb"])
             raise NotImplementedError
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
+        return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
+        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
 
     def test_dataloader(self):
-        return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
+        return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False, worker_init_fn=random.seed(RANDOM_SEED))
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
