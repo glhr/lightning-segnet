@@ -112,7 +112,7 @@ class MMDataLoader():
             objclass_to_driveidx[i] = -1
 
 
-        print(objclass_to_driveidx)
+        # print(objclass_to_driveidx)
         idx_to_color_new = {
             -1: (0,0,0),
             0: (255,0,0),
@@ -138,9 +138,9 @@ class MMDataLoader():
                 pass
 
         idx_mappings = {k:list(v) for k,v in idx_mappings.items()}
-        print(idx_mappings)
-        print(conversion)
-        print("idx_to_idx", idx_to_idx)
+        # print(idx_mappings)
+        # print(conversion)
+        # print("idx_to_idx", idx_to_idx)
         return color_to_idx_new, idx_to_color_new, conversion, idx_to_idx, idx_mappings
 
     def get_color(self, x, mode="objects"):
@@ -324,7 +324,7 @@ class FreiburgDataLoader(MMDataLoader):
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         if self.mode == "objects":
             self.cls_labels = [0]*len(classes)
@@ -390,7 +390,7 @@ class CityscapesDataLoader(MMDataLoader):
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
@@ -398,8 +398,8 @@ class CityscapesDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print("class to idx: ", self.class_to_idx['objects'])
-        print("color to idx: ", self.color_to_idx['objects'].values())
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
@@ -445,7 +445,7 @@ class KittiDataLoader(MMDataLoader):
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
@@ -453,8 +453,8 @@ class KittiDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print("class to idx: ", self.class_to_idx['objects'])
-        print("color to idx: ", self.color_to_idx['objects'].values())
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
@@ -485,7 +485,7 @@ class OwnDataLoader(MMDataLoader):
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
@@ -493,8 +493,8 @@ class OwnDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print("class to idx: ", self.class_to_idx['objects'])
-        print("color to idx: ", self.color_to_idx['objects'].values())
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 

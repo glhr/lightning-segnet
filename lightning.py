@@ -6,7 +6,7 @@ import numpy as np
 np.random.seed(RANDOM_SEED)
 
 import torch
-#torch.set_deterministic(True)
+torch.set_deterministic(True)
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed(RANDOM_SEED)
 
@@ -54,14 +54,14 @@ class LitSegNet(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--bs', type=int, default=16)
-        parser.add_argument('--lr', type=float, default=0.1)
-        parser.add_argument('--momentum', type=int, default=0.9)
-        parser.add_argument('--optim', type=str, default="SGD")
+        parser.add_argument('--lr', type=float, default=None)
+        parser.add_argument('--momentum', type=int, default=None)
+        parser.add_argument('--optim', type=str, default=None)
         parser.add_argument('--num_classes', type=int, default=3)
         parser.add_argument('--workers', type=int, default=8)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
-        parser.add_argument('--loss', default="ce")
+        parser.add_argument('--loss', default=None)
         return parser
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
@@ -149,7 +149,7 @@ class LitSegNet(pl.LightningModule):
 
         cm = cm / cm.sum(axis=1, keepdim=True) # normalize confusion matrix
 
-        plot_confusion_matrix(cm.detach().cpu().numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
+        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
         return 0
 
     def test_step(self, batch, batch_idx):
