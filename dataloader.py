@@ -167,7 +167,7 @@ class MMDataLoader():
             # labels = labels.squeeze()
             # print(labels.shape)
             s = labels.shape
-            new_proba = torch.zeros((labels.shape[0], 4, s[2], s[3]))
+            new_proba = torch.zeros((labels.shape[0], 3, s[2], s[3]))
             # print(new_proba.shape)
             # print(new_proba[3])
             for idx in self.idx_mappings.keys():
@@ -466,7 +466,7 @@ class KittiDataLoader(MMDataLoader):
             img = img.split("/")[-1]
             # print(img)
             self.filenames.append(img)
-        print(self.filenames)
+        # print(self.filenames)
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):

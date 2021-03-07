@@ -33,9 +33,8 @@ parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
 
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.metrics.classification import IoU
 
-from metrics import ConfusionMatrix
+from metrics import ConfusionMatrix, IoU
 
 class LitSegNet(pl.LightningModule):
 
@@ -46,7 +45,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--lr', type=float, default=0.1)
         parser.add_argument('--momentum', type=int, default=0.9)
         parser.add_argument('--optim', type=str, default="SGD")
-        parser.add_argument('--num_classes', type=int, default=4)
+        parser.add_argument('--num_classes', type=int, default=3)
         parser.add_argument('--workers', type=int, default=8)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
@@ -156,7 +155,7 @@ class LitSegNet(pl.LightningModule):
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
                 # print(p.shape)
-                test = p.squeeze()[1] * 0 + p.squeeze()[2] * 1 + p.squeeze()[3] * 2
+                test = p.squeeze()[0] * 0 + p.squeeze()[1] * 1 + p.squeeze()[2] * 2
                 iter = batch_idx*self.hparams.bs + i
                 self.ds.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.hparams.dataset}", filename_prefix=f"proba-{self.test_checkpoint}")
                 self.ds.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.hparams.dataset}", filename_prefix=f"cls-{self.test_checkpoint}")
@@ -165,9 +164,9 @@ class LitSegNet(pl.LightningModule):
 
             cm = self.CM(pred_cls, target)
             # print(cm.shape)
-            #iou = self.IoU(pred_cls, target)
+            iou = self.IoU(pred_cls, target)
 
-            #self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+            self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             return pred
 
