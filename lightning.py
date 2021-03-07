@@ -58,7 +58,6 @@ class LitSegNet(pl.LightningModule):
         self.save_hyperparameters(conf)
         self.ignore_index = -1
 
-        self.metric = IoU(num_classes=self.hparams.num_classes, ignore_index=self.ignore_index)
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
         self.datasets = {
@@ -100,7 +99,7 @@ class LitSegNet(pl.LightningModule):
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
 
         x_hat = torch.softmax(x_hat, dim=1)
-        iou = self.metric(x_hat, y)
+        iou = self.IoU(x_hat, y)
         # Logging to TensorBoard by default
         self.log('train_loss', loss, on_epoch=True)
         self.log('train_iou', iou, on_epoch=True)
@@ -112,7 +111,7 @@ class LitSegNet(pl.LightningModule):
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
 
         x_hat = torch.softmax(x_hat, dim=1)
-        iou = self.metric(x_hat, y)
+        iou = self.IoU(x_hat, y)
         self.log('val_loss', loss, on_epoch=True)
         self.log('val_iou', iou, on_epoch=True)
         return loss
@@ -181,7 +180,8 @@ class LitSegNet(pl.LightningModule):
     def get_dataset(self):
         if self.hparams.dataset == "freiburg": # these don't have an explicit val set
             train_set = self.datasets[self.hparams.dataset](train=True, mode=self.hparams.mode, modalities=["rgb"])
-            test_set = Subset(self.datasets[self.hparams.dataset](train=False, mode=self.hparams.mode, modalities=["rgb"]))
+            test_set = self.datasets[self.hparams.dataset](train=False, mode=self.hparams.mode, modalities=["rgb"])
+            test_set = Subset(test_set, indices = range(len(test_set)))
             total_len = len(train_set)
             val_len = int(0.1*total_len)
             train_len = total_len - val_len
