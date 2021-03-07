@@ -533,9 +533,23 @@ def _confusion_matrix_update(
     preds: torch.Tensor, target: torch.Tensor, num_classes: int, threshold: float = 0.5
 ) -> torch.Tensor:
     mask = target.ge(0)
+    bs = preds.shape[1]
 
+    # print(mask.shape, preds.shape, target.shape)
+    #
+    # if len(preds.shape) > len(target.shape):
+    #     mask_pred = mask.unsqueeze(1).repeat(1,bs,1,1)
+    # else:
+    #     mask_pred = mask
+    #
+    # print(mask_pred.shape, preds.shape, target.shape)
+    #
+    # preds = preds[mask_pred].reshape(bs,num_classes,-1)
+    # target = target[mask].reshape(bs,-1,preds.shape[-1])
+    # print(mask_pred.shape, preds.shape, target.shape)
     preds = preds[mask]
     target = target[mask]
+
     # print(torch.unique(preds))
     # print(torch.unique(target))
     preds, target, mode = _input_format_classification(preds, target, threshold)

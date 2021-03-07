@@ -91,16 +91,15 @@ class LitSegNet(pl.LightningModule):
 
 
     def training_step(self, batch, batch_idx):
-        # training_step defined the train loop.
-        # It is independent of forward
         x, y = batch
         x_hat = self.model(x)
 
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
 
         x_hat = torch.softmax(x_hat, dim=1)
-        iou = self.IoU(x_hat, y)
-        # Logging to TensorBoard by default
+        pred_cls = torch.argmax(x_hat, dim=1)
+        iou = self.IoU(pred_cls, y)
+
         self.log('train_loss', loss, on_epoch=True)
         self.log('train_iou', iou, on_epoch=True)
         return loss
@@ -111,7 +110,9 @@ class LitSegNet(pl.LightningModule):
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
 
         x_hat = torch.softmax(x_hat, dim=1)
-        iou = self.IoU(x_hat, y)
+        pred_cls = torch.argmax(x_hat, dim=1)
+        iou = self.IoU(pred_cls, y)
+        
         self.log('val_loss', loss, on_epoch=True)
         self.log('val_iou', iou, on_epoch=True)
         return loss
