@@ -89,19 +89,16 @@ class SORDLoss(nn.Module):
         else:
             self.ranks = np.arange(0, self.num_classes)
 
-    def forward(self, output, target, debug=False):
+    def forward(self, output, target, debug=False, mod_input=None):
 
-        #flatten label and prediction tensors
-        if debug: print("output",output)
-        # print(torch.unique(target))
+
         output, target = flatten_tensors(output, target)
-        output = torch.nn.LogSoftmax(dim=-1)(output)
 
-        # mask = target.ge(0)
-        # # print(mask, mask.shape)
-        # # print(output.shape,target.shape)
-        # output = output[mask]
-        # target = target[mask]
+        mask = target.ge(0)
+        # print(mask, mask.shape)
+        # print(output.shape,target.shape)
+        output = output[mask]
+        target = target[mask]
 
         if debug: print("output",output)
         ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
@@ -112,6 +109,18 @@ class SORDLoss(nn.Module):
         if debug: print("l1 target",soft_target)
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: print("soft target",soft_target)
+        # output = torch.log(soft_target)
+        #flatten label and prediction tensors
+
+        if mod_input is not None:
+            output = mod_input.long().view(-1,).unsqueeze(1).repeat(1, self.num_classes)
+            output = -nn.L1Loss(reduction='none')(output, ranks)  # should be of size N x num_classes
+            if debug: print("output",output)
+            output = torch.softmax(output, dim=-1)
+            if debug: print("output",output)
+            output = torch.log(output)
+        else:
+            output = torch.log_softmax(output, dim=-1)
         return nn.KLDivLoss(reduction='mean')(output, soft_target)
 
 
@@ -176,7 +185,7 @@ if __name__ == '__main__':
     }
     level = {
         "pref": 2,
-        "poss": 1,
+        "poss": 1.5,
         "imposs": 0
     }
 
@@ -199,7 +208,8 @@ if __name__ == '__main__':
         for g,gt in enumerate(level.keys()):
             input = torch.tensor([onehot[pred]], requires_grad=True)
             target = torch.tensor([level[gt]], dtype=torch.long)
-            loss = sord(input, target, debug=True)
+            mod_input = torch.tensor([level[pred]], dtype=torch.long)
+            loss = sord(input, target, debug=True, mod_input=mod_input)
             print("SORD ->", loss)
             cm[g][p] = loss.item()
     print(cm)
@@ -221,8 +231,10 @@ if __name__ == '__main__':
     for p,pred in enumerate(level.keys()):
         for g,gt in enumerate(level.keys()):
             input = torch.tensor([onehot[pred]], requires_grad=True)
-            target = torch.tensor([level[gt]], dtype=torch.long)
-            loss = ce(input, target)
+            target = torch.log_softmax(torch.tensor([onehot[gt]]),dim=-1)
+            input = torch.log_softmax(input, dim=-1)
+            print(input)
+            loss = nn.KLDivLoss(reduction='mean',log_target=True)(input, target)
             print("CE ->", loss)
             cm[g][p] = loss.item()
     print(cm)
