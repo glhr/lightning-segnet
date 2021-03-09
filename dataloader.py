@@ -337,7 +337,7 @@ class FreiburgDataLoader(MMDataLoader):
             if self.mode == "objects":
                 self.cls_labels[x[4]] = x[0].lower()
 
-        print(self.cls_labels)
+        # print(self.cls_labels)
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 

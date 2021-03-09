@@ -81,9 +81,13 @@ class SORDLoss(nn.Module):
     https://openaccess.thecvf.com/content_CVPR_2019/papers/Diaz_Soft_Labels_for_Ordinal_Regression_CVPR_2019_paper.pdf
     """
 
-    def __init__(self, n_classes):
+    def __init__(self, n_classes, ranks = [0,1,2]):
         super().__init__()
         self.num_classes = n_classes
+        if ranks is not None and len(ranks) == self.num_classes:
+            self.ranks = ranks
+        else:
+            self.ranks = np.arange(0, self.num_classes)
 
     def forward(self, output, target, debug=False):
 
@@ -93,14 +97,14 @@ class SORDLoss(nn.Module):
         output, target = flatten_tensors(output, target)
         output = torch.nn.LogSoftmax(dim=-1)(output)
 
-        mask = target.ge(0)
-        # print(mask, mask.shape)
-        # print(output.shape,target.shape)
-        output = output[mask]
-        target = target[mask]
+        # mask = target.ge(0)
+        # # print(mask, mask.shape)
+        # # print(output.shape,target.shape)
+        # output = output[mask]
+        # target = target[mask]
 
         if debug: print("output",output)
-        ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
+        ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
         if debug: print("ranks",ranks)
         target = target.unsqueeze(1).repeat(1, self.num_classes)
         if debug: print("target",target)
@@ -149,8 +153,8 @@ class OTLoss(nn.Module):
         return result
 
 if __name__ == '__main__':
-    ce = nn.CrossEntropyLoss()
-    sord = SORDLoss(n_classes = 3)
+
+
 
     input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
     target = torch.tensor([[[1]],[[1]]])
@@ -158,18 +162,68 @@ if __name__ == '__main__':
     # ~ print(input,target,output)
     # ~ output.backward()
 
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--pred', default="pref")
+    parser.add_argument('--gt', default="pref")
+    args = parser.parse_args()
+    print(args)
 
-    input = torch.tensor([[0.0, 1.0, 0.0],[0.0, 1.0, 0.0]], requires_grad=True)
-    target = torch.tensor([-1,1], dtype=torch.long)
+    onehot = {
+        "pref": [0.0, 0.0, 1.0],
+        "poss": [0.0, 1.0, 0.0],
+        "imposs": [1.0, 0.0, 0.0]
+    }
+    level = {
+        "pref": 2,
+        "poss": 1,
+        "imposs": 0
+    }
+
+    input = torch.tensor([onehot[args.pred]], requires_grad=True)
+    target = torch.tensor([level[args.gt]], dtype=torch.long)
     # ~ print(target, input, "CE ->", output)
     # ~ input = torch.randn(1, 3, requires_grad=True)
     # ~ target = torch.empty(1, dtype=torch.long).random_(3)
 
-    #output = ce(input, target)
-    #output.backward()
-    #print(target, input, "CE ->", output)
+    # output = ce(input, target)
+    # output.backward()
+    # print(target, input, "CE ->", output)
 
     # ~ input, target = flatten_tensors(input, target)
     # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
-    loss = sord(input, target, debug=True)
-    print("SORD ->", loss)
+    cm = np.zeros((3, 3))
+    sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]])
+
+    for p,pred in enumerate(level.keys()):
+        for g,gt in enumerate(level.keys()):
+            input = torch.tensor([onehot[pred]], requires_grad=True)
+            target = torch.tensor([level[gt]], dtype=torch.long)
+            loss = sord(input, target, debug=True)
+            print("SORD ->", loss)
+            cm[g][p] = loss.item()
+    print(cm)
+
+    rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+
+    from plotting import plot_confusion_matrix
+    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+
+    level = {
+        "pref": 2,
+        "poss": 1,
+        "imposs": 0
+    }
+    rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+
+    cm = np.zeros((3, 3))
+    ce = nn.CrossEntropyLoss(ignore_index = -1)
+    for p,pred in enumerate(level.keys()):
+        for g,gt in enumerate(level.keys()):
+            input = torch.tensor([onehot[pred]], requires_grad=True)
+            target = torch.tensor([level[gt]], dtype=torch.long)
+            loss = ce(input, target)
+            print("CE ->", loss)
+            cm[g][p] = loss.item()
+    print(cm)
+    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
