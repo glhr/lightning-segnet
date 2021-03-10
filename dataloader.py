@@ -411,25 +411,20 @@ class CityscapesDataLoader(MMDataLoader):
             self.split_path = 'test/'
 
         self.augment = augment
-        self.city = "frankfurt"
-        self.city_ids = {
-            "frankfurt": "000294",
-            "berlin": "000019"
-        }
 
-        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'{self.city}/*.png'):
-            img = '_'.join(img.split("/")[-1].split("_")[1:3])
-            # print(img)
+        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*.png'):
+            img = '_'.join('/'.join(img.split("/")[-2:]).split("_")[:3])
             self.filenames.append(img)
-        # print(self.filenames)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
 
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
 
-        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
-        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_disparity.png").convert('RGB')
-        imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
+        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('RGB')
+        imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 
 
@@ -518,3 +513,13 @@ class OwnDataLoader(MMDataLoader):
         width, height = pilRGB.size
         imgGT = Image.new('L', (width, height))
         return pilRGB, None, None, imgGT
+
+if __name__ == '__main__':
+
+    print("Cityscapes dataset")
+    cityscapes = CityscapesDataLoader(set="train", mode="objects", modalities=["rgb"], augment=True)
+    print("-> train", len(cityscapes))
+    cityscapes = CityscapesDataLoader(set="val", mode="objects", modalities=["rgb"], augment=False)
+    print("-> val", len(cityscapes))
+    cityscapes = CityscapesDataLoader(set="test", mode="objects", modalities=["rgb"], augment=False)
+    print("-> test", len(cityscapes))

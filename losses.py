@@ -185,7 +185,7 @@ if __name__ == '__main__':
     }
     level = {
         "pref": 2,
-        "poss": 1.5,
+        "poss": 1,
         "imposs": 0
     }
 
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
 
     from plotting import plot_confusion_matrix
-    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
 
     level = {
         "pref": 2,
@@ -238,4 +238,4 @@ if __name__ == '__main__':
             print("CE ->", loss)
             cm[g][p] = loss.item()
     print(cm)
-    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)

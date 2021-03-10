@@ -213,9 +213,14 @@ class LitSegNet(pl.LightningModule):
             _,val_set,test_set = random_split(val_set, [train_len, val_len, val_len])
             # print(test_set[0])
             return train_set, val_set, test_set
-        else:
-            train_set = self.datasets[self.hparams.dataset](train=train, mode=self.hparams.mode, modalities=["rgb"])
-            raise NotImplementedError
+        elif self.hparams.dataset == "cityscapes":
+            train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
+            train_set = Subset(train_set, indices = range(len(train_set)))
+            val_set = self.datasets[self.hparams.dataset](set="val", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+            val_set = Subset(val_set, indices = range(len(val_set)))
+            test_set = self.datasets[self.hparams.dataset](set="val", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+            test_set = Subset(test_set, indices = range(len(test_set)))
+            return train_set, val_set, test_set
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
