@@ -41,23 +41,32 @@ class MMDataLoader():
             "preferable": 3
         }
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
+        self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
 
-        imgGT = np.array(imgGT)
+    def read_img(self, path, grayscale=True):
+        return np.array(Image.open(path).convert('L'))
 
-        if pilRGB is not None: imgRGB = np.array(pilRGB)
-        if pilDep is not None: imgDep = np.array(pilDep)
-        if pilIR is not None: imgIR = np.array(pilIR)
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True, save=True):
+
+        imgGT_orig = np.array(imgGT)
+
+        if pilRGB is not None: imgRGB_orig = np.array(pilRGB)
+        if pilDep is not None: imgDep_orig = np.array(pilDep)
+        if pilIR is not None: imgIR_orig = np.array(pilIR)
 
         if augment:
             img_dict = {
-                'image': imgRGB,
+                'image': imgRGB_orig,
                 # 'depth': imgDep,
                 # 'ir': imgIR,
-                'mask': imgGT
+                'mask': imgGT_orig
                 }
             transformed_imgs = self.data_augmentation(img_dict)
             imgRGB, imgGT = transformed_imgs['image'], transformed_imgs['mask']
+            if pilDep is not None: imgDep = imgDep_orig
+            if pilIR is not None: imgIR = imgIR_orig
+        else:
+            imgRGB, imgDep, imgIR, imgGT = imgRGB_orig, imgDep_orig, imgIR_orig, imgGT_orig
 
         if color_GT: imgGT = imgGT[:, :, ::-1]
 
@@ -81,6 +90,18 @@ class MMDataLoader():
         if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
 
         if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
+
+        if save and self.idx < 100:
+            imgGT_orig = cv2.resize(imgGT_orig, dsize=resize, interpolation=cv2.INTER_NEAREST)
+            if color_GT:
+                imgGT_orig = cv2.cvtColor(imgGT_orig, cv2.COLOR_BGR2RGB)
+                imgGT_orig = self.mask_to_class_rgb(imgGT_orig)
+            else:
+                imgGT_orig = torch.tensor(imgGT_orig, dtype=torch.long)
+            imgGT_orig = self.labels_obj_to_aff(imgGT_orig)
+            imgRGB_orig = cv2.resize(imgRGB_orig, dsize=resize, interpolation=cv2.INTER_NEAREST)
+            self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix="tf")
+            self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder="results/data_aug", filename_prefix="orig")
 
         imgs = []
         img = {
@@ -250,6 +271,7 @@ class MMDataLoader():
             if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
             # concat.append(self.labels_to_color(gt, mode="objects"))
             concat.append(self.labels_to_color(gt, mode=self.mode))
+            # concat.append(np.stack((gt,)*3, axis=-1))
 
         if pred_proba is not None:
             if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
@@ -259,19 +281,11 @@ class MMDataLoader():
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
 
-        # if pred_test is not None:
-        #     if torch.is_tensor(test): test = test.detach().cpu().numpy()
-        #     # print(np.unique(test))
-        #     test = test/np.max(test)
-        #     test = (test*255).astype(np.uint8)
-        #     test = np.stack((test,)*3, axis=-1)
-        #     concat.append(test)
-
-
         if orig is not None:
             if torch.is_tensor(orig):
                 orig = orig.squeeze().detach().cpu().numpy()
-                orig = (orig*255).astype(np.uint8)
+            if np.max(orig) <= 1: orig = (orig*255)
+            orig = orig.astype(np.uint8)
             if orig.shape[-1] != 3:
                 orig = np.stack((orig,)*3, axis=-1)
                 # print(np.min(orig),np.max(orig))
@@ -283,22 +297,20 @@ class MMDataLoader():
         folder = "" if folder is None else folder
         img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5, save=True):
-        rand_crop = np.random.uniform(low=0.8, high=0.9)
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True):
+        img_height, img_width = imgs["image"].shape
+        rand_crop = np.random.uniform(low=0.6, high=0.9)
         transform = A.Compose([
+            # A.FDA(self.fda_refs, beta_limit = 0.2, read_fn = self.read_img),
             A.Rotate(limit=10, p=p),
             A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-            A.RandomScale(scale_limit=0.2, p=p),
             A.HorizontalFlip(p=p),
-            A.RandomBrightnessContrast(p=p)
+            A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, brightness_by_max=False, p=p)
             ]
             # additional_targets={'rgb': 'image', 'mask':'mask'}
         )
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
-
-        if save and self.idx < 5:
-            self.result_to_image(gt=transformed['mask'], orig=transformed['image'], folder="results/data_aug")
 
         return transformed
 
