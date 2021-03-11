@@ -35,10 +35,10 @@ class MMDataLoader():
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
         self.aff_idx = {
-            "void": 0,
-            "impossible": 1,
-            "possible": 2,
-            "preferable": 3
+            "void": -1,
+            "impossible": 0,
+            "possible": 1,
+            "preferable": 2
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')

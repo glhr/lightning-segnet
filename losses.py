@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions.normal import Normal
+import torch.nn.functional as F
 
 
 class RegressionLoss(nn.Module):
@@ -75,6 +76,25 @@ def flatten_tensors(inp, target):
         # ~ print(inp.shape, target.shape)
         # ~ print(inp, target)
         return inp, target
+
+class KLLoss(nn.Module):
+    def __init__(self, n_classes):
+        super().__init__()
+        self.num_classes = n_classes
+    def forward(self, output, target, debug=False):
+        output, target = flatten_tensors(output, target)
+        if debug: print(output,target)
+
+        mask = target.ge(0)
+        # print(mask, mask.shape)
+        # print(output.shape,target.shape)
+        output = output[mask]
+        target = target[mask]
+        if debug: print(output,target)
+        target = F.one_hot(target, num_classes = self.num_classes).float()
+        if debug: print(output,target)
+        output = torch.log_softmax(output, dim=-1)
+        return nn.KLDivLoss(reduction='mean')(output, target)
 
 class SORDLoss(nn.Module):
     """
@@ -204,38 +224,42 @@ if __name__ == '__main__':
     cm = np.zeros((3, 3))
     sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]])
 
-    for p,pred in enumerate(level.keys()):
-        for g,gt in enumerate(level.keys()):
-            input = torch.tensor([onehot[pred]], requires_grad=True)
-            target = torch.tensor([level[gt]], dtype=torch.long)
-            mod_input = torch.tensor([level[pred]], dtype=torch.long)
-            loss = sord(input, target, debug=True, mod_input=mod_input)
-            print("SORD ->", loss)
-            cm[g][p] = loss.item()
-    print(cm)
+    # for p,pred in enumerate(level.keys()):
+    #     for g,gt in enumerate(level.keys()):
+    #         input = torch.tensor([onehot[pred]], requires_grad=True)
+    #         target = torch.tensor([level[gt]], dtype=torch.long)
+    #         mod_input = torch.tensor([level[pred]], dtype=torch.long)
+    #         loss = sord(input, target, debug=True, mod_input=mod_input)
+    #         print("SORD ->", loss)
+    #         cm[g][p] = loss.item()
+    # print(cm)
+    #
+    # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    #
+    # from plotting import plot_confusion_matrix
+    # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    #
+    # level = {
+    #     "pref": 2,
+    #     "poss": 1,
+    #     "imposs": 0
+    # }
+    # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    #
+    # cm = np.zeros((3, 3))
+    # ce = nn.CrossEntropyLoss(ignore_index = -1)
+    # for p,pred in enumerate(level.keys()):
+    #     for g,gt in enumerate(level.keys()):
+    #         input = torch.tensor([onehot[pred]], requires_grad=True)
+    #         target = torch.log_softmax(torch.tensor([onehot[gt]]),dim=-1)
+    #         input = torch.log_softmax(input, dim=-1)
+    #         print(input)
+    #         loss = nn.KLDivLoss(reduction='mean',log_target=True)(input, target)
+    #         print("CE ->", loss)
+    #         cm[g][p] = loss.item()
+    # print(cm)
+    # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
 
-    rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
-
-    from plotting import plot_confusion_matrix
-    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
-
-    level = {
-        "pref": 2,
-        "poss": 1,
-        "imposs": 0
-    }
-    rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
-
-    cm = np.zeros((3, 3))
-    ce = nn.CrossEntropyLoss(ignore_index = -1)
-    for p,pred in enumerate(level.keys()):
-        for g,gt in enumerate(level.keys()):
-            input = torch.tensor([onehot[pred]], requires_grad=True)
-            target = torch.log_softmax(torch.tensor([onehot[gt]]),dim=-1)
-            input = torch.log_softmax(input, dim=-1)
-            print(input)
-            loss = nn.KLDivLoss(reduction='mean',log_target=True)(input, target)
-            print("CE ->", loss)
-            cm[g][p] = loss.item()
-    print(cm)
-    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    kl = KLLoss(n_classes = 3)
+    loss = kl(input, target)
+    print(loss)

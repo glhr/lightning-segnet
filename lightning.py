@@ -22,7 +22,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
-from losses import SORDLoss, flatten_tensors
+from losses import SORDLoss, KLLoss, flatten_tensors
 from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
 from utils import *
@@ -80,6 +80,7 @@ class LitSegNet(pl.LightningModule):
         }
         self.sord = SORDLoss(n_classes = self.hparams.num_classes)
         self.ce = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
+        self.kl = KLLoss(n_classes = self.hparams.num_classes)
 
         self.test_checkpoint = test_checkpoint
         self.train_set, self.val_set, self.test_set = self.get_dataset()
@@ -103,9 +104,10 @@ class LitSegNet(pl.LightningModule):
             return self.ce(x_hat, y)
         elif loss == "sord":
             return self.sord(x_hat, y)
+        elif loss == "kl":
+            return self.kl(x_hat, y)
 
-
-    def training_step(self, batch, batch_idx):
+    def predict(self, batch, set):
         x, y = batch
         x_hat = self.model(x)
 
@@ -115,21 +117,26 @@ class LitSegNet(pl.LightningModule):
         pred_cls = torch.argmax(x_hat, dim=1)
         iou = self.IoU(pred_cls, y)
 
-        self.log('train_loss', loss, on_epoch=True)
-        self.log('train_iou', iou, on_epoch=True)
+        if self.hparams.mode == "convert":
+            self.log(f'{set}_iou_obj', iou, on_epoch=True)
+            pred_proba_aff = self.test_set.dataset.labels_obj_to_aff(x_hat, proba=True)
+            pred_cls_aff = torch.argmax(x_hat, dim=1)
+            target_aff = self.test_set.dataset.labels_obj_to_aff(target)
+            iou_aff = self.IoU(pred_cls_aff, target_aff)
+            self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
+        elif self.hparams.mode == "affordances":
+            self.log(f'{set}_iou_aff', iou, on_epoch=True)
+        elif self.hparams.mode == "objects":
+            self.log(f'{set}_iou_obj', iou, on_epoch=True)
+
+        return loss
+
+    def training_step(self, batch, batch_idx):
+        loss = self.predict(batch, set="train")
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
-        x_hat = self.model(x)
-        loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
-
-        x_hat = torch.softmax(x_hat, dim=1)
-        pred_cls = torch.argmax(x_hat, dim=1)
-        iou = self.IoU(pred_cls, y)
-
-        self.log('val_loss', loss, on_epoch=True)
-        self.log('val_iou', iou, on_epoch=True)
+        loss = self.predict(batch, set="val")
         return loss
 
     def reduce_cm(self, cms):
@@ -198,7 +205,7 @@ class LitSegNet(pl.LightningModule):
     def get_dataset(self):
         if self.hparams.dataset == "freiburg": # these don't have an explicit val set
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=True)
+            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             test_set = Subset(test_set, indices = range(len(test_set)))
             total_len = len(train_set)
             val_len = int(0.1*total_len)
@@ -207,7 +214,7 @@ class LitSegNet(pl.LightningModule):
             return train_set, val_set, test_set
         elif self.hparams.dataset == "kitti":
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            val_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
+            val_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             total_len = len(train_set)
             val_len = int(0.2*total_len)
             train_len = total_len - val_len*2
@@ -220,7 +227,7 @@ class LitSegNet(pl.LightningModule):
             train_set = Subset(train_set, indices = range(len(train_set)))
             val_set = self.datasets[self.hparams.dataset](set="val", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             val_set = Subset(val_set, indices = range(len(val_set)))
-            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=True)
+            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             test_set = Subset(test_set, indices = range(len(test_set)))
             return train_set, val_set, test_set
 
