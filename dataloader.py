@@ -63,7 +63,7 @@ class MMDataLoader():
 
         return modGT
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True, save=True):
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False):
 
         imgGT_orig = np.array(imgGT)
 
@@ -95,7 +95,7 @@ class MMDataLoader():
         if pilDep is not None: modDepth = np.array(imgDep_orig)
         if pilIR is not None: modIR = np.array(imgIR_orig)
 
-        if save and self.idx < 100:
+        if save:
             orig_imgs = self.data_augmentation(img_dict, resize_only=True)
             imgRGB_orig, imgGT_orig = orig_imgs['image'], orig_imgs['mask']
             self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix=f"{self.name}-tf")
@@ -327,7 +327,7 @@ class MMDataLoader():
 
         return transformed
 
-    def sample(self, sample_id, augment=False):
+    def sample(self, sample_id, augment):
         try:
             pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
 
