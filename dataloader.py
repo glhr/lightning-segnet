@@ -49,16 +49,15 @@ class MMDataLoader():
 
     def prepare_GT(self, imgGT, color_GT=False):
         if color_GT: imgGT = imgGT[:, :, ::-1]
-        modGT = cv2.resize(imgGT, dsize=self.resize, interpolation=cv2.INTER_NEAREST)
         # print(modGT.shape)
         # print(modGT[0][0])
 
         if color_GT:
-            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
+            modGT = cv2.cvtColor(imgGT, cv2.COLOR_BGR2RGB)
             modGT = self.mask_to_class_rgb(modGT)
         # print(modGT.shape)
         else:
-            modGT = torch.tensor(modGT, dtype=torch.long)
+            modGT = torch.tensor(imgGT, dtype=torch.long)
 
         if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
 
@@ -72,36 +71,33 @@ class MMDataLoader():
         if pilDep is not None: imgDep_orig = np.array(pilDep)
         if pilIR is not None: imgIR_orig = np.array(pilIR)
 
-        if augment:
-            img_dict = {
-                'image': imgRGB_orig,
-                # 'depth': imgDep,
-                # 'ir': imgIR,
-                'mask': imgGT_orig
-                }
-            transformed_imgs = self.data_augmentation(img_dict)
-            imgRGB, imgGT = transformed_imgs['image'], transformed_imgs['mask']
-            if pilDep is not None: imgDep = imgDep_orig
-            if pilIR is not None: imgIR = imgIR_orig
-        else:
-            imgRGB, imgGT = imgRGB_orig, imgGT_orig
-            if pilDep is not None: imgDep = imgDep_orig
-            if pilIR is not None: imgIR = imgIR_orig
+        # if pilRGB is not None: modRGB = cv2.resize(imgRGB_orig, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
+        # if pilDep is not None: modDepth = cv2.resize(imgDep_orig, dsize=self.resize, interpolation=cv2.INTER_NEAREST) / 255
+        # if pilIR is not None: modIR = cv2.resize(imgIR_orig, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
 
+        if pilRGB is not None and len(imgRGB_orig.shape)==3: imgRGB_orig = imgRGB_orig[: , :, 2]
+        if pilDep is not None and len(imgDep_orig.shape)==3: imgDep_orig = imgDep_orig[: , :, 2]
+        if pilIR is not None and len(imgIR_orig.shape)==3: imgIR_orig = imgIR_orig[: , :, 2]
 
-        if pilRGB is not None: modRGB = cv2.resize(imgRGB, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
-        if pilDep is not None: modDepth = cv2.resize(imgDep, dsize=self.resize, interpolation=cv2.INTER_NEAREST) / 255
-        if pilIR is not None: modIR = cv2.resize(imgIR, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
+        modGT = self.prepare_GT(imgGT_orig, color_GT)
 
-        if pilRGB is not None and len(modRGB.shape)==3: modRGB = modRGB[: , :, 2]
-        if pilDep is not None and len(modDepth.shape)==3: modDepth = modDepth[: , :, 2]
-        if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
+        img_dict = {
+            'image': imgRGB_orig,
+            # 'depth': imgDep,
+            # 'ir': imgIR,
+            'mask': np.array(modGT)
+            }
 
-        modGT = self.prepare_GT(imgGT, color_GT)
+        if augment: transformed_imgs = self.data_augmentation(img_dict, resize_only=False)
+        else: transformed_imgs = self.data_augmentation(img_dict, resize_only=True)
+        modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
+
+        if pilDep is not None: modDepth = np.array(imgDep_orig)
+        if pilIR is not None: modIR = np.array(imgIR_orig)
 
         if save and self.idx < 100:
-            imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
-            imgRGB_orig = cv2.resize(imgRGB_orig, dsize=self.resize, interpolation=cv2.INTER_NEAREST)
+            orig_imgs = self.data_augmentation(img_dict, resize_only=True)
+            imgRGB_orig, imgGT_orig = orig_imgs['image'], orig_imgs['mask']
             self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix=f"{self.name}-tf")
             self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder="results/data_aug", filename_prefix=f"{self.name}-orig")
 
@@ -300,21 +296,32 @@ class MMDataLoader():
         folder = "" if folder is None else folder
         img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True):
+    def data_augmentation(self, imgs, gt=None, p=0.25, save=True, resize_only=False):
         img_height, img_width = imgs["image"].shape
-        rand_crop = np.random.uniform(low=0.6, high=0.9)
-        transform = A.Compose([
-            # A.FDA(self.fda_refs, beta_limit = 0.2, read_fn = self.read_img),
-            A.Rotate(limit=10, p=p),
-            A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-            A.HorizontalFlip(p=p),
-            A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
-            A.GridDistortion(p=p)
-            ]
-            # additional_targets={'rgb': 'image', 'mask':'mask'}
-        )
+        rand_crop = np.random.uniform(low=0.7, high=0.9)
+        if resize_only:
+            transform = A.Compose([
+                A.Resize(height = self.resize[1], width = self.resize[0], p=1)
+            ])
+        else:
+            transform = A.Compose([
+                # A.FDA(self.fda_refs, beta_limit = 0.2, read_fn = self.read_img),
+                A.OpticalDistortion(p=p),
+                A.GridDistortion(num_steps=5, p=p),
+                A.Perspective(p=p),
+                A.Rotate(limit=10, p=p),
+                A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
+                A.HorizontalFlip(p=p),
+                A.RandomToneCurve(p=p),
+                A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
+                A.Resize(height = self.resize[1], width = self.resize[0], p=1)
+                ]
+                # additional_targets={'rgb': 'image', 'mask':'mask'}
+            )
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
+
+        # print(np.unique(imgs['mask']))
 
         return transformed
 
