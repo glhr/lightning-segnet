@@ -15,6 +15,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MMDataLoader():
     def __init__(self, modalities, name, mode, augment):
+        self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.modalities = modalities
@@ -230,18 +231,15 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, iter, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, folder=None, filename_prefix=None):
-        """
-        Converts the output of the network to an actual image
-        :param result: The output of the network (with torch.argmax)
-        :param iter: The name of the file to save it to
-        :return:
-        """
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, folder=None, filename_prefix=None):
         if filename_prefix is None:
             filename_prefix = self.name
 
         # print(bs,np.max(b))
         concat = []
+
+        if iter is None:
+            iter = self.idx
 
         if pred_cls is not None:
             if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
@@ -271,8 +269,9 @@ class MMDataLoader():
 
 
         if orig is not None:
-            if torch.is_tensor(orig): orig = orig.squeeze().detach().cpu().numpy()
-            orig = (orig*255).astype(np.uint8)
+            if torch.is_tensor(orig):
+                orig = orig.squeeze().detach().cpu().numpy()
+                orig = (orig*255).astype(np.uint8)
             if orig.shape[-1] != 3:
                 orig = np.stack((orig,)*3, axis=-1)
                 # print(np.min(orig),np.max(orig))
@@ -284,7 +283,7 @@ class MMDataLoader():
         folder = "" if folder is None else folder
         img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
+    def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5, save=True):
         rand_crop = np.random.uniform(low=0.8, high=0.9)
         transform = A.Compose([
             A.Rotate(limit=10, p=p),
@@ -297,6 +296,9 @@ class MMDataLoader():
         )
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
+
+        if save and self.idx < 5:
+            self.result_to_image(gt=transformed['mask'], orig=transformed['image'], folder="results/data_aug")
 
         return transformed
 
@@ -315,6 +317,7 @@ class MMDataLoader():
 
     def __getitem__(self, idx):
         # print(self.sample(idx))
+        self.idx = idx
         if self.augment:
             return self.sample(idx, augment=True)
         else:
