@@ -306,14 +306,16 @@ class MMDataLoader():
         else:
             transform = A.Compose([
                 # A.FDA(self.fda_refs, beta_limit = 0.2, read_fn = self.read_img),
-                A.OpticalDistortion(p=p),
-                A.GridDistortion(num_steps=5, p=p),
-                A.Perspective(p=p),
-                A.Rotate(limit=10, p=p),
-                A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-                A.HorizontalFlip(p=p),
-                A.RandomToneCurve(p=p),
-                A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
+
+                A.Compose([
+                    A.RandomToneCurve(scale=0.1, p=p),
+                    A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
+                    A.GridDistortion(num_steps=3, p=p),
+                    A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
+                    A.Rotate(limit=10, p=p),
+                    A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
+                    A.HorizontalFlip(p=p)
+                ], p = 0.5),
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1)
                 ]
                 # additional_targets={'rgb': 'image', 'mask':'mask'}
