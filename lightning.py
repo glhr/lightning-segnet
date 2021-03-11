@@ -198,7 +198,7 @@ class LitSegNet(pl.LightningModule):
     def get_dataset(self):
         if self.hparams.dataset == "freiburg": # these don't have an explicit val set
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=True)
             test_set = Subset(test_set, indices = range(len(test_set)))
             total_len = len(train_set)
             val_len = int(0.1*total_len)
@@ -207,7 +207,7 @@ class LitSegNet(pl.LightningModule):
             return train_set, val_set, test_set
         elif self.hparams.dataset == "kitti":
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            val_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+            val_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
             total_len = len(train_set)
             val_len = int(0.1*total_len)
             train_len = total_len - val_len*2

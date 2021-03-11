@@ -42,9 +42,27 @@ class MMDataLoader():
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
+        self.resize = (480,360)
 
     def read_img(self, path, grayscale=True):
         return np.array(Image.open(path).convert('L'))
+
+    def prepare_GT(self, imgGT, color_GT=False):
+        if color_GT: imgGT = imgGT[:, :, ::-1]
+        modGT = cv2.resize(imgGT, dsize=self.resize, interpolation=cv2.INTER_NEAREST)
+        # print(modGT.shape)
+        # print(modGT[0][0])
+
+        if color_GT:
+            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
+            modGT = self.mask_to_class_rgb(modGT)
+        # print(modGT.shape)
+        else:
+            modGT = torch.tensor(modGT, dtype=torch.long)
+
+        if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
+
+        return modGT
 
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True, save=True):
 
@@ -66,42 +84,26 @@ class MMDataLoader():
             if pilDep is not None: imgDep = imgDep_orig
             if pilIR is not None: imgIR = imgIR_orig
         else:
-            imgRGB, imgDep, imgIR, imgGT = imgRGB_orig, imgDep_orig, imgIR_orig, imgGT_orig
+            imgRGB, imgGT = imgRGB_orig, imgGT_orig
+            if pilDep is not None: imgDep = imgDep_orig
+            if pilIR is not None: imgIR = imgIR_orig
 
-        if color_GT: imgGT = imgGT[:, :, ::-1]
 
-        resize = (480,360)
-        if pilRGB is not None: modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-        if pilDep is not None: modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
-        if pilIR is not None: modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-        modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
-        # print(modGT.shape)
-        # print(modGT[0][0])
-
-        if color_GT:
-            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
-            modGT = self.mask_to_class_rgb(modGT)
-        # print(modGT.shape)
-        else:
-            modGT = torch.tensor(modGT, dtype=torch.long)
+        if pilRGB is not None: modRGB = cv2.resize(imgRGB, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
+        if pilDep is not None: modDepth = cv2.resize(imgDep, dsize=self.resize, interpolation=cv2.INTER_NEAREST) / 255
+        if pilIR is not None: modIR = cv2.resize(imgIR, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
 
         if pilRGB is not None and len(modRGB.shape)==3: modRGB = modRGB[: , :, 2]
         if pilDep is not None and len(modDepth.shape)==3: modDepth = modDepth[: , :, 2]
         if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
 
-        if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
+        modGT = self.prepare_GT(imgGT, color_GT)
 
         if save and self.idx < 100:
-            imgGT_orig = cv2.resize(imgGT_orig, dsize=resize, interpolation=cv2.INTER_NEAREST)
-            if color_GT:
-                imgGT_orig = cv2.cvtColor(imgGT_orig, cv2.COLOR_BGR2RGB)
-                imgGT_orig = self.mask_to_class_rgb(imgGT_orig)
-            else:
-                imgGT_orig = torch.tensor(imgGT_orig, dtype=torch.long)
-            imgGT_orig = self.labels_obj_to_aff(imgGT_orig)
-            imgRGB_orig = cv2.resize(imgRGB_orig, dsize=resize, interpolation=cv2.INTER_NEAREST)
-            self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix="tf")
-            self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder="results/data_aug", filename_prefix="orig")
+            imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
+            imgRGB_orig = cv2.resize(imgRGB_orig, dsize=self.resize, interpolation=cv2.INTER_NEAREST)
+            self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix=f"{self.name}-tf")
+            self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder="results/data_aug", filename_prefix=f"{self.name}-orig")
 
         imgs = []
         img = {
@@ -179,7 +181,7 @@ class MMDataLoader():
             else:
                 return self.idx_to_color[mode][x]
         except KeyError:
-            if mode=="objects": print(f"mapping {x} to black")
+            print(f"mapping {x} to black")
             return (0,0,255)
 
     def labels_to_color(self, labels, mode="objects"):
@@ -270,7 +272,8 @@ class MMDataLoader():
         if gt is not None:
             if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
             # concat.append(self.labels_to_color(gt, mode="objects"))
-            concat.append(self.labels_to_color(gt, mode=self.mode))
+            gt = self.labels_to_color(gt, mode=self.mode)
+            concat.append(gt)
             # concat.append(np.stack((gt,)*3, axis=-1))
 
         if pred_proba is not None:
@@ -305,7 +308,8 @@ class MMDataLoader():
             A.Rotate(limit=10, p=p),
             A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
             A.HorizontalFlip(p=p),
-            A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, brightness_by_max=False, p=p)
+            A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
+            A.GridDistortion(p=p)
             ]
             # additional_targets={'rgb': 'image', 'mask':'mask'}
         )
