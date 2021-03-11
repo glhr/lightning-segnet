@@ -75,9 +75,9 @@ class MMDataLoader():
         else:
             modGT = torch.tensor(modGT, dtype=torch.long)
 
-        if pilRGB is not None: modRGB = modRGB[: , :, 2]
-        if pilDep is not None: modDepth = modDepth[: , :, 2]
-        if pilIR is not None: modIR = modIR[: , :, 2]
+        if pilRGB is not None and len(modRGB.shape)==3: modRGB = modRGB[: , :, 2]
+        if pilDep is not None and len(modDepth.shape)==3: modDepth = modDepth[: , :, 2]
+        if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
 
         if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
 
@@ -370,9 +370,9 @@ class FreiburgDataLoader(MMDataLoader):
         self.color_GT = True
 
     def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
-        pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('RGB')
-        pilIR = Image.open(self.path + "nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('RGB')
+        pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('L')
+        pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('L')
+        pilIR = Image.open(self.path + "nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('L')
 
         # print(self.path + "GT_color/" + a + suffixes['gt'])
         try:
@@ -434,8 +434,8 @@ class CityscapesDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
 
-        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
-        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('RGB')
+        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('L')
+        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('L')
         imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 
@@ -480,8 +480,8 @@ class KittiDataLoader(MMDataLoader):
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
-        pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('RGB')
+        pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('L')
+        pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
         return pilRGB, pilDep, None, imgGT
 
