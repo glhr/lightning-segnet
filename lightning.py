@@ -170,7 +170,9 @@ class LitSegNet(pl.LightningModule):
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
                 # print(p.shape)
-                test = p.squeeze()[0] * 0 + p.squeeze()[1] * 1 + p.squeeze()[2] * 2
+                test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * 0 \
+                 + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * 1 \
+                 + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
                 iter = batch_idx*self.hparams.bs + i
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.result_folder}", filename_prefix=f"proba-{self.test_checkpoint}")
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"cls-{self.test_checkpoint}")
@@ -218,7 +220,7 @@ class LitSegNet(pl.LightningModule):
             train_set = Subset(train_set, indices = range(len(train_set)))
             val_set = self.datasets[self.hparams.dataset](set="val", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             val_set = Subset(val_set, indices = range(len(val_set)))
-            test_set = self.datasets[self.hparams.dataset](set="val", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
             test_set = Subset(test_set, indices = range(len(test_set)))
             return train_set, val_set, test_set
 

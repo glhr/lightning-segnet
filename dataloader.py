@@ -33,6 +33,13 @@ class MMDataLoader():
 
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
+        self.aff_idx = {
+            "void": 0,
+            "impossible": 1,
+            "possible": 2,
+            "preferable": 3
+        }
+
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
 
         imgGT = np.array(imgGT)
@@ -96,28 +103,28 @@ class MMDataLoader():
         objclass_to_driveidx = dict()
 
         idx_mappings = {
-            -1: set(),
-            0: set(),
-            1: set(),
-            2: set()
+            self.aff_idx["void"]: set(),
+            self.aff_idx["impossible"]: set(),
+            self.aff_idx["possible"]: set(),
+            self.aff_idx["preferable"]: set()
         }
 
         for i in undriveable:
-            objclass_to_driveidx[i] = 0
+            objclass_to_driveidx[i] = self.aff_idx["impossible"]
         for i in driveable:
-            objclass_to_driveidx[i] = 2
+            objclass_to_driveidx[i] = self.aff_idx["preferable"]
         for i in between:
-            objclass_to_driveidx[i] = 1
+            objclass_to_driveidx[i] = self.aff_idx["possible"]
         for i in void:
-            objclass_to_driveidx[i] = -1
+            objclass_to_driveidx[i] = self.aff_idx["void"]
 
 
         # print(objclass_to_driveidx)
         idx_to_color_new = {
-            -1: (0,0,0),
-            0: (255,0,0),
-            1: (255,255,0),
-            2: (0,255,0)
+            self.aff_idx["void"]: (0,0,0),
+            self.aff_idx["impossible"]: (255,0,0),
+            self.aff_idx["possible"]: (255,255,0),
+            self.aff_idx["preferable"]: (0,255,0)
         }
         color_to_idx_new = dict()
         conversion = dict()
@@ -405,16 +412,21 @@ class CityscapesDataLoader(MMDataLoader):
 
         if set == "train":
             self.split_path = 'train/'
-        elif set == "val":
+        else:
             self.split_path = 'val/'
-        elif set == "test":
-            self.split_path = 'test/'
+
+        cities = {
+            "val": ["frankfurt"],
+            "test": ["lindau", "munster"]
+        }
 
         self.augment = augment
 
-        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*.png'):
+        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png'):
+
             img = '_'.join('/'.join(img.split("/")[-2:]).split("_")[:3])
-            self.filenames.append(img)
+            city = img.split("/")[0]
+            if set == "train" or city in cities[set]: self.filenames.append(img)
         # print(self.filenames[0])
         # print(len(self.filenames))
 
@@ -516,10 +528,15 @@ class OwnDataLoader(MMDataLoader):
 
 if __name__ == '__main__':
 
+    from torch.utils.data import DataLoader, random_split, Subset
+
     print("Cityscapes dataset")
-    cityscapes = CityscapesDataLoader(set="train", mode="objects", modalities=["rgb"], augment=True)
-    print("-> train", len(cityscapes))
-    cityscapes = CityscapesDataLoader(set="val", mode="objects", modalities=["rgb"], augment=False)
-    print("-> val", len(cityscapes))
-    cityscapes = CityscapesDataLoader(set="test", mode="objects", modalities=["rgb"], augment=False)
-    print("-> test", len(cityscapes))
+    train_set = CityscapesDataLoader(set="train", mode="objects", modalities=["rgb"], augment=True)
+    train_set = Subset(train_set, indices = range(len(train_set)))
+    print("-> train", len(train_set.dataset))
+    val_set = CityscapesDataLoader(set="val", mode="objects", modalities=["rgb"], augment=False)
+    val_set = Subset(val_set, indices = range(len(val_set)))
+    print("-> val", len(val_set.dataset))
+    test_set = CityscapesDataLoader(set="test", mode="objects", modalities=["rgb"], augment=False)
+    test_set = Subset(test_set, indices = range(len(test_set)))
+    print("-> test", len(test_set.dataset))
