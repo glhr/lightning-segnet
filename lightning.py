@@ -83,7 +83,7 @@ class LitSegNet(pl.LightningModule):
         self.kl = KLLoss(n_classes = self.hparams.num_classes)
 
         self.test_checkpoint = test_checkpoint
-        self.train_set, self.val_set, self.test_set = self.get_dataset(normalize=True)
+        self.train_set, self.val_set, self.test_set = self.get_dataset(normalize=False)
         self.test_max = test_max
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
@@ -207,7 +207,7 @@ class LitSegNet(pl.LightningModule):
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
 
-    def get_dataset(self, normalize=True):
+    def get_dataset(self, normalize=False):
         if self.hparams.dataset == "freiburg": # these don't have an explicit val set
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
             test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
