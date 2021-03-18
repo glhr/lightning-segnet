@@ -92,7 +92,7 @@ class MMDataLoader():
         if pilDep is not None: modDepth = np.array(imgDep_orig)
         if pilIR is not None: modIR = np.array(imgIR_orig)
 
-        modGT = self.prepare_GT(imgGT_orig, color_GT)
+        modGT = self.prepare_GT(modGT, color_GT)
 
         if pilRGB is not None and len(modRGB.shape)==3: imgRGB_orig = modRGB[: , :, 2]
         if pilDep is not None and len(modDepth.shape)==3: imgDep_orig = modDepth[: , :, 2]
