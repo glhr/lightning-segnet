@@ -35,10 +35,10 @@ class MMDataLoader():
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
         self.aff_idx = {
-            "void": 0,
-            "impossible": 1,
-            "possible": 2,
-            "preferable": 3
+            "void": -1,
+            "impossible": 0,
+            "possible": 1,
+            "preferable": 2
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
@@ -60,7 +60,7 @@ class MMDataLoader():
 
         return modGT
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=True):
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False):
 
         imgGT_orig = np.array(imgGT)
 
