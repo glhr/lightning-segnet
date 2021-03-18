@@ -93,8 +93,8 @@ class MMDataLoader():
             imgRGB_orig = imgRGB_orig[: , :, 2]
             imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
             # print(np.unique(modGT))
-            self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix=f"{self.name}-tf")
-            self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder="results/data_aug", filename_prefix=f"{self.name}-orig")
+            self.result_to_image(gt=modGT, orig=modRGB, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-tf")
+            self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-orig")
 
         imgs = []
         img = {
@@ -293,7 +293,7 @@ class MMDataLoader():
 
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
         img_height, img_width = imgs["image"].shape[:2]
-        rand_crop = np.random.uniform(low=0.7, high=0.9)
+        rand_crop = np.random.uniform(low=0.8, high=0.9)
         if resize_only:
             transform = A.Compose([
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
@@ -303,7 +303,7 @@ class MMDataLoader():
             transform = A.Compose([
                 A.Compose([
                     A.RandomToneCurve(scale=0.1, p=p),
-                    A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
+                    A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p),
                     A.GridDistortion(num_steps=3, p=p),
                     A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
                     A.Rotate(limit=10, p=p),
@@ -457,7 +457,7 @@ class CityscapesDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
 
-        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('L')
+        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
         pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('L')
         imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
@@ -503,7 +503,7 @@ class KittiDataLoader(MMDataLoader):
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('L')
+        pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
         pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
         return pilRGB, pilDep, None, imgGT

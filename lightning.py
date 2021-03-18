@@ -187,12 +187,15 @@ class LitSegNet(pl.LightningModule):
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
-            cm = self.CM(pred_cls, target)
-            # print(cm.shape)
-            iou = self.IoU(pred_cls, target)
+            try:
+                cm = self.CM(pred_cls, target)
+                # print(cm.shape)
+                iou = self.IoU(pred_cls, target)
 
-            self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-            self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+            except Exception as e:
+                print("Couldn't compute eval metrics",e)
             return pred
 
 
