@@ -293,7 +293,7 @@ class MMDataLoader():
 
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
         img_height, img_width = imgs["image"].shape[:2]
-        rand_crop = np.random.uniform(low=0.8, high=0.9)
+        rand_crop = np.random.uniform(low=0.7, high=0.9)
         if resize_only:
             transform = A.Compose([
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
@@ -309,7 +309,7 @@ class MMDataLoader():
                     A.Rotate(limit=10, p=p),
                     A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
                     A.HorizontalFlip(p=p)
-                ], p = 0.5),
+                ], p = 1),
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
                 A.ToGray(p=1)
                 ]
