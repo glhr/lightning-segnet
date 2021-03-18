@@ -35,10 +35,10 @@ class MMDataLoader():
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
         self.aff_idx = {
-            "void": -1,
-            "impossible": 0,
-            "possible": 1,
-            "preferable": 2
+            "void": 0,
+            "impossible": 1,
+            "possible": 2,
+            "preferable": 3
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
@@ -50,8 +50,8 @@ class MMDataLoader():
     def prepare_GT(self, imgGT, color_GT=False):
 
         if color_GT:
-            modGT = imgGT[:, :, ::-1]
-            modGT = self.mask_to_class_rgb(modGT)
+            #modGT = imgGT[:, :, ::-1]
+            modGT = self.mask_to_class_rgb(imgGT)
         # print(modGT.shape)
         else:
             modGT = torch.tensor(imgGT, dtype=torch.long)
@@ -60,7 +60,7 @@ class MMDataLoader():
 
         return modGT
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False):
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=True):
 
         imgGT_orig = np.array(imgGT)
 
@@ -90,6 +90,9 @@ class MMDataLoader():
         if save:
             orig_imgs = self.data_augmentation(img_dict, resize_only=True)
             imgRGB_orig, imgGT_orig = orig_imgs['image'], orig_imgs['mask']
+            imgRGB_orig = imgRGB_orig[: , :, 2]
+            imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
+            # print(np.unique(modGT))
             self.result_to_image(gt=modGT, orig=modRGB, folder="results/data_aug", filename_prefix=f"{self.name}-tf")
             self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder="results/data_aug", filename_prefix=f"{self.name}-orig")
 
