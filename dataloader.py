@@ -389,7 +389,7 @@ class FreiburgDataLoader(MMDataLoader):
         self.color_GT = True
 
     def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('L')
+        pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
         pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('L')
         pilIR = Image.open(self.path + "nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('L')
 
