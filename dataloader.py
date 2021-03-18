@@ -293,18 +293,19 @@ class MMDataLoader():
         rand_crop = np.random.uniform(low=0.8, high=0.9)
         if resize_only:
             transform = A.Compose([
-                A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                A.ToGray(p=1)
+                A.ToGray(p=1),
+                A.Resize(height = self.resize[1], width = self.resize[0], p=1)
             ])
         else:
             transform = A.Compose([
+                    A.ToGray(p=1),
                     A.Rotate(limit=10, p=p),
                     A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
                     A.RandomScale(scale_limit=0.2, p=p),
                     A.HorizontalFlip(p=p),
                     A.RandomBrightnessContrast(p=p),
-                    A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                    A.ToGray(p=1)])
+                    A.Resize(height = self.resize[1], width = self.resize[0], p=1)
+                    ])
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
 
