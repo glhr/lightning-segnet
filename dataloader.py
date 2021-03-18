@@ -48,12 +48,9 @@ class MMDataLoader():
         return np.array(Image.open(path).convert('L'))
 
     def prepare_GT(self, imgGT, color_GT=False):
-        if color_GT: imgGT = imgGT[:, :, ::-1]
-        # print(modGT.shape)
-        # print(modGT[0][0])
 
         if color_GT:
-            modGT = cv2.cvtColor(imgGT, cv2.COLOR_BGR2RGB)
+            imgGT = imgGT[:, :, ::-1]
             modGT = self.mask_to_class_rgb(modGT)
         # print(modGT.shape)
         else:
@@ -70,14 +67,6 @@ class MMDataLoader():
         if pilRGB is not None: imgRGB_orig = np.array(pilRGB)
         if pilDep is not None: imgDep_orig = np.array(pilDep)
         if pilIR is not None: imgIR_orig = np.array(pilIR)
-
-        # if pilRGB is not None: modRGB = cv2.resize(imgRGB_orig, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
-        # if pilDep is not None: modDepth = cv2.resize(imgDep_orig, dsize=self.resize, interpolation=cv2.INTER_NEAREST) / 255
-        # if pilIR is not None: modIR = cv2.resize(imgIR_orig, dsize=self.resize, interpolation=cv2.INTER_LINEAR) / 255
-
-        if pilRGB is not None and len(imgRGB_orig.shape)==3: imgRGB_orig = imgRGB_orig[: , :, 2]
-        if pilDep is not None and len(imgDep_orig.shape)==3: imgDep_orig = imgDep_orig[: , :, 2]
-        if pilIR is not None and len(imgIR_orig.shape)==3: imgIR_orig = imgIR_orig[: , :, 2]
 
         img_dict = {
             'image': imgRGB_orig,
@@ -313,7 +302,8 @@ class MMDataLoader():
                     A.RandomScale(scale_limit=0.2, p=p),
                     A.HorizontalFlip(p=p),
                     A.RandomBrightnessContrast(p=p),
-                    A.Resize(height = self.resize[1], width = self.resize[0], p=1)])
+                    A.Resize(height = self.resize[1], width = self.resize[0], p=1),
+                    A.ToGray(p=1)])
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
 
