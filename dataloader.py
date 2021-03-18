@@ -7,14 +7,15 @@ from PIL import Image, ImageFile
 
 import torch
 from torchvision import transforms
+from torch.utils.data import Dataset, DataLoader
 
 import albumentations as A
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class MMDataLoader():
-    def __init__(self, modalities, name, mode, augment):
+class MMDataLoader(Dataset):
+    def __init__(self, modalities, name, mode, augment, transform=None):
         self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
@@ -42,7 +43,9 @@ class MMDataLoader():
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
-        self.resize = (480,360)
+        self.resize = (480,240)
+
+        self.transform = transform
 
     def read_img(self, path, grayscale=True):
         return np.array(Image.open(path).convert('L'))
@@ -106,7 +109,7 @@ class MMDataLoader():
             if img[mod] is not None:
                 imgs.append(img[mod].copy())
 
-        return torch.from_numpy(np.array(imgs)).float(), modGT
+        return [torch.from_numpy(np.array(imgs)).float(), modGT]
 
     def remap_classes(self, idx_to_color):
 
@@ -339,9 +342,13 @@ class MMDataLoader():
         # print(self.sample(idx))
         self.idx = idx
         if self.augment:
-            return self.sample(idx, augment=True)
+            s = self.sample(idx, augment=True)
         else:
-            return self.sample(idx, augment=False)
+            s = self.sample(idx, augment=False)
+
+        if self.transform:
+            s[0] = self.transform(s[0])
+        return s
 
 class FreiburgDataLoader(MMDataLoader):
 

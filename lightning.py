@@ -83,7 +83,7 @@ class LitSegNet(pl.LightningModule):
         self.kl = KLLoss(n_classes = self.hparams.num_classes)
 
         self.test_checkpoint = test_checkpoint
-        self.train_set, self.val_set, self.test_set = self.get_dataset()
+        self.train_set, self.val_set, self.test_set = self.get_dataset(normalize=True)
         self.test_max = test_max
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
@@ -164,6 +164,7 @@ class LitSegNet(pl.LightningModule):
         sample, target = batch
 
         if self.test_max is None or batch_idx < self.test_max:
+            print(torch.min(sample),torch.max(sample))
             pred = self.model(sample)
             pred = torch.softmax(pred, dim=1)
 
@@ -206,7 +207,7 @@ class LitSegNet(pl.LightningModule):
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
 
-    def get_dataset(self):
+    def get_dataset(self, normalize=True):
         if self.hparams.dataset == "freiburg": # these don't have an explicit val set
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
             test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
@@ -217,6 +218,28 @@ class LitSegNet(pl.LightningModule):
             # val_len = int(0.1*total_len)
             # train_len = total_len - val_len
             # train_set, val_set = random_split(train_set, [train_len, val_len])
+            if normalize:
+                mean = 0.
+                std = 0.
+                loader = DataLoader(train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
+                for images, _ in loader:
+                    batch_samples = images.size(0) # batch size (the last batch can have smaller size!)
+                    #print(images.shape)
+                    images = images.view(batch_samples, images.size(1), -1)
+                    #print(images.shape)
+                    mean += images.mean(2).sum(0)
+                    std += images.std(2).sum(0)
+
+                mean /= len(loader.dataset)
+                std /= len(loader.dataset)
+                print("Mean and stdev",mean,std)
+                normalize_params = [mean,std]
+                tf = transforms.Compose([
+                    transforms.Normalize(mean=(mean,), std=(std,))
+                ])
+                train_set.dataset.transform = tf
+                test_set.dataset.transform = tf
+                val_set.dataset.transform = tf
             return train_set, val_set, test_set
         elif self.hparams.dataset == "kitti":
             train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
@@ -279,6 +302,7 @@ if args.train:
     trainer.fit(segnet_model)
 
 else:
+    print("Testing phase")
     trainer = pl.Trainer.from_argparse_args(args)
-    trained_model = LitSegNet.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
+    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
     trainer.test(trained_model)
