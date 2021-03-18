@@ -79,21 +79,24 @@ class MMDataLoader():
         if pilDep is not None and len(imgDep_orig.shape)==3: imgDep_orig = imgDep_orig[: , :, 2]
         if pilIR is not None and len(imgIR_orig.shape)==3: imgIR_orig = imgIR_orig[: , :, 2]
 
-        modGT = self.prepare_GT(imgGT_orig, color_GT)
-
         img_dict = {
             'image': imgRGB_orig,
             # 'depth': imgDep,
             # 'ir': imgIR,
-            'mask': np.array(modGT)
+            'mask': imgGT_orig
             }
 
         if augment: transformed_imgs = self.data_augmentation(img_dict, resize_only=False)
         else: transformed_imgs = self.data_augmentation(img_dict, resize_only=True)
         modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
-
         if pilDep is not None: modDepth = np.array(imgDep_orig)
         if pilIR is not None: modIR = np.array(imgIR_orig)
+
+        modGT = self.prepare_GT(imgGT_orig, color_GT)
+
+        if pilRGB is not None and len(modRGB.shape)==3: imgRGB_orig = modRGB[: , :, 2]
+        if pilDep is not None and len(modDepth.shape)==3: imgDep_orig = modDepth[: , :, 2]
+        if pilIR is not None and len(modIR.shape)==3: imgIR_orig = modIR[: , :, 2]
 
         if save:
             orig_imgs = self.data_augmentation(img_dict, resize_only=True)
