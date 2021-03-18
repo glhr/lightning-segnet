@@ -6,7 +6,7 @@ import numpy as np
 np.random.seed(RANDOM_SEED)
 
 import torch
-torch.set_deterministic(True)
+#torch.set_deterministic(True)
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed(RANDOM_SEED)
 
@@ -129,6 +129,7 @@ class LitSegNet(pl.LightningModule):
         elif self.hparams.mode == "objects":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
 
+        self.log(f'{set}_loss',loss,on_epoch=True)
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -237,7 +238,7 @@ class LitSegNet(pl.LightningModule):
         return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
+        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False, worker_init_fn=random.seed(RANDOM_SEED))
 
     def test_dataloader(self):
         return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False, worker_init_fn=random.seed(RANDOM_SEED))
