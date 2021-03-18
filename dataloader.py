@@ -50,7 +50,7 @@ class MMDataLoader():
     def prepare_GT(self, imgGT, color_GT=False):
 
         if color_GT:
-            imgGT = imgGT[:, :, ::-1]
+            modGT = imgGT[:, :, ::-1]
             modGT = self.mask_to_class_rgb(modGT)
         # print(modGT.shape)
         else:
@@ -83,9 +83,9 @@ class MMDataLoader():
 
         modGT = self.prepare_GT(modGT, color_GT)
 
-        if pilRGB is not None and len(modRGB.shape)==3: imgRGB_orig = modRGB[: , :, 2]
-        if pilDep is not None and len(modDepth.shape)==3: imgDep_orig = modDepth[: , :, 2]
-        if pilIR is not None and len(modIR.shape)==3: imgIR_orig = modIR[: , :, 2]
+        if pilRGB is not None and len(modRGB.shape)==3: modRGB = modRGB[: , :, 2]
+        if pilDep is not None and len(modDepth.shape)==3: modDepth = modDepth[: , :, 2]
+        if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
 
         if save:
             orig_imgs = self.data_augmentation(img_dict, resize_only=True)
@@ -289,11 +289,12 @@ class MMDataLoader():
         img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
-        img_height, img_width = imgs["image"].shape
+        img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
         if resize_only:
             transform = A.Compose([
-                A.Resize(height = self.resize[1], width = self.resize[0], p=1)
+                A.Resize(height = self.resize[1], width = self.resize[0], p=1),
+                A.ToGray(p=1)
             ])
         else:
             transform = A.Compose([
