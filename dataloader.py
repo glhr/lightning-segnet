@@ -296,30 +296,21 @@ class MMDataLoader():
         folder = "" if folder is None else folder
         img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.25, save=True, resize_only=False):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
         img_height, img_width = imgs["image"].shape
-        rand_crop = np.random.uniform(low=0.7, high=0.9)
+        rand_crop = np.random.uniform(low=0.8, high=0.9)
         if resize_only:
             transform = A.Compose([
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1)
             ])
         else:
             transform = A.Compose([
-                # A.FDA(self.fda_refs, beta_limit = 0.2, read_fn = self.read_img),
-
-                A.Compose([
-                    A.RandomToneCurve(scale=0.1, p=p),
-                    A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=False, p=p),
-                    A.GridDistortion(num_steps=3, p=p),
-                    A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
                     A.Rotate(limit=10, p=p),
                     A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-                    A.HorizontalFlip(p=p)
-                ], p = 0.5),
-                A.Resize(height = self.resize[1], width = self.resize[0], p=1)
-                ]
-                # additional_targets={'rgb': 'image', 'mask':'mask'}
-            )
+                    A.RandomScale(scale_limit=0.2, p=p),
+                    A.HorizontalFlip(p=p),
+                    A.RandomBrightnessContrast(p=p),
+                    A.Resize(height = self.resize[1], width = self.resize[0], p=1)])
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
 
