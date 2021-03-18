@@ -116,9 +116,9 @@ class MMDataLoader():
     def remap_classes(self, idx_to_color):
 
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static']
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge']
         void = ['void','egovehicle','outofroi','rectificationborder','unlabeled']
-        driveable = ['road','path','ground','bridge','tunnel']
+        driveable = ['road','path','ground','tunnel']
         between = ['grass','terrain','sidewalk','parking','railtrack']
         objclass_to_driveidx = dict()
 
