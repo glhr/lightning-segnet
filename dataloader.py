@@ -303,11 +303,12 @@ class MMDataLoader(Dataset):
                 #A.ToGray(p=1)
             ])
         else:
+            print("augment")
             transform = A.Compose([
                 A.Compose([
                     A.Rotate(limit=10, p=p),
                     A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-                    #A.RandomScale(scale_limit=0.2, p=p),
+                    A.RandomScale(scale_limit=0.2, p=p),
                     A.HorizontalFlip(p=p),
                     A.RandomBrightnessContrast(p=p)
                     ], p = 1),
