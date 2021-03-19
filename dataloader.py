@@ -36,14 +36,14 @@ class MMDataLoader(Dataset):
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
         self.aff_idx = {
-            "void": -1,
-            "impossible": 0,
-            "possible": 1,
-            "preferable": 2
+            "void": 0,
+            "impossible": 1,
+            "possible": 2,
+            "preferable": 3
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
-        self.resize = (480,240)
+        self.resize = (480,360)
 
         self.transform = transform
 
@@ -300,7 +300,7 @@ class MMDataLoader(Dataset):
         if resize_only:
             transform = A.Compose([
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                A.ToGray(p=1)
+                #A.ToGray(p=1)
             ])
         else:
             transform = A.Compose([
@@ -312,7 +312,7 @@ class MMDataLoader(Dataset):
                     A.RandomBrightnessContrast(p=p)
                     ], p = 1),
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                A.ToGray(p=1)
+                #A.ToGray(p=1)
                 ]
                 # additional_targets={'rgb': 'image', 'mask':'mask'}
             )
