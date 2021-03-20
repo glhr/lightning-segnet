@@ -119,7 +119,7 @@ class LitSegNet(pl.LightningModule):
              + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
             self.test_set.dataset.result_to_image(
                 iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
-                folder=f"{self.result_folder}",
+                folder=f"{self.result_folder}/viz_per_epoch",
                 filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-proba")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-cls")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
@@ -137,9 +137,9 @@ class LitSegNet(pl.LightningModule):
 
         if self.hparams.mode == "convert":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            pred_proba_aff = self.test_set.dataset.labels_obj_to_aff(x_hat, proba=True)
-            pred_cls_aff = torch.argmax(x_hat, dim=1)
-            target_aff = self.test_set.dataset.labels_obj_to_aff(target)
+            pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, proba=True)
+            pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
+            target_aff = self.train_set.dataset.labels_obj_to_aff(y)
             iou_aff = self.IoU(pred_cls_aff, target_aff)
             self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
         elif self.hparams.mode == "affordances":
