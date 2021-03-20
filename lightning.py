@@ -78,9 +78,9 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.sord = SORDLoss(n_classes = self.hparams.num_classes)
+        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=False)
         self.ce = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
-        self.kl = KLLoss(n_classes = self.hparams.num_classes)
+        self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=False)
 
         self.test_checkpoint = test_checkpoint
         self.train_set, self.val_set, self.test_set = self.get_dataset(normalize=False)
@@ -103,9 +103,9 @@ class LitSegNet(pl.LightningModule):
         if loss == "ce":
             return self.ce(x_hat, y)
         elif loss == "sord":
-            return self.sord(x_hat, y, masking=False)
+            return self.sord(x_hat, y)
         elif loss == "kl":
-            return self.kl(x_hat, y, masking=False)
+            return self.kl(x_hat, y)
 
     def predict(self, batch, set):
         x, y = batch
