@@ -303,7 +303,7 @@ class MMDataLoader(Dataset):
                 #A.ToGray(p=1)
             ])
         else:
-            print("augment")
+            # print("augment")
             transform = A.Compose([
                 A.Compose([
                     A.Rotate(limit=10, p=p),
