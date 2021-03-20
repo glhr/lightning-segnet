@@ -258,26 +258,6 @@ class MMDataLoader(Dataset):
         if iter is None:
             iter = self.idx
 
-        if pred_cls is not None:
-            if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
-            data = self.labels_to_color(pred_cls, mode=self.mode)
-            concat.append(data)
-
-        if gt is not None:
-            if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
-            # concat.append(self.labels_to_color(gt, mode="objects"))
-            gt = self.labels_to_color(gt, mode=self.mode)
-            concat.append(gt)
-            # concat.append(np.stack((gt,)*3, axis=-1))
-
-        if pred_proba is not None:
-            if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
-            # print(np.unique(proba))
-            proba = pred_proba/2
-            proba = (proba*255).astype(np.uint8)
-            proba = np.stack((proba,)*3, axis=-1)
-            concat.append(proba)
-
         if orig is not None:
             if torch.is_tensor(orig):
                 orig = orig.squeeze().detach().cpu().numpy()
@@ -287,6 +267,26 @@ class MMDataLoader(Dataset):
                 orig = np.stack((orig,)*3, axis=-1)
                 # print(np.min(orig),np.max(orig))
                 concat = [orig] + concat
+
+        if gt is not None:
+            if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
+            # concat.append(self.labels_to_color(gt, mode="objects"))
+            gt = self.labels_to_color(gt, mode=self.mode)
+            concat.append(gt)
+            # concat.append(np.stack((gt,)*3, axis=-1))
+
+        if pred_cls is not None:
+            if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
+            data = self.labels_to_color(pred_cls, mode=self.mode)
+            concat.append(data)
+
+        if pred_proba is not None:
+            if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
+            # print(np.unique(proba))
+            proba = pred_proba/2
+            proba = (proba*255).astype(np.uint8)
+            proba = np.stack((proba,)*3, axis=-1)
+            concat.append(proba)
 
         data = np.concatenate(concat, axis=1)
 

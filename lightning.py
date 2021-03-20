@@ -159,7 +159,7 @@ class LitSegNet(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        if batch_idx == 0:
+        if batch_idx == 0 and (not self.current_epoch % 10):
             loss = self.predict(batch, set="val", save=True, batch_idx=batch_idx)
         else:
             loss = self.predict(batch, set="val")
