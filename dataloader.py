@@ -194,7 +194,7 @@ class MMDataLoader(Dataset):
             # labels = labels.squeeze()
             # print(labels.shape)
             s = labels.shape
-            new_proba = torch.zeros((labels.shape[0], num_cls, s[2], s[3]))
+            new_proba = torch.zeros((labels.shape[0], num_cls, s[2], s[3])).to(self.device)
             # print(new_proba.shape)
             # print(new_proba[3])
             for idx in self.idx_mappings.keys():
