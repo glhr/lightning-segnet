@@ -89,7 +89,7 @@ class LitSegNet(pl.LightningModule):
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.test_max = test_max
 
-        self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
+        self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
         self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.hparams.ignore_index)
 
