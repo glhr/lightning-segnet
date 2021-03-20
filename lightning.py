@@ -139,9 +139,9 @@ class LitSegNet(pl.LightningModule):
 
         if self.hparams.mode == "convert":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, proba=True)
+            pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, num_cls=self.num_cls, proba=True)
             pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
-            target_aff = self.train_set.dataset.labels_obj_to_aff(y)
+            target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
             iou_aff = self.IoU_conv(pred_cls_aff, target_aff)
             self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
         elif self.hparams.mode == "affordances":

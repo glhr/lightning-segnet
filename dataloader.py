@@ -189,12 +189,12 @@ class MMDataLoader(Dataset):
             # print(idx, "->", self.get_color(idx, mode=mode))
         return data
 
-    def labels_obj_to_aff(self, labels, proba=False):
+    def labels_obj_to_aff(self, labels, num_cls=3, proba=False):
         if proba:
             # labels = labels.squeeze()
             # print(labels.shape)
             s = labels.shape
-            new_proba = torch.zeros((labels.shape[0], 3, s[2], s[3]))
+            new_proba = torch.zeros((labels.shape[0], num_cls, s[2], s[3]))
             # print(new_proba.shape)
             # print(new_proba[3])
             for idx in self.idx_mappings.keys():
