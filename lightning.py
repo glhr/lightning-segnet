@@ -68,7 +68,7 @@ class LitSegNet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(conf)
-        self.ignore_index = -1
+        self.ignore_index = 0
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
@@ -87,7 +87,7 @@ class LitSegNet(pl.LightningModule):
         self.test_max = test_max
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
-        self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none', ignore_index=self.ignore_index)
+        self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
         self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.ignore_index)
 
         self.result_folder = f"results/{self.hparams.dataset}"
