@@ -69,7 +69,7 @@ class LitSegNet(pl.LightningModule):
 
         self.save_hyperparameters(conf)
         self.hparams.ignore_index = 0
-        self.hparams.resize = (480, 360)
+        self.hparams.resize = (480, 240)
         self.hparams.masking = False
         self.hparams.normalize = False
 

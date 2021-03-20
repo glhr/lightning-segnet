@@ -300,20 +300,21 @@ class MMDataLoader(Dataset):
         if resize_only:
             transform = A.Compose([
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                #A.ToGray(p=1)
+                A.ToGray(p=1)
             ])
         else:
-            # print("augment")
             transform = A.Compose([
                 A.Compose([
+                    A.RandomToneCurve(scale=0.1, p=p),
+                    A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p),
+                    A.GridDistortion(num_steps=3, p=p),
+                    A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
                     A.Rotate(limit=10, p=p),
                     A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-                    A.RandomScale(scale_limit=0.2, p=p),
-                    A.HorizontalFlip(p=p),
-                    A.RandomBrightnessContrast(p=p)
-                    ], p = 1),
+                    A.HorizontalFlip(p=p)
+                ], p = 1),
                 A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                #A.ToGray(p=1)
+                A.ToGray(p=1)
                 ]
                 # additional_targets={'rgb': 'image', 'mask':'mask'}
             )
