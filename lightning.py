@@ -68,8 +68,10 @@ class LitSegNet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(conf)
-        self.ignore_index = 0
+        self.hparams.ignore_index = 0
         self.hparams.resize = (480, 360)
+        self.hparams.masking = False
+        self.hparams.normalize = False
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
@@ -79,12 +81,12 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=False)
+        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
         self.ce = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
-        self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=False)
+        self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
 
         self.test_checkpoint = test_checkpoint
-        self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=False)
+        self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.test_max = test_max
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
@@ -108,7 +110,18 @@ class LitSegNet(pl.LightningModule):
         elif loss == "kl":
             return self.kl(x_hat, y)
 
-    def predict(self, batch, set):
+    def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
+        for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
+            # print(p.shape)
+            test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * 0 \
+             + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * 1 \
+             + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
+            self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.result_folder}", filename_prefix=f"proba-{self.current_epoch}")
+            self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"cls-{self.current_epoch}")
+            self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
+            self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
+
+    def predict(self, batch, set, save=False, batch_idx=None):
         x, y = batch
         x_hat = self.model(x)
 
@@ -130,7 +143,11 @@ class LitSegNet(pl.LightningModule):
         elif self.hparams.mode == "objects":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
 
-        self.log(f'{set}_loss',loss,on_epoch=True)
+        self.log(f'{set}_loss', loss, on_epoch=True)
+
+        if save:
+            self.save_result(sample=x, pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
+
         return loss
 
     def training_step(self, batch, batch_idx):
@@ -138,7 +155,10 @@ class LitSegNet(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self.predict(batch, set="val")
+        if batch_idx == 0:
+            loss = self.predict(batch, set="val", save=True, batch_idx=batch_idx)
+        else:
+            loss = self.predict(batch, set="val")
         return loss
 
     def reduce_cm(self, cms):
@@ -146,7 +166,7 @@ class LitSegNet(pl.LightningModule):
         labels = self.train_set.dataset.cls_labels
 
         cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
-        cm = torch.sum(cms,dim=0,keepdim=False)
+        cm = torch.sum(cms, dim=0, keepdim=False)
 
         # ignore void class
         # cm = cm[1:, 1:]
