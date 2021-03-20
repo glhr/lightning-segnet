@@ -46,6 +46,7 @@ class MMDataLoader(Dataset):
         self.resize = resize
 
         self.transform = transform
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def read_img(self, path, grayscale=True):
         return np.array(Image.open(path).convert('L'))
@@ -199,7 +200,7 @@ class MMDataLoader(Dataset):
             for idx in self.idx_mappings.keys():
                 indices = [i for i in self.idx_mappings[idx] if i < labels.shape[1]]
                 # print(indices)
-                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices))
+                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices).to(self.device))
                 # print(select.shape)
                 s = torch.sum(select,dim=1,keepdim=True)
                 # print(s.shape)
