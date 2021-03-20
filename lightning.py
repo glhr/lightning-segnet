@@ -46,7 +46,7 @@ parser.add_argument('--prefix', default=None)
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from metrics import ConfusionMatrix, IoU
+from pytorch_lightning.metrics import ConfusionMatrix, IoU
 
 class LitSegNet(pl.LightningModule):
 
@@ -103,9 +103,9 @@ class LitSegNet(pl.LightningModule):
         if loss == "ce":
             return self.ce(x_hat, y)
         elif loss == "sord":
-            return self.sord(x_hat, y)
+            return self.sord(x_hat, y, masking=False)
         elif loss == "kl":
-            return self.kl(x_hat, y)
+            return self.kl(x_hat, y, masking=False)
 
     def predict(self, batch, set):
         x, y = batch

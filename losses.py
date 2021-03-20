@@ -1,59 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.distributions.normal import Normal
 import torch.nn.functional as F
-
-
-class RegressionLoss(nn.Module):
-    def forward(self, output, target):
-        return nn.MSELoss()(output.squeeze(), target)
-
-
-class ClassificationLoss(nn.Module):
-    def forward(self, output, target, weights):
-        return nn.NLLLoss(weights)(output, target.long())
-
-
-class UnimodalUniformOTLoss(nn.Module):
-    """
-    https://arxiv.org/pdf/1911.02475.pdf
-    """
-
-    def __init__(self, n_classes):
-        super().__init__()
-        self.num_classes = n_classes
-        self.csi = 0.15
-        self.e = 0.05
-        self.tau = 1.
-
-    def forward(self, output, target):
-        output = torch.softmax(output, -1)
-        ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device).repeat(output.size(0), 1)
-        target_repeated = target.unsqueeze(1).repeat(1, self.num_classes)
-        p = torch.softmax(torch.exp(-torch.abs(ranks - target_repeated) / self.tau), dim=-1)
-        target_onehot = torch.nn.functional.one_hot(target.unsqueeze(0).long(), self.num_classes).squeeze()
-        uniform_term = 1. / self.num_classes
-        soft_target = (1 - self.csi - self.e) * target_onehot + self.csi * p + self.e * uniform_term
-        loss = nn.L1Loss()(torch.cumsum(output, dim=1), torch.cumsum(soft_target, dim=1))
-        return loss
-
-
-class DLDLLoss(nn.Module):
-    """
-    https://arxiv.org/pdf/1611.01731.pdf
-    """
-
-    def __init__(self, n_classes):
-        super().__init__()
-        self.num_classes = n_classes
-
-    def forward(self, output, target):
-        output = torch.nn.LogSoftmax(dim=-1)(output)
-        normal_dist = Normal(torch.arange(0, self.num_classes).to(output.device), torch.ones(self.num_classes).to(output.device))
-        soft_target = torch.softmax(normal_dist.log_prob(target.unsqueeze(1)).exp(), -1)
-        return nn.KLDivLoss()(output, soft_target)
-
 
 def flatten_tensors(inp, target):
         # ~ print(inp.shape, target.shape)
@@ -78,47 +26,51 @@ def flatten_tensors(inp, target):
         return inp, target
 
 class KLLoss(nn.Module):
-    def __init__(self, n_classes):
+    def __init__(self, n_classes, masking=False):
         super().__init__()
         self.num_classes = n_classes
+        self.masking = masking
     def forward(self, output, target, debug=False):
         output, target = flatten_tensors(output, target)
         if debug: print(output,target)
 
-        mask = target.ge(0)
-        # print(mask, mask.shape)
-        # print(output.shape,target.shape)
-        output = output[mask]
-        target = target[mask]
+        if self.masking:
+            mask = target.ge(0)
+            # print(mask, mask.shape)
+            # print(output.shape,target.shape)
+            output = output[mask]
+            target = target[mask]
         if debug: print(output,target)
-        target = F.one_hot(target, num_classes = self.num_classes).float()
+        target = F.one_hot(target, num_classes=self.num_classes).float()
         if debug: print(output,target)
         output = torch.log_softmax(output, dim=-1)
         return nn.KLDivLoss(reduction='mean')(output, target)
+
 
 class SORDLoss(nn.Module):
     """
     https://openaccess.thecvf.com/content_CVPR_2019/papers/Diaz_Soft_Labels_for_Ordinal_Regression_CVPR_2019_paper.pdf
     """
 
-    def __init__(self, n_classes, ranks = [0,1,2]):
+    def __init__(self, n_classes, ranks=None, masking=False):
         super().__init__()
         self.num_classes = n_classes
         if ranks is not None and len(ranks) == self.num_classes:
             self.ranks = ranks
         else:
             self.ranks = np.arange(0, self.num_classes)
+        self.masking = masking
 
     def forward(self, output, target, debug=False, mod_input=None):
 
-
         output, target = flatten_tensors(output, target)
 
-        mask = target.ge(0)
-        # print(mask, mask.shape)
-        # print(output.shape,target.shape)
-        output = output[mask]
-        target = target[mask]
+        if self.masking:
+            mask = target.ge(0)
+            # print(mask, mask.shape)
+            # print(output.shape,target.shape)
+            output = output[mask]
+            target = target[mask]
 
         if debug: print("output",output)
         ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
@@ -130,7 +82,7 @@ class SORDLoss(nn.Module):
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: print("soft target",soft_target)
         # output = torch.log(soft_target)
-        #flatten label and prediction tensors
+        # flatten label and prediction tensors
 
         if mod_input is not None:
             output = mod_input.long().view(-1,).unsqueeze(1).repeat(1, self.num_classes)
@@ -140,50 +92,11 @@ class SORDLoss(nn.Module):
             if debug: print("output",output)
             output = torch.log(output)
         else:
-            output = torch.log_softmax(output, dim=-1)
+            output = torch.nn.LogSoftmax(dim=-1)(output)
         return nn.KLDivLoss(reduction='mean')(output, soft_target)
 
 
-class OTLossSoft(nn.Module):
-
-    def __init__(self, n_classes):
-        super().__init__()
-        self.num_classes = n_classes
-
-    def forward(self, output, target):
-        ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
-        target = target.unsqueeze(1).repeat(1, self.num_classes)
-        soft_target = -nn.L1Loss(reduction='none')(target, ranks)  # should be of size N x num_classes
-        soft_target = torch.softmax(soft_target, dim=-1)  # like in SORD
-        loss = nn.L1Loss()(torch.cumsum(output, dim=1), torch.cumsum(soft_target, dim=1))  # like in Liu 2019
-        return loss
-
-
-class OTLoss(nn.Module):
-
-    def __init__(self, n_classes, cost='linear'):
-        super().__init__()
-        self.num_classes = n_classes
-        C0 = np.expand_dims(np.arange(n_classes), 0).repeat(n_classes, axis=0) / self.num_classes
-        C1 = np.expand_dims(np.arange(n_classes), 1).repeat(n_classes, axis=1) / self.num_classes
-
-        C = np.abs(C0 - C1)
-        if cost == 'quadratic':
-            C = C ** 2
-        elif cost == 'linear':
-            pass
-        self.C = torch.tensor(C).float()
-
-    def forward(self, output_probs, target_class):
-        C = self.C.cuda(output_probs.device)
-        costs = C[target_class.long()]
-        transport_costs = torch.sum(costs * output_probs, dim=1)
-        result = torch.mean(transport_costs)
-        return result
-
 if __name__ == '__main__':
-
-
 
     input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
     target = torch.tensor([[[1]],[[1]]])
