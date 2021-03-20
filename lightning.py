@@ -89,9 +89,11 @@ class LitSegNet(pl.LightningModule):
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.test_max = test_max
 
+        self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
+
         self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
-        self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.hparams.ignore_index)
+        self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
 
         self.result_folder = f"results/{self.hparams.dataset}"
         self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
@@ -133,19 +135,18 @@ class LitSegNet(pl.LightningModule):
 
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
+        iou = self.IoU(pred_cls, y)
 
         if self.hparams.mode == "convert":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
             pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, proba=True)
             pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
             target_aff = self.train_set.dataset.labels_obj_to_aff(y)
-            iou_aff = self.IoU(pred_cls_aff, target_aff)
+            iou_aff = self.IoU_conv(pred_cls_aff, target_aff)
             self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
         elif self.hparams.mode == "affordances":
-            iou = self.IoU(pred_cls, y)
             self.log(f'{set}_iou_aff', iou, on_epoch=True)
         elif self.hparams.mode == "objects":
-            iou = self.IoU(pred_cls, y)
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
 
         self.log(f'{set}_loss', loss, on_epoch=True)
