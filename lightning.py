@@ -82,7 +82,7 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader
         }
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.ce = nn.CrossEntropyLoss(ignore_index=self.ignore_index)
+        self.ce = nn.CrossEntropyLoss(ignore_index=self.hparams.ignore_index)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
 
         self.test_checkpoint = test_checkpoint
@@ -91,7 +91,7 @@ class LitSegNet(pl.LightningModule):
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
-        self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.ignore_index)
+        self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.hparams.ignore_index)
 
         self.result_folder = f"results/{self.hparams.dataset}"
         create_folder(self.result_folder)
@@ -170,7 +170,7 @@ class LitSegNet(pl.LightningModule):
 
         # ignore void class
         # cm = cm[1:, 1:]
-        # cm = np.delete(cm, self.ignore_index, 0)
+        # cm = np.delete(cm, self.hparams.ignore_index, 0)
         if len(labels) > self.num_cls:
             labels.pop(0)
 
