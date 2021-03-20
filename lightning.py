@@ -94,6 +94,7 @@ class LitSegNet(pl.LightningModule):
         self.IoU = IoU(num_classes=self.num_cls, ignore_index=self.hparams.ignore_index)
 
         self.result_folder = f"results/{self.hparams.dataset}"
+        self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         create_folder(self.result_folder)
 
     def forward(self, x):
@@ -116,10 +117,13 @@ class LitSegNet(pl.LightningModule):
             test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * 0 \
              + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * 1 \
              + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
-            self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.result_folder}", filename_prefix=f"proba-{self.current_epoch}")
-            self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"cls-{self.current_epoch}")
-            self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
-            self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
+            self.test_set.dataset.result_to_image(
+                iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
+                folder=f"{self.result_folder}",
+                filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-proba")
+            # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-cls")
+            # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
+            # self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
     def predict(self, batch, set, save=False, batch_idx=None):
         x, y = batch
@@ -304,7 +308,7 @@ print(args)
 segnet_model = LitSegNet(conf=args)
 
 if args.prefix is None:
-    args.prefix = f"{timestamp}-{segnet_model.hparams.dataset}-c{segnet_model.hparams.num_classes}-{segnet_model.hparams.loss}"
+    args.prefix = segnet_model.save_prefix
 print(args.prefix)
 
 checkpoint_callback = ModelCheckpoint(
