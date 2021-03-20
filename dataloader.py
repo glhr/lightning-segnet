@@ -15,7 +15,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class MMDataLoader(Dataset):
-    def __init__(self, modalities, name, mode, augment, transform=None):
+    def __init__(self, modalities, name, mode, augment, resize, transform=None):
         self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
@@ -43,7 +43,7 @@ class MMDataLoader(Dataset):
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
-        self.resize = (480,360)
+        self.resize = resize
 
         self.transform = transform
 
@@ -351,12 +351,12 @@ class MMDataLoader(Dataset):
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="freiburg", mode=mode, augment=augment)
+        super().__init__(modalities, resize=resize, name="freiburg", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -417,12 +417,12 @@ class FreiburgDataLoader(MMDataLoader):
 
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="cityscapes", mode=mode, augment=augment)
+        super().__init__(modalities, resize=resize, name="cityscapes", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -472,12 +472,12 @@ class CityscapesDataLoader(MMDataLoader):
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="kitti", mode=mode, augment=augment)
+        super().__init__(modalities, resize=resize, name="kitti", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -516,8 +516,8 @@ class KittiDataLoader(MMDataLoader):
 
 
 class OwnDataLoader(MMDataLoader):
-    def __init__(self, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
-        super().__init__(modalities, name="own", mode=mode)
+    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
+        super().__init__(modalities, resize=resize, name="own", mode=mode)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -554,6 +554,7 @@ class OwnDataLoader(MMDataLoader):
         width, height = pilRGB.size
         imgGT = Image.new('L', (width, height))
         return pilRGB, None, None, imgGT
+
 
 if __name__ == '__main__':
 

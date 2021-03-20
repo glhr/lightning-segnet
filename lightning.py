@@ -69,6 +69,7 @@ class LitSegNet(pl.LightningModule):
 
         self.save_hyperparameters(conf)
         self.ignore_index = 0
+        self.hparams.resize = (480, 360)
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
@@ -83,7 +84,7 @@ class LitSegNet(pl.LightningModule):
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=False)
 
         self.test_checkpoint = test_checkpoint
-        self.train_set, self.val_set, self.test_set = self.get_dataset(normalize=False)
+        self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=False)
         self.test_max = test_max
 
         self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
@@ -207,10 +208,16 @@ class LitSegNet(pl.LightningModule):
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
 
-    def get_dataset(self, normalize=False):
-        if self.hparams.dataset == "freiburg": # these don't have an explicit val set
-            train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+    def get_dataset(self, set, augment=None):
+        if augment is None:
+            augment = True if set == "train" else False
+        dataset = self.datasets[self.hparams.dataset](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
+        return dataset
+
+    def get_dataset_splits(self, normalize=False):
+        if self.hparams.dataset == "freiburg":
+            train_set = self.get_dataset(set="train")
+            test_set = self.get_dataset(set="test")
             test_set = Subset(test_set, indices = range(len(test_set)))
             train_set = Subset(train_set, indices = range(len(train_set)))
             val_set = Subset(test_set, indices = range(len(test_set)))
@@ -218,47 +225,48 @@ class LitSegNet(pl.LightningModule):
             # val_len = int(0.1*total_len)
             # train_len = total_len - val_len
             # train_set, val_set = random_split(train_set, [train_len, val_len])
-            if normalize:
-                mean = 0.
-                std = 0.
-                loader = DataLoader(train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
-                for images, _ in loader:
-                    batch_samples = images.size(0) # batch size (the last batch can have smaller size!)
-                    #print(images.shape)
-                    images = images.view(batch_samples, images.size(1), -1)
-                    #print(images.shape)
-                    mean += images.mean(2).sum(0)
-                    std += images.std(2).sum(0)
 
-                mean /= len(loader.dataset)
-                std /= len(loader.dataset)
-                print("Mean and stdev",mean,std)
-                normalize_params = [mean,std]
-                tf = transforms.Compose([
-                    transforms.Normalize(mean=(mean,), std=(std,))
-                ])
-                train_set.dataset.transform = tf
-                test_set.dataset.transform = tf
-                val_set.dataset.transform = tf
-            return train_set, val_set, test_set
         elif self.hparams.dataset == "kitti":
-            train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            val_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=False)
+            train_set = self.get_dataset(set="train")
+            val_set = self.get_dataset(set="train", augment=False)
             total_len = len(train_set)
             val_len = int(0.2*total_len)
             train_len = total_len - val_len*2
             train_set,_,_ = random_split(train_set, [train_len, val_len, val_len])
             _,val_set,test_set = random_split(val_set, [train_len, val_len, val_len])
             # print(test_set[0])
-            return train_set, val_set, test_set
+
         elif self.hparams.dataset == "cityscapes":
-            train_set = self.datasets[self.hparams.dataset](set="train", mode=self.hparams.mode, modalities=["rgb"], augment=True)
-            train_set = Subset(train_set, indices = range(len(train_set)))
-            val_set = self.datasets[self.hparams.dataset](set="val", mode=self.hparams.mode, modalities=["rgb"], augment=False)
-            val_set = Subset(val_set, indices = range(len(val_set)))
-            test_set = self.datasets[self.hparams.dataset](set="test", mode=self.hparams.mode, modalities=["rgb"], augment=False)
-            test_set = Subset(test_set, indices = range(len(test_set)))
-            return train_set, val_set, test_set
+            train_set = self.get_dataset(set="train")
+            train_set = Subset(train_set, indices=range(len(train_set)))
+            val_set = self.get_dataset(set="val")
+            val_set = Subset(val_set, indices=range(len(val_set)))
+            test_set = self.get_dataset(set="test")
+            test_set = Subset(test_set, indices=range(len(test_set)))
+
+        if normalize:
+            mean = 0.
+            std = 0.
+            loader = DataLoader(train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
+            for images, _ in loader:
+                batch_samples = images.size(0)  # batch size
+                # print(images.shape)
+                images = images.view(batch_samples, images.size(1), -1)
+                # print(images.shape)
+                mean += images.mean(2).sum(0)
+                std += images.std(2).sum(0)
+
+            mean /= len(loader.dataset)
+            std /= len(loader.dataset)
+            print("Mean and stdev",mean,std)
+            tf = transforms.Compose([
+                transforms.Normalize(mean=(mean,), std=(std,))
+            ])
+            train_set.dataset.transform = tf
+            test_set.dataset.transform = tf
+            val_set.dataset.transform = tf
+
+        return train_set, val_set, test_set
 
     def train_dataloader(self):
         return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
@@ -285,7 +293,7 @@ checkpoint_callback = ModelCheckpoint(
     verbose=True,
     monitor='val_loss',
     mode='min',
-    save_last = True
+    save_last=True
 )
 checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
 
