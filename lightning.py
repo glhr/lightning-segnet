@@ -133,7 +133,6 @@ class LitSegNet(pl.LightningModule):
 
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
-        iou = self.IoU(pred_cls, y)
 
         if self.hparams.mode == "convert":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
@@ -143,8 +142,10 @@ class LitSegNet(pl.LightningModule):
             iou_aff = self.IoU(pred_cls_aff, target_aff)
             self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
         elif self.hparams.mode == "affordances":
+            iou = self.IoU(pred_cls, y)
             self.log(f'{set}_iou_aff', iou, on_epoch=True)
         elif self.hparams.mode == "objects":
+            iou = self.IoU(pred_cls, y)
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
 
         self.log(f'{set}_loss', loss, on_epoch=True)
