@@ -1,15 +1,27 @@
+import os
+import numpy as np
+import random
 import json
 import glob
-import numpy as np
-
-import cv2
-from PIL import Image, ImageFile
 
 import torch
 from torchvision import transforms
 from torch.utils.data import Dataset, DataLoader
 
+import cv2
+from PIL import Image, ImageFile
+
 import albumentations as A
+
+from utils import RANDOM_SEED
+
+torch.manual_seed(RANDOM_SEED)
+torch.cuda.manual_seed_all(RANDOM_SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(RANDOM_SEED)
+random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -3,6 +3,7 @@ import coloredlogs
 import logging
 import pprint
 
+RANDOM_SEED = 2
 
 def create_folder(folder):
     Path(folder).mkdir(parents=True, exist_ok=True)

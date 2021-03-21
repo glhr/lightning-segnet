@@ -16,12 +16,11 @@ from segnet import SegNet
 from losses import SORDLoss, KLLoss, MaskedIoU
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
-from utils import create_folder, logger, enable_debug
+from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
 from argparse import ArgumentParser
 from datetime import datetime
 
-RANDOM_SEED = 2
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
 torch.backends.cudnn.deterministic = True
@@ -53,7 +52,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--momentum', type=int, default=None)
         parser.add_argument('--optim', type=str, default=None)
         parser.add_argument('--num_classes', type=int, default=3)
-        parser.add_argument('--workers', type=int, default=8)
+        parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
         parser.add_argument('--loss', default=None)
