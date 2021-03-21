@@ -1,22 +1,11 @@
-RANDOM_SEED = 2
-
 import os
 
 import numpy as np
-np.random.seed(RANDOM_SEED)
+import random
 
 import torch
-#torch.set_deterministic(True)
-torch.manual_seed(RANDOM_SEED)
-torch.cuda.manual_seed(RANDOM_SEED)
-
-import random
-random.seed(RANDOM_SEED)
-
 from torch import nn
-import torch.nn.functional as F
 from torchvision import transforms
-from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
@@ -30,15 +19,21 @@ from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug
 
 from argparse import ArgumentParser
-parser = ArgumentParser()
-
 from datetime import datetime
+
+RANDOM_SEED = 2
+torch.manual_seed(RANDOM_SEED)
+torch.cuda.manual_seed_all(RANDOM_SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(RANDOM_SEED)
+random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
 timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
-
+parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
-
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=None)
