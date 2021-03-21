@@ -24,7 +24,7 @@ torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-torch.use_deterministic_algorithms(True)
+torch.set_deterministic(True)
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
