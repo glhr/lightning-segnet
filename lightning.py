@@ -1,22 +1,10 @@
-RANDOM_SEED = 2
-
 import os
-
 import numpy as np
-np.random.seed(RANDOM_SEED)
+import random
 
 import torch
-#torch.set_deterministic(True)
-torch.manual_seed(RANDOM_SEED)
-torch.cuda.manual_seed(RANDOM_SEED)
-
-import random
-random.seed(RANDOM_SEED)
-
 from torch import nn
-import torch.nn.functional as F
 from torchvision import transforms
-from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
@@ -27,18 +15,24 @@ from segnet import SegNet
 from losses import SORDLoss, KLLoss, MaskedIoU
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
-from utils import create_folder, logger, enable_debug
+from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
 from argparse import ArgumentParser
-parser = ArgumentParser()
-
 from datetime import datetime
+
+torch.manual_seed(RANDOM_SEED)
+torch.cuda.manual_seed_all(RANDOM_SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+torch.set_deterministic(True)
+np.random.seed(RANDOM_SEED)
+random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
 timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
-
+parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
-
 parser.add_argument('--gpus', type=int, default=1)
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=None)
@@ -58,14 +52,16 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--momentum', type=int, default=None)
         parser.add_argument('--optim', type=str, default=None)
         parser.add_argument('--num_classes', type=int, default=3)
-        parser.add_argument('--workers', type=int, default=8)
+        parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
+        parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
         return parser
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__()
+        pl.seed_everything(RANDOM_SEED)
 
         self.save_hyperparameters(conf)
         self.hparams.resize = (480, 240)
@@ -248,7 +244,7 @@ class LitSegNet(pl.LightningModule):
 
     def get_dataset(self, set, augment=None):
         if augment is None:
-            augment = True if set == "train" else False
+            augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[self.hparams.dataset](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
         return dataset
 
@@ -307,13 +303,13 @@ class LitSegNet(pl.LightningModule):
         return train_set, val_set, test_set
 
     def train_dataloader(self):
-        return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True, worker_init_fn=random.seed(RANDOM_SEED))
+        return DataLoader(self.train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=True)
 
     def val_dataloader(self):
-        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False, worker_init_fn=random.seed(RANDOM_SEED))
+        return DataLoader(self.val_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
 
     def test_dataloader(self):
-        return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False, worker_init_fn=random.seed(RANDOM_SEED))
+        return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
