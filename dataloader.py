@@ -36,10 +36,10 @@ class MMDataLoader(Dataset):
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
         self.aff_idx = {
-            "void": 0,
-            "impossible": 1,
-            "possible": 2,
-            "preferable": 3
+            "void": -1,
+            "impossible": 0,
+            "possible": 1,
+            "preferable": 2
         }
 
         self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
@@ -189,7 +189,7 @@ class MMDataLoader(Dataset):
             # print(idx, "->", self.get_color(idx, mode=mode))
         return data
 
-    def labels_obj_to_aff(self, labels, num_cls=4, proba=False):
+    def labels_obj_to_aff(self, labels, num_cls=3, proba=False):
         if proba:
             # labels = labels.squeeze()
             # print(labels.shape)

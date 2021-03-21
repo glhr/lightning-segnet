@@ -68,10 +68,8 @@ class LitSegNet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(conf)
-        self.hparams.ignore_index_orig = 0
-        self.hparams.ignore_index_conv = 0
         self.hparams.resize = (480, 240)
-        self.hparams.masking = False
+        self.hparams.masking = True
         self.hparams.normalize = False
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
@@ -82,8 +80,9 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.ce = nn.CrossEntropyLoss(ignore_index=self.hparams.ignore_index_orig)
+        self.hparams.ranks = range(self.hparams.num_classes)
+        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.ranks)
+        self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
 
         self.test_checkpoint = test_checkpoint
@@ -92,13 +91,11 @@ class LitSegNet(pl.LightningModule):
 
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
-        self.hparams.labels_orig.remove(self.hparams.ignore_index_orig)
         self.hparams.labels_orig = list(self.hparams.labels_orig)
         self.IoU = MaskedIoU(labels=self.hparams.labels_orig)
 
-        self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
+        self.num_cls = 3 if self.hparams.mode == "convert" else self.hparams.num_classes
         self.hparams.labels_conv = set(range(self.num_cls))
-        self.hparams.labels_conv.remove(self.hparams.ignore_index_conv)
         self.hparams.labels_conv = list(self.hparams.labels_conv)
 
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')

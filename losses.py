@@ -62,7 +62,7 @@ class MaskedIoU(nn.Module):
         output = output.detach().cpu().numpy()
         target = target.detach().cpu().numpy()
 
-        iou = jaccard_score(target, output, labels=self.labels, average='macro')
+        iou = jaccard_score(target, output, labels=self.labels, average='macro', zero_division=0)
 
         return iou
 
