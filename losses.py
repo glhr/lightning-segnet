@@ -47,6 +47,7 @@ class KLLoss(nn.Module):
             target = target[mask]
 
         n_samples = target.shape[0]
+        logger.debug(f"KLLoss n_samples {n_samples}")
         if debug: print(output,target)
         target = F.one_hot(target, num_classes=self.num_classes).float()
         if debug: print(output,target)
@@ -116,6 +117,7 @@ class SORDLoss(nn.Module):
             logger.debug(f"SORD - after masking: target shape {target.shape} | output shape {output.shape}")
 
         n_samples = target.shape[0]
+        logger.debug(f"SORDLoss n_samples {n_samples}")
 
         if debug: print("output",output)
         ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
