@@ -55,6 +55,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
+        parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
         return parser
 
@@ -242,7 +243,7 @@ class LitSegNet(pl.LightningModule):
 
     def get_dataset(self, set, augment=None):
         if augment is None:
-            augment = True if set == "train" else False
+            augment = self.augment if set == "train" else False
         dataset = self.datasets[self.hparams.dataset](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
         return dataset
 
