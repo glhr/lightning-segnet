@@ -22,7 +22,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
-from losses import SORDLoss, KLLoss, flatten_tensors
+from losses import SORDLoss, KLLoss, MaskedIoU, flatten_tensors
 from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
 from utils import *
@@ -90,6 +90,7 @@ class LitSegNet(pl.LightningModule):
         self.test_max = test_max
 
         self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
+        self.IoU_masked = MaskedIoU(n_classes=self.hparams.num_classes, labels=[1,2,3])
 
         self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
@@ -221,9 +222,11 @@ class LitSegNet(pl.LightningModule):
             try:
                 cm = self.CM(pred_cls, target)
                 # print(cm.shape)
-                iou = self.IoU(pred_cls, target)
+                iou = self.IoU_conv(pred_cls, target)
+                iou_masked= self.IoU_masked(pred, target)
 
                 self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                self.log('test_iou_masked', iou_masked, on_step=False, prog_bar=False, on_epoch=True)
                 self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             except Exception as e:
                 print("Couldn't compute eval metrics",e)

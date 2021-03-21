@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from sklearn.metrics import jaccard_score
+
 def flatten_tensors(inp, target):
         # ~ print(inp.shape, target.shape)
         # ~ print(inp, target)
@@ -45,6 +47,28 @@ class KLLoss(nn.Module):
         if debug: print(output,target)
         output = torch.log_softmax(output, dim=-1)
         return nn.KLDivLoss(reduction='mean')(output, target)
+
+class MaskedIoU(nn.Module):
+    def __init__(self, n_classes, labels=None):
+        super().__init__()
+        self.num_classes = n_classes
+        if labels is not None:
+            self.labels = labels
+        else:
+            self.labels = range(self.num_classes)
+
+    def forward(self, output, target, debug=False, mod_input=None):
+
+        output, target = flatten_tensors(output, target)
+        output = torch.argmax(output, dim=-1)
+
+        output = output.detach().cpu().numpy()
+        target = target.detach().cpu().numpy()
+
+        iou = jaccard_score(target, output, labels=self.labels, average='macro')
+
+        return iou
+
 
 
 class SORDLoss(nn.Module):
