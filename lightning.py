@@ -243,7 +243,7 @@ class LitSegNet(pl.LightningModule):
 
     def get_dataset(self, set, augment=None):
         if augment is None:
-            augment = self.augment if set == "train" else False
+            augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[self.hparams.dataset](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
         return dataset
 
