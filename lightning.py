@@ -22,8 +22,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 
 from segnet import SegNet
-from losses import SORDLoss, KLLoss, MaskedIoU, flatten_tensors
-from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
+from losses import SORDLoss, KLLoss, MaskedIoU
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger
 
@@ -69,8 +69,10 @@ class LitSegNet(pl.LightningModule):
 
         self.save_hyperparameters(conf)
         self.hparams.resize = (480, 240)
-        self.hparams.masking = False
+        self.hparams.masking = True
         self.hparams.normalize = False
+        self.test_checkpoint = test_checkpoint
+        self.test_max = test_max
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
 
@@ -85,9 +87,9 @@ class LitSegNet(pl.LightningModule):
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
 
-        self.test_checkpoint = test_checkpoint
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
-        self.test_max = test_max
+        self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
+            len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
 
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))

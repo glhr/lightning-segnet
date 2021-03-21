@@ -14,6 +14,7 @@ import albumentations as A
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 class MMDataLoader(Dataset):
     def __init__(self, modalities, name, mode, augment, resize, transform=None):
         self.idx = 0
@@ -351,6 +352,7 @@ class MMDataLoader(Dataset):
             s[0] = self.transform(s[0])
         return s
 
+
 class FreiburgDataLoader(MMDataLoader):
 
     def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False):
@@ -417,6 +419,7 @@ class FreiburgDataLoader(MMDataLoader):
 
         return pilRGB, pilDep, pilIR, imgGT
 
+
 class CityscapesDataLoader(MMDataLoader):
 
     def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False):
@@ -469,7 +472,6 @@ class CityscapesDataLoader(MMDataLoader):
         pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('L')
         imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
-
 
 
 class KittiDataLoader(MMDataLoader):

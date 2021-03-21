@@ -2,6 +2,7 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 
+
 def plot_confusion_matrix(array, labels=None, filename=None, folder="", vmax=0.9, cbar=False, cmap="Blues", annot=True, vmin=None):
     l = len(array)
     df_cm = pd.DataFrame(array, range(l), range(l))
