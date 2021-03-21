@@ -87,14 +87,19 @@ class SORDLoss(nn.Module):
 
     def forward(self, output, target, debug=False, mod_input=None):
 
+        logger.debug(f"SORD - before flatten: target shape {target.shape} | output shape {output.shape}")
         output, target = flatten_tensors(output, target)
+        logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
 
         if self.masking:
+            logger.debug(f"SORD - before masking: target shape {target.shape} | output shape {output.shape}")
             mask = target.ge(0)
+            logger.debug(f"SORD - mask shape: {mask.shape}")
             # print(mask, mask.shape)
             # print(output.shape,target.shape)
             output = output[mask]
             target = target[mask]
+            logger.debug(f"SORD - after masking: target shape {target.shape} | output shape {output.shape}")
 
         if debug: print("output",output)
         ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
