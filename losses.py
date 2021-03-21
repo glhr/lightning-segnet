@@ -56,7 +56,7 @@ class MaskedIoU(nn.Module):
         self.labels = list(labels)
         logger.info(f"IoU labels: {self.labels}")
 
-    def forward(self, output, target):
+    def forward(self, output, target, debug=False):
 
         output, target = flatten_tensors(output, target)
         output = torch.argmax(output, dim=-1)
@@ -64,9 +64,18 @@ class MaskedIoU(nn.Module):
         output = output.detach().cpu().numpy()
         target = target.detach().cpu().numpy()
 
-        iou = jaccard_score(target, output, labels=self.labels, average='macro', zero_division=0)
+        iou_micro = jaccard_score(target, output, labels=self.labels, average='micro', zero_division=0)
 
-        return iou
+        if debug:
+            iou_macro = jaccard_score(target, output, labels=self.labels, average='macro', zero_division=0)
+            iou_cls = jaccard_score(target, output, labels=self.labels, average=None, zero_division=0)
+            logger.debug(f"MaskedIoU inputs: target {target}, pred {output}")
+            logger.debug(f"MaskedIoU micro {iou_micro} | macro {iou_macro}")
+            logger.debug(f"MaskedIoU per class {iou_cls}")
+        else:
+            logger.debug(f"MaskedIoU micro {iou_micro}")
+
+        return iou_micro
 
 
 
@@ -148,7 +157,8 @@ if __name__ == '__main__':
     level = {
         "pref": 2,
         "poss": 1,
-        "imposs": 0
+        "imposs": 0,
+        "void": -1
     }
 
     input = torch.tensor([onehot[args.pred]], requires_grad=True)
@@ -164,7 +174,8 @@ if __name__ == '__main__':
     # ~ input, target = flatten_tensors(input, target)
     # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
     cm = np.zeros((3, 3))
-    sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]])
+    sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]], masking=True)
+    print("SORD",sord(input, target))
 
     # for p,pred in enumerate(level.keys()):
     #     for g,gt in enumerate(level.keys()):
@@ -202,6 +213,9 @@ if __name__ == '__main__':
     # print(cm)
     # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
 
-    kl = KLLoss(n_classes = 3)
+    kl = KLLoss(n_classes = 3, masking=True)
     loss = kl(input, target)
-    print(loss)
+    print("KL",loss)
+
+    iou = MaskedIoU(labels=[0,1,2])
+    print(iou(input,target))
