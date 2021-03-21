@@ -34,6 +34,7 @@ class KLLoss(nn.Module):
         super().__init__()
         self.num_classes = n_classes
         self.masking = masking
+
     def forward(self, output, target, debug=False):
         output, target = flatten_tensors(output, target)
         if debug: print(output,target)
@@ -44,11 +45,15 @@ class KLLoss(nn.Module):
             # print(output.shape,target.shape)
             output = output[mask]
             target = target[mask]
+
+        n_samples = target.shape[0]
         if debug: print(output,target)
         target = F.one_hot(target, num_classes=self.num_classes).float()
         if debug: print(output,target)
-        output = torch.log_softmax(output, dim=-1)
-        return nn.KLDivLoss(reduction='mean')(output, target)
+        output = torch.nn.LogSoftmax(dim=-1)(output)
+        loss = nn.KLDivLoss(reduction='none')(output, target)
+        loss = torch.sum(loss)/n_samples
+        return loss
 
 class MaskedIoU(nn.Module):
     def __init__(self, labels):
@@ -110,6 +115,8 @@ class SORDLoss(nn.Module):
             target = target[mask]
             logger.debug(f"SORD - after masking: target shape {target.shape} | output shape {output.shape}")
 
+        n_samples = target.shape[0]
+
         if debug: print("output",output)
         ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
         if debug: print("ranks",ranks)
@@ -131,7 +138,11 @@ class SORDLoss(nn.Module):
             output = torch.log(output)
         else:
             output = torch.nn.LogSoftmax(dim=-1)(output)
-        return nn.KLDivLoss(reduction='mean')(output, soft_target)
+
+        loss = nn.KLDivLoss(reduction='none')(output, soft_target)
+        #print(n_samples)
+        loss = torch.sum(loss)/n_samples
+        return loss
 
 
 if __name__ == '__main__':
@@ -161,8 +172,8 @@ if __name__ == '__main__':
         "void": -1
     }
 
-    input = torch.tensor([onehot[args.pred]], requires_grad=True)
-    target = torch.tensor([level[args.gt]], dtype=torch.long)
+    input = torch.tensor([onehot[args.pred],onehot[args.pred],onehot[args.pred],onehot[args.pred]], requires_grad=True)
+    target = torch.tensor([level[args.gt],level[args.gt],level[args.gt],level[args.gt]], dtype=torch.long)
     # ~ print(target, input, "CE ->", output)
     # ~ input = torch.randn(1, 3, requires_grad=True)
     # ~ target = torch.empty(1, dtype=torch.long).random_(3)
