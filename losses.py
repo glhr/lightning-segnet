@@ -49,15 +49,12 @@ class KLLoss(nn.Module):
         return nn.KLDivLoss(reduction='mean')(output, target)
 
 class MaskedIoU(nn.Module):
-    def __init__(self, n_classes, labels=None):
+    def __init__(self, labels):
         super().__init__()
-        self.num_classes = n_classes
-        if labels is not None:
-            self.labels = labels
-        else:
-            self.labels = range(self.num_classes)
+        self.labels = list(labels)
+        print("---IoU labels", self.labels, "---")
 
-    def forward(self, output, target, debug=False, mod_input=None):
+    def forward(self, output, target):
 
         output, target = flatten_tensors(output, target)
         output = torch.argmax(output, dim=-1)

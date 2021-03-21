@@ -46,7 +46,7 @@ parser.add_argument('--prefix', default=None)
 
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from pytorch_lightning.metrics import ConfusionMatrix, IoU
+from pytorch_lightning.metrics import ConfusionMatrix
 
 class LitSegNet(pl.LightningModule):
 
@@ -68,7 +68,8 @@ class LitSegNet(pl.LightningModule):
         super().__init__()
 
         self.save_hyperparameters(conf)
-        self.hparams.ignore_index = 0
+        self.hparams.ignore_index_orig = 0
+        self.hparams.ignore_index_conv = 0
         self.hparams.resize = (480, 240)
         self.hparams.masking = False
         self.hparams.normalize = False
@@ -82,19 +83,25 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader
         }
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.ce = nn.CrossEntropyLoss(ignore_index=self.hparams.ignore_index)
+        self.ce = nn.CrossEntropyLoss(ignore_index=self.hparams.ignore_index_orig)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
 
         self.test_checkpoint = test_checkpoint
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.test_max = test_max
 
-        self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
-        self.IoU_masked = MaskedIoU(n_classes=self.hparams.num_classes, labels=[1,2,3])
+        # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
+        self.hparams.labels_orig = set(range(self.hparams.num_classes))
+        self.hparams.labels_orig.remove(self.hparams.ignore_index_orig)
+        self.IoU = MaskedIoU(labels=self.hparams.labels_orig)
 
         self.num_cls = 4 if self.hparams.mode == "convert" else self.hparams.num_classes
+        self.hparams.labels_conv = set(range(self.num_cls))
+        self.hparams.labels_conv.remove(self.hparams.ignore_index_conv)
+
         self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
-        self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
+        # self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
+        self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
         self.result_folder = f"results/{self.hparams.dataset}"
         self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
@@ -136,14 +143,14 @@ class LitSegNet(pl.LightningModule):
 
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
-        iou = self.IoU(pred_cls, y)
+        iou = self.IoU(x_hat, y)
 
         if self.hparams.mode == "convert":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
             pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, num_cls=self.num_cls, proba=True)
             pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
             target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
-            iou_aff = self.IoU_conv(pred_cls_aff, target_aff)
+            iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
             self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
         elif self.hparams.mode == "affordances":
             self.log(f'{set}_iou_aff', iou, on_epoch=True)
@@ -222,11 +229,9 @@ class LitSegNet(pl.LightningModule):
             try:
                 cm = self.CM(pred_cls, target)
                 # print(cm.shape)
-                iou = self.IoU_conv(pred_cls, target)
-                iou_masked= self.IoU_masked(pred, target)
+                iou = self.IoU_conv(pred, target)
 
                 self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-                self.log('test_iou_masked', iou_masked, on_step=False, prog_bar=False, on_epoch=True)
                 self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             except Exception as e:
                 print("Couldn't compute eval metrics",e)
