@@ -61,6 +61,7 @@ class LitSegNet(pl.LightningModule):
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__()
+        pl.seed_everything(RANDOM_SEED)
 
         self.save_hyperparameters(conf)
         self.hparams.resize = (480, 240)
