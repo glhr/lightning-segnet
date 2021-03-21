@@ -25,7 +25,7 @@ from segnet import SegNet
 from losses import SORDLoss, KLLoss, MaskedIoU, flatten_tensors
 from dataloader import MMDataLoader, FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
-from utils import *
+from utils import create_folder, logger
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -69,7 +69,7 @@ class LitSegNet(pl.LightningModule):
 
         self.save_hyperparameters(conf)
         self.hparams.resize = (480, 240)
-        self.hparams.masking = True
+        self.hparams.masking = False
         self.hparams.normalize = False
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
@@ -104,7 +104,7 @@ class LitSegNet(pl.LightningModule):
 
         self.result_folder = f"results/{self.hparams.dataset}"
         self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
-        create_folder(self.result_folder)
+        create_folder(f"{self.result_folder}/viz_per_epoch")
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -325,7 +325,7 @@ print(args.prefix)
 
 checkpoint_callback = ModelCheckpoint(
     dirpath='lightning_logs',
-    filename= args.prefix + '-{epoch}-{val_loss:.4f}',
+    filename=args.prefix+'-{epoch}-{val_loss:.4f}',
     verbose=True,
     monitor='val_loss',
     mode='min',
@@ -334,6 +334,7 @@ checkpoint_callback = ModelCheckpoint(
 checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
 
 if args.train:
+    logger.warning("Training phase")
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
     wandb_logger.log_hyperparams(segnet_model.hparams)
 
@@ -346,7 +347,7 @@ if args.train:
     trainer.fit(segnet_model)
 
 else:
-    print("Testing phase")
+    logger.warning("Testing phase")
     trainer = pl.Trainer.from_argparse_args(args)
     trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
     trainer.test(trained_model)

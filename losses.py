@@ -2,8 +2,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 from sklearn.metrics import jaccard_score
+
+from utils import logger
+
 
 def flatten_tensors(inp, target):
         # ~ print(inp.shape, target.shape)
@@ -52,7 +54,7 @@ class MaskedIoU(nn.Module):
     def __init__(self, labels):
         super().__init__()
         self.labels = list(labels)
-        print("---IoU labels", self.labels, "---")
+        logger.info(f"IoU labels: {self.labels}")
 
     def forward(self, output, target):
 
@@ -81,6 +83,7 @@ class SORDLoss(nn.Module):
         else:
             self.ranks = np.arange(0, self.num_classes)
         self.masking = masking
+        logger.info(f"SORD ranks: {self.ranks}")
 
     def forward(self, output, target, debug=False, mod_input=None):
 
