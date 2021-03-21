@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.metrics import jaccard_score
 
-from utils import logger
+from utils import logger, enable_debug
 
 
 def flatten_tensors(inp, target):
@@ -157,8 +157,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--pred', default="pref")
     parser.add_argument('--gt', default="pref")
+    parser.add_argument('--debug', default=True, action="store_true")
     args = parser.parse_args()
     print(args)
+
+    if args.debug: enable_debug()
 
     onehot = {
         "pref": [0.0, 0.0, 1.0],

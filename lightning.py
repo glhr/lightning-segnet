@@ -20,12 +20,14 @@ from torchvision.datasets import MNIST
 from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.metrics import ConfusionMatrix
 
 from segnet import SegNet
 from losses import SORDLoss, KLLoss, MaskedIoU
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
-from utils import create_folder, logger
+from utils import create_folder, logger, enable_debug
 
 from argparse import ArgumentParser
 parser = ArgumentParser()
@@ -43,10 +45,8 @@ parser.add_argument('--test_samples', type=int, default=None)
 parser.add_argument('--test_checkpoint', default="lightning_logs/test.ckpt")
 parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
+parser.add_argument('--debug', default=False, action="store_true")
 
-from pytorch_lightning.callbacks import ModelCheckpoint
-
-from pytorch_lightning.metrics import ConfusionMatrix
 
 class LitSegNet(pl.LightningModule):
 
@@ -317,6 +317,7 @@ class LitSegNet(pl.LightningModule):
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
+if args.debug: enable_debug()
 
 print(args)
 segnet_model = LitSegNet(conf=args)
