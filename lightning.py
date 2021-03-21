@@ -152,7 +152,10 @@ class LitSegNet(pl.LightningModule):
         self.log(f'{set}_loss', loss, on_epoch=True)
 
         if save:
-            self.save_result(sample=x, pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
+            if self.hparams.mode == "convert":
+                self.save_result(sample=x, pred=pred_proba_aff, pred_cls=pred_cls_aff, target=target_aff, batch_idx=batch_idx)
+            else:
+                self.save_result(sample=x, pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
 
         return loss
 

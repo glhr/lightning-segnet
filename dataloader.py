@@ -189,7 +189,7 @@ class MMDataLoader(Dataset):
             # print(idx, "->", self.get_color(idx, mode=mode))
         return data
 
-    def labels_obj_to_aff(self, labels, num_cls=3, proba=False):
+    def labels_obj_to_aff(self, labels, num_cls=4, proba=False):
         if proba:
             # labels = labels.squeeze()
             # print(labels.shape)
