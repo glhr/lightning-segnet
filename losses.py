@@ -2,32 +2,33 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sklearn.metrics import jaccard_score
 
 from utils import logger, enable_debug
 
 
+
 def flatten_tensors(inp, target):
-        # ~ print(inp.shape, target.shape)
-        # ~ print(inp, target)
-        target = target.long()
-        num_classes = inp.size()[1]
+    # ~ print(inp.shape, target.shape)
+    # ~ print(inp, target)
+    target = target.long()
+    num_classes = inp.size()[1]
 
-        i0 = 1
-        i1 = 2
+    i0 = 1
+    i1 = 2
 
-        while i1 < len(inp.shape): # this is ugly but torch only allows to transpose two axes at once
-            inp = inp.transpose(i0, i1)
-            i0 += 1
-            i1 += 1
+    while i1 < len(inp.shape):  # this is ugly but torch only allows to transpose two axes at once
+        inp = inp.transpose(i0, i1)
+        i0 += 1
+        i1 += 1
 
-        inp = inp.contiguous()
-        inp = inp.view(-1, num_classes)
+    inp = inp.contiguous()
+    inp = inp.view(-1, num_classes)
 
-        target = target.view(-1,)
-        # ~ print(inp.shape, target.shape)
-        # ~ print(inp, target)
-        return inp, target
+    target = target.view(-1,)
+    # ~ print(inp.shape, target.shape)
+    # ~ print(inp, target)
+    return inp, target
+
 
 class KLLoss(nn.Module):
     def __init__(self, n_classes, masking=False):
@@ -56,32 +57,7 @@ class KLLoss(nn.Module):
         loss = torch.sum(loss)/n_samples
         return loss
 
-class MaskedIoU(nn.Module):
-    def __init__(self, labels):
-        super().__init__()
-        self.labels = list(labels)
-        logger.info(f"IoU labels: {self.labels}")
 
-    def forward(self, output, target, debug=False):
-
-        output, target = flatten_tensors(output, target)
-        output = torch.argmax(output, dim=-1)
-
-        output = output.detach().cpu().numpy()
-        target = target.detach().cpu().numpy()
-
-        iou_micro = jaccard_score(target, output, labels=self.labels, average='micro', zero_division=0)
-
-        if debug:
-            iou_macro = jaccard_score(target, output, labels=self.labels, average='macro', zero_division=0)
-            iou_cls = jaccard_score(target, output, labels=self.labels, average=None, zero_division=0)
-            logger.debug(f"MaskedIoU inputs: target {target}, pred {output}")
-            logger.debug(f"MaskedIoU micro {iou_micro} | macro {iou_macro}")
-            logger.debug(f"MaskedIoU per class {iou_cls}")
-        else:
-            logger.debug(f"MaskedIoU micro {iou_micro}")
-
-        return iou_micro
 
 
 
@@ -148,6 +124,8 @@ class SORDLoss(nn.Module):
 
 
 if __name__ == '__main__':
+
+    from metrics import MaskedIoU
 
     input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
     target = torch.tensor([[[1]],[[1]]])
