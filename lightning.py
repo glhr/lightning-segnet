@@ -100,7 +100,7 @@ class LitSegNet(pl.LightningModule):
         # self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
-        self.result_folder = f"results/{self.hparams.dataset}"
+        self.result_folder = f"results/{self.hparams.dataset}/c{self.hparams.num_classes}-{self.hparams.loss}/"
         self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         create_folder(f"{self.result_folder}/viz_per_epoch")
 
@@ -199,7 +199,7 @@ class LitSegNet(pl.LightningModule):
         sample, target = batch
 
         if self.test_max is None or batch_idx < self.test_max:
-            print(torch.min(sample),torch.max(sample))
+            # print(torch.min(sample),torch.max(sample))
             pred = self.model(sample)
             pred = torch.softmax(pred, dim=1)
 
