@@ -78,7 +78,7 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.hparams.ranks = [0, 1.5, 2]
+        self.hparams.ranks = range(self.hparams.num_classes)
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
