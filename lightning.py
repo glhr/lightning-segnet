@@ -78,8 +78,8 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.hparams.ranks = range(self.hparams.num_classes)
-        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.ranks)
+        self.hparams.ranks = [0, 1.5, 2]
+        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
 
@@ -121,9 +121,9 @@ class LitSegNet(pl.LightningModule):
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
             # print(p.shape)
-            test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * 0 \
-             + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * 1 \
-             + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
+            test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * self.hparams.ranks[0] \
+             + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * self.hparams.ranks[1] \
+             + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * self.hparams.ranks[2]
             self.test_set.dataset.result_to_image(
                 iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
                 folder=f"{self.result_folder}/viz_per_epoch",
