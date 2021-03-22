@@ -1,5 +1,20 @@
+import os
+import numpy as np
+import random
+
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from utils import RANDOM_SEED
+
+torch.manual_seed(RANDOM_SEED)
+torch.cuda.manual_seed_all(RANDOM_SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(RANDOM_SEED)
+random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
 
 class SegNet(nn.Module):

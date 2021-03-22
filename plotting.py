@@ -2,7 +2,8 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def plot_confusion_matrix(array, labels=None, filename=None, folder=""):
+
+def plot_confusion_matrix(array, labels=None, filename=None, folder="", vmax=0.9, cbar=False, cmap="Blues", annot=True, vmin=None):
     l = len(array)
     df_cm = pd.DataFrame(array, range(l), range(l))
 
@@ -11,7 +12,7 @@ def plot_confusion_matrix(array, labels=None, filename=None, folder=""):
 
     sn.set(font_scale=1.4) # for label size
 
-    p = sn.heatmap(df_cm, annot=True, annot_kws={"size": 16}, cmap="Blues", square=True, cbar=False, vmax=0.9)
+    p = sn.heatmap(df_cm, annot=annot, annot_kws={"size": 16}, cmap=cmap, square=True, cbar=cbar, vmax=vmax, vmin=vmin)
 
     if labels is not None:
         p.set_xticklabels(labels)

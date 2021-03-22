@@ -1,20 +1,35 @@
+import os
+import numpy as np
+import random
 import json
 import glob
-import numpy as np
+
+import torch
+from torchvision import transforms
+from torch.utils.data import Dataset, DataLoader
 
 import cv2
 from PIL import Image, ImageFile
 
-import torch
-from torchvision import transforms
-
 import albumentations as A
+
+from utils import RANDOM_SEED
+
+torch.manual_seed(RANDOM_SEED)
+torch.cuda.manual_seed_all(RANDOM_SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+np.random.seed(RANDOM_SEED)
+random.seed(RANDOM_SEED)
+os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class MMDataLoader():
-    def __init__(self, modalities, name, mode):
+
+class MMDataLoader(Dataset):
+    def __init__(self, modalities, name, mode, augment, resize, transform=None):
+        self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.modalities = modalities
@@ -25,6 +40,7 @@ class MMDataLoader():
 
         self.filenames = []
 
+        self.augment = augment
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
         self.mode = mode
@@ -32,46 +48,70 @@ class MMDataLoader():
 
         self.cls_labels = ["void", "impossible","possible","preferable"]
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment=False, color_GT=True):
+        self.aff_idx = {
+            "void": -1,
+            "impossible": 0,
+            "possible": 1,
+            "preferable": 2
+        }
 
-        imgGT = np.array(imgGT)
+        self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
+        self.resize = resize
 
-        if pilRGB is not None: imgRGB = np.array(pilRGB)
-        if pilDep is not None: imgDep = np.array(pilDep)
-        if pilIR is not None: imgIR = np.array(pilIR)
+        self.transform = transform
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        if augment:
-            img_dict = {
-                'image': imgRGB,
-                # 'depth': imgDep,
-                # 'ir': imgIR,
-                'mask': imgGT
-                }
-            transformed_imgs = self.data_augmentation(img_dict)
-            imgRGB, imgGT = transformed_imgs['image'], transformed_imgs['mask']
+    def read_img(self, path, grayscale=True):
+        return np.array(Image.open(path).convert('L'))
 
-        if color_GT: imgGT = imgGT[:, :, ::-1]
-
-        resize = (480,360)
-        if pilRGB is not None: modRGB = cv2.resize(imgRGB, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-        if pilDep is not None: modDepth = cv2.resize(imgDep, dsize=resize, interpolation=cv2.INTER_NEAREST) / 255
-        if pilIR is not None: modIR = cv2.resize(imgIR, dsize=resize, interpolation=cv2.INTER_LINEAR) / 255
-        modGT = cv2.resize(imgGT, dsize=resize, interpolation=cv2.INTER_NEAREST)
-        # print(modGT.shape)
-        # print(modGT[0][0])
+    def prepare_GT(self, imgGT, color_GT=False):
 
         if color_GT:
-            modGT = cv2.cvtColor(modGT, cv2.COLOR_BGR2RGB)
-            modGT = self.mask_to_class_rgb(modGT)
+            #modGT = imgGT[:, :, ::-1]
+            modGT = self.mask_to_class_rgb(imgGT)
         # print(modGT.shape)
         else:
-            modGT = torch.tensor(modGT, dtype=torch.long)
-
-        if pilRGB is not None: modRGB = modRGB[: , :, 2]
-        if pilDep is not None: modDepth = modDepth[: , :, 2]
-        if pilIR is not None: modIR = modIR[: , :, 2]
+            modGT = torch.tensor(imgGT, dtype=torch.long)
 
         if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
+
+        return modGT
+
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False):
+
+        imgGT_orig = np.array(imgGT)
+
+        if pilRGB is not None: imgRGB_orig = np.array(pilRGB)
+        if pilDep is not None: imgDep_orig = np.array(pilDep)
+        if pilIR is not None: imgIR_orig = np.array(pilIR)
+
+        img_dict = {
+            'image': imgRGB_orig,
+            # 'depth': imgDep,
+            # 'ir': imgIR,
+            'mask': imgGT_orig
+            }
+
+        if augment: transformed_imgs = self.data_augmentation(img_dict, resize_only=False)
+        else: transformed_imgs = self.data_augmentation(img_dict, resize_only=True)
+        modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
+        if pilDep is not None: modDepth = np.array(imgDep_orig)
+        if pilIR is not None: modIR = np.array(imgIR_orig)
+
+        modGT = self.prepare_GT(modGT, color_GT)
+
+        if pilRGB is not None and len(modRGB.shape)==3: modRGB = modRGB[: , :, 2]
+        if pilDep is not None and len(modDepth.shape)==3: modDepth = modDepth[: , :, 2]
+        if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
+
+        if save:
+            orig_imgs = self.data_augmentation(img_dict, resize_only=True)
+            imgRGB_orig, imgGT_orig = orig_imgs['image'], orig_imgs['mask']
+            imgRGB_orig = imgRGB_orig[: , :, 2]
+            imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
+            # print(np.unique(modGT))
+            self.result_to_image(gt=modGT, orig=modRGB, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-tf")
+            self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-orig")
 
         imgs = []
         img = {
@@ -83,40 +123,40 @@ class MMDataLoader():
             if img[mod] is not None:
                 imgs.append(img[mod].copy())
 
-        return torch.from_numpy(np.array(imgs)).float(), modGT
+        return [torch.from_numpy(np.array(imgs)).float(), modGT]
 
     def remap_classes(self, idx_to_color):
 
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static']
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge']
         void = ['void','egovehicle','outofroi','rectificationborder','unlabeled']
-        driveable = ['road','path','ground','bridge','tunnel']
+        driveable = ['road','path','ground','tunnel']
         between = ['grass','terrain','sidewalk','parking','railtrack']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
-            0: set(),
-            1: set(),
-            2: set(),
-            3: set()
+            self.aff_idx["void"]: set(),
+            self.aff_idx["impossible"]: set(),
+            self.aff_idx["possible"]: set(),
+            self.aff_idx["preferable"]: set()
         }
 
         for i in undriveable:
-            objclass_to_driveidx[i] = 1
+            objclass_to_driveidx[i] = self.aff_idx["impossible"]
         for i in driveable:
-            objclass_to_driveidx[i] = 3
+            objclass_to_driveidx[i] = self.aff_idx["preferable"]
         for i in between:
-            objclass_to_driveidx[i] = 2
+            objclass_to_driveidx[i] = self.aff_idx["possible"]
         for i in void:
-            objclass_to_driveidx[i] = 0
+            objclass_to_driveidx[i] = self.aff_idx["void"]
 
 
-        print(objclass_to_driveidx)
+        # print(objclass_to_driveidx)
         idx_to_color_new = {
-            0: (0,0,0),
-            1: (255,0,0),
-            2: (255,255,0),
-            3: (0,255,0)
+            self.aff_idx["void"]: (0,0,0),
+            self.aff_idx["impossible"]: (255,0,0),
+            self.aff_idx["possible"]: (255,255,0),
+            self.aff_idx["preferable"]: (0,255,0)
         }
         color_to_idx_new = dict()
         conversion = dict()
@@ -137,9 +177,9 @@ class MMDataLoader():
                 pass
 
         idx_mappings = {k:list(v) for k,v in idx_mappings.items()}
-        print(idx_mappings)
-        print(conversion)
-        print("idx_to_idx", idx_to_idx)
+        # print(idx_mappings)
+        # print(conversion)
+        # print("idx_to_idx", idx_to_idx)
         return color_to_idx_new, idx_to_color_new, conversion, idx_to_idx, idx_mappings
 
     def get_color(self, x, mode="objects"):
@@ -149,7 +189,7 @@ class MMDataLoader():
             else:
                 return self.idx_to_color[mode][x]
         except KeyError:
-            if mode=="objects": print(f"mapping {x} to black")
+            print(f"mapping {x} to black")
             return (0,0,255)
 
     def labels_to_color(self, labels, mode="objects"):
@@ -162,18 +202,18 @@ class MMDataLoader():
             # print(idx, "->", self.get_color(idx, mode=mode))
         return data
 
-    def labels_obj_to_aff(self, labels, proba=False):
+    def labels_obj_to_aff(self, labels, num_cls=3, proba=False):
         if proba:
             # labels = labels.squeeze()
             # print(labels.shape)
             s = labels.shape
-            new_proba = torch.zeros((labels.shape[0], 4, s[2], s[3]))
+            new_proba = torch.zeros((labels.shape[0], num_cls, s[2], s[3])).to(self.device)
             # print(new_proba.shape)
             # print(new_proba[3])
             for idx in self.idx_mappings.keys():
                 indices = [i for i in self.idx_mappings[idx] if i < labels.shape[1]]
                 # print(indices)
-                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices))
+                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices).to(self.device))
                 # print(select.shape)
                 s = torch.sum(select,dim=1,keepdim=True)
                 # print(s.shape)
@@ -222,28 +262,37 @@ class MMDataLoader():
 
         return mask_out
 
-    def result_to_image(self, iter, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, folder=None, filename_prefix=None):
-        """
-        Converts the output of the network to an actual image
-        :param result: The output of the network (with torch.argmax)
-        :param iter: The name of the file to save it to
-        :return:
-        """
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, folder=None, filename_prefix=None):
         if filename_prefix is None:
             filename_prefix = self.name
 
         # print(bs,np.max(b))
         concat = []
 
-        if pred_cls is not None:
-            if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
-            data = self.labels_to_color(pred_cls, mode=self.mode)
-            concat.append(data)
+        if iter is None:
+            iter = self.idx
+
+        if orig is not None:
+            if torch.is_tensor(orig):
+                orig = orig.squeeze().detach().cpu().numpy()
+            if np.max(orig) <= 1: orig = (orig*255)
+            orig = orig.astype(np.uint8)
+            if orig.shape[-1] != 3:
+                orig = np.stack((orig,)*3, axis=-1)
+                # print(np.min(orig),np.max(orig))
+                concat = [orig] + concat
 
         if gt is not None:
             if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
             # concat.append(self.labels_to_color(gt, mode="objects"))
-            concat.append(self.labels_to_color(gt, mode=self.mode))
+            gt = self.labels_to_color(gt, mode=self.mode)
+            concat.append(gt)
+            # concat.append(np.stack((gt,)*3, axis=-1))
+
+        if pred_cls is not None:
+            if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
+            data = self.labels_to_color(pred_cls, mode=self.mode)
+            concat.append(data)
 
         if pred_proba is not None:
             if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
@@ -253,46 +302,44 @@ class MMDataLoader():
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
 
-        # if pred_test is not None:
-        #     if torch.is_tensor(test): test = test.detach().cpu().numpy()
-        #     # print(np.unique(test))
-        #     test = test/np.max(test)
-        #     test = (test*255).astype(np.uint8)
-        #     test = np.stack((test,)*3, axis=-1)
-        #     concat.append(test)
-
-
-        if orig is not None:
-            if torch.is_tensor(orig): orig = orig.squeeze().detach().cpu().numpy()
-            orig = (orig*255).astype(np.uint8)
-            if orig.shape[-1] != 3:
-                orig = np.stack((orig,)*3, axis=-1)
-                # print(np.min(orig),np.max(orig))
-                concat = [orig] + concat
-
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
-        img.save(f'results/{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+        img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, img_height=360, img_width=480, p=0.5):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
+        img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
-        transform = A.Compose([
-            A.Rotate(limit=10, p=p),
-            A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-            A.RandomScale(scale_limit=0.2, p=p),
-            A.HorizontalFlip(p=p),
-            A.RandomBrightnessContrast(p=p)
-            ]
-            # additional_targets={'rgb': 'image', 'mask':'mask'}
-        )
+        if resize_only:
+            transform = A.Compose([
+                A.Resize(height = self.resize[1], width = self.resize[0], p=1),
+                A.ToGray(p=1)
+            ])
+        else:
+            transform = A.Compose([
+                A.Compose([
+                    A.RandomToneCurve(scale=0.1, p=p),
+                    A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p),
+                    A.GridDistortion(num_steps=3, p=p),
+                    A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
+                    A.Rotate(limit=10, p=p),
+                    A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
+                    A.HorizontalFlip(p=p)
+                ], p = 1),
+                A.Resize(height = self.resize[1], width = self.resize[0], p=1),
+                A.ToGray(p=1)
+                ]
+                # additional_targets={'rgb': 'image', 'mask':'mask'}
+            )
 
         transformed = transform(image=imgs['image'], mask=imgs['mask'])
 
+        # print(np.unique(imgs['mask']))
+
         return transformed
 
-    def sample(self, sample_id, augment=False):
+    def sample(self, sample_id, augment):
         try:
             pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
 
@@ -307,23 +354,29 @@ class MMDataLoader():
 
     def __getitem__(self, idx):
         # print(self.sample(idx))
-        if self.train:
-            return self.sample(idx, augment=True)
+        self.idx = idx
+        if self.augment:
+            s = self.sample(idx, augment=True)
         else:
-            return self.sample(idx, augment=False)
+            s = self.sample(idx, augment=False)
+
+        if self.transform:
+            s[0] = self.transform(s[0])
+        return s
+
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="freiburg", mode=mode)
+        super().__init__(modalities, resize=resize, name="freiburg", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         if self.mode == "objects":
             self.cls_labels = [0]*len(classes)
@@ -336,16 +389,16 @@ class FreiburgDataLoader(MMDataLoader):
             if self.mode == "objects":
                 self.cls_labels[x[4]] = x[0].lower()
 
-        print(self.cls_labels)
+        # print(self.cls_labels)
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.path = path + 'train/'
         else:
             self.path = path + 'test/'
 
-        self.train = train
+        self.augment = augment
 
         for img in glob.glob(self.path + 'GT_color/*.png'):
             img = img.split("/")[-1].split("_")[0]
@@ -363,8 +416,8 @@ class FreiburgDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
-        pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('RGB')
-        pilIR = Image.open(self.path + "nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('RGB')
+        pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('L')
+        pilIR = Image.open(self.path + "nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('L')
 
         # print(self.path + "GT_color/" + a + suffixes['gt'])
         try:
@@ -378,18 +431,19 @@ class FreiburgDataLoader(MMDataLoader):
 
         return pilRGB, pilDep, pilIR, imgGT
 
+
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="cityscapes", mode=mode)
+        super().__init__(modalities, resize=resize, name="cityscapes", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
@@ -397,52 +451,53 @@ class CityscapesDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print("class to idx: ", self.class_to_idx['objects'])
-        print("color to idx: ", self.color_to_idx['objects'].values())
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.split_path = 'train/'
         else:
             self.split_path = 'val/'
 
-        self.train = train
-        self.city = "frankfurt"
-        self.city_ids = {
-            "frankfurt": "000294",
-            "berlin": "000019"
+        cities = {
+            "val": ["frankfurt"],
+            "test": ["lindau", "munster"]
         }
 
-        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'{self.city}/*.png'):
-            img = '_'.join(img.split("/")[-1].split("_")[1:3])
-            # print(img)
-            self.filenames.append(img)
-        # print(self.filenames)
+        self.augment = augment
+
+        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png'):
+
+            img = '_'.join('/'.join(img.split("/")[-2:]).split("_")[:3])
+            city = img.split("/")[0]
+            if set == "train" or city in cities[set]: self.filenames.append(img)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
 
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
 
-        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
-        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_disparity.png").convert('RGB')
-        imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.city}/{self.city}_{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
+        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('L')
+        imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
-
 
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, train=True, path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances"):
+    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False):
         """
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, name="kitti", mode=mode)
+        super().__init__(modalities, resize=resize, name="kitti", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
@@ -450,39 +505,39 @@ class KittiDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print("class to idx: ", self.class_to_idx['objects'])
-        print("color to idx: ", self.color_to_idx['objects'].values())
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.split_path = 'training/'
         else:
             self.split_path = 'testing/'
 
-        self.train = train
+        self.augment = augment
 
         for img in glob.glob(self.path + "data_semantics/" + self.split_path + "semantic/*.png"):
             img = img.split("/")[-1]
             # print(img)
             self.filenames.append(img)
-        print(self.filenames)
+        # print(self.filenames)
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
-        pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('RGB')
+        pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
         return pilRGB, pilDep, None, imgGT
 
 
 class OwnDataLoader(MMDataLoader):
-    def __init__(self, train=True, path = "../../datasets/own/", modalities=["rgb"], mode="affordances"):
-        super().__init__(modalities, name="own", mode=mode)
+    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
+        super().__init__(modalities, resize=resize, name="own", mode=mode)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
-        print(classes)
+        # print(classes)
 
         for x in classes:
             x = [int(i) if i.isdigit() or "-" in i else i for i in x]
@@ -490,17 +545,17 @@ class OwnDataLoader(MMDataLoader):
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        print("class to idx: ", self.class_to_idx['objects'])
-        print("color to idx: ", self.color_to_idx['objects'].values())
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if train:
+        if set == "train":
             self.split_path = 'training/'
         else:
             self.split_path = 'testing/'
 
-        self.train = train
+        self.augment = augment
 
         for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
             img = img.split("/")[-1]
@@ -515,3 +570,19 @@ class OwnDataLoader(MMDataLoader):
         width, height = pilRGB.size
         imgGT = Image.new('L', (width, height))
         return pilRGB, None, None, imgGT
+
+
+if __name__ == '__main__':
+
+    from torch.utils.data import DataLoader, random_split, Subset
+
+    print("Cityscapes dataset")
+    train_set = CityscapesDataLoader(set="train", mode="objects", modalities=["rgb"], augment=True)
+    train_set = Subset(train_set, indices = range(len(train_set)))
+    print("-> train", len(train_set.dataset))
+    val_set = CityscapesDataLoader(set="val", mode="objects", modalities=["rgb"], augment=False)
+    val_set = Subset(val_set, indices = range(len(val_set)))
+    print("-> val", len(val_set.dataset))
+    test_set = CityscapesDataLoader(set="test", mode="objects", modalities=["rgb"], augment=False)
+    test_set = Subset(test_set, indices = range(len(test_set)))
+    print("-> test", len(test_set.dataset))

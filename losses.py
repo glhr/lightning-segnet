@@ -1,57 +1,10 @@
 import numpy as np
 import torch
 import torch.nn as nn
-from torch.distributions.normal import Normal
+import torch.nn.functional as F
+from sklearn.metrics import jaccard_score
 
-
-class RegressionLoss(nn.Module):
-    def forward(self, output, target):
-        return nn.MSELoss()(output.squeeze(), target)
-
-
-class ClassificationLoss(nn.Module):
-    def forward(self, output, target, weights):
-        return nn.NLLLoss(weights)(output, target.long())
-
-
-class UnimodalUniformOTLoss(nn.Module):
-    """
-    https://arxiv.org/pdf/1911.02475.pdf
-    """
-
-    def __init__(self, n_classes):
-        super().__init__()
-        self.num_classes = n_classes
-        self.csi = 0.15
-        self.e = 0.05
-        self.tau = 1.
-
-    def forward(self, output, target):
-        output = torch.softmax(output, -1)
-        ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device).repeat(output.size(0), 1)
-        target_repeated = target.unsqueeze(1).repeat(1, self.num_classes)
-        p = torch.softmax(torch.exp(-torch.abs(ranks - target_repeated) / self.tau), dim=-1)
-        target_onehot = torch.nn.functional.one_hot(target.unsqueeze(0).long(), self.num_classes).squeeze()
-        uniform_term = 1. / self.num_classes
-        soft_target = (1 - self.csi - self.e) * target_onehot + self.csi * p + self.e * uniform_term
-        loss = nn.L1Loss()(torch.cumsum(output, dim=1), torch.cumsum(soft_target, dim=1))
-        return loss
-
-
-class DLDLLoss(nn.Module):
-    """
-    https://arxiv.org/pdf/1611.01731.pdf
-    """
-
-    def __init__(self, n_classes):
-        super().__init__()
-        self.num_classes = n_classes
-
-    def forward(self, output, target):
-        output = torch.nn.LogSoftmax(dim=-1)(output)
-        normal_dist = Normal(torch.arange(0, self.num_classes).to(output.device), torch.ones(self.num_classes).to(output.device))
-        soft_target = torch.softmax(normal_dist.log_prob(target.unsqueeze(1)).exp(), -1)
-        return nn.KLDivLoss()(output, soft_target)
+from utils import logger, enable_debug
 
 
 def flatten_tensors(inp, target):
@@ -76,24 +29,98 @@ def flatten_tensors(inp, target):
         # ~ print(inp, target)
         return inp, target
 
+class KLLoss(nn.Module):
+    def __init__(self, n_classes, masking=False):
+        super().__init__()
+        self.num_classes = n_classes
+        self.masking = masking
+
+    def forward(self, output, target, debug=False):
+        output, target = flatten_tensors(output, target)
+        if debug: print(output,target)
+
+        if self.masking:
+            mask = target.ge(0)
+            # print(mask, mask.shape)
+            # print(output.shape,target.shape)
+            output = output[mask]
+            target = target[mask]
+
+        n_samples = target.shape[0]
+        logger.debug(f"KLLoss n_samples {n_samples}")
+        if debug: print(output,target)
+        target = F.one_hot(target, num_classes=self.num_classes).float()
+        if debug: print(output,target)
+        output = torch.nn.LogSoftmax(dim=-1)(output)
+        loss = nn.KLDivLoss(reduction='none')(output, target)
+        loss = torch.sum(loss)/n_samples
+        return loss
+
+class MaskedIoU(nn.Module):
+    def __init__(self, labels):
+        super().__init__()
+        self.labels = list(labels)
+        logger.info(f"IoU labels: {self.labels}")
+
+    def forward(self, output, target, debug=False):
+
+        output, target = flatten_tensors(output, target)
+        output = torch.argmax(output, dim=-1)
+
+        output = output.detach().cpu().numpy()
+        target = target.detach().cpu().numpy()
+
+        iou_micro = jaccard_score(target, output, labels=self.labels, average='micro', zero_division=0)
+
+        if debug:
+            iou_macro = jaccard_score(target, output, labels=self.labels, average='macro', zero_division=0)
+            iou_cls = jaccard_score(target, output, labels=self.labels, average=None, zero_division=0)
+            logger.debug(f"MaskedIoU inputs: target {target}, pred {output}")
+            logger.debug(f"MaskedIoU micro {iou_micro} | macro {iou_macro}")
+            logger.debug(f"MaskedIoU per class {iou_cls}")
+        else:
+            logger.debug(f"MaskedIoU micro {iou_micro}")
+
+        return iou_micro
+
+
+
 class SORDLoss(nn.Module):
     """
     https://openaccess.thecvf.com/content_CVPR_2019/papers/Diaz_Soft_Labels_for_Ordinal_Regression_CVPR_2019_paper.pdf
     """
 
-    def __init__(self, n_classes):
+    def __init__(self, n_classes, ranks=None, masking=False):
         super().__init__()
         self.num_classes = n_classes
+        if ranks is not None and len(ranks) == self.num_classes:
+            self.ranks = ranks
+        else:
+            self.ranks = np.arange(0, self.num_classes)
+        self.masking = masking
+        logger.info(f"SORD ranks: {self.ranks}")
 
-    def forward(self, output, target, debug=False):
+    def forward(self, output, target, debug=False, mod_input=None):
 
-        #flatten label and prediction tensors
-        if debug: print("output",output)
+        logger.debug(f"SORD - before flatten: target shape {target.shape} | output shape {output.shape}")
         output, target = flatten_tensors(output, target)
-        output = torch.nn.LogSoftmax(dim=-1)(output)
+        logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
+
+        if self.masking:
+            logger.debug(f"SORD - before masking: target shape {target.shape} | output shape {output.shape}")
+            mask = target.ge(0)
+            logger.debug(f"SORD - mask shape: {mask.shape}")
+            # print(mask, mask.shape)
+            # print(output.shape,target.shape)
+            output = output[mask]
+            target = target[mask]
+            logger.debug(f"SORD - after masking: target shape {target.shape} | output shape {output.shape}")
+
+        n_samples = target.shape[0]
+        logger.debug(f"SORDLoss n_samples {n_samples}")
 
         if debug: print("output",output)
-        ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
+        ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
         if debug: print("ranks",ranks)
         target = target.unsqueeze(1).repeat(1, self.num_classes)
         if debug: print("target",target)
@@ -101,49 +128,26 @@ class SORDLoss(nn.Module):
         if debug: print("l1 target",soft_target)
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: print("soft target",soft_target)
-        return nn.KLDivLoss(reduction='mean')(output, soft_target)
+        # output = torch.log(soft_target)
+        # flatten label and prediction tensors
 
+        if mod_input is not None:
+            output = mod_input.long().view(-1,).unsqueeze(1).repeat(1, self.num_classes)
+            output = -nn.L1Loss(reduction='none')(output, ranks)  # should be of size N x num_classes
+            if debug: print("output",output)
+            output = torch.softmax(output, dim=-1)
+            if debug: print("output",output)
+            output = torch.log(output)
+        else:
+            output = torch.nn.LogSoftmax(dim=-1)(output)
 
-class OTLossSoft(nn.Module):
-
-    def __init__(self, n_classes):
-        super().__init__()
-        self.num_classes = n_classes
-
-    def forward(self, output, target):
-        ranks = torch.arange(0, self.num_classes, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
-        target = target.unsqueeze(1).repeat(1, self.num_classes)
-        soft_target = -nn.L1Loss(reduction='none')(target, ranks)  # should be of size N x num_classes
-        soft_target = torch.softmax(soft_target, dim=-1)  # like in SORD
-        loss = nn.L1Loss()(torch.cumsum(output, dim=1), torch.cumsum(soft_target, dim=1))  # like in Liu 2019
+        loss = nn.KLDivLoss(reduction='none')(output, soft_target)
+        #print(n_samples)
+        loss = torch.sum(loss)/n_samples
         return loss
 
 
-class OTLoss(nn.Module):
-
-    def __init__(self, n_classes, cost='linear'):
-        super().__init__()
-        self.num_classes = n_classes
-        C0 = np.expand_dims(np.arange(n_classes), 0).repeat(n_classes, axis=0) / self.num_classes
-        C1 = np.expand_dims(np.arange(n_classes), 1).repeat(n_classes, axis=1) / self.num_classes
-
-        C = np.abs(C0 - C1)
-        if cost == 'quadratic':
-            C = C ** 2
-        elif cost == 'linear':
-            pass
-        self.C = torch.tensor(C).float()
-
-    def forward(self, output_probs, target_class):
-        C = self.C.cuda(output_probs.device)
-        costs = C[target_class.long()]
-        transport_costs = torch.sum(costs * output_probs, dim=1)
-        result = torch.mean(transport_costs)
-        return result
-
 if __name__ == '__main__':
-    ce = nn.CrossEntropyLoss()
-    sord = SORDLoss(n_classes = 3)
 
     input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
     target = torch.tensor([[[1]],[[1]]])
@@ -151,18 +155,83 @@ if __name__ == '__main__':
     # ~ print(input,target,output)
     # ~ output.backward()
 
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--pred', default="pref")
+    parser.add_argument('--gt', default="pref")
+    parser.add_argument('--debug', default=True, action="store_true")
+    args = parser.parse_args()
+    print(args)
 
-    input = torch.tensor([[0.0, 1.0, 0.0]], requires_grad=True)
-    target = torch.tensor([0], dtype=torch.long)
+    if args.debug: enable_debug()
+
+    onehot = {
+        "pref": [0.0, 0.0, 1.0],
+        "poss": [0.0, 1.0, 0.0],
+        "imposs": [1.0, 0.0, 0.0]
+    }
+    level = {
+        "pref": 2,
+        "poss": 1,
+        "imposs": 0,
+        "void": -1
+    }
+
+    input = torch.tensor([onehot[args.pred],onehot[args.pred],onehot[args.pred],onehot[args.pred]], requires_grad=True)
+    target = torch.tensor([level[args.gt],level[args.gt],level[args.gt],level[args.gt]], dtype=torch.long)
     # ~ print(target, input, "CE ->", output)
     # ~ input = torch.randn(1, 3, requires_grad=True)
     # ~ target = torch.empty(1, dtype=torch.long).random_(3)
 
-    output = ce(input, target)
-    output.backward()
-    print(target, input, "CE ->", output)
+    # output = ce(input, target)
+    # output.backward()
+    # print(target, input, "CE ->", output)
 
     # ~ input, target = flatten_tensors(input, target)
     # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
-    loss = sord(input, target, debug=True)
-    print("SORD ->", loss)
+    cm = np.zeros((3, 3))
+    sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]], masking=True)
+    print("SORD",sord(input, target))
+
+    # for p,pred in enumerate(level.keys()):
+    #     for g,gt in enumerate(level.keys()):
+    #         input = torch.tensor([onehot[pred]], requires_grad=True)
+    #         target = torch.tensor([level[gt]], dtype=torch.long)
+    #         mod_input = torch.tensor([level[pred]], dtype=torch.long)
+    #         loss = sord(input, target, debug=True, mod_input=mod_input)
+    #         print("SORD ->", loss)
+    #         cm[g][p] = loss.item()
+    # print(cm)
+    #
+    # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    #
+    # from plotting import plot_confusion_matrix
+    # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    #
+    # level = {
+    #     "pref": 2,
+    #     "poss": 1,
+    #     "imposs": 0
+    # }
+    # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    #
+    # cm = np.zeros((3, 3))
+    # ce = nn.CrossEntropyLoss(ignore_index = -1)
+    # for p,pred in enumerate(level.keys()):
+    #     for g,gt in enumerate(level.keys()):
+    #         input = torch.tensor([onehot[pred]], requires_grad=True)
+    #         target = torch.log_softmax(torch.tensor([onehot[gt]]),dim=-1)
+    #         input = torch.log_softmax(input, dim=-1)
+    #         print(input)
+    #         loss = nn.KLDivLoss(reduction='mean',log_target=True)(input, target)
+    #         print("CE ->", loss)
+    #         cm[g][p] = loss.item()
+    # print(cm)
+    # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+
+    kl = KLLoss(n_classes = 3, masking=True)
+    loss = kl(input, target)
+    print("KL",loss)
+
+    iou = MaskedIoU(labels=[0,1,2])
+    print(iou(input,target))
