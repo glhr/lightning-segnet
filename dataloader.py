@@ -13,7 +13,7 @@ from PIL import Image, ImageFile
 
 import albumentations as A
 
-from utils import RANDOM_SEED
+from utils import RANDOM_SEED, logger
 
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
@@ -189,7 +189,7 @@ class MMDataLoader(Dataset):
             else:
                 return self.idx_to_color[mode][x]
         except KeyError:
-            print(f"mapping {x} to black")
+            logger.warning(f"mapping {x} to black, idx_to_color: {self.idx_to_color}")
             return (0,0,255)
 
     def labels_to_color(self, labels, mode="objects"):
@@ -262,7 +262,7 @@ class MMDataLoader(Dataset):
 
         return mask_out
 
-    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, test=None, folder=None, filename_prefix=None):
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, dataset_name=None):
         if filename_prefix is None:
             filename_prefix = self.name
 
@@ -295,6 +295,17 @@ class MMDataLoader(Dataset):
             data = self.labels_to_color(pred_cls, mode=self.mode)
             concat.append(data)
 
+        for cls,prob_map in enumerate(proba_lst):
+            if torch.is_tensor(prob_map): prob_map = prob_map.detach().cpu().numpy()
+            # print(np.unique(proba))
+            # proba = pred_proba/2
+            proba = (prob_map*255).astype(np.uint8)
+            if cls < len(proba_lst) - 1:
+                proba = np.hstack([proba, np.ones_like(proba)[:,:100]*255])
+            proba = np.stack((proba,)*3, axis=-1)
+            concat.append(proba)
+
+
         if pred_proba is not None:
             if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
             # print(np.unique(proba))
@@ -307,7 +318,8 @@ class MMDataLoader(Dataset):
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
-        img.save(f'{folder}/{self.name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+        dataset_name = self.name if dataset_name is None else self.name
+        img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
         img_height, img_width = imgs["image"].shape[:2]
@@ -529,7 +541,7 @@ class KittiDataLoader(MMDataLoader):
         pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
         pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
-        return pilRGB, pilDep, None, imgGT
+        return pilRGB, None, None, imgGT
 
 
 class OwnDataLoader(MMDataLoader):
@@ -559,7 +571,7 @@ class OwnDataLoader(MMDataLoader):
         self.augment = augment
 
         print(self.path + self.split_path + "rgb/*.jpg")
-        for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
+        for img in glob.glob(self.path + self.split_path + "rgb/*.png"):
             img = img.split("/")[-1]
             # print(img)
             self.filenames.append(img)

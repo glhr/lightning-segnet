@@ -58,6 +58,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dataset', default="freiburg")
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
+        parser.add_argument('--orig_dataset', default="freiburg")
         return parser
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
@@ -87,6 +88,8 @@ class LitSegNet(pl.LightningModule):
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
             len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
+
+        self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set="test")
 
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
@@ -198,15 +201,30 @@ class LitSegNet(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         sample, target_orig = batch
+        folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
 
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
             pred_orig = torch.softmax(pred_orig, dim=1)
+            pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
             if self.hparams.mode == "convert":
                 # print(torch.unique(torch.argmax(pred_orig, dim=1)))
-                pred = self.test_set.dataset.labels_obj_to_aff(pred_orig, proba=True)
+                pred = self.orig_dataset.dataset.labels_obj_to_aff(pred_orig, proba=True)
+                for i, p in enumerate(pred_orig):
+                    proba_lst = []
+                    for cls, map in enumerate(p.squeeze()):
+                        if self.hparams.orig_dataset == "freiburg" and cls==0: # ignore void
+                            pass
+                        else:
+                            proba_lst.append(map)
+                    self.orig_dataset.dataset.result_to_image(
+                        iter=batch_idx+i,
+                        proba_lst=proba_lst,
+                        folder=folder,
+                        filename_prefix=f"probas_orig-{self.test_checkpoint}",
+                        dataset_name=self.hparams.dataset)
             else:
                 pred = pred_orig
             pred_cls = torch.argmax(pred, dim=1)
@@ -222,15 +240,31 @@ class LitSegNet(pl.LightningModule):
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
                 # print(p.shape)
-                test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * 0 \
-                 + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * 1 \
-                 + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
+                proba_imposs = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]]
+                proba_poss = p.squeeze()[self.test_set.dataset.aff_idx["possible"]]
+                proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
+                test = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
                 iter = batch_idx*self.hparams.bs + i
-                folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, gt=t, folder=folder, filename_prefix=f"ref")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=folder, filename_prefix=f"orig")
+
+
+                for cls,map in enumerate(p.squeeze()):
+                    proba_lst = []
+                    if self.hparams.mode == "objects" and self.hparams.orig_dataset == "freiburg" and cls==0: # ignore void
+                        pass
+                    else:
+                        proba_lst.append(map)
+                        self.orig_dataset.dataset.result_to_image(
+                            iter=batch_idx+i,
+                            proba_lst=proba_lst,
+                            folder=folder,
+                            filename_prefix=f"probas{cls}-{self.test_checkpoint}",
+                            dataset_name=self.hparams.dataset)
+                logger.debug("Generating proba map")
+                self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                logger.debug("Generating argmax pred")
+                self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=folder, filename_prefix=f"ref", dataset_name=self.hparams.dataset)
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=folder, filename_prefix=f"orig", dataset_name=self.hparams.dataset)
                 # self.test_set.dataset.result_to_image(iter=batch_idx+i, # pred_proba=p.squeeze()[self.test_set.dataset.aff_idx["impossible"]], folder=folder, filename_prefix=f"proba0")
                 # self.test_set.dataset.result_to_image(
                 #     iter=batch_idx+i, gt=t, orig=o,
@@ -256,19 +290,20 @@ class LitSegNet(pl.LightningModule):
             optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         return optimizer
 
-    def get_dataset(self, set, augment=None):
+    def get_dataset(self, set, name=None, augment=None):
+        if name is None:
+            name = self.hparams.dataset
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
-        dataset = self.datasets[self.hparams.dataset](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
+        dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset
 
     def get_dataset_splits(self, normalize=False):
         if self.hparams.dataset == "freiburg":
             train_set = self.get_dataset(set="train")
-            test_set = self.get_dataset(set="test")
-            test_set = Subset(test_set, indices = range(len(test_set)))
-            train_set = Subset(train_set, indices = range(len(train_set)))
-            val_set = Subset(test_set, indices = range(len(test_set)))
+            test_set = self.get_dataset(set="test",augment=False)
+            val_set = test_set
             # total_len = len(train_set)
             # val_len = int(0.1*total_len)
             # train_len = total_len - val_len
@@ -277,9 +312,7 @@ class LitSegNet(pl.LightningModule):
         elif self.hparams.dataset == "own":
             train_set = self.get_dataset(set="train")
             test_set = self.get_dataset(set="test")
-            test_set = Subset(test_set, indices = range(len(test_set)))
-            train_set = Subset(train_set, indices = range(len(train_set)))
-            val_set = Subset(test_set, indices = range(len(test_set)))
+            val_set = test_set
             # total_len = len(train_set)
             # val_len = int(0.1*total_len)
             # train_len = total_len - val_len
@@ -297,11 +330,8 @@ class LitSegNet(pl.LightningModule):
 
         elif self.hparams.dataset == "cityscapes":
             train_set = self.get_dataset(set="train")
-            train_set = Subset(train_set, indices=range(len(train_set)))
             val_set = self.get_dataset(set="val")
-            val_set = Subset(val_set, indices=range(len(val_set)))
             test_set = self.get_dataset(set="test")
-            test_set = Subset(test_set, indices=range(len(test_set)))
 
         if normalize:
             mean = 0.
