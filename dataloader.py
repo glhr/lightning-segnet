@@ -283,8 +283,9 @@ class MMDataLoader(Dataset):
                 concat = [orig] + concat
 
         if gt is not None:
-            if torch.is_tensor(gt): gt = gt.detach().cpu().numpy()
-            # concat.append(self.labels_to_color(gt, mode="objects"))
+            if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
+            #concat.append(self.labels_to_color(gt_numpy, mode="objects"))
+            #gt = self.labels_to_color(self.labels_obj_to_aff(gt), mode=self.mode)
             gt = self.labels_to_color(gt, mode=self.mode)
             concat.append(gt)
             # concat.append(np.stack((gt,)*3, axis=-1))
@@ -306,7 +307,7 @@ class MMDataLoader(Dataset):
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
-        img.save(f'{folder}/{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+        img.save(f'{folder}/{self.name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
         img_height, img_width = imgs["image"].shape[:2]
@@ -533,7 +534,7 @@ class KittiDataLoader(MMDataLoader):
 
 class OwnDataLoader(MMDataLoader):
     def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
-        super().__init__(modalities, resize=resize, name="own", mode=mode)
+        super().__init__(modalities, resize=resize, name="own", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -557,6 +558,7 @@ class OwnDataLoader(MMDataLoader):
 
         self.augment = augment
 
+        print(self.path + self.split_path + "rgb/*.jpg")
         for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
             img = img.split("/")[-1]
             # print(img)

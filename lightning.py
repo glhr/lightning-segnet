@@ -101,7 +101,7 @@ class LitSegNet(pl.LightningModule):
         # self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
-        self.result_folder = f"results/{self.hparams.dataset}/c{self.hparams.num_classes}-{self.hparams.loss}/"
+        self.result_folder = f"results/{self.hparams.dataset}/"
         self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         create_folder(f"{self.result_folder}/viz_per_epoch")
 
@@ -197,19 +197,26 @@ class LitSegNet(pl.LightningModule):
         return 0
 
     def test_step(self, batch, batch_idx):
-        sample, target = batch
+        sample, target_orig = batch
 
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
-            pred = self.model(sample)
-            pred = torch.softmax(pred, dim=1)
+            pred_orig = self.model(sample)
+            pred_orig = torch.softmax(pred_orig, dim=1)
 
-            if self.hparams.mode == "convert": pred = self.test_set.dataset.labels_obj_to_aff(pred, proba=True)
+            if self.hparams.mode == "convert":
+                # print(torch.unique(torch.argmax(pred_orig, dim=1)))
+                pred = self.test_set.dataset.labels_obj_to_aff(pred_orig, proba=True)
+            else:
+                pred = pred_orig
             pred_cls = torch.argmax(pred, dim=1)
 
-            if len(target) > 1:
-                target = target.squeeze()
-            if self.hparams.mode == "convert": target = self.test_set.dataset.labels_obj_to_aff(target)
+            if len(target_orig) > 1:
+                target_orig = target_orig.squeeze()
+            if self.hparams.mode == "convert":
+                target = self.test_set.dataset.labels_obj_to_aff(target_orig)
+            else:
+                target = target_orig
 
             # print("pred",pred_cls.shape,"target",target.shape)
 
@@ -219,10 +226,16 @@ class LitSegNet(pl.LightningModule):
                  + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * 1 \
                  + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * 2
                 iter = batch_idx*self.hparams.bs + i
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=f"{self.result_folder}", filename_prefix=f"proba-{self.test_checkpoint}")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"cls-{self.test_checkpoint}")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
+                folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, gt=t, folder=folder, filename_prefix=f"ref")
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=folder, filename_prefix=f"orig")
+                # self.test_set.dataset.result_to_image(iter=batch_idx+i, # pred_proba=p.squeeze()[self.test_set.dataset.aff_idx["impossible"]], folder=folder, filename_prefix=f"proba0")
+                # self.test_set.dataset.result_to_image(
+                #     iter=batch_idx+i, gt=t, orig=o,
+                #     folder=f"{self.result_folder}/viz_per_epoch",
+                #     filename_prefix=f"gt")
 
             try:
                 # cm = self.CM(pred_cls, target)
@@ -251,6 +264,17 @@ class LitSegNet(pl.LightningModule):
 
     def get_dataset_splits(self, normalize=False):
         if self.hparams.dataset == "freiburg":
+            train_set = self.get_dataset(set="train")
+            test_set = self.get_dataset(set="test")
+            test_set = Subset(test_set, indices = range(len(test_set)))
+            train_set = Subset(train_set, indices = range(len(train_set)))
+            val_set = Subset(test_set, indices = range(len(test_set)))
+            # total_len = len(train_set)
+            # val_len = int(0.1*total_len)
+            # train_len = total_len - val_len
+            # train_set, val_set = random_split(train_set, [train_len, val_len])
+
+        elif self.hparams.dataset == "own":
             train_set = self.get_dataset(set="train")
             test_set = self.get_dataset(set="test")
             test_set = Subset(test_set, indices = range(len(test_set)))
@@ -349,5 +373,7 @@ if args.train:
 else:
     logger.warning("Testing phase")
     trainer = pl.Trainer.from_argparse_args(args)
-    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=args.test_checkpoint.split("/")[-1].replace(".ckpt",""), conf=args)
+    chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
+    create_folder(f"{segnet_model.result_folder}/{chkpt}")
+    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, conf=args)
     trainer.test(trained_model)
