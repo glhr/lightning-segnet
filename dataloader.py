@@ -318,7 +318,7 @@ class MMDataLoader(Dataset):
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
-        dataset_name = self.name if dataset_name is None else self.name
+        dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
