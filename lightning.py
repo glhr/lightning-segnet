@@ -325,8 +325,9 @@ class LitSegNet(pl.LightningModule):
             total_len = len(train_set)
             val_len = int(0.2*total_len)
             train_len = total_len - val_len*2
-            train_set,_,_ = random_split(train_set, [train_len, val_len, val_len])
-            _,val_set,test_set = random_split(val_set, [train_len, val_len, val_len])
+            train_set, _, _ = random_split(train_set, [train_len, val_len, val_len])
+            _, val_set, test_set = random_split(val_set, [train_len, val_len, val_len])
+            train_set, val_set, test_set = train_set.dataset, val_set.dataset, test_set.dataset
             # print(test_set[0])
 
         elif self.hparams.dataset == "cityscapes":
