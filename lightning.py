@@ -254,18 +254,27 @@ class LitSegNet(pl.LightningModule):
                         pass
                     else:
                         proba_lst.append(map)
-                        self.orig_dataset.dataset.result_to_image(
-                            iter=batch_idx+i,
-                            proba_lst=proba_lst,
-                            folder=folder,
-                            filename_prefix=f"probas{cls}-{self.test_checkpoint}",
-                            dataset_name=self.hparams.dataset)
+                        # self.orig_dataset.dataset.result_to_image(
+                        #     iter=batch_idx+i,
+                        #     proba_lst=proba_lst,
+                        #     folder=folder,
+                        #     filename_prefix=f"probas{cls}-{self.test_checkpoint}",
+                        #     dataset_name=self.hparams.dataset)
                 # logger.debug("Generating proba map")
                 self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                 # logger.debug("Generating argmax pred")
                 self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
-                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=folder, filename_prefix=f"ref", dataset_name=self.hparams.dataset)
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=folder, filename_prefix=f"orig", dataset_name=self.hparams.dataset)
+                self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                self.test_set.dataset.result_to_image(
+                    iter=batch_idx+i,
+                    orig=o,
+                    gt=t,
+                    pred_cls=c,
+                    pred_proba=test,
+                    folder=folder,
+                    filename_prefix=f"res", dataset_name=self.hparams.dataset)
                 # self.test_set.dataset.result_to_image(iter=batch_idx+i, # pred_proba=p.squeeze()[self.test_set.dataset.aff_idx["impossible"]], folder=folder, filename_prefix=f"proba0")
                 # self.test_set.dataset.result_to_image(
                 #     iter=batch_idx+i, gt=t, orig=o,

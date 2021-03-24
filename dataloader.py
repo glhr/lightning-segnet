@@ -571,7 +571,7 @@ class OwnDataLoader(MMDataLoader):
         self.augment = augment
 
         print(self.path + self.split_path + "rgb/*.jpg")
-        for img in glob.glob(self.path + self.split_path + "rgb/*.png"):
+        for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
             img = img.split("/")[-1]
             # print(img)
             self.filenames.append(img)

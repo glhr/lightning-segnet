@@ -73,10 +73,9 @@ def compute_distmap(image_orig, depth_map=None):
     fig, axes = plt.subplots(ncols=5, sharex=True, sharey=True,
                              figsize=(15, 4))
 
-    distmap = cv2.distanceTransform(edge, cv2.DIST_L2, cv2.DIST_MASK_5)
-    # distmap[distmap > 100] = 100
-    distmap = np.sqrt(distmap)
-    distmap = cv2.normalize(distmap, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    distmap_linear = cv2.distanceTransform(edge, cv2.DIST_L2, cv2.DIST_MASK_5)
+    #distmap[distmap > 50] = 50
+
     # print(np.unique(distmap))
 
     if depth_map is None:
@@ -91,6 +90,21 @@ def compute_distmap(image_orig, depth_map=None):
     depth_map = rescale_intensity(depth_map, out_range=(0.1, 1))
     # print(np.min(depth_map),np.max(depth_map))
     # print(np.unique(depth_map))
+    distmap = np.copy(distmap_linear)
+    for ix,iy in np.ndindex(distmap_linear.shape):
+        #print(np.max(distmap))
+        pow = np.power(distmap_linear[ix,iy], 1-depth_map[ix,iy])
+        distmap[ix, iy] = pow if pow <= 30 else 30
+
+    print(np.max(distmap))
+    row_sums = distmap.sum(axis=1)
+    distmap = distmap / row_sums[:, np.newaxis]
+
+    print(np.max(distmap))
+
+    distmap = cv2.normalize(distmap, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    #distmap_linear = cv2.normalize(distmap_linear, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    #distmap[distmap > 0.7] = 0.7
 
     combined_map = distmap * depth_map
     combined_map = cv2.normalize(combined_map, 0.1, 1, norm_type=cv2.NORM_MINMAX)
@@ -101,7 +115,7 @@ def compute_distmap(image_orig, depth_map=None):
     axes[1].imshow(edge, cmap=plt.cm.gray)
     axes[1].set_title('Edges')
 
-    axes[2].imshow(distmap, cmap=plt.cm.gray, vmin=0, vmax=1)
+    axes[2].imshow(distmap_linear, cmap=plt.cm.gray)
     axes[2].set_title('Edge distance map')
 
     axes[3].imshow(depth_map, cmap=plt.cm.gray, vmin=0, vmax=1)
