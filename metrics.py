@@ -9,10 +9,31 @@ from skimage.util import random_noise
 
 import torch
 import torch.nn as nn
-from sklearn.metrics import jaccard_score
+from sklearn.metrics import jaccard_score, confusion_matrix
 
 from utils import logger, enable_debug
 from losses import flatten_tensors
+
+class ConfusionMatrix(nn.Module):
+    def __init__(self, labels):
+        super().__init__()
+        self.labels = list(labels)
+        logger.info(f"Confusion matrix labels: {self.labels}")
+
+    def forward(self, output, target, debug=False, already_flattened=False):
+
+        if not already_flattened:
+            output, target = flatten_tensors(output, target)
+            output = torch.argmax(output, dim=-1)
+
+        output = output.detach().cpu().numpy()
+        target = target.detach().cpu().numpy()
+
+        cm = confusion_matrix(target, output, labels=self.labels, normalize=None)
+
+        logger.debug(f"CM: {cm}")
+
+        return cm
 
 class MaskedIoU(nn.Module):
     def __init__(self, labels):

@@ -9,11 +9,10 @@ from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.metrics import ConfusionMatrix
 
 from segnet import SegNet
 from losses import SORDLoss, KLLoss
-from metrics import MaskedIoU
+from metrics import MaskedIoU, ConfusionMatrix
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
@@ -100,7 +99,7 @@ class LitSegNet(pl.LightningModule):
         self.hparams.labels_conv = set(range(self.num_cls))
         self.hparams.labels_conv = list(self.hparams.labels_conv)
 
-        self.CM = ConfusionMatrix(num_classes=self.num_cls, normalize='none')
+        self.CM = ConfusionMatrix(labels=self.hparams.labels_conv)
         # self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
@@ -183,6 +182,8 @@ class LitSegNet(pl.LightningModule):
 
         labels = self.train_set.dataset.cls_labels
 
+        cms = torch.tensor(cms, dtype=torch.long)
+
         cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
         cm = torch.sum(cms, dim=0, keepdim=False)
 
@@ -191,12 +192,12 @@ class LitSegNet(pl.LightningModule):
         # cm = np.delete(cm, self.hparams.ignore_index, 0)
         if len(labels) > self.num_cls:
             labels.pop(0)
-
-        print(cm)
+        #
+        # print(cm)
 
         cm = cm / cm.sum(axis=1, keepdim=True) # normalize confusion matrix
 
-        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
+        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.dataset}-{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
         return 0
 
     def test_step(self, batch, batch_idx):
@@ -259,9 +260,9 @@ class LitSegNet(pl.LightningModule):
                             folder=folder,
                             filename_prefix=f"probas{cls}-{self.test_checkpoint}",
                             dataset_name=self.hparams.dataset)
-                logger.debug("Generating proba map")
+                # logger.debug("Generating proba map")
                 self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
-                logger.debug("Generating argmax pred")
+                # logger.debug("Generating argmax pred")
                 self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=folder, filename_prefix=f"ref", dataset_name=self.hparams.dataset)
                 self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=folder, filename_prefix=f"orig", dataset_name=self.hparams.dataset)
@@ -272,12 +273,12 @@ class LitSegNet(pl.LightningModule):
                 #     filename_prefix=f"gt")
 
             try:
-                # cm = self.CM(pred_cls, target)
+                cm = self.CM(pred, target)
                 # print(cm.shape)
                 iou = self.IoU_conv(pred, target)
 
                 self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-                # self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             except Exception as e:
                 print("Couldn't compute eval metrics",e)
             return pred
