@@ -286,7 +286,7 @@ class MMDataLoader(Dataset):
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
             #concat.append(self.labels_to_color(gt_numpy, mode="objects"))
             #gt = self.labels_to_color(self.labels_obj_to_aff(gt), mode=self.mode)
-            gt = self.labels_to_color(gt, mode=self.mode)
+            gt = self.labels_to_color(gt_numpy, mode=self.mode)
             concat.append(gt)
             # concat.append(np.stack((gt,)*3, axis=-1))
 
