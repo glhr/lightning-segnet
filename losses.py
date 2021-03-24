@@ -5,6 +5,7 @@ import torch.nn.functional as F
 
 from utils import logger, enable_debug
 
+import matplotlib.pyplot as plt
 
 
 def flatten_tensors(inp, target):
@@ -30,14 +31,39 @@ def flatten_tensors(inp, target):
     return inp, target
 
 
+def viz_loss(target, output, loss, bs, nclasses):
+    loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
+    logger.debug(f"target {target.shape} | loss {loss.shape} | reshaped {loss_reshaped.shape}")
+    fig, axes = plt.subplots(ncols=nclasses+2, nrows=bs, sharex=True, sharey=True,
+                             figsize=(6, 3))
+    for i in range(bs):
+        loss_viz = torch.sum(loss_reshaped[i].squeeze(), axis=-1).numpy()
+        axes[i][0].imshow(target[i], cmap=plt.cm.gray)
+        axes[i][0].axis('off')
+        for cls in range(0, nclasses):
+            axes[i][cls+1].imshow(output[i][cls], cmap=plt.cm.gray)
+            axes[i][cls+1].axis('off')
+        axes[i][nclasses+1].imshow(loss_viz, cmap=plt.cm.gray)
+        axes[i][nclasses+1].axis('off')
+
+    # for r in axes:
+    #     for c in r:
+    #         axes[r][c].axis('off')
+
+    plt.axis('off')
+    plt.tight_layout()
+    plt.show()
+
+
 class KLLoss(nn.Module):
     def __init__(self, n_classes, masking=False):
         super().__init__()
         self.num_classes = n_classes
         self.masking = masking
 
-    def forward(self, output, target, debug=False):
-        output, target = flatten_tensors(output, target)
+    def forward(self, output_orig, target_orig, debug=False, viz=True):
+        bs = target_orig.shape[0]
+        output, target = flatten_tensors(output_orig, target_orig)
         if debug: print(output,target)
 
         if self.masking:
@@ -54,6 +80,9 @@ class KLLoss(nn.Module):
         if debug: print(output,target)
         output = torch.nn.LogSoftmax(dim=-1)(output)
         loss = nn.KLDivLoss(reduction='none')(output, target)
+        if viz:
+            viz_loss(target_orig, output_orig, loss, bs, self.num_classes)
+
         loss = torch.sum(loss)/n_samples
         return loss
 
@@ -76,10 +105,12 @@ class SORDLoss(nn.Module):
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
 
-    def forward(self, output, target, debug=False, mod_input=None):
+    def forward(self, output_orig, target_orig, debug=False, mod_input=None, viz=True):
 
-        logger.debug(f"SORD - before flatten: target shape {target.shape} | output shape {output.shape}")
-        output, target = flatten_tensors(output, target)
+        bs = target_orig.shape[0]
+
+        logger.debug(f"SORD - before flatten: target shape {target_orig.shape} | output shape {output_orig.shape}")
+        output, target = flatten_tensors(output_orig, target_orig)
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
 
         if self.masking:
@@ -118,6 +149,9 @@ class SORDLoss(nn.Module):
             output = torch.nn.LogSoftmax(dim=-1)(output)
 
         loss = nn.KLDivLoss(reduction='none')(output, soft_target)
+        if viz:
+            viz_loss(target_orig, output_orig, loss, bs, self.num_classes)
+
         #print(n_samples)
         loss = torch.sum(loss)/n_samples
         return loss
