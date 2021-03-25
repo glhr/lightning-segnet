@@ -11,7 +11,7 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 from segnet import SegNet
-from losses import SORDLoss, KLLoss
+from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
@@ -79,10 +79,11 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.hparams.ranks = range(self.hparams.num_classes)
+        self.hparams.ranks = np.array(range(self.hparams.num_classes))*2
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
+        #self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss=self.hparams.loss)
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
@@ -120,6 +121,7 @@ class LitSegNet(pl.LightningModule):
             return self.sord(x_hat, y)
         elif loss == "kl":
             return self.kl(x_hat, y)
+        #return self.loss(x_hat, y)
 
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
@@ -207,6 +209,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
+            loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
@@ -306,7 +309,10 @@ class LitSegNet(pl.LightningModule):
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
-        dataset = Subset(dataset, indices=range(len(dataset)))
+        if set == "test":
+            dataset = Subset(dataset, indices=range(len(dataset)))
+        else:
+            dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset
 
     def get_dataset_splits(self, normalize=False):
