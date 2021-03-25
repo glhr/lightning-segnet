@@ -80,8 +80,8 @@ class CompareLosses(nn.Module):
             output[i][2] = 1.0
 
         losses = {
-            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, viz=False),
-            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, viz=False),
+            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, viz=False, reduce=False),
+            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, viz=False, reduce=False),
         }
         viz_loss(target, output, losses, bs=target.shape[0], nclasses=self.num_classes)
         return losses[self.returnloss]
