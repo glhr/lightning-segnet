@@ -55,6 +55,24 @@ def viz_loss(target, output, loss, bs, nclasses):
     plt.show()
 
 
+class CompareLosses(nn.Module):
+    def __init__(self, n_classes, masking, ranks, returnloss):
+        super().__init__()
+        self.num_classes = n_classes
+        self.masking = masking
+        self.ranks = ranks
+        self.kl = KLLoss(n_classes=n_classes, masking=masking)
+        self.sord = SORDLoss(n_classes=n_classes, masking=masking, ranks=ranks)
+        self.returnloss = returnloss
+
+    def forward(self, output, target, debug=False, viz=True):
+        losses = {
+            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, viz=viz),
+            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, viz=viz)
+        }
+        return losses[self.returnloss]
+
+
 class KLLoss(nn.Module):
     def __init__(self, n_classes, masking=False):
         super().__init__()
