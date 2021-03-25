@@ -83,7 +83,7 @@ class LitSegNet(pl.LightningModule):
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss=self.hparams.loss)
+        #self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss=self.hparams.loss)
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
@@ -115,13 +115,13 @@ class LitSegNet(pl.LightningModule):
         return embedding
 
     def compute_loss(self, x_hat, y, loss="ce"):
-        # if loss == "ce":
-        #     return self.ce(x_hat, y)
-        # elif loss == "sord":
-        #     return self.sord(x_hat, y)
-        # elif loss == "kl":
-        #     return self.kl(x_hat, y)
-        return self.loss(x_hat, y)
+        if loss == "ce":
+            return self.ce(x_hat, y)
+        elif loss == "sord":
+            return self.sord(x_hat, y)
+        elif loss == "kl":
+            return self.kl(x_hat, y)
+        #return self.loss(x_hat, y)
 
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
@@ -310,7 +310,7 @@ class LitSegNet(pl.LightningModule):
             augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
         if set == "test":
-            dataset = Subset(dataset, indices=range(2))
+            dataset = Subset(dataset, indices=range(len(dataset)))
         else:
             dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset

@@ -93,7 +93,7 @@ class KLLoss(nn.Module):
         self.num_classes = n_classes
         self.masking = masking
 
-    def forward(self, output_orig, target_orig, debug=False, viz=True):
+    def forward(self, output_orig, target_orig, debug=False, viz=True, reduce=True):
         bs = target_orig.shape[0]
         output, target = flatten_tensors(output_orig, target_orig)
         if debug: print(output,target)
@@ -115,7 +115,8 @@ class KLLoss(nn.Module):
         if viz:
             viz_loss(target_orig, output_orig, loss, bs, self.num_classes, title="KLLoss")
 
-        #loss = torch.sum(loss)/n_samples
+        if reduce:
+            loss = torch.sum(loss)/n_samples
         return loss
 
 
@@ -137,14 +138,14 @@ class SORDLoss(nn.Module):
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
 
-    def forward(self, output_orig, target_orig, debug=False, mod_input=None, viz=True):
+    def forward(self, output_orig, target_orig, debug=False, mod_input=None, viz=True, reduce=True):
 
         bs = target_orig.shape[0]
         target = torch.clone(target_orig)
         #if debug: print("target_orig",target_orig,torch.unique(target_orig))
         for i,r in enumerate(self.ranks):
             target[target_orig==i] = r
-            print(f"{i} to {r}")
+            if debug: print(f"{i} to {r}")
         logger.debug(f"SORD - before flatten: target shape {target_orig.shape} | output shape {output_orig.shape}")
         output, target = flatten_tensors(output_orig, target)
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
@@ -186,11 +187,10 @@ class SORDLoss(nn.Module):
             output = torch.nn.LogSoftmax(dim=-1)(output)
 
         loss = nn.KLDivLoss(reduction='none')(output, soft_target)
-        if viz:
-            viz_loss(target_orig, output_orig, loss, bs, self.num_classes, title="SORDLoss")
 
         #print(n_samples)
-        #loss = torch.sum(loss)/n_samples
+        if reduce:
+            loss = torch.sum(loss)/n_samples
         return loss
 
 
