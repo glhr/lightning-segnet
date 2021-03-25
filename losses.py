@@ -31,24 +31,31 @@ def flatten_tensors(inp, target):
     return inp, target
 
 
-def viz_loss(target, output, loss, bs, nclasses):
-    loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
-    logger.debug(f"target {target.shape} | loss {loss.shape} | reshaped {loss_reshaped.shape}")
+def viz_loss(target, output, losses, bs, nclasses):
+
     fig, axes = plt.subplots(ncols=nclasses+2, nrows=bs, sharex=True, sharey=True,
                              figsize=(6, 3))
-    for i in range(bs):
-        loss_viz = torch.sum(loss_reshaped[i].squeeze(), axis=-1).numpy()
-        axes[i][0].imshow(target[i], cmap=plt.cm.gray)
+    for i, (loss_name, loss) in enumerate(losses.items()):
+        loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
+        logger.debug(f"target {target.shape} | loss {loss.shape} | reshaped {loss_reshaped.shape}")
+
+        batch = 0
+        loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
+        axes[i][0].imshow(target[batch], cmap=plt.cm.gray)
         axes[i][0].axis('off')
         for cls in range(0, nclasses):
-            axes[i][cls+1].imshow(output[i][cls], cmap=plt.cm.gray)
+            axes[i][cls+1].imshow(output[batch][cls], cmap=plt.cm.gray, vmin=0, vmax=1)
             axes[i][cls+1].axis('off')
-        axes[i][nclasses+1].imshow(loss_viz, cmap=plt.cm.gray)
+        im = axes[i][nclasses+1].imshow(loss_viz, cmap=plt.cm.gray)
+        fig.colorbar(im, ax=axes[i][nclasses+1])
         axes[i][nclasses+1].axis('off')
+        axes[i][nclasses+1].set_title(loss_name)
+        print("unique loss values",np.unique(loss_viz))
 
     # for r in axes:
     #     for c in r:
     #         axes[r][c].axis('off')
+
 
     plt.axis('off')
     plt.tight_layout()
@@ -65,11 +72,18 @@ class CompareLosses(nn.Module):
         self.sord = SORDLoss(n_classes=n_classes, masking=masking, ranks=ranks)
         self.returnloss = returnloss
 
-    def forward(self, output, target, debug=False, viz=True):
+    def forward(self, output, target, debug=True, viz=True):
+        target = torch.fliplr(target)
+        for i in range(target.shape[0]):
+            for cls in range(0, self.num_classes):
+                output[i][cls] = 0.0
+            output[i][2] = 1.0
+
         losses = {
-            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, viz=viz),
-            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, viz=viz)
+            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, viz=False),
+            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, viz=False),
         }
+        viz_loss(target, output, losses, bs=target.shape[0], nclasses=self.num_classes)
         return losses[self.returnloss]
 
 
@@ -99,9 +113,9 @@ class KLLoss(nn.Module):
         output = torch.nn.LogSoftmax(dim=-1)(output)
         loss = nn.KLDivLoss(reduction='none')(output, target)
         if viz:
-            viz_loss(target_orig, output_orig, loss, bs, self.num_classes)
+            viz_loss(target_orig, output_orig, loss, bs, self.num_classes, title="KLLoss")
 
-        loss = torch.sum(loss)/n_samples
+        #loss = torch.sum(loss)/n_samples
         return loss
 
 
@@ -126,10 +140,13 @@ class SORDLoss(nn.Module):
     def forward(self, output_orig, target_orig, debug=False, mod_input=None, viz=True):
 
         bs = target_orig.shape[0]
-
+        target_orig = torch.clone(target_orig)
+        for i,r in enumerate(self.ranks):
+            target_orig[target_orig==i] = r
         logger.debug(f"SORD - before flatten: target shape {target_orig.shape} | output shape {output_orig.shape}")
         output, target = flatten_tensors(output_orig, target_orig)
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
+
 
         if self.masking:
             logger.debug(f"SORD - before masking: target shape {target.shape} | output shape {output.shape}")
@@ -168,10 +185,10 @@ class SORDLoss(nn.Module):
 
         loss = nn.KLDivLoss(reduction='none')(output, soft_target)
         if viz:
-            viz_loss(target_orig, output_orig, loss, bs, self.num_classes)
+            viz_loss(target_orig, output_orig, loss, bs, self.num_classes, title="SORDLoss")
 
         #print(n_samples)
-        loss = torch.sum(loss)/n_samples
+        #loss = torch.sum(loss)/n_samples
         return loss
 
 
