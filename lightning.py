@@ -79,7 +79,7 @@ class LitSegNet(pl.LightningModule):
             "kitti": KittiDataLoader,
             "own": OwnDataLoader
         }
-        self.hparams.ranks = np.array(range(self.hparams.num_classes))
+        self.hparams.ranks = np.array(range(self.hparams.num_classes))*2
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
@@ -309,7 +309,10 @@ class LitSegNet(pl.LightningModule):
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
-        dataset = Subset(dataset, indices=range(len(dataset)))
+        if set == "test":
+            dataset = Subset(dataset, indices=range(2))
+        else:
+            dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset
 
     def get_dataset_splits(self, normalize=False):

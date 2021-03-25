@@ -140,11 +140,13 @@ class SORDLoss(nn.Module):
     def forward(self, output_orig, target_orig, debug=False, mod_input=None, viz=True):
 
         bs = target_orig.shape[0]
-        target_orig = torch.clone(target_orig)
+        target = torch.clone(target_orig)
+        #if debug: print("target_orig",target_orig,torch.unique(target_orig))
         for i,r in enumerate(self.ranks):
-            target_orig[target_orig==i] = r
+            target[target_orig==i] = r
+            print(f"{i} to {r}")
         logger.debug(f"SORD - before flatten: target shape {target_orig.shape} | output shape {output_orig.shape}")
-        output, target = flatten_tensors(output_orig, target_orig)
+        output, target = flatten_tensors(output_orig, target)
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
 
 
@@ -165,7 +167,7 @@ class SORDLoss(nn.Module):
         ranks = torch.tensor(self.ranks, dtype=output.dtype, device=output.device, requires_grad=False).repeat(output.size(0), 1)
         if debug: print("ranks",ranks)
         target = target.unsqueeze(1).repeat(1, self.num_classes)
-        if debug: print("target",target)
+        if debug: print("target",target,torch.unique(target))
         soft_target = -nn.L1Loss(reduction='none')(target, ranks)  # should be of size N x num_classes
         if debug: print("l1 target",soft_target)
         soft_target = torch.softmax(soft_target, dim=-1)
