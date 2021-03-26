@@ -14,6 +14,26 @@ from sklearn.metrics import jaccard_score, confusion_matrix
 from utils import logger, enable_debug
 from losses import flatten_tensors
 
+
+class Distance(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.l1 = nn.L1Loss(size_average=False, reduce=False, reduction='none')
+        self.l2 = nn.MSELoss(size_average=False, reduce=False, reduction='none')
+
+    def forward(self, output, target, debug=False, already_flattened=False):
+
+        if not already_flattened:
+            output, target = flatten_tensors(output, target)
+            output = torch.argmax(output, dim=-1)
+
+        dist_l1 = self.l1(output.float(), target.float())
+        dist_l2 = self.l2(output.float(), target.float())
+        logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
+
+        return dist_l1, dist_l2
+
+
 class ConfusionMatrix(nn.Module):
     def __init__(self, labels):
         super().__init__()

@@ -12,7 +12,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from segnet import SegNet
 from losses import SORDLoss, KLLoss, CompareLosses
-from metrics import MaskedIoU, ConfusionMatrix
+from metrics import MaskedIoU, ConfusionMatrix, Distance
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
@@ -84,6 +84,7 @@ class LitSegNet(pl.LightningModule):
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
         self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss=self.hparams.loss)
+        self.dist = Distance()
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
@@ -198,10 +199,29 @@ class LitSegNet(pl.LightningModule):
         #
         # print(cm)
 
-        cm = cm / cm.sum(axis=1, keepdim=True) # normalize confusion matrix
+        recall = np.diag(cm) / cm.sum(axis = 1)
+        precision = np.diag(cm) / cm.sum(axis = 0)
+        recall_overall = torch.mean(recall)
+        precision_overall = torch.mean(precision)
 
-        plot_confusion_matrix(cm.numpy(), labels=labels, filename=f"{self.hparams.dataset}-{self.hparams.mode}-{self.test_checkpoint}", folder=f"{self.result_folder}")
+        print(f"precision {precision} ({precision_overall}) | recall {recall} ({recall_overall})")
+
+        cm1 = cm / cm.sum(axis=1, keepdim=True)  # normalize confusion matrix
+        cm2 = cm / cm.sum(axis=0, keepdim=True)  # normalize confusion matrix
+
+        confusionmatrix_file = f"{self.hparams.dataset}-{self.hparams.mode}-{self.test_checkpoint}"
+        logger.info(f"Saving confusion matrix {confusionmatrix_file}")
+
+        plot_confusion_matrix(cm1.numpy(), labels=labels, filename=confusionmatrix_file+"-1", folder=f"{self.result_folder}")
+        plot_confusion_matrix(cm2.numpy(), labels=labels, filename=confusionmatrix_file+"-2", folder=f"{self.result_folder}")
         return 0
+
+    def reduce_dist(self, dists):
+
+        dist = torch.sum(dists, dim=0, keepdim=False) / dists.shape[0]
+        #logger.debug(f"l1 distance {dist.item()}")
+
+        return dist
 
     def test_step(self, batch, batch_idx):
         sample, target_orig = batch
@@ -210,7 +230,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
-            loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
+            # loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
@@ -289,9 +309,12 @@ class LitSegNet(pl.LightningModule):
                 cm = self.CM(pred, target)
                 # print(cm.shape)
                 iou = self.IoU_conv(pred, target)
+                dist_l1, dist_l2 = self.dist(pred, target)
 
                 self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
                 self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                self.log('dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
+                self.log('dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             except Exception as e:
                 print("Couldn't compute eval metrics",e)
             return pred
