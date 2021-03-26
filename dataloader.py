@@ -128,9 +128,9 @@ class MMDataLoader(Dataset):
     def remap_classes(self, idx_to_color):
 
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge']
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat']
         void = ['void','egovehicle','outofroi','rectificationborder','unlabeled']
-        driveable = ['road','path','ground','tunnel']
+        driveable = ['road','path','ground']
         between = ['grass','terrain','sidewalk','parking','railtrack']
         objclass_to_driveidx = dict()
 
@@ -395,14 +395,15 @@ class FreiburgDataLoader(MMDataLoader):
             self.cls_labels = [0]*len(classes)
 
         for x in classes:
-            x = [int(i) if i.isdigit() else i for i in x]
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
             self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
             if self.mode == "objects":
                 self.cls_labels[x[4]] = x[0].lower()
 
-        # print(self.cls_labels)
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
@@ -459,13 +460,13 @@ class CityscapesDataLoader(MMDataLoader):
         # print(classes)
 
         for x in classes:
-            x = [int(i) if i.isdigit() or "-" in i else i for i in x]
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
             self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
 
-        # print("class to idx: ", self.class_to_idx['objects'])
-        # print("color to idx: ", self.color_to_idx['objects'].values())
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
@@ -513,7 +514,7 @@ class KittiDataLoader(MMDataLoader):
         # print(classes)
 
         for x in classes:
-            x = [int(i) if i.isdigit() or "-" in i else i for i in x]
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
             self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
             self.class_to_idx['objects'][x[0].lower()] = x[4]
@@ -543,6 +544,56 @@ class KittiDataLoader(MMDataLoader):
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
         return pilRGB, None, None, imgGT
 
+class ThermalVOCDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="thermalvoc", mode=mode, augment=augment)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        if self.mode == "objects":
+            self.cls_labels = [0]*len(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+            if self.mode == "objects":
+                self.cls_labels[x[4]] = x[0].lower()
+
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+        logger.debug(self.idx_to_idx["convert"])
+
+        self.path = path + 'train/'
+
+        self.augment = augment
+
+        for img in glob.glob(self.path + 'SegmentationClass/*.png'):
+            img = img.split("/")[-1]
+            # print(img)
+            self.filenames.append(img)
+        # logger.debug(self.filenames)
+
+        self.color_GT = True
+
+    def get_image_pairs(self, sample_id):
+        pilRGB = Image.open(self.path + "ColorImages/" + self.filenames[sample_id]).convert('RGB')
+        pilDep = None
+        pilIR = Image.fromarray(np.load(self.path + "ThermalImages/" + self.filenames[sample_id].replace(".png",".npy")))
+
+        imgGT = Image.open(self.path + "SegmentationClass/" + self.filenames[sample_id]).convert('RGB')
+
+        return pilRGB, pilDep, pilIR, imgGT
 
 class OwnDataLoader(MMDataLoader):
     def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):

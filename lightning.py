@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from segnet import SegNet
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Distance
-from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
@@ -77,7 +77,8 @@ class LitSegNet(pl.LightningModule):
             "freiburg": FreiburgDataLoader,
             "cityscapes": CityscapesDataLoader,
             "kitti": KittiDataLoader,
-            "own": OwnDataLoader
+            "own": OwnDataLoader,
+            "thermalvoc": ThermalVOCDataLoader
         }
         self.hparams.ranks = [0, 9, 10]
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
@@ -334,7 +335,10 @@ class LitSegNet(pl.LightningModule):
             augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
         if set == "test":
-            dataset = Subset(dataset, indices=range(len(dataset)))
+            if self.test_max is None:
+                dataset = Subset(dataset, indices=range(len(dataset)))
+            else:
+                dataset = Subset(dataset, indices=range(self.test_max))
         else:
             dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset
@@ -367,6 +371,12 @@ class LitSegNet(pl.LightningModule):
             train_set, _, _ = random_split(train_set, [train_len, val_len, val_len])
             _, val_set, test_set = random_split(val_set, [train_len, val_len, val_len])
             train_set, val_set, test_set = train_set.dataset, val_set.dataset, test_set.dataset
+            # print(test_set[0])
+
+        elif self.hparams.dataset == "thermalvoc":
+            train_set = self.get_dataset(set="train")
+            val_set = self.get_dataset(set="test", augment=False)
+            test_set = val_set
             # print(test_set[0])
 
         elif self.hparams.dataset == "cityscapes":
