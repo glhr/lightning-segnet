@@ -93,7 +93,7 @@ class KLLoss(nn.Module):
         self.num_classes = n_classes
         self.masking = masking
 
-    def forward(self, output_orig, target_orig, debug=False, viz=True, reduce=True):
+    def forward(self, output_orig, target_orig, debug=False, reduce=True):
         bs = target_orig.shape[0]
         output, target = flatten_tensors(output_orig, target_orig)
         if debug: print(output,target)
@@ -112,8 +112,6 @@ class KLLoss(nn.Module):
         if debug: print(output,target)
         output = torch.nn.LogSoftmax(dim=-1)(output)
         loss = nn.KLDivLoss(reduction='none')(output, target)
-        if viz:
-            viz_loss(target_orig, output_orig, loss, bs, self.num_classes, title="KLLoss")
 
         if reduce:
             loss = torch.sum(loss)/n_samples
@@ -138,7 +136,7 @@ class SORDLoss(nn.Module):
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
 
-    def forward(self, output_orig, target_orig, debug=False, mod_input=None, viz=True, reduce=True):
+    def forward(self, output_orig, target_orig, debug=False, mod_input=None, reduce=True):
 
         bs = target_orig.shape[0]
         target = torch.clone(target_orig)
