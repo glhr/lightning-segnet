@@ -90,7 +90,7 @@ class MMDataLoader(Dataset):
         img_dict = {
             'image': imgRGB_orig,
             'depth': imgDep_orig if pilDep is not None else None,
-            # 'ir': imgIR,
+            'ir': imgIR_orig if pilIR is not None else None,
             'mask': imgGT_orig
             }
 
@@ -354,17 +354,19 @@ class MMDataLoader(Dataset):
             A.HorizontalFlip(p=p)
             ], p=1, additional_targets=additional_targets)
         if apply == 'resize_only':
-            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"])
+            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
             if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
+            if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
             transformed_final = transformed_gray
         elif apply == 'all':
-            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"])
+            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
-            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"])
+            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"], ir=transformed_resized["ir"])
             transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
             if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
-            transformed_final = resize_transform(image=transformed_gray['image'], mask=transformed_gray['mask'], depth=transformed_gray["depth"])
+            if "ir" in imgs: transformed_gray["ir"] = transformed_geom["ir"]
+            transformed_final = resize_transform(image=transformed_gray['image'], mask=transformed_gray['mask'], depth=transformed_gray["depth"], ir=transformed_gray["ir"])
 
         # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))

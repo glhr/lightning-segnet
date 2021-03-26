@@ -346,7 +346,7 @@ class LitSegNet(pl.LightningModule):
     def get_dataset_splits(self, normalize=False):
         if self.hparams.dataset == "freiburg":
             train_set = self.get_dataset(set="train")
-            test_set = self.get_dataset(set="test", augment=False)
+            test_set = self.get_dataset(set="test", augment=True)
             val_set = test_set
             # total_len = len(train_set)
             # val_len = int(0.1*total_len)

@@ -41,11 +41,11 @@ def visualize_data_aug(imgs, augmented):
     axes[0][1].axis('off')
 
     if imgs.get("depth") is not None:
-        axes[0][2].imshow(imgs["depth"], cmap=plt.cm.gray)
+        axes[0][2].imshow(imgs["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[0][2].set_title('Depth')
         axes[0][2].axis('off')
     if imgs.get("ir") is not None:
-        axes[0][3].imshow(imgs["ir"], cmap=plt.cm.gray)
+        axes[0][3].imshow(imgs["ir"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[0][3].set_title('IR')
         axes[0][3].axis('off')
 
@@ -56,10 +56,10 @@ def visualize_data_aug(imgs, augmented):
     axes[1][1].axis('off')
 
     if imgs.get("depth") is not None:
-        axes[1][2].imshow(augmented["depth"], cmap=plt.cm.gray)
+        axes[1][2].imshow(augmented["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[1][2].axis('off')
     if imgs.get("ir") is not None:
-        axes[1][3].imshow(augmented["ir"], cmap=plt.cm.gray)
+        axes[1][3].imshow(augmented["ir"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[1][3].axis('off')
 
     plt.tight_layout()
