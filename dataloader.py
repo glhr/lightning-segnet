@@ -14,6 +14,7 @@ from PIL import Image, ImageFile
 import albumentations as A
 
 from utils import RANDOM_SEED, logger
+from plotting import visualize_data_aug
 
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
@@ -82,30 +83,37 @@ class MMDataLoader(Dataset):
         imgGT_orig = np.array(imgGT)
 
         if pilRGB is not None: imgRGB_orig = np.array(pilRGB)
+        #logger.debug(f"RGB range {np.min(imgRGB_orig)} {np.max(imgRGB_orig)}")
         if pilDep is not None: imgDep_orig = np.array(pilDep)
         if pilIR is not None: imgIR_orig = np.array(pilIR)
 
         img_dict = {
             'image': imgRGB_orig,
-            # 'depth': imgDep,
+            'depth': imgDep_orig if pilDep is not None else None,
             # 'ir': imgIR,
             'mask': imgGT_orig
             }
 
-        if augment: transformed_imgs = self.data_augmentation(img_dict, resize_only=False)
-        else: transformed_imgs = self.data_augmentation(img_dict, resize_only=True)
+        if augment: transformed_imgs = self.data_augmentation(img_dict, apply='all')
+        else: transformed_imgs = self.data_augmentation(img_dict, apply='resize_only')
         modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
         if pilDep is not None: modDepth = np.array(imgDep_orig)
         if pilIR is not None: modIR = np.array(imgIR_orig)
 
         modGT = self.prepare_GT(modGT, color_GT)
 
-        if pilRGB is not None and len(modRGB.shape)==3: modRGB = modRGB[: , :, 2]
-        if pilDep is not None and len(modDepth.shape)==3: modDepth = modDepth[: , :, 2]
-        if pilIR is not None and len(modIR.shape)==3: modIR = modIR[: , :, 2]
+        if pilRGB is not None:
+            if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
+            # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
+        if pilDep is not None:
+            if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
+            # logger.debug(f"D range {np.min(modDepth)} {np.max(modDepth)}")
+        if pilIR is not None:
+            if len(modIR.shape) == 3: modIR = modIR[:,:,2]
+            # logger.debug(f"IR range {np.min(modIR)} {np.max(modIR)}")
 
         if save:
-            orig_imgs = self.data_augmentation(img_dict, resize_only=True)
+            orig_imgs = self.data_augmentation(img_dict, apply='resize_only')
             imgRGB_orig, imgGT_orig = orig_imgs['image'], orig_imgs['mask']
             imgRGB_orig = imgRGB_orig[: , :, 2]
             imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
@@ -321,36 +329,48 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, resize_only=False):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=True):
         img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
-        if resize_only:
-            transform = A.Compose([
-                A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                A.ToGray(p=1)
-            ])
-        else:
-            transform = A.Compose([
-                A.Compose([
-                    A.RandomToneCurve(scale=0.1, p=p),
-                    A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p),
-                    A.GridDistortion(num_steps=3, p=p),
-                    A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
-                    A.Rotate(limit=10, p=p),
-                    A.RandomCrop(width=int(img_width * rand_crop), height=int(img_height * rand_crop), p=p),
-                    A.HorizontalFlip(p=p)
-                ], p = 1),
-                A.Resize(height = self.resize[1], width = self.resize[0], p=1),
-                A.ToGray(p=1)
-                ]
-                # additional_targets={'rgb': 'image', 'mask':'mask'}
-            )
+        additional_targets = dict()
+        for modality in ["depth", "ir"]:
+            if imgs.get(modality) is not None:
+                additional_targets[modality] = 'image'
+        resize_transform = A.Compose([
+            A.Resize(height = self.resize[1], width = self.resize[0], p=1)
+            ], p=1, additional_targets=additional_targets)
+        gray_transform = A.Compose([
+            A.ToGray(p=1)
+            ], p=1)
+        color_transform = A.Compose([
+            A.RandomToneCurve(scale=0.1, p=p),
+            A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p)
+            ], p=1)
+        geom_transform = A.Compose([
+            A.GridDistortion(num_steps=3, p=p),
+            A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
+            A.Rotate(limit=10, p=p),
+            A.RandomCrop(width=int(self.resize[0] * rand_crop), height=int(self.resize[1]*rand_crop), p=p),
+            A.HorizontalFlip(p=p)
+            ], p=1, additional_targets=additional_targets)
+        if apply == 'resize_only':
+            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"])
+            transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
+            if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
+            transformed_final = transformed_gray
+        elif apply == 'all':
+            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"])
+            transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
+            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"])
+            transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
+            if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
+            transformed_final = resize_transform(image=transformed_gray['image'], mask=transformed_gray['mask'], depth=transformed_gray["depth"])
 
-        transformed = transform(image=imgs['image'], mask=imgs['mask'])
-
+        # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))
+        if viz: visualize_data_aug(imgs=imgs, augmented=transformed_final)
 
-        return transformed
+        return transformed_final
 
     def sample(self, sample_id, augment):
         try:
