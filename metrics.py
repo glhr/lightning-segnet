@@ -56,16 +56,24 @@ class ConfusionMatrix(nn.Module):
         return cm
 
 class MaskedIoU(nn.Module):
-    def __init__(self, labels):
+    def __init__(self, labels, masking=True):
         super().__init__()
         self.labels = list(labels)
+        self.masking = masking
         logger.info(f"IoU labels: {self.labels}")
 
-    def forward(self, output, target, debug=False, already_flattened=False):
+    def forward(self, output, target, debug=True, already_flattened=False):
 
         if not already_flattened:
             output, target = flatten_tensors(output, target)
             output = torch.argmax(output, dim=-1)
+
+        if self.masking:
+            mask = target.ge(0)
+            # print(mask, mask.shape)
+            # print(output.shape,target.shape)
+            output = output[mask]
+            target = target[mask]
 
         output = output.detach().cpu().numpy()
         target = target.detach().cpu().numpy()
