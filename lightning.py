@@ -144,9 +144,12 @@ class LitSegNet(pl.LightningModule):
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
             # print(p.shape)
-            test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * self.hparams.ranks[0] \
-             + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * self.hparams.ranks[1] \
-             + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * self.hparams.ranks[2]
+            if self.hparams.ranks is not None:
+                test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * self.hparams.ranks[0] \
+                 + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * self.hparams.ranks[1] \
+                 + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * self.hparams.ranks[2]
+            else:
+                test = None
             self.test_set.dataset.result_to_image(
                 iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
                 folder=f"{self.result_folder}/viz_per_epoch",
