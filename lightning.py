@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from segnet import SegNet
+from segnet import SegNet, new_input_channels
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Distance
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader
@@ -58,6 +58,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
+        parser.add_argument('--modalities', default="rgb")
         return parser
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
@@ -72,6 +73,8 @@ class LitSegNet(pl.LightningModule):
         self.test_max = test_max
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
+        self.hparams.modalities = self.hparams.modalities.split(",")
+        logger.warning(f"modalities {self.hparams.modalities}")
 
         self.datasets = {
             "freiburg": FreiburgDataLoader,
@@ -109,6 +112,10 @@ class LitSegNet(pl.LightningModule):
         self.result_folder = f"results/{self.hparams.dataset}/"
         self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         create_folder(f"{self.result_folder}/viz_per_epoch")
+
+    def update_model(self):
+        channels = len(self.hparams.modalities)
+        self.model = new_input_channels(self.model, channels)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -333,7 +340,7 @@ class LitSegNet(pl.LightningModule):
             name = self.hparams.dataset
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities)
         if set == "test":
             if self.test_max is None:
                 dataset = Subset(dataset, indices=range(len(dataset)))
@@ -457,4 +464,5 @@ else:
     chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
     trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, conf=args)
+    trained_model.update_model()
     trainer.test(trained_model)

@@ -34,6 +34,7 @@ class MMDataLoader(Dataset):
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.modalities = modalities
+        logger.warning(f"dataset modalities {self.modalities}")
 
         self.idx_to_color['objects'] = self.idx_to_color.get('objects', dict())
         self.class_to_idx['objects'] = self.class_to_idx.get('objects', dict())
@@ -284,13 +285,15 @@ class MMDataLoader(Dataset):
 
         if orig is not None:
             if torch.is_tensor(orig):
-                orig = orig.squeeze().detach().cpu().numpy()
-            if np.max(orig) <= 1: orig = (orig*255)
-            orig = orig.astype(np.uint8)
-            if orig.shape[-1] != 3:
-                orig = np.stack((orig,)*3, axis=-1)
-                # print(np.min(orig),np.max(orig))
-                concat = [orig] + concat
+                orig = orig.detach().cpu().numpy()
+            for modality in orig:
+                # print("orig shape",modality.shape)
+                if np.max(modality) <= 1: modality = (modality*255)
+                modality = modality.astype(np.uint8)
+                if modality.shape[-1] != 3:
+                    modality = np.stack((modality,)*3, axis=-1)
+                    # print(np.min(orig),np.max(orig))
+                    concat = [modality] + concat
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
@@ -323,7 +326,9 @@ class MMDataLoader(Dataset):
             proba = (proba*255).astype(np.uint8)
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
-
+        
+        # for d in concat:
+        #     print(d.shape)
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
@@ -331,13 +336,15 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=True):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=False):
         img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
+
         additional_targets = dict()
         for modality in ["depth", "ir"]:
             if imgs.get(modality) is not None:
                 additional_targets[modality] = 'image'
+
         resize_transform = A.Compose([
             A.Resize(height = self.resize[1], width = self.resize[0], p=1)
             ], p=1, additional_targets=additional_targets)
