@@ -17,6 +17,24 @@ random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
 
+def new_input_channels(segnet, channels):
+    conv1 = segnet.encoders[0].features[0]
+    new_layer = nn.Conv2d(channels, 64, 3, 1, 1)
+    copy_weights = 0  # Here will initialize the weights from new channel with the red channel weights
+
+    # Copying the weights from the old to the new layer
+    new_layer.weight[:, :conv1.in_channels, :, :] = conv1.weight.clone()
+
+    # Copying the weights of the `copy_weights` channel of the old layer to the extra channels of the new layer
+    for i in range(channels - conv1.in_channels):
+        channel = conv1.in_channels + i
+        new_layer.weight[:, channel:channel+1, :, :] = conv1.weight[:, copy_weights:copy_weights+1, : :].clone()
+    new_layer.weight = nn.Parameter(new_layer.weight)
+
+    segnet.encoders[0].features[0] = new_layer
+    return segnet
+
+
 class SegNet(nn.Module):
     """SegNet: A Deep Convolutional Encoder-Decoder Architecture for
     Image Segmentation. https://arxiv.org/abs/1511.00561
@@ -81,6 +99,7 @@ class _Encoder(nn.Module):
             drop_rate (float): dropout rate to use
         """
         super(_Encoder, self).__init__()
+        # print(f"encoder {n_in_feat}, {n_out_feat}")
 
         layers = [nn.Conv2d(n_in_feat, n_out_feat, 3, 1, 1),
                   nn.BatchNorm2d(n_out_feat),
@@ -128,3 +147,12 @@ class _Decoder(nn.Module):
     def forward(self, x, indices, size):
         unpooled = F.max_unpool2d(x, indices, 2, 2, 0, size)
         return self.features(unpooled)
+
+
+if __name__ == '__main__':
+    segnet = SegNet(num_classes=3)
+    # print(segnet)
+
+    channels = 2
+    segnet = new_input_channels(segnet, channels)
+    print(segnet)
