@@ -114,7 +114,11 @@ class LitSegNet(pl.LightningModule):
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
         self.result_folder = f"results/{self.hparams.dataset}/"
-        self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        if self.hparams.ranks is not None:
+            self.hparams.save_prefix += f'-{",".join(self.hparams.ranks)}'
+        self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
+        logger.info(self.hparams.save_prefix)
         create_folder(f"{self.result_folder}/viz_per_epoch")
 
     def update_model(self):
@@ -146,8 +150,8 @@ class LitSegNet(pl.LightningModule):
             self.test_set.dataset.result_to_image(
                 iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
                 folder=f"{self.result_folder}/viz_per_epoch",
-                filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-proba")
-            # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-cls")
+                filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-proba")
+            # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-cls")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
@@ -436,7 +440,7 @@ print(args)
 segnet_model = LitSegNet(conf=args)
 
 if args.prefix is None:
-    args.prefix = segnet_model.save_prefix
+    args.prefix = segnet_model.hparams.save_prefix
 print(args.prefix)
 
 checkpoint_callback = ModelCheckpoint(
