@@ -85,7 +85,7 @@ class LitSegNet(pl.LightningModule):
             "thermalvoc": ThermalVOCDataLoader
         }
         if self.hparams.loss == "sord":
-            self.hparams.ranks = self.hparams.ranks.split(",")
+            self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
         else:
             self.hparams.ranks = None
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
