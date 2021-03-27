@@ -434,7 +434,6 @@ if args.debug: enable_debug()
 
 print(args)
 segnet_model = LitSegNet(conf=args)
-segnet_model.update_model()
 
 if args.prefix is None:
     args.prefix = segnet_model.save_prefix
@@ -462,6 +461,7 @@ if args.train:
         logger=wandb_logger,
         checkpoint_callback=checkpoint_callback,
         resume_from_checkpoint=args.train_checkpoint)
+    segnet_model.update_model()
     trainer.fit(segnet_model)
 
 else:
