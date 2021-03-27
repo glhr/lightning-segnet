@@ -430,6 +430,7 @@ if args.debug: enable_debug()
 
 print(args)
 segnet_model = LitSegNet(conf=args)
+segnet_model.update_model()
 
 if args.prefix is None:
     args.prefix = segnet_model.save_prefix
@@ -449,6 +450,7 @@ if args.train:
     logger.warning("Training phase")
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
     wandb_logger.log_hyperparams(segnet_model.hparams)
+    #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
     trainer = pl.Trainer.from_argparse_args(args,
         check_val_every_n_epoch=1,
