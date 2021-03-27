@@ -12,7 +12,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from segnet import SegNet, new_input_channels
 from losses import SORDLoss, KLLoss, CompareLosses
-from metrics import MaskedIoU, ConfusionMatrix, Distance
+from metrics import MaskedIoU, ConfusionMatrix, Distance, iou_from_confmat
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
@@ -204,11 +204,11 @@ class LitSegNet(pl.LightningModule):
             loss = self.predict(batch, set="val")
         return loss
 
-    def reduce_cm(self, cms):
+    def reduce_cm(self, cms, save=False):
 
         labels = self.train_set.dataset.cls_labels
 
-        cms = torch.tensor(cms, dtype=torch.long)
+        #cms = torch.from_numpy(cms)
 
         cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
         cm = torch.sum(cms, dim=0, keepdim=False)
@@ -216,26 +216,31 @@ class LitSegNet(pl.LightningModule):
         # ignore void class
         # cm = cm[1:, 1:]
         # cm = np.delete(cm, self.hparams.ignore_index, 0)
-        if len(labels) > self.num_cls:
-            labels.pop(0)
+
         #
         # print(cm)
+        iou_cls = iou_from_confmat(cm, num_classes=len(labels))
+        logger.debug(f"CM - {cm}")
+        logger.debug(f"CM IoU - {iou_cls}")
 
         recall = np.diag(cm) / cm.sum(axis = 1)
         precision = np.diag(cm) / cm.sum(axis = 0)
         recall_overall = torch.mean(recall)
         precision_overall = torch.mean(precision)
 
-        print(f"precision {precision} ({precision_overall}) | recall {recall} ({recall_overall})")
+        logger.debug(f"precision {precision} ({precision_overall}) | recall {recall} ({recall_overall})")
 
         cm1 = cm / cm.sum(axis=1, keepdim=True)  # normalize confusion matrix
         cm2 = cm / cm.sum(axis=0, keepdim=True)  # normalize confusion matrix
 
-        confusionmatrix_file = f"{self.hparams.dataset}-{self.hparams.mode}-{self.test_checkpoint}"
-        logger.info(f"Saving confusion matrix {confusionmatrix_file}")
+        if save:
+            if len(labels) > self.num_cls:
+                labels.pop(0)
+            confusionmatrix_file = f"{self.hparams.dataset}-{self.hparams.mode}-{self.test_checkpoint}"
+            logger.info(f"Saving confusion matrix {confusionmatrix_file}")
 
-        plot_confusion_matrix(cm1.numpy(), labels=labels, filename=confusionmatrix_file+"-1", folder=f"{self.result_folder}")
-        plot_confusion_matrix(cm2.numpy(), labels=labels, filename=confusionmatrix_file+"-2", folder=f"{self.result_folder}")
+            plot_confusion_matrix(cm1.numpy(), labels=labels, filename=confusionmatrix_file+"-1", folder=f"{self.result_folder}")
+            plot_confusion_matrix(cm2.numpy(), labels=labels, filename=confusionmatrix_file+"-2", folder=f"{self.result_folder}")
         return 0
 
     def reduce_dist(self, dists):
@@ -367,7 +372,7 @@ class LitSegNet(pl.LightningModule):
     def get_dataset_splits(self, normalize=False):
         if self.hparams.dataset == "freiburg":
             train_set = self.get_dataset(set="train")
-            test_set = self.get_dataset(set="test", augment=False)
+            test_set = self.get_dataset(set="test", augment=True)
             val_set = test_set
             # total_len = len(train_set)
             # val_len = int(0.1*total_len)

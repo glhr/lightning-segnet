@@ -619,7 +619,6 @@ class ThermalVOCDataLoader(MMDataLoader):
 
         for img in glob.glob(self.path + 'SegmentationClass/*.png'):
             img = img.split("/")[-1]
-            # print(img)
             self.filenames.append(img)
         # logger.debug(self.filenames)
 
@@ -628,7 +627,10 @@ class ThermalVOCDataLoader(MMDataLoader):
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + "ColorImages/" + self.filenames[sample_id]).convert('RGB')
         pilDep = None
-        pilIR = Image.fromarray(np.load(self.path + "ThermalImages/" + self.filenames[sample_id].replace(".png",".npy")))
+        thermal = np.load(self.path + "ThermalImages/" + self.filenames[sample_id].replace(".png",".npy"))
+        thermal = (thermal - np.min(thermal))
+        thermal = thermal/np.max(thermal)
+        pilIR = Image.fromarray(thermal* 255.0).convert('L')
 
         imgGT = Image.open(self.path + "SegmentationClass/" + self.filenames[sample_id]).convert('RGB')
 
