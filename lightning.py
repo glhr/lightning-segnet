@@ -116,7 +116,7 @@ class LitSegNet(pl.LightningModule):
         self.result_folder = f"results/{self.hparams.dataset}/"
         self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.ranks is not None:
-            self.hparams.save_prefix += f'-{",".join(self.hparams.ranks)}'
+            self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
         self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
         logger.info(self.hparams.save_prefix)
         create_folder(f"{self.result_folder}/viz_per_epoch")
