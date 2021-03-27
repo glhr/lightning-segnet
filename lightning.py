@@ -59,6 +59,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
         parser.add_argument('--modalities', default="rgb")
+        parser.add_argument('--ranks', default="0,5,10")
         return parser
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
@@ -83,7 +84,10 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader,
             "thermalvoc": ThermalVOCDataLoader
         }
-        self.hparams.ranks = [0, 9, 10]
+        if self.hparams.loss == "sord":
+            self.hparams.ranks = self.hparams.ranks.split(",")
+        else:
+            self.hparams.ranks = None
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
