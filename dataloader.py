@@ -83,35 +83,41 @@ class MMDataLoader(Dataset):
 
         imgGT_orig = np.array(imgGT)
 
-        if pilRGB is not None: imgRGB_orig = np.array(pilRGB)
+        use = {
+            "rgb": "rgb" in self.modalities and pilRGB is not None,
+            "depth": "depth" in self.modalities and pilDep is not None,
+            "ir": "ir" in self.modalities and pilIR is not None
+        }
+
+        if use["rgb"]: imgRGB_orig = np.array(pilRGB)
         #logger.debug(f"RGB range {np.min(imgRGB_orig)} {np.max(imgRGB_orig)}")
-        if pilDep is not None: imgDep_orig = np.array(pilDep)
-        if pilIR is not None: imgIR_orig = np.array(pilIR)
+        if use["depth"]: imgDep_orig = np.array(pilDep)
+        if use["ir"]: imgIR_orig = np.array(pilIR)
 
         img_dict = {
-            'image': imgRGB_orig,
-            'depth': imgDep_orig if pilDep is not None else None,
-            'ir': imgIR_orig if pilIR is not None else None,
+            'image': imgRGB_orig if use["rgb"] else None,
+            'depth': imgDep_orig if use["depth"] else None,
+            'ir': imgIR_orig if use["ir"] else None,
             'mask': imgGT_orig
             }
 
         if augment: transformed_imgs = self.data_augmentation(img_dict, apply='all')
         else: transformed_imgs = self.data_augmentation(img_dict, apply='resize_only')
         modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
-        if pilDep is not None:
+        if use["depth"]:
             modDepth = transformed_imgs['depth']
-        if pilIR is not None:
+        if use["ir"]:
             modIR = transformed_imgs['ir']
 
         modGT = self.prepare_GT(modGT, color_GT)
 
-        if pilRGB is not None:
+        if use["rgb"]:
             if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
             # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
-        if pilDep is not None:
+        if use["depth"]:
             if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
             # logger.debug(f"D range {np.min(modDepth)} {np.max(modDepth)}")
-        if pilIR is not None:
+        if use["ir"]:
             if len(modIR.shape) == 3: modIR = modIR[:,:,2]
             # logger.debug(f"IR range {np.min(modIR)} {np.max(modIR)}")
 
@@ -126,12 +132,12 @@ class MMDataLoader(Dataset):
 
         imgs = []
         img = {
-            'rgb': modRGB if pilRGB is not None else None,
-            'depth': modDepth if pilDep is not None else None,
-            'ir': modIR if pilIR is not None else None
+            'rgb': modRGB if use["rgb"] is not None else None,
+            'depth': modDepth if use["depth"] else None,
+            'ir': modIR if use["ir"] else None
         }
         for mod in self.modalities:
-            if img[mod] is not None:
+            if use[mod] and img.get(mod) is not None:
                 imgs.append(torch.from_numpy(img[mod].copy()).float())
 
         return [torch.stack(imgs), modGT]
@@ -326,7 +332,7 @@ class MMDataLoader(Dataset):
             proba = (proba*255).astype(np.uint8)
             proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
-        
+
         # for d in concat:
         #     print(d.shape)
         data = np.concatenate(concat, axis=1)
@@ -336,7 +342,7 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=False):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=True):
         img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
 
