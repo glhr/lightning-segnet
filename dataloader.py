@@ -97,8 +97,10 @@ class MMDataLoader(Dataset):
         if augment: transformed_imgs = self.data_augmentation(img_dict, apply='all')
         else: transformed_imgs = self.data_augmentation(img_dict, apply='resize_only')
         modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
-        if pilDep is not None: modDepth = np.array(imgDep_orig)
-        if pilIR is not None: modIR = np.array(imgIR_orig)
+        if pilDep is not None:
+            modDepth = transformed_imgs['depth']
+        if pilIR is not None:
+            modIR = transformed_imgs['ir']
 
         modGT = self.prepare_GT(modGT, color_GT)
 
@@ -129,9 +131,9 @@ class MMDataLoader(Dataset):
         }
         for mod in self.modalities:
             if img[mod] is not None:
-                imgs.append(img[mod].copy())
+                imgs.append(torch.from_numpy(img[mod].copy()).float())
 
-        return [torch.from_numpy(np.array(imgs)).float(), modGT]
+        return [torch.stack(imgs), modGT]
 
     def remap_classes(self, idx_to_color):
 
@@ -350,15 +352,17 @@ class MMDataLoader(Dataset):
             A.GridDistortion(num_steps=3, p=p),
             A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
             A.Rotate(limit=10, p=p),
-            A.RandomCrop(width=int(self.resize[0] * rand_crop), height=int(self.resize[1]*rand_crop), p=p),
+            A.RandomCrop(width=int(self.resize[0]*rand_crop), height=int(self.resize[1]*rand_crop), p=p),
             A.HorizontalFlip(p=p)
             ], p=1, additional_targets=additional_targets)
+
         if apply == 'resize_only':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
             if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
             if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
             transformed_final = transformed_gray
+
         elif apply == 'all':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
