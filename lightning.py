@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from segnet import SegNet
+from segnet import SegNet, new_input_channels
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Distance
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader
@@ -58,6 +58,8 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
+        parser.add_argument('--modalities', default="rgb")
+        parser.add_argument('--ranks', default="0,5,10")
         return parser
 
     def __init__(self, conf, test_checkpoint = None, test_max=None, **kwargs):
@@ -72,6 +74,8 @@ class LitSegNet(pl.LightningModule):
         self.test_max = test_max
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
+        self.hparams.modalities = self.hparams.modalities.split(",")
+        logger.warning(f"modalities {self.hparams.modalities}")
 
         self.datasets = {
             "freiburg": FreiburgDataLoader,
@@ -80,7 +84,10 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader,
             "thermalvoc": ThermalVOCDataLoader
         }
-        self.hparams.ranks = [0, 9, 10]
+        if self.hparams.loss == "sord":
+            self.hparams.ranks = self.hparams.ranks.split(",")
+        else:
+            self.hparams.ranks = None
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
@@ -107,8 +114,16 @@ class LitSegNet(pl.LightningModule):
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
         self.result_folder = f"results/{self.hparams.dataset}/"
-        self.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        if self.hparams.ranks is not None:
+            self.hparams.save_prefix += f'-{",".join(self.hparams.ranks)}'
+        self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
+        logger.info(self.hparams.save_prefix)
         create_folder(f"{self.result_folder}/viz_per_epoch")
+
+    def update_model(self):
+        channels = len(self.hparams.modalities)
+        self.model = new_input_channels(self.model, channels)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -135,8 +150,8 @@ class LitSegNet(pl.LightningModule):
             self.test_set.dataset.result_to_image(
                 iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
                 folder=f"{self.result_folder}/viz_per_epoch",
-                filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-proba")
-            # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.save_prefix}-epoch{self.current_epoch}-cls")
+                filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-proba")
+            # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-cls")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
@@ -333,7 +348,7 @@ class LitSegNet(pl.LightningModule):
             name = self.hparams.dataset
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, modalities=["rgb"], augment=augment)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities)
         if set == "test":
             if self.test_max is None:
                 dataset = Subset(dataset, indices=range(len(dataset)))
@@ -425,7 +440,7 @@ print(args)
 segnet_model = LitSegNet(conf=args)
 
 if args.prefix is None:
-    args.prefix = segnet_model.save_prefix
+    args.prefix = segnet_model.hparams.save_prefix
 print(args.prefix)
 
 checkpoint_callback = ModelCheckpoint(
@@ -442,6 +457,7 @@ if args.train:
     logger.warning("Training phase")
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
     wandb_logger.log_hyperparams(segnet_model.hparams)
+    #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
     trainer = pl.Trainer.from_argparse_args(args,
         check_val_every_n_epoch=1,
@@ -449,6 +465,7 @@ if args.train:
         logger=wandb_logger,
         checkpoint_callback=checkpoint_callback,
         resume_from_checkpoint=args.train_checkpoint)
+    segnet_model.update_model()
     trainer.fit(segnet_model)
 
 else:
@@ -457,4 +474,5 @@ else:
     chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
     trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, conf=args)
+    trained_model.update_model()
     trainer.test(trained_model)
