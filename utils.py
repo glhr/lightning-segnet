@@ -23,3 +23,9 @@ def enable_debug():
 
 def get_printer(depth=2):
     return pprint.PrettyPrinter(depth=depth)
+
+from colour import Color
+from matplotlib.colors import LinearSegmentedColormap
+
+ramp_colors = ['#ff0000','#ffff00','#00ff00']
+color_ramp = LinearSegmentedColormap.from_list( 'driveability', [ Color( c1 ).rgb for c1 in ramp_colors ] )
