@@ -33,12 +33,14 @@ class MMDataLoader(Dataset):
         self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
+        self.idx_to_obj = {}
         self.modalities = modalities
         logger.warning(f"dataset modalities {self.modalities}")
 
         self.idx_to_color['objects'] = self.idx_to_color.get('objects', dict())
         self.class_to_idx['objects'] = self.class_to_idx.get('objects', dict())
         self.color_to_idx['objects'] = self.color_to_idx.get('objects', dict())
+        self.idx_to_obj['objects'] = self.idx_to_obj.get('objects', dict())
 
         self.filenames = []
 
@@ -74,6 +76,8 @@ class MMDataLoader(Dataset):
         # print(modGT.shape)
         else:
             modGT = torch.tensor(imgGT, dtype=torch.long)
+            if len(self.idx_to_obj):
+                modGT = self.labels_to_obj(modGT)
 
         if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
 
@@ -139,6 +143,8 @@ class MMDataLoader(Dataset):
         for mod in self.modalities:
             if use[mod] and img.get(mod) is not None:
                 imgs.append(torch.from_numpy(img[mod].copy()).float())
+
+        print(torch.unique(modGT))
 
         return [torch.stack(imgs), modGT]
 
@@ -218,6 +224,14 @@ class MMDataLoader(Dataset):
             data[labels==idx] = self.get_color(idx, mode=mode)
             # print(idx, "->", self.get_color(idx, mode=mode))
         return data
+
+    def labels_to_obj(self, gt):
+        #print(torch.unique(gt))
+        for orig,new in self.idx_to_obj["objects"].items():
+            #print(orig,new)
+            gt[gt==orig] = new
+        #print(torch.unique(gt))
+        return gt
 
     def labels_obj_to_aff(self, labels, num_cls=3, proba=False):
         if proba:
@@ -500,10 +514,12 @@ class CityscapesDataLoader(MMDataLoader):
 
         for x in classes:
             x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
-            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
-            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
-            self.class_to_idx['objects'][x[0].lower()] = x[4]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
 
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
         logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
         logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
 
