@@ -87,14 +87,14 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader,
             "thermalvoc": ThermalVOCDataLoader
         }
-        if self.hparams.loss == "sord":
+        if self.hparams.loss in ["sord","compare"]:
             self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
         else:
             self.hparams.ranks = None
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss=self.hparams.loss)
+        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss="sord")
         self.dist = Distance()
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
@@ -257,7 +257,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
-            # loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
+            loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 

@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils import logger, enable_debug
+from utils import logger, enable_debug, color_ramp
 
 import matplotlib.pyplot as plt
 
@@ -11,7 +11,6 @@ import matplotlib.pyplot as plt
 def flatten_tensors(inp, target):
     # ~ print(inp.shape, target.shape)
     # ~ print(inp, target)
-    target = target.long()
     num_classes = inp.size()[1]
 
     i0 = 1
@@ -33,23 +32,26 @@ def flatten_tensors(inp, target):
 
 def viz_loss(target, output, losses, bs, nclasses):
 
-    fig, axes = plt.subplots(ncols=nclasses+2, nrows=bs, sharex=True, sharey=True,
-                             figsize=(6, 3))
+    fig, axes = plt.subplots(ncols=3, nrows=bs, sharex=True, sharey=True,
+                             figsize=(8, 4))
     for i, (loss_name, loss) in enumerate(losses.items()):
         loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
         logger.debug(f"target {target.shape} | loss {loss.shape} | reshaped {loss_reshaped.shape}")
 
         batch = 0
         loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
-        axes[i][0].imshow(target[batch], cmap=plt.cm.gray)
+        axes[i][0].imshow(target[batch], cmap=color_ramp, vmin=0, vmax=2)
         axes[i][0].axis('off')
-        for cls in range(0, nclasses):
-            axes[i][cls+1].imshow(output[batch][cls], cmap=plt.cm.gray, vmin=0, vmax=1)
-            axes[i][cls+1].axis('off')
-        im = axes[i][nclasses+1].imshow(loss_viz, cmap=plt.cm.gray)
-        fig.colorbar(im, ax=axes[i][nclasses+1])
-        axes[i][nclasses+1].axis('off')
-        axes[i][nclasses+1].set_title(loss_name)
+        # for cls in range(0, nclasses):
+        #     axes[i][cls+1].imshow(output[batch][cls], cmap=plt.cm.gray, vmin=0, vmax=1)
+        #     axes[i][cls+1].axis('off')
+        pred = output[batch][0]*0 + output[batch][1]*1 + output[batch][2]*2
+        axes[i][1].imshow(pred, cmap=color_ramp, vmin=0, vmax=2)
+        axes[i][1].axis('off')
+        im = axes[i][2].imshow(loss_viz, cmap=plt.cm.gray)
+        fig.colorbar(im, ax=axes[i][2])
+        axes[i][2].axis('off')
+        axes[i][2].set_title(loss_name)
         print("unique loss values",np.unique(loss_viz))
 
     # for r in axes:
@@ -68,20 +70,25 @@ class CompareLosses(nn.Module):
         self.num_classes = n_classes
         self.masking = masking
         self.ranks = ranks
-        self.kl = KLLoss(n_classes=n_classes, masking=masking)
-        self.sord = SORDLoss(n_classes=n_classes, masking=masking, ranks=ranks)
+        self.kl = KLLoss(n_classes=self.num_classes, masking=self.masking)
+        self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks)
         self.returnloss = returnloss
 
     def forward(self, output, target, debug=True, viz=True):
-        target = torch.fliplr(target)
+        #target = torch.fliplr(target)
         for i in range(target.shape[0]):
+            driveable = torch.zeros_like(target[i])
+            driveable[:100,:] = 1
             for cls in range(0, self.num_classes):
-                output[i][cls] = 0.0
-            output[i][2] = 1.0
+                output[i][cls] = driveable
+
+            output[i][1] = 0
+            output[i][0] = driveable
+            output[i][2] = torch.logical_not(driveable)
 
         losses = {
-            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, viz=False, reduce=False),
-            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, viz=False, reduce=False),
+            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, reduce=False),
+            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, reduce=False),
         }
         viz_loss(target, output, losses, bs=target.shape[0], nclasses=self.num_classes)
         return losses[self.returnloss]
@@ -139,7 +146,7 @@ class SORDLoss(nn.Module):
     def forward(self, output_orig, target_orig, debug=False, mod_input=None, reduce=True):
 
         bs = target_orig.shape[0]
-        target = torch.clone(target_orig)
+        target = torch.clone(target_orig).float()
         #if debug: print("target_orig",target_orig,torch.unique(target_orig))
         for i,r in enumerate(self.ranks):
             target[target_orig==i] = r
