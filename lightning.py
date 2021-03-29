@@ -475,15 +475,23 @@ if args.train:
     wandb_logger.log_hyperparams(segnet_model.hparams)
     #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
-    trainer = pl.Trainer.from_argparse_args(args,
-        check_val_every_n_epoch=1,
-        # ~ log_every_n_steps=10,
-        logger=wandb_logger,
-        checkpoint_callback=checkpoint_callback,
-        resume_from_checkpoint=args.train_checkpoint)
+
     segnet_model.update_model()
     if args.update_output_layer:
+        segnet_model = segnet_model.load_from_checkpoint(checkpoint_path=args.train_checkpoint, conf=args)
         segnet_model.new_output()
+        trainer = pl.Trainer.from_argparse_args(args,
+            check_val_every_n_epoch=1,
+            # ~ log_every_n_steps=10,
+            logger=wandb_logger,
+            checkpoint_callback=checkpoint_callback)
+    else:
+        trainer = pl.Trainer.from_argparse_args(args,
+            check_val_every_n_epoch=1,
+            # ~ log_every_n_steps=10,
+            logger=wandb_logger,
+            checkpoint_callback=checkpoint_callback,
+            resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
 else:
