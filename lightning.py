@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 
-from segnet import SegNet, new_input_channels
+from segnet import SegNet, new_input_channels, new_output_channels
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Distance, iou_from_confmat
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader
@@ -43,6 +43,7 @@ parser.add_argument('--test_checkpoint', default="lightning_logs/test.ckpt")
 parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
 parser.add_argument('--debug', default=False, action="store_true")
+parser.add_argument('--update_output_layer', default=False, action="store_true")
 
 
 class LitSegNet(pl.LightningModule):
@@ -127,6 +128,10 @@ class LitSegNet(pl.LightningModule):
     def update_model(self):
         channels = len(self.hparams.modalities)
         self.model = new_input_channels(self.model, channels)
+
+    def new_output(self):
+        self.model = new_output_channels(self.model, 3)
+        print(self.model)
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
@@ -257,7 +262,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
-            loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
+            #loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
@@ -477,6 +482,8 @@ if args.train:
         checkpoint_callback=checkpoint_callback,
         resume_from_checkpoint=args.train_checkpoint)
     segnet_model.update_model()
+    if args.update_output_layer:
+        segnet_model.new_output()
     trainer.fit(segnet_model)
 
 else:
@@ -486,4 +493,6 @@ else:
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
     trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, conf=args)
     trained_model.update_model()
+    if args.update_output_layer:
+        segnet_model.new_output()
     trainer.test(trained_model)

@@ -1,14 +1,19 @@
-# pytorch-unet-segnet
+# Results
 
-These architectures have shown good results in semantic segmentation, image reconstruction (denoising, super-resolution).
+trained on Freiburg
 
-|Paper|File|Figure|
-|-------|--------|----------|
-|[Unet](https://arxiv.org/abs/1505.04597)|[unet.py](https://github.com/trypag/pytorch-unet-segnet/blob/master/unet.py)|![Unet](https://github.com/trypag/pytorch-unet-segnet/blob/master/docs/unet/u-net-architecture.png)|
-|[SegNet](https://arxiv.org/abs/1511.00561)|[segnet.py](https://github.com/trypag/pytorch-unet-segnet/blob/master/segnet.py)|![SegNet](https://github.com/trypag/pytorch-unet-segnet/blob/master/docs/segnet/segnet.png)|
-|[ModSegNet](https://link.springer.com/chapter/10.1007/978-3-030-00931-1_68)|[modsegnet.py](https://github.com/trypag/pytorch-unet-segnet/blob/master/unet.py)|![ModSegNet](https://github.com/trypag/pytorch-unet-segnet/blob/master/docs/modsegnet/1.png)|
+```bash
+python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 20-58-freiburg-c3-kl-epoch\=676-val_loss\=0.1252.ckpt --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --loss kl
 
+python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 11-22-freiburg-c3-sord-epoch\=689-val_loss\=0.0164.ckpt --num_classes 3 --bs 2 --mode affordances --loss sord --dataset freiburg
 
-**I would encourage you to use SegNet if you don't see any major performance decrease with Unet: SegNet will be lighter and faster !** SegNet uses maximum unpooling during the upsampling step, reusing the maximum pooling indices from the encoding step. Making the upsampling procedure parameter free, where Unet makes use of transpose convolution (filters) to learn how to upsample.
+python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 12-46-freiburg-c7-kl-epoch\=512-val_loss\=0.1937.ckpt --num_classes 7 --bs 2 --mode convert --loss kl --dataset freiburg
+```
 
-We provide an updated version of SegNet, which was designed for medical image segmentation: [Semi-supervised Learning for Segmentation Under Semantic Constraint, MICCAI 2018](https://link.springer.com/chapter/10.1007/978-3-030-00931-1_68)
+trained on Cityscapes
+
+```bash
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310.ckpt" --num_classes 30 --bs 2 --mode convert --dataset cityscapes --orig_dataset cityscapes --loss kl --test_samples 2
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-27 14-54-cityscapes-c3-kl-rgb-epoch=191-val_loss=0.0958.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss kl --test_samples 2
+```

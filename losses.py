@@ -7,6 +7,19 @@ from utils import logger, enable_debug, color_ramp
 
 import matplotlib.pyplot as plt
 
+def test_loss():
+    n_cls = 4
+    input = torch.as_tensor([n_cls-1])
+    input = F.one_hot(input, num_classes=n_cls).float()
+    input = input.expand(2, 1, n_cls)
+    print(input)
+    target = torch.tensor([n_cls-1])
+    target = target.expand(2, 1, 1)
+    print(target)
+    kl = KLLoss(n_classes = n_cls, masking=True)
+    print("KL", kl(input, target, debug=True)/n_cls)
+    sord = SORDLoss(n_classes = n_cls, ranks=[0,50,100], masking=True)
+    print("SORD", sord(input, target, debug=True)/n_cls)
 
 def flatten_tensors(inp, target):
     # ~ print(inp.shape, target.shape)
@@ -203,89 +216,92 @@ if __name__ == '__main__':
 
     from metrics import MaskedIoU
 
-    input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
-    target = torch.tensor([[[1]],[[1]]])
-    # ~ output = ce(input, target)
-    # ~ print(input,target,output)
-    # ~ output.backward()
-
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--pred', default="pref")
-    parser.add_argument('--gt', default="pref")
-    parser.add_argument('--debug', default=True, action="store_true")
-    args = parser.parse_args()
-    print(args)
-
-    if args.debug: enable_debug()
-
-    onehot = {
-        "pref": [0.0, 0.0, 1.0],
-        "poss": [0.0, 1.0, 0.0],
-        "imposs": [1.0, 0.0, 0.0]
-    }
-    level = {
-        "pref": 2,
-        "poss": 1,
-        "imposs": 0,
-        "void": -1
-    }
-
-    input = torch.tensor([onehot[args.pred],onehot[args.pred],onehot[args.pred],onehot[args.pred]], requires_grad=True)
-    target = torch.tensor([level[args.gt],level[args.gt],level[args.gt],level[args.gt]], dtype=torch.long)
-    # ~ print(target, input, "CE ->", output)
-    # ~ input = torch.randn(1, 3, requires_grad=True)
-    # ~ target = torch.empty(1, dtype=torch.long).random_(3)
-
-    # output = ce(input, target)
-    # output.backward()
-    # print(target, input, "CE ->", output)
-
-    # ~ input, target = flatten_tensors(input, target)
-    # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
-    cm = np.zeros((3, 3))
-    sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]], masking=True)
-    print("SORD",sord(input, target))
-
-    # for p,pred in enumerate(level.keys()):
-    #     for g,gt in enumerate(level.keys()):
-    #         input = torch.tensor([onehot[pred]], requires_grad=True)
-    #         target = torch.tensor([level[gt]], dtype=torch.long)
-    #         mod_input = torch.tensor([level[pred]], dtype=torch.long)
-    #         loss = sord(input, target, debug=True, mod_input=mod_input)
-    #         print("SORD ->", loss)
-    #         cm[g][p] = loss.item()
-    # print(cm)
+    test_loss()
+    # from metrics import MaskedIoU
     #
-    # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    # input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
+    # target = torch.tensor([[[1]],[[1]]])
+    # # ~ output = ce(input, target)
+    # # ~ print(input,target,output)
+    # # ~ output.backward()
     #
-    # from plotting import plot_confusion_matrix
-    # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    # import argparse
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--pred', default="pref")
+    # parser.add_argument('--gt', default="pref")
+    # parser.add_argument('--debug', default=True, action="store_true")
+    # args = parser.parse_args()
+    # print(args)
     #
+    # if args.debug: enable_debug()
+    #
+    # onehot = {
+    #     "pref": [0.0, 0.0, 1.0],
+    #     "poss": [0.0, 1.0, 0.0],
+    #     "imposs": [1.0, 0.0, 0.0]
+    # }
     # level = {
     #     "pref": 2,
     #     "poss": 1,
-    #     "imposs": 0
+    #     "imposs": 0,
+    #     "void": -1
     # }
-    # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
     #
+    # input = torch.tensor([onehot[args.pred],onehot[args.pred],onehot[args.pred],onehot[args.pred]], requires_grad=True)
+    # target = torch.tensor([level[args.gt],level[args.gt],level[args.gt],level[args.gt]], dtype=torch.long)
+    # # ~ print(target, input, "CE ->", output)
+    # # ~ input = torch.randn(1, 3, requires_grad=True)
+    # # ~ target = torch.empty(1, dtype=torch.long).random_(3)
+    #
+    # # output = ce(input, target)
+    # # output.backward()
+    # # print(target, input, "CE ->", output)
+    #
+    # # ~ input, target = flatten_tensors(input, target)
+    # # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
     # cm = np.zeros((3, 3))
-    # ce = nn.CrossEntropyLoss(ignore_index = -1)
-    # for p,pred in enumerate(level.keys()):
-    #     for g,gt in enumerate(level.keys()):
-    #         input = torch.tensor([onehot[pred]], requires_grad=True)
-    #         target = torch.log_softmax(torch.tensor([onehot[gt]]),dim=-1)
-    #         input = torch.log_softmax(input, dim=-1)
-    #         print(input)
-    #         loss = nn.KLDivLoss(reduction='mean',log_target=True)(input, target)
-    #         print("CE ->", loss)
-    #         cm[g][p] = loss.item()
-    # print(cm)
-    # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
-
-    kl = KLLoss(n_classes = 3, masking=True)
-    loss = kl(input, target)
-    print("KL",loss)
-
-    iou = MaskedIoU(labels=[0,1,2])
-    print(iou(input,target))
+    # sord = SORDLoss(n_classes = 3, ranks=[level["imposs"],level["poss"],level["pref"]], masking=True)
+    # print("SORD",sord(input, target))
+    #
+    # # for p,pred in enumerate(level.keys()):
+    # #     for g,gt in enumerate(level.keys()):
+    # #         input = torch.tensor([onehot[pred]], requires_grad=True)
+    # #         target = torch.tensor([level[gt]], dtype=torch.long)
+    # #         mod_input = torch.tensor([level[pred]], dtype=torch.long)
+    # #         loss = sord(input, target, debug=True, mod_input=mod_input)
+    # #         print("SORD ->", loss)
+    # #         cm[g][p] = loss.item()
+    # # print(cm)
+    # #
+    # # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    # #
+    # # from plotting import plot_confusion_matrix
+    # # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    # #
+    # # level = {
+    # #     "pref": 2,
+    # #     "poss": 1,
+    # #     "imposs": 0
+    # # }
+    # # rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
+    # #
+    # # cm = np.zeros((3, 3))
+    # # ce = nn.CrossEntropyLoss(ignore_index = -1)
+    # # for p,pred in enumerate(level.keys()):
+    # #     for g,gt in enumerate(level.keys()):
+    # #         input = torch.tensor([onehot[pred]], requires_grad=True)
+    # #         target = torch.log_softmax(torch.tensor([onehot[gt]]),dim=-1)
+    # #         input = torch.log_softmax(input, dim=-1)
+    # #         print(input)
+    # #         loss = nn.KLDivLoss(reduction='mean',log_target=True)(input, target)
+    # #         print("CE ->", loss)
+    # #         cm[g][p] = loss.item()
+    # # print(cm)
+    # # plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"celoss-{rankings}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    #
+    # kl = KLLoss(n_classes = 3, masking=True)
+    # loss = kl(input, target)
+    # print("KL",loss)
+    #
+    # iou = MaskedIoU(labels=[0,1,2])
+    # print(iou(input,target))

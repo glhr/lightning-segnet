@@ -34,9 +34,6 @@ def new_input_channels(segnet, channels):
     segnet.encoders[0].features[0] = new_layer
     return segnet
 
-def new_output_channels(segnet, channels):
-    segnet.classifier = nn.Conv2d(segnet.filter_config[0], channels, 3, 1, 1)
-    return segnet
 
 class SegNet(nn.Module):
     """SegNet: A Deep Convolutional Encoder-Decoder Architecture for
@@ -59,7 +56,6 @@ class SegNet(nn.Module):
         encoder_filter_config = (n_init_features,) + filter_config
         decoder_n_layers = (3, 3, 3, 2, 1)
         decoder_filter_config = filter_config[::-1] + (filter_config[0],)
-        self.filter_config = filter_config
 
         for i in range(0, 5):
             # encoder architecture
@@ -82,9 +78,11 @@ class SegNet(nn.Module):
 
         # encoder path, keep track of pooling indices and features size
         for i in range(0, 5):
-            (feat, ind), size = self.encoders[i](feat)
-            indices.append(ind)
-            unpool_sizes.append(size)
+            feat = self.encoders[i](feat)
+            # indices.append(ind)
+            # unpool_sizes.append(size)
+
+        print("-----")
 
         # decoder path, upsampling with corresponding indices and size
         for i in range(0, 5):
@@ -119,10 +117,13 @@ class _Encoder(nn.Module):
         self.features = nn.Sequential(*layers)
 
     def forward(self, x):
+        print(">", x.shape)
         output = self.features(x)
-        pooled = F.max_pool2d(output, 2, 2, return_indices=True)
-        #print(pooled.size)
-        return pooled, output.size()
+        print("->", output.shape)
+        pooled = F.max_pool2d(output, 2, 2, return_indices=False)
+        print("-->", pooled[0].shape)
+        #print(pooled[0].shape)
+        return pooled
 
 
 class _Decoder(nn.Module):
@@ -151,14 +152,19 @@ class _Decoder(nn.Module):
         self.features = nn.Sequential(*layers)
 
     def forward(self, x, indices, size):
+        print(">",x.shape)
         unpooled = F.max_unpool2d(x, indices, 2, 2, 0, size)
-        #print(unpooled.size)
-        return self.features(unpooled)
+        print("->",unpooled.shape)
+        output = self.features(unpooled)
+        print("-->",output.shape)
+        return output
 
 
 if __name__ == '__main__':
     from torchsummary import summary
     segnet = SegNet(num_classes=3)
+    input = torch.zeros((1, 1, 480, 240))
+    segnet(input)
     print(segnet)
     #print(summary(segnet, (1, 480, 240)))
 
