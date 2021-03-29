@@ -88,6 +88,17 @@ class LitSegNet(pl.LightningModule):
             "own": OwnDataLoader,
             "thermalvoc": ThermalVOCDataLoader
         }
+
+
+        self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
+        self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
+            len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
+
+        self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set="test")
+
+        self.update_settings()
+
+    def update_settings(self):
         if self.hparams.loss in ["sord","compare"]:
             self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
         else:
@@ -97,13 +108,6 @@ class LitSegNet(pl.LightningModule):
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
         self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss="sord")
         self.dist = Distance()
-
-        self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
-        self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
-            len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
-
-        self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set="test")
-
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
         self.hparams.labels_orig = list(self.hparams.labels_orig)
@@ -125,13 +129,16 @@ class LitSegNet(pl.LightningModule):
         logger.info(self.hparams.save_prefix)
         create_folder(f"{self.result_folder}/viz_per_epoch")
 
+
     def update_model(self):
         channels = len(self.hparams.modalities)
         self.model = new_input_channels(self.model, channels)
 
     def new_output(self):
         self.model = new_output_channels(self.model, 3)
+        self.hparams.num_classes = 3
         print(self.model)
+        self.update_settings()
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
