@@ -89,6 +89,11 @@ class LitSegNet(pl.LightningModule):
             "thermalvoc": ThermalVOCDataLoader
         }
 
+        if self.hparams.loss in ["sord","compare"]:
+            self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
+        else:
+            self.hparams.ranks = None
+
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
         self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
@@ -99,10 +104,7 @@ class LitSegNet(pl.LightningModule):
         self.update_settings()
 
     def update_settings(self):
-        if self.hparams.loss in ["sord","compare"]:
-            self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
-        else:
-            self.hparams.ranks = None
+
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
