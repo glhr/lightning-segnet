@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from segnet import SegNet, new_input_channels, new_output_channels
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Distance, iou_from_confmat
-from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
@@ -86,7 +86,8 @@ class LitSegNet(pl.LightningModule):
             "cityscapes": CityscapesDataLoader,
             "kitti": KittiDataLoader,
             "own": OwnDataLoader,
-            "thermalvoc": ThermalVOCDataLoader
+            "thermalvoc": ThermalVOCDataLoader,
+            "synthia": SynthiaDataLoader
         }
 
         if self.hparams.loss in ["sord","compare"]:
@@ -420,6 +421,11 @@ class LitSegNet(pl.LightningModule):
             # print(test_set[0])
 
         elif self.hparams.dataset == "cityscapes":
+            train_set = self.get_dataset(set="train")
+            val_set = self.get_dataset(set="val")
+            test_set = self.get_dataset(set="test")
+
+        elif self.hparams.dataset == "synthia":
             train_set = self.get_dataset(set="train")
             val_set = self.get_dataset(set="val")
             test_set = self.get_dataset(set="test")

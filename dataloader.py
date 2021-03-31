@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import cv2
 from PIL import Image, ImageFile
+import imageio
 
 import albumentations as A
 
@@ -151,9 +152,9 @@ class MMDataLoader(Dataset):
     def remap_classes(self, idx_to_color):
 
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat']
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat','pedestrian']
         void = ['void','egovehicle','outofroi','rectificationborder','unlabeled']
-        driveable = ['road','path','ground']
+        driveable = ['road','path','ground','lanemarking']
         between = ['grass','terrain','sidewalk','parking','railtrack']
         objclass_to_driveidx = dict()
 
@@ -651,6 +652,49 @@ class ThermalVOCDataLoader(MMDataLoader):
         imgGT = Image.open(self.path + "SegmentationClass/" + self.filenames[sample_id]).convert('RGB')
 
         return pilRGB, pilDep, pilIR, imgGT
+
+
+class SynthiaDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/synthia/", modalities=["rgb"], mode="affordances", augment=False):
+        super().__init__(modalities, resize=resize, name="synthia", mode=mode, augment=augment)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        self.augment = augment
+
+        for img in glob.glob(self.path + 'SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/' + '**/*.png'):
+
+            img = '/'.join(img.split("/")[-2:])
+            self.filenames.append(img)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = False
+
+    def get_image_pairs(self, sample_id):
+
+        pilRGB = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
+        pilDep = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('L')
+        imgGT = np.asarray(imageio.imread(self.path + "SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
+        print(np.unique(imgGT))
+        return pilRGB, pilDep, None, imgGT
+
 
 class OwnDataLoader(MMDataLoader):
     def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
