@@ -271,7 +271,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
-            #loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
+            loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 

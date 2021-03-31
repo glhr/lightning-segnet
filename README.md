@@ -29,4 +29,15 @@ python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-29 22-19
 ## transfer learning from c30 to c3 with lr == 0.0001
 python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 08-51-cityscapes-c3-kl-rgb-epoch=15-val_loss=0.0915.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss kl --debug
 python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 06-26-cityscapes-c30-kl-rgb-epoch=13-val_loss=0.0921.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss kl --debug
+
+## transfer learning from c30 to sord c3 with lr == 0.0001
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 10-11-cityscapes-c30-sord-0,5,10-rgb-epoch=5-val_loss=0.0853.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss sord --debug
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 10-11-cityscapes-c30-sord-0,5,10-rgb-epoch=6-val_loss=0.0836.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss sord --debug
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 10-11-cityscapes-c30-sord-0,5,10-rgb-epoch=13-val_loss=0.0817.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss sord --debug
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 11-56-cityscapes-c30-sord-0,1,2-rgb-epoch=2-val_loss=0.0154.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss sord --debug
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 11-56-cityscapes-c30-sord-0,1,2-rgb-epoch=28-val_loss=0.0132.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss sord --debug
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-30 11-56-cityscapes-c30-sord-0,1,2-rgb-epoch=30-val_loss=0.0132.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss sord --debug
 ```
