@@ -8,7 +8,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 
 from segnet import SegNet, new_input_channels, new_output_channels
 from losses import SORDLoss, KLLoss, CompareLosses
@@ -386,7 +386,7 @@ class LitSegNet(pl.LightningModule):
     def get_dataset_splits(self, normalize=False):
         if self.hparams.dataset == "freiburg":
             train_set = self.get_dataset(set="train")
-            test_set = self.get_dataset(set="test", augment=True)
+            test_set = self.get_dataset(set="test", augment=False)
             val_set = test_set
             # total_len = len(train_set)
             # val_len = int(0.1*total_len)
@@ -478,6 +478,8 @@ checkpoint_callback = ModelCheckpoint(
 )
 checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
 
+lr_monitor = LearningRateMonitor(logging_interval='step')
+
 if args.train:
     logger.warning("Training phase")
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
@@ -493,13 +495,15 @@ if args.train:
             check_val_every_n_epoch=1,
             # ~ log_every_n_steps=10,
             logger=wandb_logger,
-            checkpoint_callback=checkpoint_callback)
+            checkpoint_callback=checkpoint_callback,
+            callbacks=[lr_monitor])
     else:
         trainer = pl.Trainer.from_argparse_args(args,
             check_val_every_n_epoch=1,
             # ~ log_every_n_steps=10,
             logger=wandb_logger,
             checkpoint_callback=checkpoint_callback,
+            callbacks=[lr_monitor],
             resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
