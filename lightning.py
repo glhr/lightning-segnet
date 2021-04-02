@@ -65,7 +65,8 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
         parser.add_argument('--modalities', default="rgb")
-        parser.add_argument('--ranks', default="0,5,10")
+        parser.add_argument('--ranks', default="0,1,2")
+        parser.add_argument('--dist', default="l1")
         return parser
 
     def __init__(self, conf, save=False, full_dataset=False, test_checkpoint = None, test_max=None, **kwargs):
@@ -110,10 +111,10 @@ class LitSegNet(pl.LightningModule):
 
     def update_settings(self):
 
-        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks)
+        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, returnloss="sord")
+        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="sord")
         self.dist = Distance()
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
@@ -276,7 +277,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
-            # loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
+            if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 

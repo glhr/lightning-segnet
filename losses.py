@@ -9,7 +9,7 @@ import metrics
 import matplotlib.pyplot as plt
 
 def test_loss():
-    n_cls = 4
+    n_cls = 3
     input = torch.as_tensor([n_cls-1])
     input = F.one_hot(input, num_classes=n_cls).float()
     # input = input.expand(2, 1, n_cls)
@@ -19,7 +19,7 @@ def test_loss():
     print(target)
     kl = KLLoss(n_classes = n_cls, masking=True)
     print("KL", kl(input, target, debug=True)/n_cls)
-    sord = SORDLoss(n_classes = n_cls, ranks=[0,50,100], masking=True)
+    sord = SORDLoss(n_classes = n_cls, ranks=[0,1,2], masking=True, dist="l2")
     print("SORD", sord(input, target, debug=True)/n_cls)
 
 def flatten_tensors(inp, target, weight_map=None):
@@ -98,7 +98,10 @@ def viz_loss(output, losses, bs, nclasses):
 
 def prepare_sample(output_orig, target_orig, weight_map=None, masking=True):
     bs = target_orig.shape[0]
-    output, target, weight_map = flatten_tensors(output_orig, target_orig, weight_map)
+    if weight_map is not None:
+        output, target, weight_map = flatten_tensors(output_orig, target_orig, weight_map)
+    else:
+        output, target = flatten_tensors(output_orig, target_orig)
 
     n_samples = target.shape[0]
 
@@ -112,13 +115,13 @@ def prepare_sample(output_orig, target_orig, weight_map=None, masking=True):
     return bs, n_samples, output, target, weight_map
 
 class CompareLosses(nn.Module):
-    def __init__(self, n_classes, masking, ranks, returnloss):
+    def __init__(self, n_classes, masking, ranks, dist, returnloss):
         super().__init__()
         self.num_classes = n_classes
         self.masking = masking
         self.ranks = ranks
         self.kl = KLLoss(n_classes=self.num_classes, masking=self.masking)
-        self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks)
+        self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks, dist=dist)
         self.returnloss = returnloss
 
     def forward(self, output, target, weight_map=None, debug=True, viz=True):
@@ -177,7 +180,7 @@ class SORDLoss(nn.Module):
     https://openaccess.thecvf.com/content_CVPR_2019/papers/Diaz_Soft_Labels_for_Ordinal_Regression_CVPR_2019_paper.pdf
     """
 
-    def __init__(self, n_classes, ranks=None, masking=False):
+    def __init__(self, n_classes, ranks=None, masking=False, dist="l1"):
         super().__init__()
         self.num_classes = n_classes
         if ranks is not None and len(ranks) == self.num_classes:
@@ -186,6 +189,13 @@ class SORDLoss(nn.Module):
             self.ranks = np.arange(0, self.num_classes)
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
+        if dist == "l2":
+            logger.info("SORD using L2 distance")
+            self.dist = nn.MSELoss(reduction='none')
+            print(self.dist)
+        else:
+            logger.info("SORD using L1 distance")
+            self.dist = nn.L1Loss(reduction='none')
 
     def forward(self, output_orig, target_orig, weight_map=None, debug=False, mod_input=None, reduce=True):
 
@@ -208,8 +218,8 @@ class SORDLoss(nn.Module):
         if debug: print("ranks",ranks)
         target = target.unsqueeze(1).repeat(1, self.num_classes)
         if debug: print("target",target,torch.unique(target))
-        soft_target = -nn.L1Loss(reduction='none')(target, ranks)  # should be of size N x num_classes
-        if debug: print("l1 target",soft_target)
+        soft_target = -self.dist(target, ranks)  # should be of size N x num_classes
+        if debug: print("dist target",soft_target)
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: print("soft target",soft_target)
         # output = torch.log(soft_target)
@@ -217,7 +227,7 @@ class SORDLoss(nn.Module):
 
         if mod_input is not None:
             output = mod_input.long().view(-1,).unsqueeze(1).repeat(1, self.num_classes)
-            output = -nn.L1Loss(reduction='none')(output, ranks)  # should be of size N x num_classes
+            output = -self.dist(reduction='none')(output, ranks)  # should be of size N x num_classes
             if debug: print("output",output)
             output = torch.softmax(output, dim=-1)
             if debug: print("output",output)
