@@ -35,7 +35,17 @@ class Distance(nn.Module):
         self.l1 = nn.L1Loss(size_average=False, reduce=False, reduction='none')
         self.l2 = nn.MSELoss(size_average=False, reduce=False, reduction='none')
         self.masking = masking
-        self.ranks = ranks
+        self.ranks = sorted(ranks)
+        logger.info(f"Distance ranks {self.ranks}")
+        self.mistake_max = max(self.ranks) - min(self.ranks)
+        self.mistake_min = self.mistake_max
+        distances = []
+        for i in range(len(self.ranks)):
+            if i > 0:
+                distances.append(abs(self.ranks[i]-self.ranks[i-1]))
+        self.mistake_min = min(distances)
+        logger.info(f"Distances: mistakes from {self.mistake_min} to {self.mistake_max}")
+
 
     def forward(self, output, target, debug=False, already_flattened=False):
 
@@ -50,8 +60,7 @@ class Distance(nn.Module):
             output = output[mask]
             target = target[mask]
 
-        rank_max = max(self.ranks)
-        mistake_min = self.ranks[1]
+
         target_orig, output_orig = torch.clone(target).float(), torch.clone(output).float()
         for i,r in enumerate(self.ranks):
             target[target_orig==i] = r
@@ -63,8 +72,8 @@ class Distance(nn.Module):
         dist_l1 = self.l1(output[incorrect].float(), target[incorrect].float())
         dist_l2 = self.l2(output[incorrect].float(), target[incorrect].float())
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
-        dist_l1 = (dist_l1 - mistake_min)/rank_max
-        dist_l2 = (dist_l2 - mistake_min**2)/(rank_max**2)
+        dist_l1 = (dist_l1 - self.mistake_min)/self.mistake_max
+        dist_l2 = (dist_l2 - self.mistake_min**2)/(self.mistake_max**2)
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
 
         return dist_l1, dist_l2, correct
