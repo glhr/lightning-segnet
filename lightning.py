@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader, random_split, Subset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
+from pytorch_lightning.callbacks.base import Callback
 
 from segnet import SegNet, new_input_channels, new_output_channels
 from losses import SORDLoss, KLLoss, CompareLosses
@@ -44,9 +45,42 @@ parser.add_argument('--train_checkpoint', default="lightning_logs/last.ckpt")
 parser.add_argument('--prefix', default=None)
 parser.add_argument('--debug', default=False, action="store_true")
 parser.add_argument('--save', default=False, action="store_true")
+parser.add_argument('--viz', default=False, action="store_true")
 parser.add_argument('--full_dataset', default=False, action="store_true")
 parser.add_argument('--update_output_layer', default=False, action="store_true")
 
+import inspect
+
+class CustomCB(Callback):
+    def on_train_epoch_start(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_train_epoch_end(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_validation_epoch_start(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_validation_epoch_end(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_epoch_start(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_epoch_end(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_train_start(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_train_end(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_validation_start(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
+
+    def on_validation_end(self, trainer, pl_module):
+        print(f'{inspect.currentframe().f_code.co_name}')
 
 class LitSegNet(pl.LightningModule):
 
@@ -69,10 +103,11 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist', default="l1")
         return parser
 
-    def __init__(self, conf, save=False, full_dataset=False, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, conf, viz=False, save=False, full_dataset=False, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
         self.save = save
+        self.viz = viz
 
         self.save_hyperparameters(conf)
         self.hparams.resize = (480, 240)
@@ -198,12 +233,13 @@ class LitSegNet(pl.LightningModule):
             target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
             iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
             self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
+            dist_l1, dist_l2 = self.dist(pred_proba_aff, target_aff)
         elif self.hparams.mode == "affordances":
             self.log(f'{set}_iou_aff', iou, on_epoch=True)
+            dist_l1, dist_l2 = self.dist(x_hat, y)
         elif self.hparams.mode == "objects":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
-
-        dist_l1, dist_l2 = self.dist(x_hat, y)
+            dist_l1, dist_l2 = self.dist(x_hat, y)
 
         self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
         self.log(f'{set}_dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
@@ -503,7 +539,11 @@ checkpoint_callback = ModelCheckpoint(
 )
 checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
 
+custom_callback = CustomCB()
+
 lr_monitor = LearningRateMonitor(logging_interval='step')
+
+callbacks = [lr_monitor]
 
 if args.train:
     logger.warning("Training phase")
@@ -521,14 +561,14 @@ if args.train:
             # ~ log_every_n_steps=10,
             logger=wandb_logger,
             checkpoint_callback=checkpoint_callback,
-            callbacks=[lr_monitor])
+            callbacks=callbacks)
     else:
         trainer = pl.Trainer.from_argparse_args(args,
             check_val_every_n_epoch=1,
             # ~ log_every_n_steps=10,
             logger=wandb_logger,
             checkpoint_callback=checkpoint_callback,
-            callbacks=[lr_monitor],
+            callbacks=callbacks,
             resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(segnet_model)
 
@@ -537,7 +577,7 @@ else:
     trainer = pl.Trainer.from_argparse_args(args)
     chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
-    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, full_dataset=args.full_dataset, conf=args)
+    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, full_dataset=args.full_dataset, conf=args)
     trained_model.update_model()
     if args.update_output_layer:
         segnet_model.new_output()

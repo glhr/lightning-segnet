@@ -30,10 +30,11 @@ def iou_from_confmat(
     return scores
 
 class Distance(nn.Module):
-    def __init__(self):
+    def __init__(self, masking=True):
         super().__init__()
         self.l1 = nn.L1Loss(size_average=False, reduce=False, reduction='none')
         self.l2 = nn.MSELoss(size_average=False, reduce=False, reduction='none')
+        self.masking = masking
 
     def forward(self, output, target, debug=False, already_flattened=False):
 
@@ -41,8 +42,17 @@ class Distance(nn.Module):
             output, target = losses.flatten_tensors(output, target)
             output = torch.argmax(output, dim=-1)
 
-        dist_l1 = self.l1(output.float(), target.float())
-        dist_l2 = self.l2(output.float(), target.float())
+        if self.masking:
+            mask = target.ge(0)
+            # print(mask, mask.shape)
+            # print(output.shape,target.shape)
+            output = output[mask]
+            target = target[mask]
+
+        incorrect = (target != output)
+
+        dist_l1 = self.l1(output[incorrect].float(), target[incorrect].float())
+        dist_l2 = self.l2(output[incorrect].float(), target[incorrect].float())
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
 
         return dist_l1, dist_l2
