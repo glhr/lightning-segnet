@@ -224,10 +224,10 @@ class LitSegNet(pl.LightningModule):
 
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
-        iou = self.IoU(x_hat, y)
+        # iou = self.IoU(x_hat, y)
 
         if self.hparams.mode == "convert":
-            self.log(f'{set}_iou_obj', iou, on_epoch=True)
+            # self.log(f'{set}_iou_obj', iou, on_epoch=True)
             pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, num_cls=self.num_cls, proba=True)
             pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
             target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
@@ -235,10 +235,10 @@ class LitSegNet(pl.LightningModule):
             # self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
             dist_l1, dist_l2, correct = self.dist(pred_proba_aff, target_aff)
         elif self.hparams.mode == "affordances":
-            self.log(f'{set}_iou_aff', iou, on_epoch=True)
+            # self.log(f'{set}_iou_aff', iou, on_epoch=True)
             dist_l1, dist_l2, correct = self.dist(x_hat, y)
         elif self.hparams.mode == "objects":
-            self.log(f'{set}_iou_obj', iou, on_epoch=True)
+            # self.log(f'{set}_iou_obj', iou, on_epoch=True)
             dist_l1, dist_l2, correct = self.dist(x_hat, y)
 
         self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
