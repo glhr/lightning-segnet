@@ -150,7 +150,7 @@ class LitSegNet(pl.LightningModule):
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
         self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="sord")
-        self.dist = Distance()
+        self.dist = Distance(ranks=self.hparams.ranks)
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
         self.hparams.labels_orig = list(self.hparams.labels_orig)
