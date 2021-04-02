@@ -203,6 +203,11 @@ class LitSegNet(pl.LightningModule):
         elif self.hparams.mode == "objects":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
 
+        dist_l1, dist_l2 = self.dist(x_hat, y)
+
+        self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
+        self.log(f'{set}_dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
+
         self.log(f'{set}_loss', loss, on_epoch=True)
 
         if save:
