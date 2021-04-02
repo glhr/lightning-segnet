@@ -50,12 +50,13 @@ class Distance(nn.Module):
             target = target[mask]
 
         incorrect = (target != output)
+        correct = (target == output)
 
         dist_l1 = self.l1(output[incorrect].float(), target[incorrect].float())
         dist_l2 = self.l2(output[incorrect].float(), target[incorrect].float())
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
 
-        return dist_l1, dist_l2
+        return dist_l1, dist_l2, correct
 
 
 class ConfusionMatrix(nn.Module):

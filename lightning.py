@@ -231,19 +231,19 @@ class LitSegNet(pl.LightningModule):
             pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, num_cls=self.num_cls, proba=True)
             pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
             target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
-            iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
-            self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
-            dist_l1, dist_l2 = self.dist(pred_proba_aff, target_aff)
+            # iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
+            # self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
+            dist_l1, dist_l2, correct = self.dist(pred_proba_aff, target_aff)
         elif self.hparams.mode == "affordances":
             self.log(f'{set}_iou_aff', iou, on_epoch=True)
-            dist_l1, dist_l2 = self.dist(x_hat, y)
+            dist_l1, dist_l2, correct = self.dist(x_hat, y)
         elif self.hparams.mode == "objects":
             self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            dist_l1, dist_l2 = self.dist(x_hat, y)
+            dist_l1, dist_l2, correct = self.dist(x_hat, y)
 
         self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
         self.log(f'{set}_dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-
+        self.log(f'{set}_acc', correct, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
         self.log(f'{set}_loss', loss, on_epoch=True)
 
         if save:
@@ -259,10 +259,11 @@ class LitSegNet(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        if batch_idx == 0 and (not self.current_epoch % 10):
-            loss = self.predict(batch, set="val", save=True, batch_idx=batch_idx)
-        else:
-            loss = self.predict(batch, set="val")
+        # if batch_idx == 0 and (not self.current_epoch % 10):
+        #   loss = self.predict(batch, set="val", save=True, batch_idx=batch_idx)
+        # else:
+        #   loss = self.predict(batch, set="val")
+        loss = self.predict(batch, set="val")
         return loss
 
     def reduce_cm(self, cms, save=False):
@@ -398,12 +399,13 @@ class LitSegNet(pl.LightningModule):
             cm = self.CM(pred, target)
             # print(cm.shape)
             iou = self.IoU_conv(pred, target)
-            dist_l1, dist_l2 = self.dist(pred, target)
+            dist_l1, dist_l2, correct = self.dist(pred, target)
 
             self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             self.log('dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             self.log('dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
+            self.log('acc', correct, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             #except Exception as e:
                 #print("Couldn't compute eval metrics",e)
             return pred
