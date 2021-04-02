@@ -4,11 +4,25 @@ trained on Freiburg
 
 ```bash
 ## trained from scratch - object classes
+# c7
 python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 12-46-freiburg-c7-kl-epoch\=512-val_loss\=0.1937.ckpt --num_classes 7 --bs 2 --mode convert --loss kl --dataset freiburg
 
+# c6
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --num_classes 6 --bs 2 --mode convert --dataset freiburg --loss kl
+
 ## trained from scratch - driveability
+
 python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 20-58-freiburg-c3-kl-epoch\=676-val_loss\=0.1252.ckpt --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --loss kl
 
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --loss kl
+
+## transfer learning command
+lightning.py --test_samples 0 --train --bs 8 --lr 0.0001 --optim adam --loss kl --num_classes 6 --mode affordances --dataset freiburg --max_epochs 100 --augment --orig_dataset freiburg --workers 10 --train_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --update_output_layer
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 11-41-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt" --num_classes 3 --bs 2 --mode affordances --dataset cityscapes --loss kl
+
+
+## sord
 python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 11-22-freiburg-c3-sord-epoch\=689-val_loss\=0.0164.ckpt --num_classes 3 --bs 2 --mode affordances --loss sord --dataset freiburg
 ```
 

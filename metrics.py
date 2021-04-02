@@ -12,7 +12,7 @@ import torch.nn as nn
 from sklearn.metrics import jaccard_score, confusion_matrix
 
 from utils import logger, enable_debug
-from losses import flatten_tensors
+import losses
 
 def iou_from_confmat(
     confmat: torch.Tensor,
@@ -38,7 +38,7 @@ class Distance(nn.Module):
     def forward(self, output, target, debug=False, already_flattened=False):
 
         if not already_flattened:
-            output, target = flatten_tensors(output, target)
+            output, target = losses.flatten_tensors(output, target)
             output = torch.argmax(output, dim=-1)
 
         dist_l1 = self.l1(output.float(), target.float())
@@ -58,7 +58,7 @@ class ConfusionMatrix(nn.Module):
     def forward(self, output, target, debug=False, already_flattened=False):
 
         if not already_flattened:
-            output, target = flatten_tensors(output, target)
+            output, target = losses.flatten_tensors(output, target)
             output = torch.argmax(output, dim=-1)
 
         if self.masking:
@@ -90,7 +90,7 @@ class MaskedIoU(nn.Module):
     def forward(self, output, target, debug=True, already_flattened=False):
 
         if not already_flattened:
-            output, target = flatten_tensors(output, target)
+            output, target = losses.flatten_tensors(output, target)
             output = torch.argmax(output, dim=-1)
 
         if self.masking:
@@ -116,18 +116,30 @@ class MaskedIoU(nn.Module):
 
         return iou_micro
 
+
+def weight_from_target(target):
+
+    print(target.shape)
+    distmap = torch.zeros_like(target).float()
+    for i,sample in enumerate(target):
+        map = np.array(compute_distmap(target[i])["combined_map"],dtype=np.float32)
+        print("map",np.unique(map),map.dtype)
+        distmap[i] = torch.from_numpy(map).float()
+        print("map",np.unique(distmap[i]),)
+    return distmap
+
 def compute_distmap(image_orig, depth_map=None):
-    image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
+    if image_orig.shape[-1] == 3:
+        image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
+    else:
+        image_gray = image_orig
     edge = filters.roberts(image_gray)
     print(np.min(edge), np.max(edge))
     edge = np.array(edge > 0,dtype=np.uint8)*255
     edge = 255-edge
 
-    fig, axes = plt.subplots(ncols=5, sharex=True, sharey=True,
-                             figsize=(15, 4))
-
     distmap_linear = cv2.distanceTransform(edge, cv2.DIST_L2, cv2.DIST_MASK_5)
-    #distmap[distmap > 50] = 50
+    #distmap_linear[distmap_linear > 50] = 50
 
     # print(np.unique(distmap))
 
@@ -138,7 +150,10 @@ def compute_distmap(image_orig, depth_map=None):
         #weight_map = np.array([[i for j in range(weight_map.shape[0])] for i in range(weight_map.shape[1])])
         #weight_map = np.power(weight_map,2)
 
+
+
     depth_map = np.power(depth_map,2)
+    depth_map = cv2.blur(depth_map,(10,10))
     # print(np.min(depth_map),np.max(depth_map))
     depth_map = rescale_intensity(depth_map, out_range=(0.1, 1))
     # print(np.min(depth_map),np.max(depth_map))
@@ -162,26 +177,14 @@ def compute_distmap(image_orig, depth_map=None):
     combined_map = distmap * depth_map
     combined_map = cv2.normalize(combined_map, 0.1, 1, norm_type=cv2.NORM_MINMAX)
 
-    axes[0].imshow(image_orig)
-    axes[0].set_title('Ground truth')
-
-    axes[1].imshow(edge, cmap=plt.cm.gray)
-    axes[1].set_title('Edges')
-
-    axes[2].imshow(distmap_linear, cmap=plt.cm.gray)
-    axes[2].set_title('Edge distance map')
-
-    axes[3].imshow(depth_map, cmap=plt.cm.gray, vmin=0, vmax=1)
-    axes[3].set_title('Depth map')
-
-    axes[4].imshow(combined_map, cmap=plt.cm.gray, vmin=0, vmax=1)
-    axes[4].set_title('Combined map')
-
-    for ax in axes:
-        ax.axis('off')
-
-    plt.tight_layout()
-    plt.show()
+    result = {
+        "combined_map": combined_map,
+        "image_orig": image_orig,
+        "edge": edge,
+        "distmap_linear": distmap_linear,
+        "depth_map": depth_map
+    }
+    return result
 
 
 if __name__ == "__main__":
@@ -209,9 +212,33 @@ if __name__ == "__main__":
             depth_gray = cv2.resize(depth_gray, dsize=(480,240))
             depth_gray = np.max(depth_gray) - depth_gray
             print(np.unique(depth_gray))
-            compute_distmap(image_orig, depth_map=depth_gray)
+            result = compute_distmap(image_orig, depth_map=depth_gray)
         else:
-            compute_distmap(image_orig)
+            result = compute_distmap(image_orig)
+
+        fig, axes = plt.subplots(ncols=5, sharex=True, sharey=True,
+                                 figsize=(15, 4))
+
+        axes[0].imshow(result["image_orig"])
+        axes[0].set_title('Ground truth')
+
+        axes[1].imshow(result["edge"], cmap=plt.cm.gray)
+        axes[1].set_title('Edges')
+
+        axes[2].imshow(result["distmap_linear"], cmap=plt.cm.gray)
+        axes[2].set_title('Edge distance map')
+
+        axes[3].imshow(result["depth_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
+        axes[3].set_title('Depth map')
+
+        axes[4].imshow(result["combined_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
+        axes[4].set_title('Combined map')
+
+        for ax in axes:
+            ax.axis('off')
+
+        plt.tight_layout()
+        plt.show()
 
     if args.iou:
         gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/report/diagrams/cato-iou-gt-2.png'

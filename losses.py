@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from utils import logger, enable_debug, color_ramp
+import metrics
 
 import matplotlib.pyplot as plt
 
@@ -11,17 +12,17 @@ def test_loss():
     n_cls = 4
     input = torch.as_tensor([n_cls-1])
     input = F.one_hot(input, num_classes=n_cls).float()
-    input = input.expand(2, 1, n_cls)
+    # input = input.expand(2, 1, n_cls)
     print(input)
     target = torch.tensor([n_cls-1])
-    target = target.expand(2, 1, 1)
+    # target = target.expand(2, 1, 1)
     print(target)
     kl = KLLoss(n_classes = n_cls, masking=True)
     print("KL", kl(input, target, debug=True)/n_cls)
     sord = SORDLoss(n_classes = n_cls, ranks=[0,50,100], masking=True)
     print("SORD", sord(input, target, debug=True)/n_cls)
 
-def flatten_tensors(inp, target):
+def flatten_tensors(inp, target, weight_map=None):
     # ~ print(inp.shape, target.shape)
     # ~ print(inp, target)
     num_classes = inp.size()[1]
@@ -40,20 +41,38 @@ def flatten_tensors(inp, target):
     target = target.view(-1,)
     # ~ print(inp.shape, target.shape)
     # ~ print(inp, target)
-    return inp, target
+    if weight_map is not None:
+        print(type(target), type(weight_map))
+        weight_map = weight_map.view(-1,)
+        return inp, target, weight_map
+    else:
+        return inp, target
 
 
-def viz_loss(target, output, losses, bs, nclasses):
+def expected_value(p, ranks=[0,1,2]):
+    p = torch.transpose(p, 0, 1)
+    proba_imposs = p[ranks[0]]
+    proba_poss = p[ranks[1]]
+    proba_pref = p[ranks[2]]
+    return proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
+
+def viz_loss(output, losses, bs, nclasses):
+
+
 
     fig, axes = plt.subplots(ncols=3, nrows=bs, sharex=True, sharey=True,
                              figsize=(8, 4))
-    for i, (loss_name, loss) in enumerate(losses.items()):
+    for i, (loss_name, (target,loss)) in enumerate(losses.items()):
+        print(target.shape)
+        target = expected_value(target)
+        print(target.shape)
         loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
+        target = torch.reshape(target,(bs,240,480,-1))
         logger.debug(f"target {target.shape} | loss {loss.shape} | reshaped {loss_reshaped.shape}")
 
         batch = 0
         loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
-        axes[i][0].imshow(target[batch], cmap=color_ramp, vmin=0, vmax=2)
+        axes[i][0].imshow(target[batch], cmap=color_ramp)
         axes[i][0].axis('off')
         # for cls in range(0, nclasses):
         #     axes[i][cls+1].imshow(output[batch][cls], cmap=plt.cm.gray, vmin=0, vmax=1)
@@ -77,6 +96,21 @@ def viz_loss(target, output, losses, bs, nclasses):
     plt.show()
 
 
+def prepare_sample(output_orig, target_orig, weight_map=None, masking=True):
+    bs = target_orig.shape[0]
+    output, target, weight_map = flatten_tensors(output_orig, target_orig, weight_map)
+
+    n_samples = target.shape[0]
+
+    if masking:
+        mask = target.ge(0)
+        # print(mask, mask.shape)
+        # print(output.shape,target.shape)
+        output = output[mask]
+        target = target[mask]
+        if weight_map is not None: weight_map = weight_map[mask]
+    return bs, n_samples, output, target, weight_map
+
 class CompareLosses(nn.Module):
     def __init__(self, n_classes, masking, ranks, returnloss):
         super().__init__()
@@ -87,7 +121,7 @@ class CompareLosses(nn.Module):
         self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks)
         self.returnloss = returnloss
 
-    def forward(self, output, target, debug=True, viz=True):
+    def forward(self, output, target, weight_map=None, debug=True, viz=True):
         #target = torch.fliplr(target)
         for i in range(target.shape[0]):
             driveable = torch.zeros_like(target[i])
@@ -99,12 +133,14 @@ class CompareLosses(nn.Module):
             output[i][0] = driveable
             output[i][2] = torch.logical_not(driveable)
 
+        weight_map = metrics.weight_from_target(target)
+
         losses = {
-            "kl": self.kl(output_orig=output, target_orig=target, debug=debug, reduce=False),
-            "sord": self.sord(output_orig=output, target_orig=target, debug=debug, reduce=False),
+            "kl": self.kl(output_orig=output, target_orig=target, weight_map=weight_map, debug=debug, reduce=False),
+            "sord": self.sord(output_orig=output, target_orig=target, weight_map=weight_map, debug=debug, reduce=False),
         }
-        viz_loss(target, output, losses, bs=target.shape[0], nclasses=self.num_classes)
-        return losses[self.returnloss]
+        viz_loss(output, losses, bs=target.shape[0], nclasses=self.num_classes)
+        return losses[self.returnloss][1]
 
 
 class KLLoss(nn.Module):
@@ -113,29 +149,24 @@ class KLLoss(nn.Module):
         self.num_classes = n_classes
         self.masking = masking
 
-    def forward(self, output_orig, target_orig, debug=False, reduce=True):
-        bs = target_orig.shape[0]
-        output, target = flatten_tensors(output_orig, target_orig)
-        if debug: print(output,target)
+    def forward(self, output_orig, target_orig, weight_map=None, debug=False, reduce=True):
 
-        if self.masking:
-            mask = target.ge(0)
-            # print(mask, mask.shape)
-            # print(output.shape,target.shape)
-            output = output[mask]
-            target = target[mask]
+        bs, n_samples, output, target, weight_map = prepare_sample(output_orig, target_orig, weight_map=weight_map, masking=self.masking)
 
-        n_samples = target.shape[0]
         logger.debug(f"KLLoss n_samples {n_samples}")
         if debug: print(output,target)
         target = F.one_hot(target, num_classes=self.num_classes).float()
         if debug: print(output,target)
         output = torch.nn.LogSoftmax(dim=-1)(output)
         loss = nn.KLDivLoss(reduction='none')(output, target)
+        if weight_map is not None:
+            print(loss.shape,weight_map.shape)
+            loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
 
         if reduce:
             loss = torch.sum(loss)/n_samples
-        return loss
+            return loss
+        return target, loss
 
 
 
@@ -156,28 +187,18 @@ class SORDLoss(nn.Module):
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
 
-    def forward(self, output_orig, target_orig, debug=False, mod_input=None, reduce=True):
+    def forward(self, output_orig, target_orig, weight_map=None, debug=False, mod_input=None, reduce=True):
 
-        bs = target_orig.shape[0]
         target = torch.clone(target_orig).float()
         #if debug: print("target_orig",target_orig,torch.unique(target_orig))
         for i,r in enumerate(self.ranks):
             target[target_orig==i] = r
             if debug: print(f"{i} to {r}")
+
         logger.debug(f"SORD - before flatten: target shape {target_orig.shape} | output shape {output_orig.shape}")
-        output, target = flatten_tensors(output_orig, target)
+
+        bs, n_samples, output, target, weight_map = prepare_sample(output_orig, target, weight_map=weight_map, masking=self.masking)
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
-
-
-        if self.masking:
-            logger.debug(f"SORD - before masking: target shape {target.shape} | output shape {output.shape}")
-            mask = target.ge(0)
-            logger.debug(f"SORD - mask shape: {mask.shape}")
-            # print(mask, mask.shape)
-            # print(output.shape,target.shape)
-            output = output[mask]
-            target = target[mask]
-            logger.debug(f"SORD - after masking: target shape {target.shape} | output shape {output.shape}")
 
         n_samples = target.shape[0]
         logger.debug(f"SORDLoss n_samples {n_samples}")
@@ -205,11 +226,17 @@ class SORDLoss(nn.Module):
             output = torch.nn.LogSoftmax(dim=-1)(output)
 
         loss = nn.KLDivLoss(reduction='none')(output, soft_target)
+        if weight_map is not None:
+            print(loss.shape,weight_map.shape)
+            print(torch.unique(weight_map), "before weight map", torch.unique(loss))
+            loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
+            print("after weight map", torch.unique(loss))
 
         #print(n_samples)
         if reduce:
             loss = torch.sum(loss)/n_samples
-        return loss
+            return loss
+        return soft_target, loss
 
 
 if __name__ == '__main__':
