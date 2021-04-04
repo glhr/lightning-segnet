@@ -185,16 +185,16 @@ def compute_distmap(image_orig, depth_map=None):
         # weight_map = np.array([[i for j in range(weight_map.shape[0])] for i in range(weight_map.shape[1])])
         # weight_map = np.power(weight_map,2)
 
-    depth_map = np.power(depth_map, 2)
+    # depth_map = np.power(depth_map, 2)
     depth_map = cv2.blur(depth_map, (10, 10))
-    depth_map = rescale_intensity(depth_map, out_range=(0.1, 1))
+    depth_map = rescale_intensity(depth_map, out_range=(0, 1))
     print_range(depth_map, nameof(depth_map))
 
     distmap = np.copy(distmap_linear)
     for ix, iy in np.ndindex(distmap_linear.shape):
         # print(np.max(distmap))
         # pow = np.power(distmap_linear[ix, iy], 1-depth_map[ix, iy])
-        pow = 1-np.exp(-(distmap_linear[ix, iy])/(1+30*(1-depth_map[ix, iy])**2))
+        pow = 1-np.exp(-(distmap_linear[ix, iy])/(1+30*(1-depth_map[ix, iy]**2)**2))
         # pow = 1-np.exp(-(distmap_linear[ix, iy]/(1+10**(1-depth_map[ix, iy]))))
         # pow = 1-np.exp(-(distmap_linear[ix, iy]**2/30*(1+(1-depth_map[ix, iy]))))
         # pow = pow/np.max(pow)
@@ -212,7 +212,8 @@ def compute_distmap(image_orig, depth_map=None):
     # distmap[distmap > 0.7] = 0.7
 
     combined_map = distmap * depth_map
-    combined_map = cv2.normalize(combined_map, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    print_range(combined_map, nameof(combined_map))
+    combined_map = rescale_intensity(combined_map, out_range=(0.1, 1))
     # combined_map = distmap
 
     result = {
@@ -286,7 +287,7 @@ if __name__ == "__main__":
 
             axes[0].imshow(result["image_orig"])
 
-            im = axes[1].imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0, vmax=1)
+            im = axes[1].imshow(result["combined_map"], cmap=plt.cm.jet)
 
             for ax in axes:
                 ax.axis('off')
