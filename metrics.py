@@ -262,11 +262,26 @@ if __name__ == "__main__":
         axes[3].imshow(result["depth_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
         axes[3].set_title('Depth map')
 
-        axes[4].imshow(result["combined_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
+        im = axes[4].imshow(result["combined_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
         axes[4].set_title('Combined map')
 
         for ax in axes:
             ax.axis('off')
+
+        plt.tight_layout()
+        plt.show()
+
+        fig, axes = plt.subplots(ncols=2, sharex=True, sharey=True,
+                                 figsize=(16, 4))
+
+        axes[0].imshow(result["image_orig"])
+
+        im = axes[1].imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0, vmax=1)
+
+        for ax in axes:
+            ax.axis('off')
+
+        fig.colorbar(im, fraction=0.046, pad=0.04)
 
         plt.tight_layout()
         plt.show()
