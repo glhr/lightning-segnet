@@ -33,7 +33,7 @@ def get_printer(depth=2):
 from colour import Color
 from matplotlib.colors import LinearSegmentedColormap
 
-ramp_colors = ['#ff0000','#ffff00','#00ff00']
+ramp_colors = ['#000000','#ff0000','#ffff00','#00ff00']
 color_ramp = LinearSegmentedColormap.from_list( 'driveability', [ Color( c1 ).rgb for c1 in ramp_colors ] )
 
 import numpy as np
