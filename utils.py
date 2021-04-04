@@ -35,3 +35,8 @@ from matplotlib.colors import LinearSegmentedColormap
 
 ramp_colors = ['#ff0000','#ffff00','#00ff00']
 color_ramp = LinearSegmentedColormap.from_list( 'driveability', [ Color( c1 ).rgb for c1 in ramp_colors ] )
+
+import numpy as np
+
+def print_range(arr, name=""):
+    logger.debug(f"{name} from {np.min(arr)} to {np.max(arr)}")

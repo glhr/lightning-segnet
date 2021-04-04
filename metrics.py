@@ -1,3 +1,4 @@
+from varname import nameof
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -11,7 +12,7 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import jaccard_score, confusion_matrix
 
-from utils import logger, enable_debug
+from utils import logger, enable_debug, print_range
 import losses
 
 def iou_from_confmat(
@@ -159,54 +160,60 @@ def weight_from_target(target):
         print("map",np.unique(distmap[i]),)
     return distmap
 
+
 def compute_distmap(image_orig, depth_map=None):
     if image_orig.shape[-1] == 3:
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
     else:
         image_gray = image_orig
     edge = filters.roberts(image_gray)
-    print(np.min(edge), np.max(edge))
-    edge = np.array(edge > 0,dtype=np.uint8)*255
+
+    print_range(edge, nameof(edge))
+    edge = np.array(edge > 0, dtype=np.uint8)*255
     edge = 255-edge
 
     distmap_linear = cv2.distanceTransform(edge, cv2.DIST_L2, cv2.DIST_MASK_5)
-    #distmap_linear[distmap_linear > 50] = 50
+    # distmap_linear[distmap_linear > 50] = 50
+    print_range(distmap_linear, nameof(distmap_linear))
 
     # print(np.unique(distmap))
 
     if depth_map is None:
         depth_map = np.zeros_like(image_gray).astype(np.float32)
-        for ix,iy in np.ndindex(depth_map.shape):
-            depth_map[ix,iy] = ix
-        #weight_map = np.array([[i for j in range(weight_map.shape[0])] for i in range(weight_map.shape[1])])
-        #weight_map = np.power(weight_map,2)
+        for ix, iy in np.ndindex(depth_map.shape):
+            depth_map[ix, iy] = ix
+        # weight_map = np.array([[i for j in range(weight_map.shape[0])] for i in range(weight_map.shape[1])])
+        # weight_map = np.power(weight_map,2)
 
-
-
-    depth_map = np.power(depth_map,2)
-    depth_map = cv2.blur(depth_map,(10,10))
-    # print(np.min(depth_map),np.max(depth_map))
+    depth_map = np.power(depth_map, 2)
+    depth_map = cv2.blur(depth_map, (10, 10))
     depth_map = rescale_intensity(depth_map, out_range=(0.1, 1))
-    # print(np.min(depth_map),np.max(depth_map))
-    # print(np.unique(depth_map))
+    print_range(depth_map, nameof(depth_map))
+
     distmap = np.copy(distmap_linear)
-    for ix,iy in np.ndindex(distmap_linear.shape):
-        #print(np.max(distmap))
-        pow = np.power(distmap_linear[ix,iy], 1-depth_map[ix,iy])
-        distmap[ix, iy] = pow if pow <= 30 else 30
+    for ix, iy in np.ndindex(distmap_linear.shape):
+        # print(np.max(distmap))
+        # pow = np.power(distmap_linear[ix, iy], 1-depth_map[ix, iy])
+        pow = 1-np.exp(-(distmap_linear[ix, iy])/(1+30*(1-depth_map[ix, iy])**2))
+        # pow = 1-np.exp(-(distmap_linear[ix, iy]/(1+10**(1-depth_map[ix, iy]))))
+        # pow = 1-np.exp(-(distmap_linear[ix, iy]**2/30*(1+(1-depth_map[ix, iy]))))
+        # pow = pow/np.max(pow)
+        # pow = min(30,pow)
+        distmap[ix, iy] = pow
+    print_range(distmap, nameof(distmap))
 
-    print(np.max(distmap))
-    row_sums = distmap.sum(axis=1)
-    distmap = distmap / row_sums[:, np.newaxis]
+    # row_sums = distmap.sum(axis=1)
+    # distmap = distmap / row_sums[:, np.newaxis]
 
-    print(np.max(distmap))
+    # print_range(distmap, nameof(distmap))
 
-    distmap = cv2.normalize(distmap, 0.1, 1, norm_type=cv2.NORM_MINMAX)
-    #distmap_linear = cv2.normalize(distmap_linear, 0.1, 1, norm_type=cv2.NORM_MINMAX)
-    #distmap[distmap > 0.7] = 0.7
+    # distmap = cv2.normalize(distmap, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    # distmap_linear = cv2.normalize(distmap_linear, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    # distmap[distmap > 0.7] = 0.7
 
     combined_map = distmap * depth_map
     combined_map = cv2.normalize(combined_map, 0.1, 1, norm_type=cv2.NORM_MINMAX)
+    # combined_map = distmap
 
     result = {
         "combined_map": combined_map,
@@ -223,6 +230,7 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--distmap', default=False, action="store_true")
+    parser.add_argument('--final', default=False, action="store_true")
     parser.add_argument('--depth', default=False, action="store_true")
     parser.add_argument('--iou', default=False, action="store_true")
     parser.add_argument('--debug', default=True, action="store_true")
@@ -271,20 +279,22 @@ if __name__ == "__main__":
         plt.tight_layout()
         plt.show()
 
-        fig, axes = plt.subplots(ncols=2, sharex=True, sharey=True,
-                                 figsize=(16, 4))
+        if args.final:
 
-        axes[0].imshow(result["image_orig"])
+            fig, axes = plt.subplots(ncols=2, sharex=True, sharey=True,
+                                     figsize=(16, 4))
 
-        im = axes[1].imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0, vmax=1)
+            axes[0].imshow(result["image_orig"])
 
-        for ax in axes:
-            ax.axis('off')
+            im = axes[1].imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0, vmax=1)
 
-        fig.colorbar(im, fraction=0.046, pad=0.04)
+            for ax in axes:
+                ax.axis('off')
 
-        plt.tight_layout()
-        plt.show()
+            fig.colorbar(im, fraction=0.046, pad=0.04)
+
+            plt.tight_layout()
+            plt.show()
 
     if args.iou:
         gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/report/diagrams/cato-iou-gt-2.png'
