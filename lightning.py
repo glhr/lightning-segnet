@@ -482,6 +482,7 @@ class LitSegNet(pl.LightningModule):
             else:
                 test_set = self.get_dataset(set="test",augment=False)
 
+
         elif self.hparams.dataset == "synthia":
             train_set = self.get_dataset(set="train")
             val_set = self.get_dataset(set="val")
@@ -509,6 +510,7 @@ class LitSegNet(pl.LightningModule):
             test_set.dataset.transform = tf
             val_set.dataset.transform = tf
 
+        logger.warning(f"{self.hparams.dataset} - train {len(train_set)} | val {len(val_set)} | test {len(test_set)}")
         return train_set, val_set, test_set
 
     def train_dataloader(self):

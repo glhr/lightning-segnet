@@ -81,13 +81,10 @@ def viz_loss(output, losses, bs, nclasses, weight_map=None, show={"gt","argmax",
                 if single_col: ax = axes
                 else: ax = axes[col]
 
-            print(col,elem_name)
-
-
             if elem_name == "gt" and elem_name in show:
-                print(target.shape)
+                # print(target.shape)
                 target = expected_value(target)
-                print(target.shape)
+                # print(target.shape)
                 target = torch.reshape(target,(bs,240,480,-1))
                 ax.imshow(target[batch], cmap=color_ramp)
                 ax.axis('off')
@@ -103,13 +100,15 @@ def viz_loss(output, losses, bs, nclasses, weight_map=None, show={"gt","argmax",
 
             elif elem_name == "loss" and elem_name in show:
                 loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
-                loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
+                nsamples = 240 * 480
+                loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy() / nsamples
+                # print(loss_reshaped[batch].shape, f"loss sum {np.sum(loss_viz)}")
                 im = ax.imshow(loss_viz, cmap=plt.cm.jet)
                 cbar = fig.colorbar(im, fraction=0.046, pad=0.04)
                 cbar.ax.locator_params(nbins=5)
                 ax.axis('off')
                 # axes[i][2].set_title(loss_name)
-                print("unique loss values",np.unique(loss_viz))
+                # print("unique loss values",np.unique(loss_viz))
 
                 logger.debug(f"loss {loss.shape} | reshaped {loss_reshaped.shape}")
 
@@ -159,7 +158,7 @@ class CompareLosses(nn.Module):
         self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks, dist=dist)
         self.returnloss = returnloss
 
-    def forward(self, output, target, weight_map=None, debug=True, viz=True):
+    def forward(self, output, target, weight_map=None, debug=False, viz=True):
         #target = torch.fliplr(target)
         # for i in range(target.shape[0]):
             # driveable = torch.zeros_like(target[i])
@@ -201,9 +200,18 @@ class KLLoss(nn.Module):
             print(loss.shape,weight_map.shape)
             loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
 
+        loss_reduced = torch.sum(loss)/n_samples
+        logger.debug(f"KL loss reduced {loss_reduced}")
+
         if reduce:
-            loss = torch.sum(loss)/n_samples
-            return loss
+            return loss_reduced
+
+        loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
+        nsamples = 240 * 480
+        for i in range(bs):
+            loss_viz = torch.sum(loss_reshaped[i].squeeze(), axis=-1).numpy() / nsamples
+            logger.debug(f"loss reshaped b{i}: {np.sum(loss_viz)}")
+
         return target, loss
 
 
