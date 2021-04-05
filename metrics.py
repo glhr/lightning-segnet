@@ -168,7 +168,7 @@ def compute_distmap(image_orig, depth_map=None):
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
     else:
         image_gray = image_orig
-    edge = filters.roberts(image_gray)
+    edge = filters.roberts(image_gray.detach().cpu().numpy())
 
     print_range(edge, nameof(edge))
     edge = np.array(edge > 0, dtype=np.uint8)*255
