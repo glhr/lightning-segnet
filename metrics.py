@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from sklearn.metrics import jaccard_score, confusion_matrix
 
-from utils import logger, enable_debug, print_range
+from utils import logger, enable_debug, print_range, create_folder
 import losses
 
 def iou_from_confmat(
@@ -162,6 +162,8 @@ def weight_from_target(target):
 
 
 def compute_distmap(image_orig, depth_map=None):
+    print("img shape",image_orig.shape)
+    img_h, img_w = image_orig.shape[:2]
     if image_orig.shape[-1] == 3:
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
     else:
@@ -185,9 +187,11 @@ def compute_distmap(image_orig, depth_map=None):
         # weight_map = np.array([[i for j in range(weight_map.shape[0])] for i in range(weight_map.shape[1])])
         # weight_map = np.power(weight_map,2)
 
+    #
+    # depth_map = cv2.blur(depth_map, (10, 10))
+    # depth_map = rescale_intensity(depth_map, out_range=(0, 1))
+    depth_map = depth_map / img_h
     # depth_map = np.power(depth_map, 2)
-    depth_map = cv2.blur(depth_map, (10, 10))
-    depth_map = rescale_intensity(depth_map, out_range=(0, 1))
     print_range(depth_map, nameof(depth_map))
 
     distmap = np.copy(distmap_linear)
@@ -215,6 +219,7 @@ def compute_distmap(image_orig, depth_map=None):
     print_range(combined_map, nameof(combined_map))
     combined_map = rescale_intensity(combined_map, out_range=(0.1, 1))
     # combined_map = distmap
+    print_range(combined_map, nameof(combined_map))
 
     result = {
         "combined_map": combined_map,
@@ -241,7 +246,8 @@ if __name__ == "__main__":
     if args.debug: enable_debug()
 
     if args.distmap:
-        gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test/GT_color/b1-09517_Clipped.png'
+        create_folder("results/distmap/")
+        gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/results/kitti/2021-03-30 08-51-cityscapes-c3-kl-rgb-epoch=15-val_loss=0.0915/kitti25-gt_affordances.png'
         depth_path = '/home/robotlab/rob10/learning-driveability-heatmaps/datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test/depth_gray/b1-09517_Clipped_redict_depth_gray.png'
         pred_path = gt_path
         image_orig = imread(gt_path)
@@ -261,41 +267,51 @@ if __name__ == "__main__":
 
         axes[0].imshow(result["image_orig"])
         axes[0].set_title('Ground truth')
+        cv2.imwrite("results/distmap/gt.png",cv2.cvtColor(result["image_orig"], cv2.COLOR_BGR2RGB))
 
         axes[1].imshow(result["edge"], cmap=plt.cm.gray)
         axes[1].set_title('Edges')
 
+        cv2.imwrite("results/distmap/edges.png",result["edge"])
+
         axes[2].imshow(result["distmap_linear"], cmap=plt.cm.gray)
         axes[2].set_title('Edge distance map')
+
+        cv2.imwrite("results/distmap/dmap.png", rescale_intensity(result["distmap_linear"], out_range=(0, 255)))
 
         axes[3].imshow(result["depth_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
         axes[3].set_title('Depth map')
 
+        cv2.imwrite("results/distmap/hmap.png",result["depth_map"]*255)
+
         im = axes[4].imshow(result["combined_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
         axes[4].set_title('Combined map')
+
+        cv2.imwrite("results/distmap/wmap.png", rescale_intensity(result["combined_map"], out_range=(0, 255)))
 
         for ax in axes:
             ax.axis('off')
 
         plt.tight_layout()
-        plt.show()
+        # plt.show()
+
 
         if args.final:
 
-            fig, axes = plt.subplots(ncols=2, sharex=True, sharey=True,
-                                     figsize=(16, 4))
+            fig, axes = plt.subplots(ncols=1, sharex=True, sharey=True,
+                                     figsize=(8, 4))
 
-            axes[0].imshow(result["image_orig"])
+            # axes[0].imshow(result["image_orig"])
 
-            im = axes[1].imshow(result["combined_map"], cmap=plt.cm.jet)
+            im = axes.imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0.1)
 
-            for ax in axes:
-                ax.axis('off')
+            axes.axis('off')
 
             fig.colorbar(im, fraction=0.046, pad=0.04)
 
             plt.tight_layout()
-            plt.show()
+            # plt.show()
+            plt.savefig("results/distmap/wmap-cbar.png")
 
     if args.iou:
         gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/report/diagrams/cato-iou-gt-2.png'
