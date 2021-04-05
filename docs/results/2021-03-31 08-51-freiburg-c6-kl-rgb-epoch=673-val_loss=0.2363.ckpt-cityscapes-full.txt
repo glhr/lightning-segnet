@@ -1,0 +1,2585 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[DEBUG] cityscapes - idx to obj: {0: -1, 1: -1, 2: -1, 3: -1, 4: 0, 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6, 11: 7, 12: 8, 13: 9, 14: 10, 15: 11, 16: 12, 17: 13, 18: 14, 19: 15, 20: 16, 21: 17, 22: 18, 23: 19, 24: 20, 25: 21, 26: 22, 27: 23, 28: 24, 29: 25, 30: 26, 31: 27, 32: 28, 33: 29, -1: -1}
+[DEBUG] cityscapes - class to idx: {'unlabeled': -1, 'egovehicle': -1, 'rectificationborder': -1, 'outofroi': -1, 'static': 0, 'dynamic': 1, 'ground': 2, 'road': 3, 'sidewalk': 4, 'parking': 5, 'railtrack': 6, 'building': 7, 'wall': 8, 'fence': 9, 'guardrail': 10, 'bridge': 11, 'tunnel': 12, 'pole': 13, 'polegroup': 14, 'trafficlight': 15, 'trafficsign': 16, 'vegetation': 17, 'terrain': 18, 'sky': 19, 'person': 20, 'rider': 21, 'car': 22, 'truck': 23, 'bus': 24, 'caravan': 25, 'trailer': 26, 'train': 27, 'motorcycle': 28, 'bicycle': 29, 'licenseplate': -1}
+[DEBUG] cityscapes - color to idx: dict_values([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, -1, 23, 24, 25, 26, 27, 28, 29])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] cityscapes - idx to obj: {0: -1, 1: -1, 2: -1, 3: -1, 4: 0, 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6, 11: 7, 12: 8, 13: 9, 14: 10, 15: 11, 16: 12, 17: 13, 18: 14, 19: 15, 20: 16, 21: 17, 22: 18, 23: 19, 24: 20, 25: 21, 26: 22, 27: 23, 28: 24, 29: 25, 30: 26, 31: 27, 32: 28, 33: 29, -1: -1}
+[DEBUG] cityscapes - class to idx: {'unlabeled': -1, 'egovehicle': -1, 'rectificationborder': -1, 'outofroi': -1, 'static': 0, 'dynamic': 1, 'ground': 2, 'road': 3, 'sidewalk': 4, 'parking': 5, 'railtrack': 6, 'building': 7, 'wall': 8, 'fence': 9, 'guardrail': 10, 'bridge': 11, 'tunnel': 12, 'pole': 13, 'polegroup': 14, 'trafficlight': 15, 'trafficsign': 16, 'vegetation': 17, 'terrain': 18, 'sky': 19, 'person': 20, 'rider': 21, 'car': 22, 'truck': 23, 'bus': 24, 'caravan': 25, 'trailer': 26, 'train': 27, 'motorcycle': 28, 'bicycle': 29, 'licenseplate': -1}
+[DEBUG] cityscapes - color to idx: dict_values([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, -1, 23, 24, 25, 26, 27, 28, 29])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] cityscapes - idx to obj: {0: -1, 1: -1, 2: -1, 3: -1, 4: 0, 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6, 11: 7, 12: 8, 13: 9, 14: 10, 15: 11, 16: 12, 17: 13, 18: 14, 19: 15, 20: 16, 21: 17, 22: 18, 23: 19, 24: 20, 25: 21, 26: 22, 27: 23, 28: 24, 29: 25, 30: 26, 31: 27, 32: 28, 33: 29, -1: -1}
+[DEBUG] cityscapes - class to idx: {'unlabeled': -1, 'egovehicle': -1, 'rectificationborder': -1, 'outofroi': -1, 'static': 0, 'dynamic': 1, 'ground': 2, 'road': 3, 'sidewalk': 4, 'parking': 5, 'railtrack': 6, 'building': 7, 'wall': 8, 'fence': 9, 'guardrail': 10, 'bridge': 11, 'tunnel': 12, 'pole': 13, 'polegroup': 14, 'trafficlight': 15, 'trafficsign': 16, 'vegetation': 17, 'terrain': 18, 'sky': 19, 'person': 20, 'rider': 21, 'car': 22, 'truck': 23, 'bus': 24, 'caravan': 25, 'trailer': 26, 'train': 27, 'motorcycle': 28, 'bicycle': 29, 'licenseplate': -1}
+[DEBUG] cityscapes - color to idx: dict_values([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, -1, 23, 24, 25, 26, 27, 28, 29])
+[WARNING] cityscapes - train 2975 | val 267 | test 233
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[INFO] SORD ranks: [0 1 2 3 4 5]
+[INFO] SORD using L1 distance
+[INFO] SORD ranks: [0 1 2 3 4 5]
+[INFO] SORD using L1 distance
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [0, 1, 2]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2, 3, 4, 5]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-04-05 20-01-cityscapes-c6-kl-0,1,2-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[DEBUG] cityscapes - idx to obj: {0: -1, 1: -1, 2: -1, 3: -1, 4: 0, 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6, 11: 7, 12: 8, 13: 9, 14: 10, 15: 11, 16: 12, 17: 13, 18: 14, 19: 15, 20: 16, 21: 17, 22: 18, 23: 19, 24: 20, 25: 21, 26: 22, 27: 23, 28: 24, 29: 25, 30: 26, 31: 27, 32: 28, 33: 29, -1: -1}
+[DEBUG] cityscapes - class to idx: {'unlabeled': -1, 'egovehicle': -1, 'rectificationborder': -1, 'outofroi': -1, 'static': 0, 'dynamic': 1, 'ground': 2, 'road': 3, 'sidewalk': 4, 'parking': 5, 'railtrack': 6, 'building': 7, 'wall': 8, 'fence': 9, 'guardrail': 10, 'bridge': 11, 'tunnel': 12, 'pole': 13, 'polegroup': 14, 'trafficlight': 15, 'trafficsign': 16, 'vegetation': 17, 'terrain': 18, 'sky': 19, 'person': 20, 'rider': 21, 'car': 22, 'truck': 23, 'bus': 24, 'caravan': 25, 'trailer': 26, 'train': 27, 'motorcycle': 28, 'bicycle': 29, 'licenseplate': -1}
+[DEBUG] cityscapes - color to idx: dict_values([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, -1, 23, 24, 25, 26, 27, 28, 29])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] cityscapes - idx to obj: {0: -1, 1: -1, 2: -1, 3: -1, 4: 0, 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6, 11: 7, 12: 8, 13: 9, 14: 10, 15: 11, 16: 12, 17: 13, 18: 14, 19: 15, 20: 16, 21: 17, 22: 18, 23: 19, 24: 20, 25: 21, 26: 22, 27: 23, 28: 24, 29: 25, 30: 26, 31: 27, 32: 28, 33: 29, -1: -1}
+[DEBUG] cityscapes - class to idx: {'unlabeled': -1, 'egovehicle': -1, 'rectificationborder': -1, 'outofroi': -1, 'static': 0, 'dynamic': 1, 'ground': 2, 'road': 3, 'sidewalk': 4, 'parking': 5, 'railtrack': 6, 'building': 7, 'wall': 8, 'fence': 9, 'guardrail': 10, 'bridge': 11, 'tunnel': 12, 'pole': 13, 'polegroup': 14, 'trafficlight': 15, 'trafficsign': 16, 'vegetation': 17, 'terrain': 18, 'sky': 19, 'person': 20, 'rider': 21, 'car': 22, 'truck': 23, 'bus': 24, 'caravan': 25, 'trailer': 26, 'train': 27, 'motorcycle': 28, 'bicycle': 29, 'licenseplate': -1}
+[DEBUG] cityscapes - color to idx: dict_values([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, -1, 23, 24, 25, 26, 27, 28, 29])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] cityscapes - idx to obj: {0: -1, 1: -1, 2: -1, 3: -1, 4: 0, 5: 1, 6: 2, 7: 3, 8: 4, 9: 5, 10: 6, 11: 7, 12: 8, 13: 9, 14: 10, 15: 11, 16: 12, 17: 13, 18: 14, 19: 15, 20: 16, 21: 17, 22: 18, 23: 19, 24: 20, 25: 21, 26: 22, 27: 23, 28: 24, 29: 25, 30: 26, 31: 27, 32: 28, 33: 29, -1: -1}
+[DEBUG] cityscapes - class to idx: {'unlabeled': -1, 'egovehicle': -1, 'rectificationborder': -1, 'outofroi': -1, 'static': 0, 'dynamic': 1, 'ground': 2, 'road': 3, 'sidewalk': 4, 'parking': 5, 'railtrack': 6, 'building': 7, 'wall': 8, 'fence': 9, 'guardrail': 10, 'bridge': 11, 'tunnel': 12, 'pole': 13, 'polegroup': 14, 'trafficlight': 15, 'trafficsign': 16, 'vegetation': 17, 'terrain': 18, 'sky': 19, 'person': 20, 'rider': 21, 'car': 22, 'truck': 23, 'bus': 24, 'caravan': 25, 'trailer': 26, 'train': 27, 'motorcycle': 28, 'bicycle': 29, 'licenseplate': -1}
+[DEBUG] cityscapes - color to idx: dict_values([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21, -1, 23, 24, 25, 26, 27, 28, 29])
+[WARNING] cityscapes - train 2975 | val 267 | test 5000
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[INFO] SORD ranks: [0 1 2 3 4 5]
+[INFO] SORD using L1 distance
+[INFO] SORD ranks: [0 1 2 3 4 5]
+[INFO] SORD using L1 distance
+[INFO] Distance ranks [0, 1, 2]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2, 3, 4, 5]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-04-05 20-01-cityscapes-c6-kl-0,1,2-rgb
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Namespace(augment=False, bs=16, dataset='cityscapes', debug=True, dist='l1', full_dataset=True, gpus=1, loss='kl', loss_weight=False, lr=None, max_epochs=1000, modalities='rgb', mode='convert', momentum=None, num_classes=6, optim=None, orig_dataset='freiburg', prefix=None, ranks='0,1,2', save=False, test_checkpoint='lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt', test_samples=None, train=False, train_checkpoint='lightning_logs/last.ckpt', update_output_layer=False, viz=False, workers=10)
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+2021-04-05 20-01-cityscapes-c6-kl-0,1,2-rgb
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+Testing: 0it [00:00, ?it/s][DEBUG] CM: [[991552  24386   1428]
+ [ 38713  60747    361]
+ [ 64517 459165  98153]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4942670364909314 | macro 0.3821218490739317
+[DEBUG] MaskedIoU per class [0.88484342 0.10413081 0.15739131]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   0%|          | 1/313 [00:24<2:05:24, 24.12s/it][DEBUG] CM: [[985486  26113   1515]
+ [ 39845  46875   1114]
+ [ 75850 447010 115039]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49238422276330795 | macro 0.3787314954440754
+[DEBUG] MaskedIoU per class [0.87303166 0.08356255 0.17960027]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   1%|          | 2/313 [00:28<1:05:38, 12.66s/it][DEBUG] CM: [[951500  26264    580]
+ [ 19444  51164   3355]
+ [ 76476 504584 105588]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4676843662671997 | macro 0.37440487084715895
+[DEBUG] MaskedIoU per class [0.88572269 0.08459502 0.1528969 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   1%|          | 3/313 [00:31<42:44,  8.27s/it]  [DEBUG] CM: [[939773  55768    388]
+ [ 16923  70530    825]
+ [ 64870 453158 106440]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.485412328137748 | macro 0.38673948148914433
+[DEBUG] MaskedIoU per class [0.87199946 0.11810035 0.17011864]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   1%|▏         | 4/313 [00:34<30:55,  6.00s/it][DEBUG] CM: [[882888   1759      0]
+ [ 51279  38427     55]
+ [ 64338 501779 101395]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4523003984733297 | macro 0.3664369032524755
+[DEBUG] MaskedIoU per class [0.88265498 0.06476835 0.15188738]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   2%|▏         | 5/313 [00:36<24:23,  4.75s/it][DEBUG] CM: [[896824  21078    132]
+ [ 58599  55133   1820]
+ [ 69146 324805 212965]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5505089122255187 | macro 0.44227305389557575
+[DEBUG] MaskedIoU per class [0.85756551 0.11948162 0.34977204]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   2%|▏         | 6/313 [00:39<19:58,  3.90s/it][DEBUG] CM: [[871583   2367     23]
+ [ 36656  57422   1468]
+ [ 80317 489207 102877]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.458215472935108 | macro 0.37667006930297603
+[DEBUG] MaskedIoU per class [0.87954641 0.09780283 0.15266096]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   2%|▏         | 7/313 [00:41<17:55,  3.52s/it][DEBUG] CM: [[906383  21816    100]
+ [ 69396  55481   5675]
+ [ 57666 343379 172016]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5323520242785725 | macro 0.42264219333797365
+[DEBUG] MaskedIoU per class [0.85883693 0.11191394 0.29717571]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   3%|▎         | 8/313 [00:44<16:01,  3.15s/it][DEBUG] CM: [[901696  27638     27]
+ [ 33211  68746   5643]
+ [ 82949 444217  77792]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4688817876511225 | macro 0.3694909280008247
+[DEBUG] MaskedIoU per class [0.86243701 0.11863907 0.12739671]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   3%|▎         | 9/313 [00:46<14:42,  2.90s/it][DEBUG] CM: [[915130   8205     46]
+ [ 49523  53577    952]
+ [ 85225 451669  77590]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4676110383872982 | macro 0.3619758963837236
+[DEBUG] MaskedIoU per class [0.86485674 0.09500715 0.1260638 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   3%|▎         | 10/313 [00:48<13:41,  2.71s/it][DEBUG] CM: [[887013  17156     64]
+ [ 50149  42290  13913]
+ [ 64899 455670 110526]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 0]
+[DEBUG] MaskedIoU micro 0.4634787751985598 | macro 0.37153010247633095
+[DEBUG] MaskedIoU per class [0.87023402 0.07301728 0.17133901]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 2.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.5000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.7500], device='cuda:0')
+Testing:   4%|▎         | 11/313 [00:51<13:10,  2.62s/it][DEBUG] CM: [[857334   6178      9]
+ [ 65892  58879   4274]
+ [ 86153 452790 110394]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4548145732830823 | macro 0.3710739092761739
+[DEBUG] MaskedIoU per class [0.84419329 0.10013214 0.1688963 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   4%|▍         | 12/313 [00:53<12:43,  2.54s/it][DEBUG] CM: [[879225   9478     87]
+ [ 44872  56557   1377]
+ [ 59776 493949  96576]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.45853313174347393 | macro 0.37550040105947047
+[DEBUG] MaskedIoU per class [0.88503258 0.09329251 0.14817611]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   4%|▍         | 13/313 [00:55<12:27,  2.49s/it][DEBUG] CM: [[900682   3755      7]
+ [ 44476  56029   3401]
+ [ 61553 488706  83311]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4635055071311488 | macro 0.3720294923892937
+[DEBUG] MaskedIoU per class [0.89134692 0.09395054 0.13079102]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   4%|▍         | 14/313 [00:58<12:22,  2.48s/it][DEBUG] CM: [[880478  12944      6]
+ [ 37801  51071    607]
+ [ 51638 497275 110100]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.46456746994346154 | macro 0.3826333845456314
+[DEBUG] MaskedIoU per class [0.89582619 0.0851612  0.16691277]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   5%|▍         | 15/313 [01:00<12:15,  2.47s/it][DEBUG] CM: [[891202   9495    720]
+ [ 41226  49445    243]
+ [ 87509 409966 146372]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49741481519783903 | macro 0.39633231311297984
+[DEBUG] MaskedIoU per class [0.86511699 0.09687975 0.2270002 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   5%|▌         | 16/313 [01:03<11:54,  2.40s/it][DEBUG] CM: [[862208  10196      3]
+ [ 74295  32655   5506]
+ [ 77543 432852 144315]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4639253775053929 | macro 0.3730565360738998
+[DEBUG] MaskedIoU per class [0.84179859 0.05878446 0.21858656]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   5%|▌         | 17/313 [01:05<11:48,  2.39s/it][DEBUG] CM: [[874226  13949     42]
+ [ 45616  62461    149]
+ [ 87881 437714 119881]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.47437805025883706 | macro 0.38429203911358956
+[DEBUG] MaskedIoU per class [0.85564649 0.11155961 0.18567001]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   6%|▌         | 18/313 [01:07<11:50,  2.41s/it][DEBUG] CM: [[885127   7423    428]
+ [ 51770  49399   3049]
+ [ 82567 438915 123241]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.47517217555055524 | macro 0.3804821014105462
+[DEBUG] MaskedIoU per class [0.8615926  0.08972566 0.19012805]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   6%|▌         | 19/313 [01:10<11:45,  2.40s/it][DEBUG] CM: [[872892   8994     27]
+ [ 48653  43232   1055]
+ [ 72942 493271 100854]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.44862810351931437 | macro 0.3644732568601643
+[DEBUG] MaskedIoU per class [0.8698406  0.0726338  0.15094537]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   6%|▋         | 20/313 [01:12<11:44,  2.40s/it][DEBUG] CM: [[890740  23189     92]
+ [ 36542  68473  11060]
+ [ 51135 460582 160714]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49009398602353393 | macro 0.4128287909274781
+[DEBUG] MaskedIoU per class [0.88923009 0.11415097 0.23510532]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   7%|▋         | 21/313 [01:15<11:46,  2.42s/it][DEBUG] CM: [[992372   7997     25]
+ [ 45013  63476   3382]
+ [ 57683 403171 165904]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5414861715716126 | macro 0.42808664303796284
+[DEBUG] MaskedIoU per class [0.89962922 0.12135998 0.26327073]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   7%|▋         | 22/313 [01:17<12:10,  2.51s/it][DEBUG] CM: [[959441  14097    139]
+ [ 41467  81828  13447]
+ [ 47191 309309 272091]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6067280773885968 | macro 0.501558076998912
+[DEBUG] MaskedIoU per class [0.90314355 0.17782974 0.42370094]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   7%|▋         | 23/313 [01:20<11:54,  2.46s/it][DEBUG] CM: [[980445  23883     46]
+ [ 47018  76297  10179]
+ [ 43074 332567 225380]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5839357349238679 | macro 0.4734228791070794
+[DEBUG] MaskedIoU per class [0.89582043 0.15572596 0.36872225]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   8%|▊         | 24/313 [01:22<12:04,  2.51s/it][DEBUG] CM: [[952073  12543    287]
+ [ 50217  51023   3529]
+ [ 43472 439546 186347]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5197181196968843 | macro 0.4226063020951875
+[DEBUG] MaskedIoU per class [0.89937672 0.09162659 0.2768156 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   8%|▊         | 25/313 [01:25<12:05,  2.52s/it][DEBUG] CM: [[952230  32451    228]
+ [ 40206  68687   3157]
+ [ 58316 346949 236766]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5664480923047682 | macro 0.46183624547062513
+[DEBUG] MaskedIoU per class [0.8789023  0.13976396 0.36684247]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   8%|▊         | 26/313 [01:27<12:00,  2.51s/it][DEBUG] CM: [[959702  18188    272]
+ [ 46437  58319   1755]
+ [ 38748 327049 288536]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6016965582984681 | macro 0.49040866521544374
+[DEBUG] MaskedIoU per class [0.90252947 0.12909631 0.43960022]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   9%|▊         | 27/313 [01:30<12:03,  2.53s/it][DEBUG] CM: [[952042  25733    424]
+ [ 31961  96519   7289]
+ [ 38170 371126 215755]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5711268171884275 | macro 0.47677871461149196
+[DEBUG] MaskedIoU per class [0.90815106 0.18121278 0.34097231]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:   9%|▉         | 28/313 [01:32<11:45,  2.47s/it][DEBUG] CM: [[943938  15453    623]
+ [ 42696  98175  13687]
+ [ 32459 259024 332934]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6538716676866716 | macro 0.5539807159914683
+[DEBUG] MaskedIoU per class [0.9118685  0.22882748 0.52124617]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:   9%|▉         | 29/313 [01:35<11:41,  2.47s/it][DEBUG] CM: [[984076  13632    105]
+ [ 44998  74912   4249]
+ [ 39745 354410 222906]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5836947197214062 | macro 0.47331174618550526
+[DEBUG] MaskedIoU per class [0.90903011 0.15219798 0.35870714]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  10%|▉         | 30/313 [01:37<11:48,  2.50s/it][DEBUG] CM: [[964382  22292    238]
+ [ 44495  51082   3549]
+ [ 40000 312122 300877]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6089285772109692 | macro 0.49201280299923983
+[DEBUG] MaskedIoU per class [0.90010799 0.11782534 0.45810508]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  10%|▉         | 31/313 [01:40<11:40,  2.48s/it][DEBUG] CM: [[229540   1160     43]
+ [ 13607  16624      6]
+ [ 12766 108281  52733]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5238081885938702 | macro 0.4383755809639906
+[DEBUG] MaskedIoU per class [0.8927488  0.1190166  0.30336135]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  10%|█         | 32/313 [01:40<09:02,  1.93s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  11%|█         | 33/313 [01:41<06:34,  1.41s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  11%|█         | 34/313 [01:41<04:49,  1.04s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  11%|█         | 35/313 [01:41<03:36,  1.29it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  12%|█▏        | 36/313 [01:41<02:44,  1.68it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  12%|█▏        | 37/313 [01:41<02:09,  2.13it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  12%|█▏        | 38/313 [01:42<01:45,  2.61it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  12%|█▏        | 39/313 [01:42<01:29,  3.07it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  13%|█▎        | 40/313 [01:42<01:16,  3.57it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  13%|█▎        | 41/313 [01:42<01:07,  4.01it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  13%|█▎        | 42/313 [01:42<01:02,  4.35it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  14%|█▎        | 43/313 [01:42<01:00,  4.45it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  14%|█▍        | 44/313 [01:43<00:59,  4.55it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  14%|█▍        | 45/313 [01:43<00:59,  4.47it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  15%|█▍        | 46/313 [01:43<00:59,  4.50it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  15%|█▌        | 47/313 [01:43<00:57,  4.66it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  15%|█▌        | 48/313 [01:43<00:53,  4.98it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  16%|█▌        | 49/313 [01:44<00:50,  5.24it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  16%|█▌        | 50/313 [01:44<00:50,  5.21it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  16%|█▋        | 51/313 [01:44<00:50,  5.16it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  17%|█▋        | 52/313 [01:49<06:47,  1.56s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  17%|█▋        | 53/313 [01:50<06:03,  1.40s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  17%|█▋        | 54/313 [01:50<04:29,  1.04s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  18%|█▊        | 55/313 [01:51<04:01,  1.07it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  18%|█▊        | 56/313 [01:51<03:11,  1.34it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  18%|█▊        | 57/313 [01:52<02:52,  1.49it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  19%|█▊        | 58/313 [01:52<02:12,  1.92it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  19%|█▉        | 59/313 [01:52<01:45,  2.40it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  19%|█▉        | 60/313 [01:52<01:35,  2.66it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  19%|█▉        | 61/313 [01:53<02:27,  1.71it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  20%|█▉        | 62/313 [01:58<08:04,  1.93s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  20%|██        | 63/313 [01:58<05:50,  1.40s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  20%|██        | 64/313 [02:00<06:28,  1.56s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  21%|██        | 65/313 [02:01<04:45,  1.15s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  21%|██        | 66/313 [02:01<03:53,  1.06it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  21%|██▏       | 67/313 [02:01<02:55,  1.40it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  22%|██▏       | 68/313 [02:01<02:15,  1.81it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  22%|██▏       | 69/313 [02:02<01:47,  2.26it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  22%|██▏       | 70/313 [02:02<01:27,  2.76it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  23%|██▎       | 71/313 [02:02<01:53,  2.13it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  23%|██▎       | 72/313 [02:09<08:48,  2.19s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  23%|██▎       | 73/313 [02:09<06:20,  1.59s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  24%|██▎       | 74/313 [02:11<06:34,  1.65s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  24%|██▍       | 75/313 [02:11<04:47,  1.21s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  24%|██▍       | 76/313 [02:12<04:06,  1.04s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  25%|██▍       | 77/313 [02:12<03:17,  1.19it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  25%|██▍       | 78/313 [02:12<02:33,  1.53it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  25%|██▌       | 79/313 [02:12<02:01,  1.93it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  26%|██▌       | 80/313 [02:12<01:37,  2.39it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  26%|██▌       | 81/313 [02:13<01:21,  2.85it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  26%|██▌       | 82/313 [02:17<06:10,  1.60s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  27%|██▋       | 83/313 [02:17<04:31,  1.18s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  27%|██▋       | 84/313 [02:19<05:08,  1.35s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  27%|██▋       | 85/313 [02:20<04:06,  1.08s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  27%|██▋       | 86/313 [02:20<03:21,  1.13it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  28%|██▊       | 87/313 [02:21<03:17,  1.15it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  28%|██▊       | 88/313 [02:21<02:28,  1.51it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  28%|██▊       | 89/313 [02:22<02:17,  1.62it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  29%|██▉       | 90/313 [02:22<01:49,  2.05it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  29%|██▉       | 91/313 [02:22<01:27,  2.53it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  29%|██▉       | 92/313 [02:28<07:19,  1.99s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  30%|██▉       | 93/313 [02:28<05:18,  1.45s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  30%|███       | 94/313 [02:29<04:59,  1.37s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  30%|███       | 95/313 [02:30<04:46,  1.31s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  31%|███       | 96/313 [02:30<03:30,  1.03it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  31%|███       | 97/313 [02:31<03:12,  1.12it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  31%|███▏      | 98/313 [02:31<02:26,  1.46it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  32%|███▏      | 99/313 [02:32<02:15,  1.58it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  32%|███▏      | 100/313 [02:32<01:46,  2.00it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  32%|███▏      | 101/313 [02:33<01:50,  1.91it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  33%|███▎      | 102/313 [02:36<05:08,  1.46s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  33%|███▎      | 103/313 [02:36<03:46,  1.08s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  33%|███▎      | 104/313 [02:39<05:06,  1.47s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  34%|███▎      | 105/313 [02:41<05:25,  1.56s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  34%|███▍      | 106/313 [02:41<03:58,  1.15s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  34%|███▍      | 107/313 [02:41<03:01,  1.14it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  35%|███▍      | 108/313 [02:41<02:16,  1.50it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  35%|███▍      | 109/313 [02:42<02:10,  1.56it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  35%|███▌      | 110/313 [02:42<01:41,  1.99it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  35%|███▌      | 111/313 [02:42<01:46,  1.89it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  36%|███▌      | 112/313 [02:46<04:54,  1.47s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  36%|███▌      | 113/313 [02:46<03:37,  1.09s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  36%|███▋      | 114/313 [02:47<03:24,  1.03s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  37%|███▋      | 115/313 [02:49<04:17,  1.30s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  37%|███▋      | 116/313 [02:49<03:09,  1.04it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  37%|███▋      | 117/313 [02:50<02:36,  1.25it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  38%|███▊      | 118/313 [02:50<02:01,  1.61it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  38%|███▊      | 119/313 [02:51<02:27,  1.31it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  38%|███▊      | 120/313 [02:51<01:53,  1.71it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  39%|███▊      | 121/313 [02:52<01:51,  1.72it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  39%|███▉      | 122/313 [02:55<04:01,  1.26s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  39%|███▉      | 123/313 [02:55<03:31,  1.12s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  40%|███▉      | 124/313 [02:56<02:39,  1.18it/s][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  40%|███▉      | 125/313 [02:58<04:30,  1.44s/it][DEBUG] CM: [[0 0 0]
+ [0 0 0]
+ [0 0 0]]
+[DEBUG] MaskedIoU inputs: target [], pred []
+[DEBUG] MaskedIoU micro 0.0 | macro 0.0
+[DEBUG] MaskedIoU per class [0. 0. 0.]
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+[DEBUG] L1 distance tensor([], device='cuda:0') | L2 distance tensor([], device='cuda:0')
+Testing:  40%|████      | 126/313 [02:59<03:18,  1.06s/it][DEBUG] CM: [[381672   3041      0]
+ [ 23608  40752    207]
+ [ 40786 173806  54463]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4968696049002743 | macro 0.40697320248295843
+[DEBUG] MaskedIoU per class [0.84984647 0.16880545 0.20226768]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  41%|████      | 127/313 [03:01<04:07,  1.33s/it][DEBUG] CM: [[839935   7240     22]
+ [ 51412  80776  12861]
+ [ 51299 470364 128000]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4691994611443658 | macro 0.4023835420347317
+[DEBUG] MaskedIoU per class [0.88422774 0.12972876 0.19319413]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  41%|████      | 128/313 [03:04<06:28,  2.10s/it][DEBUG] CM: [[852899   8776    313]
+ [ 53914  88154    920]
+ [ 65520 470307 101116]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4649076201705069 | macro 0.3897333108726442
+[DEBUG] MaskedIoU per class [0.8690441  0.14171051 0.15844532]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  41%|████      | 129/313 [03:07<06:58,  2.28s/it][DEBUG] CM: [[838395  43796    195]
+ [ 52047  92957    891]
+ [ 52886 396807 163852]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5004478059337027 | macro 0.4247480686684972
+[DEBUG] MaskedIoU per class [0.84916324 0.158495   0.26658597]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  42%|████▏     | 130/313 [03:11<08:39,  2.84s/it][DEBUG] CM: [[849677  19416    212]
+ [ 55326  97334   6693]
+ [ 57524 446116 109505]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4743930420414083 | macro 0.39916158747583097
+[DEBUG] MaskedIoU per class [0.86511498 0.15576306 0.17660673]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  42%|████▏     | 131/313 [03:15<09:10,  3.02s/it][DEBUG] CM: [[859681  35507    812]
+ [ 56712  97305   1149]
+ [ 51324 400650 138765]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5007867703750218 | macro 0.41830117104757986
+[DEBUG] MaskedIoU per class [0.85622527 0.16455474 0.2341235 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  42%|████▏     | 132/313 [03:18<09:42,  3.22s/it][DEBUG] CM: [[869953  36229    134]
+ [ 51251 100936    954]
+ [ 58431 388935 134977]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.507805820178222 | macro 0.42071423464993973
+[DEBUG] MaskedIoU per class [0.85625464 0.17453766 0.23135041]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  42%|████▏     | 133/313 [03:22<09:37,  3.21s/it][DEBUG] CM: [[893560  12825    481]
+ [ 59469  66143   7516]
+ [ 45325 416647 139922]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5034564917901738 | macro 0.4100830507821409
+[DEBUG] MaskedIoU per class [0.88326117 0.11756665 0.22942132]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  43%|████▎     | 134/313 [03:24<09:15,  3.10s/it][DEBUG] CM: [[893152   7616     23]
+ [ 44764  66228   6187]
+ [ 53568 442135 128057]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4951847043496357 | macro 0.40467646527732987
+[DEBUG] MaskedIoU per class [0.89393598 0.11681865 0.20327476]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  43%|████▎     | 135/313 [03:27<08:41,  2.93s/it][DEBUG] CM: [[881677   8433     87]
+ [ 29908  63935   3404]
+ [ 52352 446331 155650]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5046354933253662 | macro 0.4196947455605265
+[DEBUG] MaskedIoU per class [0.90664883 0.11582197 0.23661344]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  43%|████▎     | 136/313 [03:29<08:05,  2.74s/it][DEBUG] CM: [[856984   6095      1]
+ [ 38004  63071    685]
+ [ 47598 502687 126650]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4679381003153996 | macro 0.3978496239956313
+[DEBUG] MaskedIoU per class [0.90334169 0.10330329 0.18690389]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  44%|████▍     | 137/313 [03:32<07:54,  2.69s/it][DEBUG] CM: [[885073  11522      9]
+ [ 31440  31198   1233]
+ [ 51986 494052 135291]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4711202188485363 | macro 0.38536756612351186
+[DEBUG] MaskedIoU per class [0.90310807 0.05478668 0.19820795]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  44%|████▍     | 138/313 [03:34<07:36,  2.61s/it][DEBUG] CM: [[914119  23521     37]
+ [ 38431  44394   1244]
+ [ 68579 406449 144859]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.5061585563334731 | macro 0.3981948096919277
+[DEBUG] MaskedIoU per class [0.87501711 0.0863631  0.23320422]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  44%|████▍     | 139/313 [03:37<07:21,  2.54s/it][DEBUG] CM: [[888135  12114    244]
+ [ 54801  69502   2630]
+ [ 62802 434237 117455]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4867427157828779 | macro 0.39461167294090665
+[DEBUG] MaskedIoU per class [0.87234897 0.12123485 0.1902512 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  45%|████▍     | 140/313 [03:39<07:12,  2.50s/it][DEBUG] CM: [[894317  52564    382]
+ [ 30823  50859   5860]
+ [ 48718 423011 135355]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4904266294246628 | macro 0.39399285049506233
+[DEBUG] MaskedIoU per class [0.87097148 0.09031693 0.22069014]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  45%|████▌     | 141/313 [03:41<07:01,  2.45s/it][DEBUG] CM: [[856224  12820    126]
+ [ 39652  71040   1683]
+ [ 65122 463045 131984]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4762497392255178 | macro 0.399760436685392
+[DEBUG] MaskedIoU per class [0.87913063 0.12076703 0.19938365]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  45%|████▌     | 142/313 [03:44<06:56,  2.43s/it][DEBUG] CM: [[874267  18951    222]
+ [ 50068  49525   7721]
+ [ 53911 430536 156604]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 2]
+[DEBUG] MaskedIoU micro 0.49037270097230684 | macro 0.40225920567389944
+[DEBUG] MaskedIoU per class [0.87652932 0.0889456  0.24130269]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  46%|████▌     | 143/313 [03:46<06:58,  2.46s/it][DEBUG] CM: [[883002  23502    168]
+ [ 27374  52077   5016]
+ [ 56615 431811 162352]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5019344558162425 | macro 0.41176881036934593
+[DEBUG] MaskedIoU per class [0.89132609 0.09647819 0.24750214]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  46%|████▌     | 144/313 [03:49<06:47,  2.41s/it][DEBUG] CM: [[902491  19900    139]
+ [ 42919  53549   3874]
+ [ 62062 414477 142507]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5027010157466587 | macro 0.4023976806894661
+[DEBUG] MaskedIoU per class [0.87832734 0.10014419 0.22872152]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  46%|████▋     | 145/313 [03:51<06:45,  2.41s/it][DEBUG] CM: [[885934  10565    188]
+ [ 47852  65747   2501]
+ [ 59069 458866 111170]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.47856058692450426 | macro 0.3903314689822153
+[DEBUG] MaskedIoU per class [0.88274904 0.11228611 0.17595925]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  47%|████▋     | 146/313 [03:53<06:41,  2.41s/it][DEBUG] CM: [[854242  51474    783]
+ [ 28822  51334    729]
+ [ 64105 430086 160313]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4805876043279031 | macro 0.39679186597369215
+[DEBUG] MaskedIoU per class [0.85473262 0.09126937 0.24437361]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  47%|████▋     | 147/313 [03:56<06:34,  2.37s/it][DEBUG] CM: [[862588  10746    111]
+ [ 37418  62757   5891]
+ [ 58291 412427 191543]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5154893070242808 | macro 0.4317500361285907
+[DEBUG] MaskedIoU per class [0.89004224 0.1185797  0.28662817]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  47%|████▋     | 148/313 [03:58<06:30,  2.37s/it][DEBUG] CM: [[878937   7783     10]
+ [ 45241  71962   1886]
+ [ 63452 405927 166642]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5159137986989755 | macro 0.42642360034373117
+[DEBUG] MaskedIoU per class [0.88297839 0.13506407 0.26122834]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  48%|████▊     | 149/313 [04:00<06:27,  2.37s/it][DEBUG] CM: [[884694  11205    140]
+ [ 37986  80609   3562]
+ [ 44484 377413 201790]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5513808698840114 | macro 0.46119205573177213
+[DEBUG] MaskedIoU per class [0.90412454 0.15781704 0.32163458]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  48%|████▊     | 150/313 [04:03<06:24,  2.36s/it][DEBUG] CM: [[864609  14582    391]
+ [ 36251  68067   8055]
+ [ 54696 468762 126481]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.47610457644436316 | macro 0.39907741133994395
+[DEBUG] MaskedIoU per class [0.89086364 0.11426063 0.19210796]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  48%|████▊     | 151/313 [04:05<06:21,  2.36s/it][DEBUG] CM: [[884623  17371    127]
+ [ 45469  53913   5702]
+ [ 56376 384819 193393]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5260731612891831 | macro 0.4297960297492697
+[DEBUG] MaskedIoU per class [0.88112844 0.10627984 0.3019798 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  49%|████▊     | 152/313 [04:07<06:15,  2.33s/it][DEBUG] CM: [[886176  36157   1224]
+ [ 42426  62890   5226]
+ [ 54363 437560 115848]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 2]
+[DEBUG] MaskedIoU micro 0.47994479963728565 | macro 0.38825188162786256
+[DEBUG] MaskedIoU per class [0.86850539 0.10764062 0.18860964]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  49%|████▉     | 153/313 [04:10<06:17,  2.36s/it][DEBUG] CM: [[860586  10103    167]
+ [ 60577  87961  10010]
+ [ 55844 334285 222382]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5541807211980116 | macro 0.4679012194435364
+[DEBUG] MaskedIoU per class [0.87167634 0.17489502 0.3571323 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  49%|████▉     | 154/313 [04:12<06:16,  2.37s/it][DEBUG] CM: [[916964  17137     88]
+ [ 56490  64993   4963]
+ [ 64913 418570 170638]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5062086145432618 | macro 0.41438478734499967
+[DEBUG] MaskedIoU per class [0.86867274 0.11561443 0.25886718]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  50%|████▉     | 155/313 [04:15<06:20,  2.41s/it][DEBUG] CM: [[937553  21448    177]
+ [ 48230  45420    448]
+ [ 62627 540536  82571]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4416806633516769 | macro 0.35524039323336615
+[DEBUG] MaskedIoU per class [0.8761891  0.06922915 0.12030293]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  50%|████▉     | 156/313 [04:17<06:16,  2.39s/it][DEBUG] CM: [[958129  39643    279]
+ [ 33904  32445   3974]
+ [ 50715 398341 221576]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5349619703229941 | macro 0.42570495153327553
+[DEBUG] MaskedIoU per class [0.88496864 0.06382954 0.32831668]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  50%|█████     | 157/313 [04:19<06:10,  2.37s/it][DEBUG] CM: [[980103  25881     26]
+ [ 46900  61677   8023]
+ [ 60949 327315 228144]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.57511756650025 | macro 0.45884967839570673
+[DEBUG] MaskedIoU per class [0.87991658 0.13128464 0.36534781]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  50%|█████     | 158/313 [04:22<06:11,  2.39s/it][DEBUG] CM: [[960031  17870    185]
+ [ 36212  61877    851]
+ [ 75226 420725 162068]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5178989324241923 | macro 0.4140564526236277
+[DEBUG] MaskedIoU per class [0.88114718 0.1151125  0.24590967]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  51%|█████     | 159/313 [04:24<06:14,  2.43s/it][DEBUG] CM: [[933984  16865    275]
+ [ 29529  51068   5299]
+ [ 66487 519686 115847]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4631111387816073 | macro 0.37923385480969607
+[DEBUG] MaskedIoU per class [0.89193804 0.08204393 0.16371959]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  51%|█████     | 160/313 [04:27<06:13,  2.44s/it][DEBUG] CM: [[953017   7223    182]
+ [ 55780  46581   7323]
+ [ 46595 488294 134016]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4835395545485257 | macro 0.3906008973442614
+[DEBUG] MaskedIoU per class [0.89670652 0.07696782 0.19812835]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  51%|█████▏    | 161/313 [04:29<06:14,  2.47s/it][DEBUG] CM: [[957701  18130     70]
+ [ 38065  47167   1620]
+ [ 54394 472433 149457]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4967511551376676 | macro 0.39951820232411794
+[DEBUG] MaskedIoU per class [0.89642162 0.08168648 0.22044651]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  52%|█████▏    | 162/313 [04:32<06:19,  2.51s/it][DEBUG] CM: [[940973  10129     58]
+ [ 39055  93653    595]
+ [ 47067 495106 112404]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49206580725424165 | macro 0.40845643922592273
+[DEBUG] MaskedIoU per class [0.90715254 0.14666786 0.17154892]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  52%|█████▏    | 163/313 [04:34<06:15,  2.50s/it][DEBUG] CM: [[967536  17529    589]
+ [ 39602  49890   4018]
+ [ 69651 438364 151769]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5064298061983774 | macro 0.40097016245117256
+[DEBUG] MaskedIoU per class [0.88366957 0.09080766 0.22843326]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  52%|█████▏    | 164/313 [04:37<06:10,  2.48s/it][DEBUG] CM: [[932441   8677     37]
+ [ 51899  80154   1777]
+ [ 80526 472002 111521]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.477544147034434 | macro 0.38881783167815603
+[DEBUG] MaskedIoU per class [0.86853425 0.13043584 0.1674834 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  53%|█████▎    | 165/313 [04:40<06:12,  2.52s/it][DEBUG] CM: [[973438  29629    211]
+ [ 37588  51957  12379]
+ [ 74162 374198 185454]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5340764287664471 | macro 0.4208833617152086
+[DEBUG] MaskedIoU per class [0.87301664 0.10273237 0.28690107]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  53%|█████▎    | 166/313 [04:42<06:05,  2.49s/it][DEBUG] CM: [[930712  19820    140]
+ [ 53441  93646   5677]
+ [ 50083 333228 252291]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5799188435501155 | macro 0.48711227196556006
+[DEBUG] MaskedIoU per class [0.88286429 0.18513993 0.3933326 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  53%|█████▎    | 167/313 [04:44<05:54,  2.43s/it][DEBUG] CM: [[966281  21103    734]
+ [ 34513  87452   1190]
+ [ 68341 435624 123788]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5118474821682473 | macro 0.41103539335832906
+[DEBUG] MaskedIoU per class [0.88570651 0.15080999 0.19658968]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  54%|█████▎    | 168/313 [04:47<05:56,  2.46s/it][DEBUG] CM: [[949305  17645     21]
+ [ 47963 124393   2883]
+ [ 50878 428087 117865]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5211257996332413 | macro 0.4291786795821118
+[DEBUG] MaskedIoU per class [0.8906871  0.20032014 0.19652879]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  54%|█████▍    | 169/313 [04:49<05:54,  2.46s/it][DEBUG] CM: [[959889  24691     14]
+ [ 54622 111205   4113]
+ [ 47273 408626 128606]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5265588063086986 | macro 0.4287672463094246
+[DEBUG] MaskedIoU per class [0.88347788 0.184341   0.21848286]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  54%|█████▍    | 170/313 [04:52<05:56,  2.49s/it][DEBUG] CM: [[918024  13567      0]
+ [ 48556  96202   1376]
+ [ 56992 538229  66075]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4505494963801345 | macro 0.3742331332371657
+[DEBUG] MaskedIoU per class [0.8851504  0.13783904 0.09970996]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  55%|█████▍    | 171/313 [04:54<05:53,  2.49s/it][DEBUG] CM: [[978981  18834     59]
+ [ 40910  89605   2198]
+ [ 42054 451587 114810]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5157128662820089 | macro 0.4141072204879925
+[DEBUG] MaskedIoU per class [0.90576109 0.14856566 0.18799492]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  55%|█████▍    | 172/313 [04:57<05:55,  2.52s/it][DEBUG] CM: [[955589  18722      4]
+ [ 52962  68260    914]
+ [ 57971 437759 145548]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5070971669873433 | macro 0.40837932283975437
+[DEBUG] MaskedIoU per class [0.88052593 0.11797095 0.22664109]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  55%|█████▌    | 173/313 [04:59<05:52,  2.51s/it][DEBUG] CM: [[963743  38788    184]
+ [ 41941  84833   2441]
+ [ 56033 419719 131356]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5134282272999429 | macro 0.4117852069949799
+[DEBUG] MaskedIoU per class [0.87558157 0.14434205 0.215432  ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  56%|█████▌    | 174/313 [05:02<05:54,  2.55s/it][DEBUG] CM: [[962664  18146    103]
+ [ 33467  94833   4130]
+ [ 38702 448308 138648]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.5241980544793122 | macro 0.43086781450455125
+[DEBUG] MaskedIoU per class [0.91413964 0.15834953 0.22011427]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  56%|█████▌    | 175/313 [05:05<05:56,  2.58s/it][DEBUG] CM: [[923030  19842    193]
+ [ 49367 105553  12359]
+ [ 46892 461517 120287]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4932444906212836 | macro 0.41280632653763966
+[DEBUG] MaskedIoU per class [0.88810612 0.16273021 0.18758265]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  56%|█████▌    | 176/313 [05:07<05:54,  2.59s/it][DEBUG] CM: [[924210  24348     24]
+ [ 49819  58617   4041]
+ [ 57577 417139 192539]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5152262212757676 | macro 0.4226124741720823
+[DEBUG] MaskedIoU per class [0.8752171  0.10581374 0.28680659]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  57%|█████▋    | 177/313 [05:10<05:44,  2.53s/it][DEBUG] CM: [[858323  18285    342]
+ [ 43702  64611   4271]
+ [ 57294 513831  81261]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4405049909086722 | macro 0.36719438876912874
+[DEBUG] MaskedIoU per class [0.87767934 0.10021871 0.12368512]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  57%|█████▋    | 178/313 [05:12<05:34,  2.48s/it][DEBUG] CM: [[882913  16988    284]
+ [ 54684  66581   6878]
+ [ 78209 464376  71007]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.45088296538874645 | macro 0.35942296304739857
+[DEBUG] MaskedIoU per class [0.85464312 0.10923747 0.11438831]
+[DEBUG] L1 distance tensor([1., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  57%|█████▋    | 179/313 [05:14<05:19,  2.38s/it][DEBUG] CM: [[860960  12136    170]
+ [ 60354  83570   5705]
+ [ 56414 416392 146208]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4973544056760355 | macro 0.4160488554194657
+[DEBUG] MaskedIoU per class [0.8696267  0.14454551 0.23397435]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  58%|█████▊    | 180/313 [05:17<05:20,  2.41s/it][DEBUG] CM: [[865677  11286     61]
+ [ 60066  82129  17271]
+ [ 53793 450817 100749]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.46912210986053243 | macro 0.3891899613918359
+[DEBUG] MaskedIoU per class [0.87364199 0.13213175 0.16179614]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  58%|█████▊    | 181/313 [05:19<05:21,  2.44s/it][DEBUG] CM: [[810635  23807    232]
+ [ 46318  54547   4846]
+ [ 62916 465513 173106]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4623753981203731 | macro 0.39848599791607664
+[DEBUG] MaskedIoU per class [0.85880721 0.09167085 0.24497993]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  58%|█████▊    | 182/313 [05:21<05:13,  2.39s/it][DEBUG] CM: [[851371  16142     66]
+ [ 49913  79149   7563]
+ [ 43613 466311 145997]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4797883705414147 | macro 0.4112330283872618
+[DEBUG] MaskedIoU per class [0.88582517 0.1278498  0.22002411]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  58%|█████▊    | 183/313 [05:24<05:16,  2.43s/it][DEBUG] CM: [[948881  19829    287]
+ [ 45720  76821   3438]
+ [ 58244 430236 155574]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5143174107795945 | macro 0.41929408192391465
+[DEBUG] MaskedIoU per class [0.8843574  0.1333596  0.24016524]
+[DEBUG] L1 distance tensor([1., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  59%|█████▉    | 184/313 [05:27<05:19,  2.48s/it][DEBUG] CM: [[915082  13925     63]
+ [ 48539 115979   3299]
+ [ 39770 407033 195275]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5446523662791782 | macro 0.46632652283923554
+[DEBUG] MaskedIoU per class [0.89945045 0.19698357 0.30254555]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  59%|█████▉    | 185/313 [05:29<05:17,  2.48s/it][DEBUG] CM: [[953793   8113    228]
+ [ 66929  92812  17977]
+ [ 44719 325027 229434]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5794843382795382 | macro 0.4805188760784647
+[DEBUG] MaskedIoU per class [0.88825572 0.18167867 0.37162225]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  59%|█████▉    | 186/313 [05:31<05:12,  2.46s/it][DEBUG] CM: [[971362  31338    137]
+ [ 42800  83342   4243]
+ [ 37935 386127 181289]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5514987151702717 | macro 0.44863204411113283
+[DEBUG] MaskedIoU per class [0.89644435 0.15212558 0.2973262 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  60%|█████▉    | 187/313 [05:34<05:07,  2.44s/it][DEBUG] CM: [[975159  29354    433]
+ [ 37522  57148   5429]
+ [ 42631 384167 207191]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5537008000643268 | macro 0.4445861727377189
+[DEBUG] MaskedIoU per class [0.89868206 0.11126514 0.32381132]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  60%|██████    | 188/313 [05:36<05:04,  2.44s/it][DEBUG] CM: [[953789  27679    196]
+ [ 73773  55686   1429]
+ [ 47335 487348  91784]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4633409332546274 | macro 0.36574846608974876
+[DEBUG] MaskedIoU per class [0.86490136 0.08621258 0.14613146]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  60%|██████    | 189/313 [05:39<05:02,  2.44s/it][DEBUG] CM: [[930375  20521     11]
+ [ 43546  70932    819]
+ [ 48760 457645 166403]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5054334605599066 | macro 0.41945989290708896
+[DEBUG] MaskedIoU per class [0.89183609 0.11952219 0.2470214 ]
+[DEBUG] L1 distance tensor([1., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  61%|██████    | 190/313 [05:41<05:02,  2.46s/it][DEBUG] CM: [[954708  15682    338]
+ [ 48895  86792   4742]
+ [ 33637 327063 267140]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.6032394897282786 | macro 0.5027119303168839
+[DEBUG] MaskedIoU per class [0.90643146 0.17962887 0.42207546]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  61%|██████    | 191/313 [05:44<04:59,  2.45s/it][DEBUG] CM: [[981941  11847    928]
+ [ 50331  74230  12628]
+ [ 45159 358371 203594]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5678983795197479 | macro 0.4583345187557269
+[DEBUG] MaskedIoU per class [0.90069308 0.14629282 0.32801766]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  61%|██████▏   | 192/313 [05:46<05:05,  2.53s/it][DEBUG] CM: [[967540  20604    265]
+ [ 38951  92441   1405]
+ [ 46567 410268 160993]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5409495572625685 | macro 0.4416039148549209
+[DEBUG] MaskedIoU per class [0.90093647 0.16399873 0.25987655]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  62%|██████▏   | 193/313 [05:49<04:59,  2.50s/it][DEBUG] CM: [[964838  15198    134]
+ [ 41924  46053   2004]
+ [ 63937 414551 190355]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 0 1]
+[DEBUG] MaskedIoU micro 0.5276162165058668 | macro 0.42023781639317365
+[DEBUG] MaskedIoU per class [0.88840742 0.08860947 0.28369656]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 2., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 4., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.0000, 0.5000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.0000, 0.7500, 0.0000], device='cuda:0')
+Testing:  62%|██████▏   | 194/313 [05:51<04:58,  2.51s/it][DEBUG] CM: [[966906  19794    233]
+ [ 34277  41162   1913]
+ [ 59934 456669 158145]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5044494611032795 | macro 0.40076459641382506
+[DEBUG] MaskedIoU per class [0.894336   0.07432446 0.23363333]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  62%|██████▏   | 195/313 [05:54<04:48,  2.44s/it][DEBUG] CM: [[942196  22489    889]
+ [ 32619 101079    581]
+ [ 73140 429286 136743]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5134920144506633 | macro 0.4217943573577992
+[DEBUG] MaskedIoU per class [0.87946138 0.17247387 0.21344782]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  63%|██████▎   | 196/313 [05:56<04:42,  2.42s/it][DEBUG] CM: [[967891  10297    201]
+ [ 29606  44872   1096]
+ [ 85810 418973 180179]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5220962944678735 | macro 0.4121065987416654
+[DEBUG] MaskedIoU per class [0.88488442 0.0888829  0.26255248]
+[DEBUG] L1 distance tensor([1., 1., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  63%|██████▎   | 197/313 [05:58<04:43,  2.44s/it][DEBUG] CM: [[1010331   12966      40]
+ [  28026   52718    3362]
+ [  61806  402574  167213]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5473158318541158 | macro 0.4254857456093178
+[DEBUG] MaskedIoU per class [0.9076169  0.1055107  0.26332963]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  63%|██████▎   | 198/313 [06:01<04:41,  2.45s/it][DEBUG] CM: [[955227  20165    233]
+ [ 40321  61071   1102]
+ [ 66847 411567 182468]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5259508010578984 | macro 0.4240152981924232
+[DEBUG] MaskedIoU per class [0.88218801 0.11431679 0.2755411 ]
+[DEBUG] L1 distance tensor([2., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  64%|██████▎   | 199/313 [06:03<04:38,  2.44s/it][DEBUG] CM: [[986181  11430     69]
+ [ 37797  66592   2380]
+ [ 66292 441236 127054]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5133622105659343 | macro 0.4045234073301524
+[DEBUG] MaskedIoU per class [0.89508872 0.11903438 0.19944712]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  64%|██████▍   | 200/313 [06:06<04:40,  2.48s/it][DEBUG] CM: [[978141  34566    617]
+ [ 51253  65894   2348]
+ [ 84830 368059 153319]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5249940807646775 | macro 0.4096282511573019
+[DEBUG] MaskedIoU per class [0.85099621 0.1262047  0.25168384]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  64%|██████▍   | 201/313 [06:08<04:33,  2.44s/it][DEBUG] CM: [[994520  20686    289]
+ [ 38538  68455   1887]
+ [ 94971 319501 199947]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5702539344533216 | macro 0.44742132778484417
+[DEBUG] MaskedIoU per class [0.86554964 0.15243828 0.32427606]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  65%|██████▍   | 202/313 [06:11<04:33,  2.46s/it][DEBUG] CM: [[959117  19182     45]
+ [ 53350  56807   1212]
+ [ 66137 403960 179157]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5235032654314579 | macro 0.41844510244137795
+[DEBUG] MaskedIoU per class [0.87364722 0.10627845 0.27540964]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  65%|██████▍   | 203/313 [06:13<04:35,  2.50s/it][DEBUG] CM: [[929993  23633    100]
+ [ 35391 114266   6182]
+ [ 42644 395712 191107]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5508411773361455 | macro 0.4668759634731678
+[DEBUG] MaskedIoU per class [0.90136475 0.19865991 0.30060323]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  65%|██████▌   | 204/313 [06:16<04:30,  2.48s/it][DEBUG] CM: [[956142  20268      7]
+ [ 50201 170526   3549]
+ [ 30947 348661 158735]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5862275610226624 | macro 0.49482891896092146
+[DEBUG] MaskedIoU per class [0.90409762 0.28746555 0.29292359]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  65%|██████▌   | 205/313 [06:19<04:35,  2.55s/it][DEBUG] CM: [[961185  40850    518]
+ [ 41795 102314    557]
+ [ 33045 336994 221764]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5861337725928855 | macro 0.4873329190697584
+[DEBUG] MaskedIoU per class [0.89213964 0.19581252 0.3740466 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  66%|██████▌   | 206/313 [06:21<04:40,  2.62s/it][DEBUG] CM: [[983079  26313    464]
+ [ 36024 102621   2815]
+ [ 40971 388923 157809]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 0 0]
+[DEBUG] MaskedIoU micro 0.5564971410082393 | macro 0.45196277212256303
+[DEBUG] MaskedIoU per class [0.90452049 0.18433939 0.26702844]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  66%|██████▌   | 207/313 [06:24<04:33,  2.58s/it][DEBUG] CM: [[966357  17062    263]
+ [ 51562 160850   5818]
+ [ 41054 347131 148918]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5795549762591937 | macro 0.48272801511683333
+[DEBUG] MaskedIoU per class [0.89785264 0.27617385 0.27415756]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  66%|██████▋   | 208/313 [06:26<04:29,  2.56s/it][DEBUG] CM: [[928750  24447     71]
+ [ 42447 155983  16271]
+ [ 32384 359752 178793]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5706286947842856 | macro 0.48942088236794884
+[DEBUG] MaskedIoU per class [0.90336631 0.26044916 0.30444718]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  67%|██████▋   | 209/313 [06:29<04:27,  2.57s/it][DEBUG] CM: [[939461  26373    937]
+ [ 43176 137836  11445]
+ [ 38160 416958 124686]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5280932444847086 | macro 0.4412294539583463
+[DEBUG] MaskedIoU per class [0.89634074 0.21679554 0.21055209]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  67%|██████▋   | 210/313 [06:31<04:21,  2.54s/it][DEBUG] CM: [[945032  34414    990]
+ [ 35820  78812   2254]
+ [ 57417 353696 230590]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5641414704697214 | macro 0.4645946366951477
+[DEBUG] MaskedIoU per class [0.88018605 0.1560646  0.35753325]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  67%|██████▋   | 211/313 [06:34<04:15,  2.50s/it][DEBUG] CM: [[910513  15952    492]
+ [ 82228  58587   5542]
+ [ 35539 394159 236016]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5302014131477294 | macro 0.44272140465545307
+[DEBUG] MaskedIoU per class [0.87153449 0.10528368 0.35134604]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  68%|██████▊   | 212/313 [06:36<04:10,  2.48s/it][DEBUG] CM: [[918968  44745   2486]
+ [ 42083 139037   5882]
+ [ 46292 353508 185979]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5568475220861817 | macro 0.4739988701516537
+[DEBUG] MaskedIoU per class [0.87141158 0.23756653 0.3130185 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  68%|██████▊   | 213/313 [06:39<04:02,  2.43s/it][DEBUG] CM: [[944750  16135    231]
+ [ 36618  97286   4174]
+ [ 57231 415240 167332]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5330839018859874 | macro 0.44203896151492733
+[DEBUG] MaskedIoU per class [0.89552734 0.17084114 0.2597484 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  68%|██████▊   | 214/313 [06:41<03:58,  2.41s/it][DEBUG] CM: [[929569  27680   1980]
+ [ 34722  82727   3683]
+ [ 43260 367229 248060]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5683772092805114 | macro 0.4766652567661795
+[DEBUG] MaskedIoU per class [0.89621977 0.16031091 0.3734651 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  69%|██████▊   | 215/313 [06:43<03:59,  2.44s/it][DEBUG] CM: [[917300  25933    651]
+ [ 54203  76355   2011]
+ [ 67723 382155 212679]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5310302568224657 | macro 0.44053301552512675
+[DEBUG] MaskedIoU per class [0.86065997 0.14122632 0.31971276]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  69%|██████▉   | 216/313 [06:46<03:54,  2.42s/it][DEBUG] CM: [[950126  19065     99]
+ [ 46054  77499   5419]
+ [ 43800 379194 217770]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5578084766267277 | macro 0.46034012461247636
+[DEBUG] MaskedIoU per class [0.89706971 0.14699249 0.33695817]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  69%|██████▉   | 217/313 [06:48<03:58,  2.48s/it][DEBUG] CM: [[960592  37805    353]
+ [ 50157  86513   2716]
+ [ 44222 352616 203733]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5617764675447863 | macro 0.4598511558514273
+[DEBUG] MaskedIoU per class [0.87875447 0.16329154 0.33750745]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  70%|██████▉   | 218/313 [06:51<03:57,  2.50s/it][DEBUG] CM: [[937441  16524    115]
+ [ 54441 135255   4913]
+ [ 44304 402320 142611]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5376177649509565 | macro 0.4502887938948909
+[DEBUG] MaskedIoU per class [0.89040534 0.22048144 0.2399796 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  70%|██████▉   | 219/313 [06:53<03:55,  2.51s/it][DEBUG] CM: [[969461  11578    135]
+ [ 44424 111937   3630]
+ [ 56465 362295 179107]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5684200510561388 | macro 0.46777094492754795
+[DEBUG] MaskedIoU per class [0.89593767 0.20967325 0.29770192]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  70%|███████   | 220/313 [06:56<03:51,  2.49s/it][DEBUG] CM: [[947330  21427    444]
+ [ 49223  81268  11542]
+ [ 47957 377650 202198]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5476820443540241 | macro 0.45152831575524277
+[DEBUG] MaskedIoU per class [0.88835979 0.15018758 0.31603758]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  71%|███████   | 221/313 [06:58<03:47,  2.47s/it][DEBUG] CM: [[937605  20349   1510]
+ [ 42610 106203   3041]
+ [ 54166 384515 189033]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5490951232906487 | macro 0.459141834430989
+[DEBUG] MaskedIoU per class [0.88768178 0.19076624 0.29897749]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  71%|███████   | 222/313 [07:01<03:41,  2.44s/it][DEBUG] CM: [[925201  13472    127]
+ [ 46228  78230   1279]
+ [ 43761 475595 155143]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49949342487038145 | macro 0.4186960945995701
+[DEBUG] MaskedIoU per class [0.89931074 0.1272438  0.22953374]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  71%|███████   | 223/313 [07:03<03:42,  2.48s/it][DEBUG] CM: [[907004  25700    289]
+ [ 44275  82609   1831]
+ [ 33636 471229 172466]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5017614429021774 | macro 0.4276968184106181
+[DEBUG] MaskedIoU per class [0.89722071 0.13203835 0.2538314 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  72%|███████▏  | 224/313 [07:06<03:40,  2.48s/it][DEBUG] CM: [[939033  26895    628]
+ [ 40927 102818   5016]
+ [ 56086 375237 192400]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.5500646439635106 | macro 0.45841674190437437
+[DEBUG] MaskedIoU per class [0.88290746 0.18663878 0.30570399]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  72%|███████▏  | 225/313 [07:08<03:38,  2.48s/it][DEBUG] CM: [[929868   9273    248]
+ [ 41816  86509   7333]
+ [ 62700 368181 233112]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5606632172525151 | macro 0.46882294604961555
+[DEBUG] MaskedIoU per class [0.89075922 0.16859672 0.3471129 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  72%|███████▏  | 226/313 [07:11<03:32,  2.44s/it][DEBUG] CM: [[947988  33935    367]
+ [ 51412 108689   2284]
+ [ 39184 450803 104378]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5010973122862291 | macro 0.40879232409929284
+[DEBUG] MaskedIoU per class [0.88358689 0.16795725 0.17483284]
+[DEBUG] L1 distance tensor([1., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  73%|███████▎  | 227/313 [07:13<03:31,  2.46s/it][DEBUG] CM: [[926208  30365   1370]
+ [ 45830 106779   2942]
+ [ 38499 405456 181588]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5365917988035338 | macro 0.45250200710283167
+[DEBUG] MaskedIoU per class [0.88864327 0.18056147 0.28830128]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  73%|███████▎  | 228/313 [07:16<03:32,  2.50s/it][DEBUG] CM: [[920059  14098     22]
+ [ 42652 105213   1401]
+ [ 44890 423291 173617]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.532461626125812 | macro 0.4499204261035194
+[DEBUG] MaskedIoU per class [0.90049926 0.17934391 0.26991812]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  73%|███████▎  | 229/313 [07:18<03:36,  2.58s/it][DEBUG] CM: [[927374  18816    379]
+ [ 50617 106246   1375]
+ [ 38430 454419 141379]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5101879186529638 | macro 0.42867731278280896
+[DEBUG] MaskedIoU per class [0.89548056 0.16825106 0.22230032]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  73%|███████▎  | 230/313 [07:21<03:26,  2.49s/it][DEBUG] CM: [[908640  31574     52]
+ [ 45958  80980   1837]
+ [ 43054 439819 187078]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5113219304336792 | macro 0.43205954549429476
+[DEBUG] MaskedIoU per class [0.88279357 0.13492889 0.27845618]
+[DEBUG] L1 distance tensor([1., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  74%|███████▍  | 231/313 [07:23<03:20,  2.44s/it][DEBUG] CM: [[932159  22744    128]
+ [ 69431 123372   2081]
+ [ 57468 373348 158299]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5360895315405237 | macro 0.4460109734246694
+[DEBUG] MaskedIoU per class [0.86157053 0.20875975 0.26770265]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  74%|███████▍  | 232/313 [07:25<03:15,  2.42s/it][DEBUG] CM: [[957905  30637    897]
+ [ 40721 122365   1249]
+ [ 52052 382219 150975]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5480005964051015 | macro 0.45138767886552095
+[DEBUG] MaskedIoU per class [0.88513618 0.21200088 0.25702597]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  74%|███████▍  | 233/313 [07:28<03:19,  2.50s/it][DEBUG] CM: [[919935  45869    107]
+ [ 54375 100860   4945]
+ [ 42397 394915 175629]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5243701898634315 | macro 0.4392316563834453
+[DEBUG] MaskedIoU per class [0.86567208 0.16783035 0.28419254]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  75%|███████▍  | 234/313 [07:31<03:19,  2.52s/it][DEBUG] CM: [[981876  28206    159]
+ [ 48487  95106  15002]
+ [ 51258 296047 222896]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5967681512591153 | macro 0.4874453739078805
+[DEBUG] MaskedIoU per class [0.88458413 0.19696882 0.38078317]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  75%|███████▌  | 235/313 [07:33<03:14,  2.49s/it][DEBUG] CM: [[972203  36741    258]
+ [ 46945  98674    576]
+ [ 64266 389310 130066]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5273920957694647 | macro 0.4208952097292577
+[DEBUG] MaskedIoU per class [0.86771842 0.17243283 0.22253437]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  75%|███████▌  | 236/313 [07:36<03:12,  2.50s/it][DEBUG] CM: [[1034594   22797     418]
+ [  39164   74393    4108]
+ [  39995  307292  216262]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6155940388248404 | macro 0.4855994979501843
+[DEBUG] MaskedIoU per class [0.90995877 0.16614704 0.38069269]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  76%|███████▌  | 237/313 [07:38<03:08,  2.48s/it][DEBUG] CM: [[981394  14392    453]
+ [ 42783 119860   7057]
+ [ 40635 312341 220104]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6126815290168222 | macro 0.5098444336522575
+[DEBUG] MaskedIoU per class [0.90898684 0.24144245 0.37910401]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  76%|███████▌  | 238/313 [07:41<03:05,  2.48s/it][DEBUG] CM: [[957964  14426    246]
+ [ 55157  96813   9472]
+ [ 47463 295154 262344]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 2 2]
+[DEBUG] MaskedIoU micro 0.6095081947489006 | macro 0.5077512292045833
+[DEBUG] MaskedIoU per class [0.89091714 0.20553817 0.42679838]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  76%|███████▋  | 239/313 [07:43<03:02,  2.46s/it][DEBUG] CM: [[955745  16028    534]
+ [ 43654 166990   4389]
+ [ 40024 371011 140664]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5704659682057761 | macro 0.4783811203292969
+[DEBUG] MaskedIoU per class [0.90507441 0.27735885 0.2527101 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  77%|███████▋  | 240/313 [07:46<03:03,  2.51s/it][DEBUG] CM: [[935569   6739     59]
+ [ 54541  85515   2657]
+ [ 44843 399229 209883]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5478017696563086 | macro 0.45784859758897795
+[DEBUG] MaskedIoU per class [0.89807353 0.15585559 0.31961667]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  77%|███████▋  | 241/313 [07:48<03:00,  2.51s/it][DEBUG] CM: [[952891  19476    395]
+ [ 34343  67240  12762]
+ [ 61893 362997 227038]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.559042736544562 | macro 0.45603175989627487
+[DEBUG] MaskedIoU per class [0.89138707 0.13534131 0.34136689]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  77%|███████▋  | 242/313 [07:50<02:55,  2.48s/it][DEBUG] CM: [[960269   9241   1030]
+ [ 50854  74143   2679]
+ [ 39917 387578 213313]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5594369066722623 | macro 0.45904050450665607
+[DEBUG] MaskedIoU per class [0.90479511 0.14136074 0.33096567]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  78%|███████▊  | 243/313 [07:53<02:52,  2.47s/it][DEBUG] CM: [[983312  16722    508]
+ [ 63984 121735   6342]
+ [ 25138 292492 228639]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6220382097872352 | macro 0.5195377101152636
+[DEBUG] MaskedIoU per class [0.90239927 0.24285073 0.41336313]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  78%|███████▊  | 244/313 [07:55<02:51,  2.48s/it][DEBUG] CM: [[917075  22375     93]
+ [ 36072  69485   3290]
+ [ 47077 534682 108818]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.4597491097795813 | macro 0.3859602214188975
+[DEBUG] MaskedIoU per class [0.89672648 0.10434687 0.15680731]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  78%|███████▊  | 245/313 [07:58<02:49,  2.49s/it][DEBUG] CM: [[922883   6420     17]
+ [ 28271  50428    846]
+ [129481 497394 103276]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4483079978929353 | macro 0.35889469824727754
+[DEBUG] MaskedIoU per class [0.84896217 0.0864442  0.14127773]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  79%|███████▊  | 246/313 [08:01<02:48,  2.51s/it][DEBUG] CM: [[930268   8374     96]
+ [ 25831  74763    147]
+ [114959 484332 100140]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4657962471482297 | macro 0.3769468630124162
+[DEBUG] MaskedIoU per class [0.86173587 0.12598092 0.1431238 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  79%|███████▉  | 247/313 [08:03<02:46,  2.52s/it][DEBUG] CM: [[959453  19524   2381]
+ [ 42172  83648   2399]
+ [ 90083 444741  94635]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4861421607837507 | macro 0.3839866310107189
+[DEBUG] MaskedIoU per class [0.86156771 0.14118187 0.14921031]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  79%|███████▉  | 248/313 [08:05<02:41,  2.48s/it][DEBUG] CM: [[964669  24155    110]
+ [ 41693  56465     91]
+ [ 97278 490876  63696]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.45329002237974025 | macro 0.3483437206465852
+[DEBUG] MaskedIoU per class [0.85527505 0.09207051 0.09768561]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  80%|███████▉  | 249/313 [08:08<02:41,  2.52s/it][DEBUG] CM: [[963867  20507    118]
+ [ 27739  76190    218]
+ [ 92014 450439 107941]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49268862539634034 | macro 0.3904113103231271
+[DEBUG] MaskedIoU per class [0.87287423 0.13248292 0.16587678]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  80%|███████▉  | 250/313 [08:10<02:34,  2.45s/it][DEBUG] CM: [[986822  49756    702]
+ [ 32068  72185   6804]
+ [ 75452 332587 182658]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.5552062843771897 | macro 0.43788317526026305
+[DEBUG] MaskedIoU per class [0.86200384 0.14630118 0.30534451]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  80%|████████  | 251/313 [08:13<02:35,  2.51s/it][DEBUG] CM: [[965947  14407    130]
+ [ 21679  55528   4705]
+ [ 60932 385444 230219]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.562233637337128 | macro 0.4539082120322213
+[DEBUG] MaskedIoU per class [0.90861776 0.11525999 0.33784688]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  81%|████████  | 252/313 [08:15<02:32,  2.50s/it][DEBUG] CM: [[976851  22554    108]
+ [ 45663  39239   1649]
+ [ 81956 406036 164968]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.514176378652062 | macro 0.39826978364128496
+[DEBUG] MaskedIoU per class [0.86666956 0.07617138 0.25196841]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 2., 2., 2.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 4., 4., 4.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.5000, 0.5000, 0.5000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.0000,  ..., 0.7500, 0.7500, 0.7500], device='cuda:0')
+Testing:  81%|████████  | 253/313 [08:18<02:30,  2.51s/it][DEBUG] CM: [[992437  30060    288]
+ [ 28480  51659   1712]
+ [100455 332440 200959]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5578390850947053 | macro 0.4313343024164637
+[DEBUG] MaskedIoU per class [0.86169989 0.11625719 0.31604582]
+[DEBUG] L1 distance tensor([1., 1., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  81%|████████  | 254/313 [08:20<02:27,  2.50s/it][DEBUG] CM: [[973453  20256   3617]
+ [ 34627  37373   6773]
+ [ 89318 412333 161286]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5082967614355843 | macro 0.39359679176591117
+[DEBUG] MaskedIoU per class [0.86816925 0.07308521 0.23953592]
+[DEBUG] L1 distance tensor([1., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  81%|████████▏ | 255/313 [08:23<02:24,  2.49s/it][DEBUG] CM: [[1004016   43200    1776]
+ [  27451   24251    1304]
+ [  59119  291987  285930]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6073361119955857 | macro 0.46443798875357095
+[DEBUG] MaskedIoU per class [0.8841578  0.0624715  0.44668466]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  82%|████████▏ | 256/313 [08:26<02:24,  2.54s/it][DEBUG] CM: [[970274  28135    907]
+ [ 35915  51683    654]
+ [ 69333 398271 183856]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5306707953330696 | macro 0.4201304955962651
+[DEBUG] MaskedIoU per class [0.87842262 0.10042203 0.28154684]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  82%|████████▏ | 257/313 [08:28<02:21,  2.53s/it][DEBUG] CM: [[1024772   11472     149]
+ [  32748   43235   12212]
+ [  49423  257845  307159]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6539490903834009 | macro 0.5090450320953354
+[DEBUG] MaskedIoU per class [0.91614963 0.120933   0.49005246]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  82%|████████▏ | 258/313 [08:31<02:17,  2.49s/it][DEBUG] CM: [[976665  25360    618]
+ [ 32004  53617   4391]
+ [ 56956 334917 254412]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5857660955340769 | macro 0.4681349971558721
+[DEBUG] MaskedIoU per class [0.89470714 0.11907242 0.39062543]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  83%|████████▎ | 259/313 [08:33<02:14,  2.49s/it][DEBUG] CM: [[951334  29635   1539]
+ [ 31635  31586   2561]
+ [101750 385997 202969]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5173758127290725 | macro 0.4034205041557337
+[DEBUG] MaskedIoU per class [0.85253156 0.06561089 0.29211906]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  83%|████████▎ | 260/313 [08:35<02:11,  2.49s/it][DEBUG] CM: [[981447  29591    342]
+ [ 24434  49001   5964]
+ [ 82854 365878 199510]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5471138978792608 | macro 0.42844326712751196
+[DEBUG] MaskedIoU per class [0.87733537 0.10318868 0.30480576]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  83%|████████▎ | 261/313 [08:38<02:11,  2.52s/it][DEBUG] CM: [[933234  30089    530]
+ [ 34930  57371   2804]
+ [ 64186 458044 157848]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49297889483215923 | macro 0.40242906324273003
+[DEBUG] MaskedIoU per class [0.87795034 0.09836636 0.23097048]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  84%|████████▎ | 262/313 [08:41<02:08,  2.52s/it][DEBUG] CM: [[929859  10226     92]
+ [ 55509  83057   3494]
+ [ 52187 378267 161919]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5403067993938516 | macro 0.43854013917550044
+[DEBUG] MaskedIoU per class [0.88737757 0.15654798 0.27169486]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  84%|████████▍ | 263/313 [08:43<02:01,  2.43s/it][DEBUG] CM: [[879381  14982    102]
+ [ 51612  89913  15664]
+ [ 45709 366115 178425]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5372997448137646 | macro 0.4493744011012417
+[DEBUG] MaskedIoU per class [0.88666406 0.16703574 0.29442341]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  84%|████████▍ | 264/313 [08:45<01:58,  2.42s/it][DEBUG] CM: [[895661   6729    102]
+ [ 34666  83168  10494]
+ [ 52471 363580 195042]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5563488320840966 | macro 0.46185570940687865
+[DEBUG] MaskedIoU per class [0.90504724 0.16679067 0.31372921]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  85%|████████▍ | 265/313 [08:48<01:54,  2.38s/it][DEBUG] CM: [[874152   9755      4]
+ [ 40898 112565   4598]
+ [ 43557 448214 108013]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5001548806596545 | macro 0.42138334074913614
+[DEBUG] MaskedIoU per class [0.90270827 0.18272649 0.17871526]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  85%|████████▍ | 266/313 [08:50<01:49,  2.33s/it][DEBUG] CM: [[901210   6498      8]
+ [ 46195 101736  10934]
+ [ 42138 446569  86616]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49655416940488895 | macro 0.4062602111862705
+[DEBUG] MaskedIoU per class [0.9047848  0.16625377 0.14774206]
+[DEBUG] L1 distance tensor([1., 1., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  85%|████████▌ | 267/313 [08:52<01:47,  2.34s/it][DEBUG] CM: [[892018  22454    164]
+ [ 30766  63061   6534]
+ [ 72286 418635 135997]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4975824921537026 | macro 0.40253914022570497
+[DEBUG] MaskedIoU per class [0.87651422 0.11646689 0.21463631]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  86%|████████▌ | 268/313 [08:54<01:44,  2.33s/it][DEBUG] CM: [[884178   5899    592]
+ [ 54186  77490   7155]
+ [ 42158 473170  97088]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4758291402181319 | macro 0.39259098056647734
+[DEBUG] MaskedIoU per class [0.89581191 0.12540864 0.15655239]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  86%|████████▌ | 269/313 [08:57<01:43,  2.34s/it][DEBUG] CM: [[909306  13815      2]
+ [ 33337  80055   4947]
+ [ 43057 440883 116472]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5077484658492182 | macro 0.41394977531001187
+[DEBUG] MaskedIoU per class [0.90974541 0.13970302 0.1924009 ]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  86%|████████▋ | 270/313 [08:59<01:42,  2.38s/it][DEBUG] CM: [[879803   6680     29]
+ [ 45204 116251   1040]
+ [ 59375 456353  77184]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4854962453632498 | macro 0.4011665905713595
+[DEBUG] MaskedIoU per class [0.88771162 0.1858446  0.12994355]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  87%|████████▋ | 271/313 [09:02<01:38,  2.35s/it][DEBUG] CM: [[933575   8625     23]
+ [ 61723  93352   6359]
+ [ 58835 364226 115194]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5332770230045902 | macro 0.421551915351918
+[DEBUG] MaskedIoU per class [0.87842651 0.17472323 0.21150601]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  87%|████████▋ | 272/313 [09:04<01:38,  2.39s/it][DEBUG] CM: [[891009   6919     28]
+ [ 57707 109795   3759]
+ [ 61392 397065 114216]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.514127888747487 | macro 0.42168920047390923
+[DEBUG] MaskedIoU per class [0.87606767 0.1908665  0.19813344]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  87%|████████▋ | 273/313 [09:06<01:35,  2.39s/it][DEBUG] CM: [[903168  25495    264]
+ [ 52704 141152   8723]
+ [ 34845 336668 138901]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5632725401417392 | macro 0.4686315482518923
+[DEBUG] MaskedIoU per class [0.8885286  0.24994068 0.26742536]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  88%|████████▊ | 274/313 [09:09<01:32,  2.36s/it][DEBUG] CM: [[936835  17164     85]
+ [ 66870  72467  14483]
+ [ 65183 314847 153976]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.548575788642715 | macro 0.43079451423860976
+[DEBUG] MaskedIoU per class [0.86253852 0.14916092 0.2806841 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  88%|████████▊ | 275/313 [09:11<01:30,  2.39s/it][DEBUG] CM: [[895289  10753     32]
+ [ 52547  96099  12802]
+ [ 39594 381533 153265]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5350908644687788 | macro 0.4438118320413129
+[DEBUG] MaskedIoU per class [0.89688995 0.17354723 0.26099832]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  88%|████████▊ | 276/313 [09:14<01:29,  2.43s/it][DEBUG] CM: [[886905  15427     18]
+ [ 38527  89594   2318]
+ [ 57113 389148 162825]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5312955541482896 | macro 0.4408192467029923
+[DEBUG] MaskedIoU per class [0.88869127 0.16746104 0.26630543]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  88%|████████▊ | 277/313 [09:16<01:26,  2.41s/it][DEBUG] CM: [[892726  13932    119]
+ [ 37023 110806   8887]
+ [ 42663 390641 145030]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5379449691160849 | macro 0.44977231515665833
+[DEBUG] MaskedIoU per class [0.90497667 0.19741345 0.24692682]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  89%|████████▉ | 278/313 [09:18<01:22,  2.37s/it][DEBUG] CM: [[929474  22135    120]
+ [ 53993 124584   4363]
+ [ 44843 408443  53902]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.509230363359093 | macro 0.3977157477806928
+[DEBUG] MaskedIoU per class [0.88473726 0.20306495 0.10534504]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  89%|████████▉ | 279/313 [09:21<01:21,  2.40s/it][DEBUG] CM: [[896053  11475    138]
+ [ 58384 101612   4635]
+ [ 49276 432631  87684]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49369344535888615 | macro 0.40070427260623137
+[DEBUG] MaskedIoU per class [0.88252739 0.16692266 0.15266277]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  89%|████████▉ | 280/313 [09:23<01:20,  2.44s/it][DEBUG] CM: [[891679   7300     99]
+ [ 50384 113680  10487]
+ [ 39810 409884 118595]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5203775021042816 | macro 0.4327777367042644
+[DEBUG] MaskedIoU per class [0.90134867 0.19211302 0.20487152]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  90%|████████▉ | 281/313 [09:25<01:15,  2.36s/it][DEBUG] CM: [[887234   9533    115]
+ [ 46714 123177   6755]
+ [ 49673 358057 160638]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5542789634139126 | macro 0.4662771369499718
+[DEBUG] MaskedIoU per class [0.89324644 0.22633012 0.27925485]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  90%|█████████ | 282/313 [09:28<01:13,  2.36s/it][DEBUG] CM: [[875201  21608   2482]
+ [ 52972 118906  17911]
+ [ 62895 395963  93963]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.495538617645505 | macro 0.407277007191083
+[DEBUG] MaskedIoU per class [0.86213279 0.19577516 0.16392307]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  90%|█████████ | 283/313 [09:30<01:10,  2.35s/it][DEBUG] CM: [[923515  11217   1173]
+ [ 39487  81653   9669]
+ [ 43216 412740 119091]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5206679316044409 | macro 0.4190314030180495
+[DEBUG] MaskedIoU per class [0.90664417 0.14718458 0.20326546]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  91%|█████████ | 284/313 [09:33<01:08,  2.36s/it][DEBUG] CM: [[915514  10911     86]
+ [ 69262 123710   7767]
+ [ 58267 353427 102894]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5333117291243105 | macro 0.42815020545511046
+[DEBUG] MaskedIoU per class [0.86857615 0.21892592 0.19694855]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  91%|█████████ | 285/313 [09:35<01:05,  2.34s/it][DEBUG] CM: [[861334  10723     12]
+ [ 42715  74789   1177]
+ [ 62942 466391 121801]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.4752911704503999 | macro 0.3977344495702517
+[DEBUG] MaskedIoU per class [0.88095642 0.12552808 0.18671885]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  91%|█████████▏| 286/313 [09:37<01:02,  2.32s/it][DEBUG] CM: [[866551  18517   1236]
+ [ 35043  92482   9124]
+ [ 53289 313045 252576]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5847203608676537 | macro 0.4960012071197437
+[DEBUG] MaskedIoU per class [0.88910219 0.19752206 0.40137938]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  92%|█████████▏| 287/313 [09:40<01:01,  2.35s/it][DEBUG] CM: [[901862  19087    420]
+ [ 41969  80655   2478]
+ [ 52870 326577 215939]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5747279233552874 | macro 0.47324517048660236
+[DEBUG] MaskedIoU per class [0.88747776 0.17132716 0.36093059]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  92%|█████████▏| 288/313 [09:42<00:58,  2.35s/it][DEBUG] CM: [[869670  18574    104]
+ [ 51134 104341   3718]
+ [ 52565 442333  99254]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.48561368359469914 | macro 0.40363017820403146
+[DEBUG] MaskedIoU per class [0.87664193 0.1682648  0.16598381]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  92%|█████████▏| 289/313 [09:44<00:56,  2.35s/it][DEBUG] CM: [[903649  26891    292]
+ [ 45421 105012    593]
+ [ 65263 354724 139994]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5380059137536223 | macro 0.43812841854637186
+[DEBUG] MaskedIoU per class [0.86762853 0.19715343 0.24960329]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  93%|█████████▎| 290/313 [09:47<00:54,  2.35s/it][DEBUG] CM: [[855849  19641    362]
+ [ 41834  87473  14009]
+ [ 62026 404174 156545]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5036115604734338 | macro 0.4245061834964916
+[DEBUG] MaskedIoU per class [0.87357203 0.15423773 0.24570879]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  93%|█████████▎| 291/313 [09:49<00:51,  2.35s/it][DEBUG] CM: [[875609   5981      9]
+ [ 55681 126405   3956]
+ [ 64503 408646 101067]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5058535755443488 | macro 0.41976419643081453
+[DEBUG] MaskedIoU per class [0.87405057 0.21044036 0.17480166]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  93%|█████████▎| 292/313 [09:51<00:50,  2.40s/it][DEBUG] CM: [[885549  17401     12]
+ [ 41246  63019   1968]
+ [ 80703 413068 138922]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4951495388123405 | macro 0.4001105885246116
+[DEBUG] MaskedIoU per class [0.86402527 0.11741898 0.21888752]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  94%|█████████▎| 293/313 [09:54<00:48,  2.40s/it][DEBUG] CM: [[830628   8937    444]
+ [ 31824  93839   2562]
+ [ 57661 458341 157245]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.49140806360022715 | macro 0.4279126381064562
+[DEBUG] MaskedIoU per class [0.8936346  0.15757939 0.23252392]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  94%|█████████▍| 294/313 [09:56<00:43,  2.31s/it][DEBUG] CM: [[869592  13398     14]
+ [ 33760  94998   3195]
+ [ 49132 394769 183050]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5372403771973845 | macro 0.45555353449750186
+[DEBUG] MaskedIoU per class [0.90029568 0.17588314 0.29048178]
+[DEBUG] L1 distance tensor([1., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.0000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.0000, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  94%|█████████▍| 295/313 [09:58<00:40,  2.25s/it][DEBUG] CM: [[862789  26170    784]
+ [ 37274  87815   2393]
+ [ 63005 441189 120476]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.48405801031314544 | macro 0.403666624485222
+[DEBUG] MaskedIoU per class [0.87148467 0.14762769 0.19188751]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  95%|█████████▍| 296/313 [10:00<00:37,  2.21s/it][DEBUG] CM: [[839703  13652    563]
+ [ 50663  84175   1636]
+ [ 60169 430920 159875]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4928482068105863 | macro 0.4200075111445872
+[DEBUG] MaskedIoU per class [0.87038404 0.14486805 0.24477045]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  95%|█████████▍| 297/313 [10:02<00:34,  2.18s/it][DEBUG] CM: [[933185  19701    531]
+ [ 42354 102118   5034]
+ [ 58590 390981 143950]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 2 2 2]
+[DEBUG] MaskedIoU micro 0.5327224226216156 | macro 0.43588223072097104
+[DEBUG] MaskedIoU per class [0.88507162 0.18229237 0.2402827 ]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  95%|█████████▌| 298/313 [10:05<00:32,  2.19s/it][DEBUG] CM: [[964148  32615    270]
+ [ 44665 102672   1874]
+ [ 39089 322428 231275]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5954627044230283 | macro 0.49481017760198304
+[DEBUG] MaskedIoU per class [0.89207957 0.20361167 0.38873929]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  96%|█████████▌| 299/313 [10:07<00:31,  2.22s/it][DEBUG] CM: [[959773  35670   1492]
+ [ 59636 113805   2151]
+ [ 41781 307387 217330]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5902259661238274 | macro 0.4914807760537154
+[DEBUG] MaskedIoU per class [0.87383007 0.21942585 0.38118641]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  96%|█████████▌| 300/313 [10:09<00:28,  2.22s/it][DEBUG] CM: [[936554  18378     17]
+ [ 39745  94014   4719]
+ [ 53786 404755 187048]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.538668988363204 | macro 0.44942406170418464
+[DEBUG] MaskedIoU per class [0.89324928 0.16740057 0.28762234]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  96%|█████████▌| 301/313 [10:11<00:26,  2.24s/it][DEBUG] CM: [[935679  19095     37]
+ [ 43363 105956   3386]
+ [ 43427 413644 174422]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5376118332721033 | macro 0.45133637669981735
+[DEBUG] MaskedIoU per class [0.89830847 0.18098401 0.27471666]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  96%|█████████▋| 302/313 [10:14<00:24,  2.25s/it][DEBUG] CM: [[924874  20338    159]
+ [ 35884  92698   1726]
+ [ 43794 417597 201963]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.539968235990562 | macro 0.4563328421712249
+[DEBUG] MaskedIoU per class [0.90227296 0.16313091 0.30359465]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  97%|█████████▋| 303/313 [10:16<00:22,  2.26s/it][DEBUG] CM: [[973070  22886    166]
+ [ 39029  92358   8773]
+ [ 53210 362096 187449]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5630409352520249 | macro 0.4587946743208784
+[DEBUG] MaskedIoU per class [0.89406916 0.17587243 0.30644244]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  97%|█████████▋| 304/313 [10:18<00:20,  2.27s/it][DEBUG] CM: [[941728  16472     52]
+ [ 63702  88055   3134]
+ [ 49988 456690 119198]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4933245515245011 | macro 0.4027378589878765
+[DEBUG] MaskedIoU per class [0.87852514 0.14020314 0.1894853 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  97%|█████████▋| 305/313 [10:20<00:18,  2.27s/it][DEBUG] CM: [[967432  17217     14]
+ [ 24493  93313    249]
+ [ 55458 430373 150484]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5343255822981537 | macro 0.4366929543489151
+[DEBUG] MaskedIoU per class [0.90871621 0.16496743 0.23639523]
+[DEBUG] L1 distance tensor([2., 2., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  98%|█████████▊| 306/313 [10:23<00:15,  2.27s/it][DEBUG] CM: [[968023  41164     76]
+ [ 21815  86198  11044]
+ [ 33775 373215 203719]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5666095225569091 | macro 0.4660899933285778
+[DEBUG] MaskedIoU per class [0.90906726 0.16159014 0.32761258]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  98%|█████████▊| 307/313 [10:25<00:13,  2.26s/it][DEBUG] CM: [[947137   7906      3]
+ [ 33850 105222  13032]
+ [ 52002 365953 213904]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5725150389622721 | macro 0.4805558288070144
+[DEBUG] MaskedIoU per class [0.90992297 0.2000559  0.33168862]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  98%|█████████▊| 308/313 [10:27<00:11,  2.25s/it][DEBUG] CM: [[914153  17211    243]
+ [ 44434 132485   5655]
+ [ 38869 399935 186054]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5489889043576472 | macro 0.4722014959592471
+[DEBUG] MaskedIoU per class [0.90072322 0.22091143 0.29496985]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  99%|█████████▊| 309/313 [10:29<00:08,  2.25s/it][DEBUG] CM: [[950134  10546   1532]
+ [ 43584 116286  10263]
+ [ 62197 338319 206160]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5770128889094439 | macro 0.4823470862266121
+[DEBUG] MaskedIoU per class [0.88964441 0.22405867 0.33333818]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing:  99%|█████████▉| 310/313 [10:32<00:06,  2.26s/it][DEBUG] CM: [[959653  27103   1352]
+ [ 41922  76231   1621]
+ [ 59105 484872  86554]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.47674300072885184 | macro 0.3794696055168954
+[DEBUG] MaskedIoU per class [0.88111483 0.12066659 0.13662739]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing:  99%|█████████▉| 311/313 [10:34<00:04,  2.26s/it][DEBUG] CM: [[955672  32016    171]
+ [ 50050  59030    301]
+ [ 81744 440548 119507]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.4839046038835788 | macro 0.38034938392766815
+[DEBUG] MaskedIoU per class [0.85354302 0.1014357  0.18606943]
+[DEBUG] L1 distance tensor([2., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([4., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0.5000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0') | L2 distance tensor([0.7500, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000], device='cuda:0')
+Testing: 100%|█████████▉| 312/313 [10:36<00:02,  2.26s/it][DEBUG] CM: [[482898  16637     15]
+ [ 15847  22166   1413]
+ [ 34758 188054 107732]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5441058953477221 | macro 0.43102368859588874
+[DEBUG] MaskedIoU per class [0.877749   0.09080072 0.32452135]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0') | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.], device='cuda:0')
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0') | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.], device='cuda:0')
+Testing: 100%|██████████| 313/313 [10:37<00:00,  1.89s/it][DEBUG] CM - tensor([[201050895,   4247438,     75646],
+        [  9631882,  17437678,   1020388],
+        [ 12374510,  88668056,  34847053]])
+[INFO] CM IoU - tensor([0.8842, 0.1441, 0.2544])
+[INFO] precision tensor([0.9013, 0.1580, 0.9695], dtype=torch.float64) (0.6762884660131707) | recall tensor([0.9790, 0.6208, 0.2564], dtype=torch.float64) (0.6187222209168904)
+Testing: 100%|██████████| 313/313 [10:37<00:00,  2.04s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'acc': 0.6858893036842346,
+ 'cm': 0.0,
+ 'dist_l1': 0.05365617200732231,
+ 'dist_l2': 0.08048426359891891,
+ 'test_iou': 0.3653648793697357}
+--------------------------------------------------------------------------------
