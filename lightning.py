@@ -134,7 +134,7 @@ class LitSegNet(pl.LightningModule):
         if self.hparams.loss in ["sord","compare"]:
             self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
         else:
-            self.hparams.ranks = None
+            self.hparams.ranks = [0,1,2]
 
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
