@@ -1,0 +1,166 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[WARNING] kitti - train 200 | val 200 | test 200
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [0, 1, 2]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-04-05 22-30-kitti-c3-kl-0,1,2-rgb
+[WARNING] Testing phase
+GPU available: False, used: False
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[WARNING] kitti - train 200 | val 200 | test 200
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+[INFO] Distance ranks [0, 1, 2]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-04-05 22-30-kitti-c3-kl-0,1,2-rgb
+Namespace(augment=False, bs=16, dataset='kitti', debug=True, dist='l1', full_dataset=True, gpus=0, loss='kl', loss_weight=False, lr=None, max_epochs=1000, modalities='rgb', mode='affordances', momentum=None, num_classes=3, optim=None, orig_dataset='freiburg', prefix=None, ranks='0,1,2', save=False, test_checkpoint='lightning_logs/2021-04-01 11-41-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt', test_samples=None, train=False, train_checkpoint='lightning_logs/last.ckpt', update_output_layer=False, viz=False, workers=10)
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+2021-04-05 22-30-kitti-c3-kl-0,1,2-rgb
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+Testing: 0it [00:00, ?it/s][DEBUG] CM: [[1108237   31217      26]
+ [  96692  142426   13869]
+ [  82208  289199   78903]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.564334792876704 | macro 0.4196556230041419
+[DEBUG] MaskedIoU per class [0.84060514 0.24838726 0.16997447]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:   8%|▊         | 1/13 [00:15<03:02, 15.24s/it][DEBUG] CM: [[1087876   20773     973]
+ [ 131673  142521    7200]
+ [  79440  280040   92656]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.5598444684885355 | macro 0.4232583628761724
+[DEBUG] MaskedIoU per class [0.82368984 0.24479438 0.20129087]
+[DEBUG] L1 distance tensor([2., 1., 1.,  ..., 2., 2., 1.]) | L2 distance tensor([4., 1., 1.,  ..., 4., 4., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.0000, 0.0000,  ..., 0.5000, 0.5000, 0.0000]) | L2 distance tensor([0.7500, 0.0000, 0.0000,  ..., 0.7500, 0.7500, 0.0000])
+Testing:  15%|█▌        | 2/13 [00:27<02:29, 13.58s/it][DEBUG] CM: [[1087956   16569     545]
+ [ 148020  168672    4409]
+ [  85797  245561   85645]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 2 2 2], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5726237428409927 | macro 0.43491868148510965
+[DEBUG] MaskedIoU per class [0.81258239 0.28920273 0.20297092]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  23%|██▎       | 3/13 [00:39<02:09, 12.96s/it][DEBUG] CM: [[1107431   29902     494]
+ [ 119430  133703    8472]
+ [ 103882  270454   69382]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5516141198021369 | macro 0.4015987909420266
+[DEBUG] MaskedIoU per class [0.8136061  0.2379222  0.15326806]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  31%|███       | 4/13 [00:51<01:51, 12.42s/it][DEBUG] CM: [[1114412   32567     168]
+ [ 128590  207210    6610]
+ [  73971  186585   92899]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.6227246893356513 | macro 0.4841811567383938
+[DEBUG] MaskedIoU per class [0.82566896 0.36898864 0.25788587]
+[DEBUG] L1 distance tensor([2., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  38%|███▊      | 5/13 [01:03<01:37, 12.22s/it][DEBUG] CM: [[1103952   49349     273]
+ [ 110526  153779   13554]
+ [  73454  204542  133478]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.6062956369396911 | macro 0.47612970924228276
+[DEBUG] MaskedIoU per class [0.82535135 0.28919417 0.31384361]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  46%|████▌     | 6/13 [01:16<01:28, 12.71s/it][DEBUG] CM: [[1152475   37902    3037]
+ [  70759  109204    9437]
+ [  95007  266165   99208]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 0]
+[DEBUG] MaskedIoU micro 0.5852016404207093 | macro 0.4263418885087262
+[DEBUG] MaskedIoU per class [0.84791933 0.2212995  0.20980683]
+[DEBUG] L1 distance tensor([1., 1., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.0000, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  54%|█████▍    | 7/13 [01:30<01:17, 12.86s/it][DEBUG] CM: [[1134427   47095     125]
+ [ 111427  137159   10922]
+ [  81357  203147  117488]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.6046760867483306 | macro 0.4596327346853378
+[DEBUG] MaskedIoU per class [0.82537938 0.26907111 0.28444772]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  62%|██████▏   | 8/13 [01:42<01:03, 12.70s/it][DEBUG] CM: [[1121692   36309     462]
+ [ 110879  169457    2008]
+ [  73045  246071   82892]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.594414058900609 | macro 0.4468671072057791
+[DEBUG] MaskedIoU per class [0.8355951  0.30007048 0.20493574]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  69%|██████▉   | 9/13 [01:54<00:49, 12.49s/it][DEBUG] CM: [[1141217   13737      14]
+ [ 127726  144078   14319]
+ [ 122543  210381   69136]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5808344458162565 | macro 0.4201750005232234
+[DEBUG] MaskedIoU per class [0.8121171  0.28237245 0.16603545]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  77%|███████▋  | 10/13 [02:06<00:36, 12.33s/it][DEBUG] CM: [[1129638   20771       3]
+ [ 121350  119505    2929]
+ [  89776  268539   90510]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5709424140668917 | macro 0.41806715148636026
+[DEBUG] MaskedIoU per class [0.82967791 0.22417247 0.20035107]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  85%|████████▍ | 11/13 [02:19<00:25, 12.68s/it][DEBUG] CM: [[1155152   14935      64]
+ [  75284  125694    2355]
+ [ 131773  289844   47991]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 0 0]
+[DEBUG] MaskedIoU micro 0.5637002104484405 | macro 0.3959360899034139
+[DEBUG] MaskedIoU per class [0.83876364 0.24737459 0.10167003]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  92%|█████████▏| 12/13 [02:31<00:12, 12.36s/it][DEBUG] CM: [[581397  11884      5]
+ [ 35773  60568   1764]
+ [ 48677 135916  45583]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.5949777861621722 | macro 0.43356108953944283
+[DEBUG] MaskedIoU per class [0.85785173 0.2463065  0.19652504]
+[DEBUG] L1 distance tensor([2., 2., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 4., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.5000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.7500, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing: 100%|██████████| 13/13 [02:37<00:00, 10.36s/it][DEBUG] CM - tensor([[14025862,   363010,     6189],
+        [ 1388129,  1813976,    97848],
+        [ 1140930,  3096444,  1105771]])
+[INFO] CM IoU - tensor([82.8750, 26.8363, 20.2999])
+[INFO] precision tensor([84.7232, 34.3984, 91.4005], dtype=torch.float64) (70.17405470103313) | recall tensor([97.4352, 54.9698, 20.6951], dtype=torch.float64) (57.700041922187495)
+Testing: 100%|██████████| 13/13 [02:37<00:00, 12.12s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'acc': 0.7355452179908752,
+ 'cm': 0.0,
+ 'dist_l1': 0.09414112567901611,
+ 'dist_l2': 0.14121168851852417,
+ 'test_iou': 0.5819756388664246}
+--------------------------------------------------------------------------------

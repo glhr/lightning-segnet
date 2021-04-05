@@ -1,0 +1,152 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[WARNING] freiburg - train 230 | val 136 | test 136
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [0, 1, 2]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-04-05 22-35-freiburg-c3-kl-0,1,2-rgb
+[WARNING] Testing phase
+GPU available: False, used: False
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] modalities ['rgb']
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[WARNING] freiburg - train 230 | val 136 | test 136
+[WARNING] dataset modalities ['rgb']
+[DEBUG] freiburg - class to idx: {'void': -1, 'road': 0, 'grass': 1, 'vegetation': 2, 'tree': 3, 'sky': 4, 'obstacle': 5}
+[DEBUG] freiburg - color to idx: dict_values([-1, 0, 1, 2, 3, 4, 5])
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+[INFO] SORD ranks: [0, 1, 2]
+[INFO] SORD using L1 distance
+[INFO] Distance ranks [0, 1, 2]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-04-05 22-35-freiburg-c3-kl-0,1,2-rgb
+Namespace(augment=False, bs=16, dataset='freiburg', debug=True, dist='l1', full_dataset=False, gpus=0, loss='kl', loss_weight=False, lr=None, max_epochs=1000, modalities='rgb', mode='affordances', momentum=None, num_classes=3, optim=None, orig_dataset='freiburg', prefix=None, ranks='0,1,2', save=False, test_checkpoint='lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt', test_samples=None, train=False, train_checkpoint='lightning_logs/last.ckpt', update_output_layer=False, viz=False, workers=10)
+b396-759 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+2021-04-05 22-35-freiburg-c3-kl-0,1,2-rgb
+b396-759 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+Testing: 0it [00:00, ?it/s][DEBUG] CM: [[1210912   11654     237]
+ [  50073  381928    3099]
+ [   3989   19812  161496]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.9080113288172649 | macro 0.8743600252645729
+[DEBUG] MaskedIoU per class [0.94834771 0.81859373 0.85613864]
+[DEBUG] L1 distance tensor([1., 1., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.0000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.0000, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  11%|█         | 1/9 [00:14<01:59, 14.89s/it][DEBUG] CM: [[1210911   22340      19]
+ [  52975  407525    4006]
+ [   1197   21704  122523]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.894891698077711 | macro 0.8539114166740484
+[DEBUG] MaskedIoU per class [0.94055577 0.80134697 0.81983151]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  22%|██▏       | 2/9 [00:26<01:30, 12.94s/it][DEBUG] CM: [[1188554   12603      72]
+ [  76097  408541    2759]
+ [   1174   28521  124879]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.8765787054335465 | macro 0.8319991568485715
+[DEBUG] MaskedIoU per class [0.92964724 0.77298915 0.79336107]
+[DEBUG] L1 distance tensor([2., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  33%|███▎      | 3/9 [00:38<01:13, 12.33s/it][DEBUG] CM: [[1172704   32022       2]
+ [  78193  414207    2469]
+ [   1232   23916  118455]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.8608464064725795 | macro 0.8253789672402085
+[DEBUG] MaskedIoU per class [0.91321205 0.75200025 0.8109246 ]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  44%|████▍     | 4/9 [00:49<01:00, 12.03s/it][DEBUG] CM: [[1189980   13948      23]
+ [  51160  394902    2606]
+ [    985   24664  164932]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.9035560517322753 | macro 0.8704753749183922
+[DEBUG] MaskedIoU per class [0.9473639  0.81042111 0.85364112]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  56%|█████▌    | 5/9 [01:01<00:47, 11.87s/it][DEBUG] CM: [[1112817   12327      27]
+ [  37466  543882    3183]
+ [    568   22302  110628]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.9209274477833829 | macro 0.8814431104300143
+[DEBUG] MaskedIoU per class [0.95668175 0.87841915 0.80922843]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  67%|██████▋   | 6/9 [01:12<00:35, 11.74s/it][DEBUG] CM: [[1188168   15605      19]
+ [  46844  431337    2800]
+ [   1693   30629  126105]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
+[DEBUG] MaskedIoU micro 0.8994327052385884 | macro 0.8496583577360455
+[DEBUG] MaskedIoU per class [0.94876666 0.8181425  0.78206591]
+[DEBUG] L1 distance tensor([2., 1., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 1., 4.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0.5000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
+Testing:  78%|███████▊  | 7/9 [01:24<00:23, 11.70s/it][DEBUG] CM: [[1127286   22563      75]
+ [  67811  476793    3352]
+ [   1684   27729  115907]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.8746815268809112 | macro 0.833549930729371
+[DEBUG] MaskedIoU per class [0.92444517 0.79698219 0.77922244]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing:  89%|████████▉ | 8/9 [01:35<00:11, 11.65s/it][DEBUG] CM: [[598586   8985      2]
+ [ 25426 211547   1405]
+ [   662   9559  65428]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 1 0 0]
+[DEBUG] MaskedIoU micro 0.9048426117591375 | macro 0.8723779326650164
+[DEBUG] MaskedIoU per class [0.94464706 0.82338998 0.84909676]
+[DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
+[DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
+Testing: 100%|██████████| 9/9 [01:41<00:00,  9.82s/it][DEBUG] CM - tensor([[9999918,  152047,     476],
+        [ 486045, 3670662,   25679],
+        [  13184,  208836, 1110353]])
+[INFO] CM IoU - tensor([93.8812, 80.7934, 81.7321])
+[INFO] precision tensor([95.2450, 91.0485, 97.6987], dtype=torch.float64) (94.6640744253088) | recall tensor([98.4977, 87.7648, 83.3365], dtype=torch.float64) (89.86631788288784)
+Testing: 100%|██████████| 9/9 [01:41<00:00, 11.31s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'acc': 0.9434316754341125,
+ 'cm': 0.0,
+ 'dist_l1': 0.007706481032073498,
+ 'dist_l2': 0.011559722013771534,
+ 'test_iou': 0.8930996656417847}
+--------------------------------------------------------------------------------
