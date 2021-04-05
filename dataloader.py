@@ -591,7 +591,7 @@ class KittiDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if set == "train":
+        if set in ["train","test","val","full"]:
             self.split_path = 'training/'
         else:
             self.split_path = 'testing/'
