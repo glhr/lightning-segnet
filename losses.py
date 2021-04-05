@@ -163,13 +163,14 @@ class CompareLosses(nn.Module):
             # output[i][0] = driveable
             # output[i][2] = torch.logical_not(driveable)
 
-        weight_map = None
+        weight_map = metrics.weight_from_target(target)
+        # weight_map = None
 
         losses = {
             "kl": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
             "sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
         }
-        viz_loss(output, losses = {"kl":losses["kl"]}, weight_map = metrics.weight_from_target(target), bs=target.shape[0], nclasses=self.num_classes, show={"gt","loss"}, target=target)
+        viz_loss(output, losses = {"kl":losses["kl"]}, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"gt","loss"}, target=target)
         return losses[self.returnloss][1]
 
 
@@ -200,7 +201,8 @@ class KLLoss(nn.Module):
         output = torch.nn.LogSoftmax(dim=-1)(output)
         loss[mask] = nn.KLDivLoss(reduction='none')(output, target)[mask]
         if weight_map is not None:
-            print(loss.shape, weight_map.shape)
+            #print(loss.shape, weight_map.shape)
+            #print(torch.min(weight_map).item(),torch.max(weight_map).item())
             loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
 
         loss_reduced = torch.sum(loss)/n_samples
@@ -288,10 +290,10 @@ class SORDLoss(nn.Module):
 
         loss[mask] = nn.KLDivLoss(reduction='none')(output, soft_target)[mask]
         if weight_map is not None:
-            print(loss.shape,weight_map.shape)
-            print(torch.unique(weight_map), "before weight map", torch.unique(loss))
+            if debug: print(loss.shape,weight_map.shape)
+            if debug: print(torch.unique(weight_map), "before weight map", torch.unique(loss))
             loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
-            print("after weight map", torch.unique(loss))
+            if debug: print("after weight map", torch.unique(loss))
 
         #print(n_samples)
         if reduce:
