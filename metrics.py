@@ -160,8 +160,16 @@ def weight_from_target(target):
         # print("map", torch.unique(distmap[i]))
     return distmap
 
+def compute_hmap(image_gray):
+    depth_map = np.zeros_like(image_gray).astype(np.float32)
+    for ix, iy in np.ndindex(depth_map.shape):
+        depth_map[ix, iy] = ix
+    return depth_map
+
+hmap = None
 
 def compute_distmap(image_orig, depth_map=None):
+    global hmap
     # print("img shape",image_orig.shape)
     img_h, img_w = image_orig.shape[:2]
     if image_orig.shape[-1] == 3:
@@ -181,9 +189,8 @@ def compute_distmap(image_orig, depth_map=None):
     # print(np.unique(distmap))
 
     if depth_map is None:
-        depth_map = np.zeros_like(image_gray).astype(np.float32)
-        for ix, iy in np.ndindex(depth_map.shape):
-            depth_map[ix, iy] = ix
+        depth_map = compute_hmap(image_gray) if hmap is None else hmap
+        hmap = depth_map
         # weight_map = np.array([[i for j in range(weight_map.shape[0])] for i in range(weight_map.shape[1])])
         # weight_map = np.power(weight_map,2)
 
