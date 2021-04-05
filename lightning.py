@@ -48,6 +48,7 @@ parser.add_argument('--save', default=False, action="store_true")
 parser.add_argument('--viz', default=False, action="store_true")
 parser.add_argument('--full_dataset', default=False, action="store_true")
 parser.add_argument('--update_output_layer', default=False, action="store_true")
+parser.add_argument('--init', default=False, action="store_true")
 
 import inspect
 
@@ -562,9 +563,9 @@ if args.train:
 
 
     segnet_model.update_model()
-    if args.update_output_layer:
+    if args.update_output_layer or args.init:
         segnet_model = segnet_model.load_from_checkpoint(checkpoint_path=args.train_checkpoint, conf=args)
-        segnet_model.new_output()
+        if args.update_output_layer: segnet_model.new_output()
         trainer = pl.Trainer.from_argparse_args(args,
             check_val_every_n_epoch=1,
             # ~ log_every_n_steps=10,
