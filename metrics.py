@@ -154,7 +154,7 @@ def weight_from_target(target):
     print(target.shape)
     distmap = torch.zeros_like(target).float()
     for i,sample in enumerate(target):
-        map = np.array(compute_distmap(target[i])["combined_map"],dtype=np.float32)
+        map = np.array(compute_distmap(target[i].detach().cpu().numpy())["combined_map"],dtype=np.float32)
         print("map",np.unique(map),map.dtype)
         distmap[i] = torch.from_numpy(map).float()
         print("map",np.unique(distmap[i]),)
