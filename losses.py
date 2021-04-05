@@ -42,7 +42,7 @@ def flatten_tensors(inp, target, weight_map=None):
     # ~ print(inp.shape, target.shape)
     # ~ print(inp, target)
     if weight_map is not None:
-        print(type(target), type(weight_map))
+        # print(type(target), type(weight_map))
         weight_map = weight_map.view(-1,)
         return inp, target, weight_map
     else:

@@ -151,7 +151,7 @@ class MaskedIoU(nn.Module):
 
 def weight_from_target(target):
 
-    print(target.shape)
+    # print(target.shape)
     distmap = torch.zeros_like(target).float()
     for i,sample in enumerate(target):
         map = np.array(compute_distmap(target[i].detach().cpu().numpy())["combined_map"],dtype=np.float32)
