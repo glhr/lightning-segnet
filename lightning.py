@@ -288,14 +288,14 @@ class LitSegNet(pl.LightningModule):
         # print(cm)
         iou_cls = iou_from_confmat(cm, num_classes=len(labels))
         logger.debug(f"CM - {cm}")
-        logger.debug(f"CM IoU - {iou_cls}")
+        logger.info(f"CM IoU - {iou_cls}")
 
         recall = np.diag(cm) / cm.sum(axis = 1)
         precision = np.diag(cm) / cm.sum(axis = 0)
         recall_overall = torch.mean(recall)
         precision_overall = torch.mean(precision)
 
-        logger.debug(f"precision {precision} ({precision_overall}) | recall {recall} ({recall_overall})")
+        logger.info(f"precision {precision} ({precision_overall}) | recall {recall} ({recall_overall})")
 
         cm1 = cm / cm.sum(axis=1, keepdim=True)  # normalize confusion matrix
         cm2 = cm / cm.sum(axis=0, keepdim=True)  # normalize confusion matrix

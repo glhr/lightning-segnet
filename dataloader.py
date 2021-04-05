@@ -145,7 +145,7 @@ class MMDataLoader(Dataset):
             if use[mod] and img.get(mod) is not None:
                 imgs.append(torch.from_numpy(img[mod].copy()).float())
 
-        logger.debug(torch.unique(modGT))
+        # logger.debug(torch.unique(modGT))
 
         return [torch.stack(imgs), modGT]
 
