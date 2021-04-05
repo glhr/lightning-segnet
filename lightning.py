@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks.base import Callback
 
 from segnet import SegNet, new_input_channels, new_output_channels
 from losses import SORDLoss, KLLoss, CompareLosses
-from metrics import MaskedIoU, ConfusionMatrix, Distance, iou_from_confmat
+from metrics import MaskedIoU, ConfusionMatrix, Distance, iou_from_confmat, weight_from_target
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
@@ -96,6 +96,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
         parser.add_argument('--augment', action="store_true", default=False)
+        parser.add_argument('--loss_weight', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
         parser.add_argument('--modalities', default="rgb")
@@ -190,14 +191,18 @@ class LitSegNet(pl.LightningModule):
         return embedding
 
     def compute_loss(self, x_hat, y, loss="ce"):
+        if self.hparams.loss_weight:
+            weight_map = weight_from_target(y)
+        else:
+            weight_map = None
         if loss == "ce":
             return self.ce(x_hat, y)
         elif loss == "sord":
-            return self.sord(x_hat, y)
+            return self.sord(x_hat, y, weight_map=weight_map)
         elif loss == "kl":
-            return self.kl(x_hat, y)
+            return self.kl(x_hat, y, weight_map=weight_map)
         elif loss == "compare":
-            return self.loss(x_hat, y)
+            return self.loss(x_hat, y, weight_map=weight_map)
 
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):

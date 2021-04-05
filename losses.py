@@ -163,7 +163,6 @@ class CompareLosses(nn.Module):
             # output[i][0] = driveable
             # output[i][2] = torch.logical_not(driveable)
 
-        weight_map = metrics.weight_from_target(target)
         # weight_map = None
 
         losses = {
