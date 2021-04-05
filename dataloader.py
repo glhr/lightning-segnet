@@ -463,16 +463,21 @@ class FreiburgDataLoader(MMDataLoader):
 
         if set == "train":
             self.path = path + 'train/'
-        else:
+        elif set in ["val", "test"]:
             self.path = path + 'test/'
+        elif set == "full":
+            self.path = path + '**/'
 
         self.augment = augment
 
-        for img in glob.glob(self.path + 'GT_color/*.png'):
-            img = img.split("/")[-1].split("_")[0]
+        self.base_folders = []
+
+        for filepath in glob.glob(self.path + 'GT_color/*.png'):
+            img = filepath.split("/")[-1].split("_")[0]
             # print(img)
             self.filenames.append(img)
-        # print(self.filenames)
+            self.base_folders.append(path + filepath.split("/")[-3])
+        print(self.filenames[0], self.base_folders[0])
 
         self.suffixes = {
             'depth': "_Clipped_redict_depth_gray.png",
@@ -483,19 +488,19 @@ class FreiburgDataLoader(MMDataLoader):
         self.color_GT = True
 
     def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + "rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
-        pilDep = Image.open(self.path + "depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('L')
-        pilIR = Image.open(self.path + "nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('L')
+        pilRGB = Image.open(self.base_folders[sample_id] + "/rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
+        pilDep = Image.open(self.base_folders[sample_id] + "/depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('L')
+        pilIR = Image.open(self.base_folders[sample_id] + "/nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('L')
 
         # print(self.path + "GT_color/" + a + suffixes['gt'])
         try:
             self.suffixes['gt'] = "_Clipped.png"
             # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
-            imgGT = Image.open(self.path + "GT_color/" + self.filenames[sample_id] + self.suffixes['gt']).convert('RGB')
+            imgGT = Image.open(self.base_folders[sample_id] + "/GT_color/" + self.filenames[sample_id] + self.suffixes['gt']).convert('RGB')
         except (AttributeError,IOError):
             self.suffixes['gt'] = "_mask.png"
             # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
-            imgGT = Image.open(self.path + "GT_color/" + self.filenames[sample_id] + self.suffixes['gt']).convert('RGB')
+            imgGT = Image.open(self.base_folders[sample_id] + "/GT_color/" + self.filenames[sample_id] + self.suffixes['gt']).convert('RGB')
 
         return pilRGB, pilDep, pilIR, imgGT
 
@@ -528,8 +533,10 @@ class CityscapesDataLoader(MMDataLoader):
 
         if set == "train":
             self.split_path = 'train/'
-        else:
+        elif set in ["test", "val"]:
             self.split_path = 'val/'
+        else:
+            self.split_path = '**/'
 
         cities = {
             "val": ["frankfurt"],
@@ -537,12 +544,16 @@ class CityscapesDataLoader(MMDataLoader):
         }
 
         self.augment = augment
+        self.base_folders = []
 
-        for img in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png'):
+        for filepath in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png'):
 
-            img = '_'.join('/'.join(img.split("/")[-2:]).split("_")[:3])
+            img = '_'.join('/'.join(filepath.split("/")[-2:]).split("_")[:3])
             city = img.split("/")[0]
-            if set == "train" or city in cities[set]: self.filenames.append(img)
+            base_folder = filepath.split("/")[-3]
+            if set in ["train","full"] or city in cities[set]:
+                self.filenames.append(img)
+                self.base_folders.append(base_folder)
         # print(self.filenames[0])
         # print(len(self.filenames))
 
@@ -550,9 +561,9 @@ class CityscapesDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
 
-        pilRGB = Image.open(self.path + "leftImg8bit/" + self.split_path + f"{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
-        pilDep = Image.open(self.path + "disparity/" + self.split_path + f"{self.filenames[sample_id]}_disparity.png").convert('L')
-        imgGT = Image.open(self.path + "gtFine/" + self.split_path + f"{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
+        pilRGB = Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+        pilDep = Image.open(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png").convert('L')
+        imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 
 

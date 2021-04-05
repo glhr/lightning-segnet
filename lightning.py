@@ -380,7 +380,7 @@ class LitSegNet(pl.LightningModule):
                         #     dataset_name=self.hparams.dataset)
                 # logger.debug("Generating proba map")
                 if self.save:
-                    self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                    # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # logger.debug("Generating argmax pred")
                     self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
@@ -429,11 +429,8 @@ class LitSegNet(pl.LightningModule):
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
         dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities)
-        if set == "test":
-            if self.test_max is None:
-                dataset = Subset(dataset, indices=range(len(dataset)))
-            else:
-                dataset = Subset(dataset, indices=range(self.test_max))
+        if set == "test" and self.test_max is not None:
+            dataset = Subset(dataset, indices=range(self.test_max))
         else:
             dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset
@@ -442,7 +439,7 @@ class LitSegNet(pl.LightningModule):
         if self.hparams.dataset == "freiburg":
             train_set = self.get_dataset(set="train")
             if self.full:
-                test_set = self.get_dataset(set="train",augment=False)
+                test_set = self.get_dataset(set="full",augment=False)
             else:
                 test_set = self.get_dataset(set="test",augment=False)
             val_set = self.get_dataset(set="test",augment=False)
@@ -483,7 +480,7 @@ class LitSegNet(pl.LightningModule):
             train_set = self.get_dataset(set="train")
             val_set = self.get_dataset(set="val")
             if self.full:
-                test_set = self.get_dataset(set="train",augment=False)
+                test_set = self.get_dataset(set="full",augment=False)
             else:
                 test_set = self.get_dataset(set="test",augment=False)
 
