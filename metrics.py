@@ -155,14 +155,14 @@ def weight_from_target(target):
     distmap = torch.zeros_like(target).float()
     for i,sample in enumerate(target):
         map = np.array(compute_distmap(target[i].detach().cpu().numpy())["combined_map"],dtype=np.float32)
-        print("map",np.unique(map),map.dtype)
+        # print("map",np.unique(map),map.dtype)
         distmap[i] = torch.from_numpy(map).float()
-        print("map", torch.unique(distmap[i]))
+        # print("map", torch.unique(distmap[i]))
     return distmap
 
 
 def compute_distmap(image_orig, depth_map=None):
-    print("img shape",image_orig.shape)
+    # print("img shape",image_orig.shape)
     img_h, img_w = image_orig.shape[:2]
     if image_orig.shape[-1] == 3:
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
