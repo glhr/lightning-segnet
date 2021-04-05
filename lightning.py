@@ -37,7 +37,7 @@ timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
 parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
-parser.add_argument('--gpus', type=int, default=1)
+parser.add_argument('--gpus', type=int, default=torch.cuda.device_count())
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=None)
 parser.add_argument('--test_checkpoint', default="lightning_logs/test.ckpt")
@@ -288,14 +288,14 @@ class LitSegNet(pl.LightningModule):
         # print(cm)
         iou_cls = iou_from_confmat(cm, num_classes=len(labels))
         logger.debug(f"CM - {cm}")
-        logger.info(f"CM IoU - {iou_cls}")
+        logger.info(f"CM IoU - {100*iou_cls}")
 
         recall = np.diag(cm) / cm.sum(axis = 1)
         precision = np.diag(cm) / cm.sum(axis = 0)
         recall_overall = torch.mean(recall)
         precision_overall = torch.mean(precision)
 
-        logger.info(f"precision {precision} ({precision_overall}) | recall {recall} ({recall_overall})")
+        logger.info(f"precision {100*precision} ({100*precision_overall}) | recall {100*recall} ({100*recall_overall})")
 
         cm1 = cm / cm.sum(axis=1, keepdim=True)  # normalize confusion matrix
         cm2 = cm / cm.sum(axis=0, keepdim=True)  # normalize confusion matrix
