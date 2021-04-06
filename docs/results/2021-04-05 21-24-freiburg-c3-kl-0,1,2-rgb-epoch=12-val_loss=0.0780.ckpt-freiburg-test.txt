@@ -25,7 +25,7 @@ Global seed set to 2
 [INFO] IoU labels: [0, 1, 2]
 [INFO] Confusion matrix labels: [0, 1, 2]
 [INFO] IoU labels: [0, 1, 2]
-[INFO] 2021-04-06 01-39-freiburg-c3-kl-0,1,2-rgb
+[INFO] 2021-04-06 01-30-freiburg-c3-kl-0,1,2-rgb
 [WARNING] Testing phase
 GPU available: False, used: False
 TPU available: None, using: 0 TPU cores
@@ -53,23 +53,23 @@ Global seed set to 2
 [INFO] IoU labels: [0, 1, 2]
 [INFO] Confusion matrix labels: [0, 1, 2]
 [INFO] IoU labels: [0, 1, 2]
-[INFO] 2021-04-06 01-39-freiburg-c3-kl-0,1,2-rgb
-Namespace(augment=False, bs=16, dataset='freiburg', debug=True, dist='l1', full_dataset=False, gpus=0, init=False, loss='kl', loss_weight=True, lr=None, max_epochs=1000, modalities='rgb', mode='affordances', momentum=None, num_classes=3, optim=None, orig_dataset='freiburg', prefix=None, ranks='0,1,2', save=False, test_checkpoint='lightning_logs/2021-04-01 11-41-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt', test_samples=None, train=False, train_checkpoint='lightning_logs/last.ckpt', update_output_layer=False, viz=False, workers=10)
+[INFO] 2021-04-06 01-30-freiburg-c3-kl-0,1,2-rgb
+Namespace(augment=False, bs=16, dataset='freiburg', debug=True, dist='l1', full_dataset=False, gpus=0, init=False, loss='kl', loss_weight=True, lr=None, max_epochs=1000, modalities='rgb', mode='affordances', momentum=None, num_classes=3, optim=None, orig_dataset='freiburg', prefix=None, ranks='0,1,2', save=False, test_checkpoint='lightning_logs/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt', test_samples=None, train=False, train_checkpoint='lightning_logs/last.ckpt', update_output_layer=False, viz=False, workers=10)
 b396-759 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
 b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
 b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
 b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
-2021-04-06 01-39-freiburg-c3-kl-0,1,2-rgb
+2021-04-06 01-30-freiburg-c3-kl-0,1,2-rgb
 b396-759 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
 b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
 b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
 b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
-Testing: 0it [00:00, ?it/s][DEBUG] CM: [[1212434   10200     169]
- [  53216  378573    3311]
- [   4221   19256  161820]]
+Testing: 0it [00:00, ?it/s][DEBUG] CM: [[1217442    5327      34]
+ [  55266  376953    2881]
+ [   6329   24101  154867]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
-[DEBUG] MaskedIoU micro 0.9065222776693717 | macro 0.8730506572593407
-[DEBUG] MaskedIoU per class [0.94703649 0.81491359 0.85720188]
+[DEBUG] MaskedIoU micro 0.9030136211255987 | macro 0.8607259361098659
+[DEBUG] MaskedIoU per class [0.94786974 0.8114753  0.82283276]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 186.0108642578125
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -169,12 +169,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 4.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0.0000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.0000, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
-Testing:  11%|█         | 1/9 [00:27<03:42, 27.82s/it][DEBUG] CM: [[1209979   23279      12]
- [  56581  403089    4836]
- [   1335   20162  123927]]
+Testing:  11%|█         | 1/9 [00:27<03:41, 27.63s/it][DEBUG] CM: [[1224028    9215      27]
+ [  60852  398680    4974]
+ [   1213   17852  126359]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
-[DEBUG] MaskedIoU micro 0.891038547659414 | macro 0.8517854362419811
-[DEBUG] MaskedIoU per class [0.93710666 0.79356508 0.82468457]
+[DEBUG] MaskedIoU micro 0.9028220755027659 | macro 0.8653310999598038
+[DEBUG] MaskedIoU per class [0.94495092 0.81102908 0.8400133 ]
 [DEBUG] edge from 0.0 to 1.0842021724855044e-19
 [DEBUG] distmap_linear from 0.0 to 211.11904907226562
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -274,12 +274,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
-Testing:  22%|██▏       | 2/9 [00:53<03:06, 26.62s/it][DEBUG] CM: [[1186798   14403      28]
- [  76227  408408    2762]
- [   1400   28913  124261]]
+Testing:  22%|██▏       | 2/9 [00:53<03:04, 26.38s/it][DEBUG] CM: [[1194700    6515      14]
+ [  72630  410768    3999]
+ [   2605   22110  129859]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
-[DEBUG] MaskedIoU micro 0.8741868685918636 | macro 0.8290672682763155
-[DEBUG] MaskedIoU per class [0.92801535 0.76954588 0.78964058]
+[DEBUG] MaskedIoU micro 0.8894218719648112 | macro 0.8502744067286772
+[DEBUG] MaskedIoU per class [0.93594492 0.79602808 0.81885022]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 150.1658935546875
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -379,12 +379,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([2., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0.5000, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.0000, 0.0000,  ..., 0.0000, 0.0000, 0.0000])
-Testing:  33%|███▎      | 3/9 [01:19<02:37, 26.29s/it][DEBUG] CM: [[1171848   32874       6]
- [  75214  417290    2365]
- [   1542   23756  118305]]
+Testing:  33%|███▎      | 3/9 [01:18<02:36, 26.04s/it][DEBUG] CM: [[1180214   24474      40]
+ [  88728  403947    2194]
+ [   1552   21828  120223]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
-[DEBUG] MaskedIoU micro 0.8627994443537682 | macro 0.8271818315525006
-[DEBUG] MaskedIoU per class [0.91444606 0.75664688 0.81045255]
+[DEBUG] MaskedIoU micro 0.8599244405696018 | macro 0.8273844802547976
+[DEBUG] MaskedIoU per class [0.91135653 0.74643135 0.82436556]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 170.4046630859375
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -484,12 +484,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
-Testing:  44%|████▍     | 4/9 [01:45<02:10, 26.18s/it][DEBUG] CM: [[1188806   15119      26]
- [  52176  393466    3026]
- [   1357   24838  164386]]
+Testing:  44%|████▍     | 4/9 [01:44<02:09, 25.91s/it][DEBUG] CM: [[1196881    7016      54]
+ [  54931  390219    3518]
+ [   2560   25390  162631]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
-[DEBUG] MaskedIoU micro 0.9004589270119429 | macro 0.866530865165617
-[DEBUG] MaskedIoU per class [0.94538459 0.80525147 0.84895653]
+[DEBUG] MaskedIoU micro 0.9034744708569198 | macro 0.8658681711293116
+[DEBUG] MaskedIoU per class [0.94881968 0.81114132 0.83764351]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 196.5364227294922
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -589,12 +589,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
-Testing:  56%|█████▌    | 5/9 [02:11<01:44, 26.12s/it][DEBUG] CM: [[1113783   11364      24]
- [  41103  539674    3754]
- [    660   21878  110960]]
+Testing:  56%|█████▌    | 5/9 [02:10<01:43, 25.85s/it][DEBUG] CM: [[1119815    5304      52]
+ [  49316  529986    5229]
+ [    651   18552  114295]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
-[DEBUG] MaskedIoU micro 0.9180190459541006 | macro 0.878776941561146
-[DEBUG] MaskedIoU per class [0.95445244 0.87357978 0.80829861]
+[DEBUG] MaskedIoU micro 0.9176987614862165 | macro 0.882543583430412
+[DEBUG] MaskedIoU per class [0.95292212 0.87113301 0.82357561]
 [DEBUG] edge from 0.0 to 1.0842021724855044e-19
 [DEBUG] distmap_linear from 0.0 to 163.5751953125
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -694,12 +694,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
-Testing:  67%|██████▋   | 6/9 [02:37<01:18, 26.03s/it][DEBUG] CM: [[1190260   13525       7]
- [  50072  427508    3401]
- [   2304   28272  127851]]
+Testing:  67%|██████▋   | 6/9 [02:35<01:17, 25.74s/it][DEBUG] CM: [[1194512    9230      50]
+ [  54479  422715    3787]
+ [   1714   31346  125367]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 1 1 1], pred [0 0 0 ... 1 1 1]
-[DEBUG] MaskedIoU micro 0.8994415134937945 | macro 0.8517676234384602
-[DEBUG] MaskedIoU per class [0.9475325  0.81776203 0.79000834]
+[DEBUG] MaskedIoU micro 0.896485554628394 | macro 0.8437115534902951
+[DEBUG] MaskedIoU per class [0.94803668 0.81048668 0.7726113 ]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 220.31468200683594
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -799,12 +799,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([2., 1., 2.,  ..., 1., 1., 1.]) | L2 distance tensor([4., 1., 4.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0.5000, 0.0000, 0.5000,  ..., 0.0000, 0.0000, 0.0000]) | L2 distance tensor([0.7500, 0.0000, 0.7500,  ..., 0.0000, 0.0000, 0.0000])
-Testing:  78%|███████▊  | 7/9 [03:03<00:51, 25.93s/it][DEBUG] CM: [[1126723   23128      73]
- [  68060  475653    4243]
- [   1912   27719  115689]]
+Testing:  78%|███████▊  | 7/9 [03:01<00:51, 25.62s/it][DEBUG] CM: [[1131109   18780      35]
+ [  84499  459097    4360]
+ [   2832   24361  118127]]
 [DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
-[DEBUG] MaskedIoU micro 0.872851928152474 | macro 0.8303660096846285
-[DEBUG] MaskedIoU per class [0.92362218 0.79433971 0.77313614]
+[DEBUG] MaskedIoU micro 0.8636375815379358 | macro 0.8266357749659793
+[DEBUG] MaskedIoU per class [0.91420847 0.7766864  0.78901246]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 141.3472900390625
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -904,12 +904,12 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
-Testing:  89%|████████▉ | 8/9 [03:28<00:25, 25.85s/it][DEBUG] CM: [[598501   9070      2]
- [ 27563 209416   1399]
- [  1083   9393  65173]]
-[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 1 0 0]
-[DEBUG] MaskedIoU micro 0.8999907227015493 | macro 0.8673071378665624
-[DEBUG] MaskedIoU per class [0.94071538 0.81535269 0.84585334]
+Testing:  89%|████████▉ | 8/9 [03:28<00:26, 26.11s/it][DEBUG] CM: [[602179   5390      4]
+ [ 28907 206575   2896]
+ [   459   7466  67724]]
+[DEBUG] MaskedIoU inputs: target [0 0 0 ... 0 0 0], pred [0 0 0 ... 0 0 0]
+[DEBUG] MaskedIoU micro 0.906649481443476 | macro 0.8766186117087121
+[DEBUG] MaskedIoU per class [0.94542649 0.82224142 0.86218793]
 [DEBUG] edge from 0.0 to 2.168404344971009e-19
 [DEBUG] distmap_linear from 0.0 to 182.544189453125
 [DEBUG] depth_map from 0.0 to 0.9958333373069763
@@ -958,23 +958,23 @@ b221-999 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/
 [DEBUG] distmap from 0.0 to 1.0
 [DEBUG] combined_map from 0.0 to 0.9958333373069763
 [DEBUG] combined_map from 0.10000000149011612 to 1.0
-[DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 0.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
+[DEBUG] correct_w tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000])
 [DEBUG] L1 distance tensor([1., 1., 1.,  ..., 1., 1., 1.]) | L2 distance tensor([1., 1., 1.,  ..., 1., 1., 1.])
 [DEBUG] L1 distance tensor([0., 0., 0.,  ..., 0., 0., 0.]) | L2 distance tensor([0., 0., 0.,  ..., 0., 0., 0.])
-Testing: 100%|██████████| 9/9 [03:41<00:00, 21.75s/it][DEBUG] CM - tensor([[9999132,  152962,     347],
-        [ 500212, 3653077,   29097],
-        [  15814,  204187, 1112372]])
-[INFO] CM IoU - tensor([93.7260, 80.4725, 81.6829])
-[INFO] precision tensor([95.0926, 91.0940, 97.4213], dtype=torch.float64) (94.53596605252224) | recall tensor([98.4899, 87.3443, 83.4880], dtype=torch.float64) (89.7740973406627)
-{'acc_w': tensor([0.1000, 0.1000, 0.1000,  ..., 0.0000, 1.0000, 1.0000]), 'samples_w': tensor([862076.6250, 860917.8750, 854433.9375, 864348.6875, 857435.6250,
+Testing: 100%|██████████| 9/9 [03:41<00:00, 21.94s/it][DEBUG] CM - tensor([[10060880,    91251,      310],
+        [  549608,  3598940,    33838],
+        [   19915,   193006,  1119452]])
+[INFO] CM IoU - tensor([93.8343, 80.5737, 81.9199])
+[INFO] precision tensor([94.6425, 92.6798, 97.0399], dtype=torch.float64) (94.78740086334861) | recall tensor([99.0981, 86.0499, 84.0194], dtype=torch.float64) (89.72249282365965)
+{'acc_w': tensor([0.1000, 0.1000, 0.1000,  ..., 1.0000, 1.0000, 1.0000]), 'samples_w': tensor([862076.6250, 860917.8750, 854433.9375, 864348.6875, 857435.6250,
         858615.3750, 859492.2500, 849048.7500, 428680.0312])}
-Testing: 100%|██████████| 9/9 [03:41<00:00, 24.62s/it]
+Testing: 100%|██████████| 9/9 [03:41<00:00, 24.57s/it]
 --------------------------------------------------------------------------------
 DATALOADER:0 TEST RESULTS
-{'acc': 0.9423879981040955,
- 'acc_w': 0.9358378648757935,
+{'acc': 0.9433256983757019,
+ 'acc_w': 0.940726637840271,
  'cm': 0.0,
- 'dist_l1': 0.00895228236913681,
- 'dist_l2': 0.013428423553705215,
- 'test_iou': 0.8912134170532227}
+ 'dist_l1': 0.011388873681426048,
+ 'dist_l2': 0.017083311453461647,
+ 'test_iou': 0.892918050289154}
 --------------------------------------------------------------------------------

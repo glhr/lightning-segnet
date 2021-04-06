@@ -191,11 +191,7 @@ class LitSegNet(pl.LightningModule):
         embedding = self.model(x)
         return embedding
 
-    def compute_loss(self, x_hat, y, loss="ce"):
-        if self.hparams.loss_weight:
-            weight_map = weight_from_target(y)
-        else:
-            weight_map = None
+    def compute_loss(self, x_hat, y, loss="ce", weight_map=None):
         if loss == "ce":
             return self.ce(x_hat, y)
         elif loss == "sord":
@@ -226,7 +222,12 @@ class LitSegNet(pl.LightningModule):
         x, y = batch
         x_hat = self.model(x)
 
-        loss = self.compute_loss(x_hat, y, loss=self.hparams.loss)
+        if self.hparams.loss_weight:
+            weight_map = weight_from_target(y)
+        else:
+            weight_map = None
+
+        loss = self.compute_loss(x_hat, y, loss=self.hparams.loss, weight_map=weight_map)
 
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
@@ -239,13 +240,13 @@ class LitSegNet(pl.LightningModule):
             target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
             # iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
             # self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
-            dist_l1, dist_l2, correct = self.dist(pred_proba_aff, target_aff)
+            dist_l1, dist_l2, correct, correct_w = self.dist(pred_proba_aff, target_aff, weight_map=weight_map)
         elif self.hparams.mode == "affordances":
             # self.log(f'{set}_iou_aff', iou, on_epoch=True)
-            dist_l1, dist_l2, correct = self.dist(x_hat, y)
+            dist_l1, dist_l2, correct, correct_w = self.dist(x_hat, y, weight_map=weight_map)
         elif self.hparams.mode == "objects":
             # self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            dist_l1, dist_l2, correct = self.dist(x_hat, y)
+            dist_l1, dist_l2, correct, correct_w = self.dist(x_hat, y, weight_map=weight_map)
 
         self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
         self.log(f'{set}_dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
@@ -265,10 +266,6 @@ class LitSegNet(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        # if batch_idx == 0 and (not self.current_epoch % 10):
-        #   loss = self.predict(batch, set="val", save=True, batch_idx=batch_idx)
-        # else:
-        #   loss = self.predict(batch, set="val")
         loss = self.predict(batch, set="val")
         return loss
 
@@ -276,17 +273,9 @@ class LitSegNet(pl.LightningModule):
 
         labels = self.train_set.dataset.cls_labels
 
-        #cms = torch.from_numpy(cms)
-
         cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
         cm = torch.sum(cms, dim=0, keepdim=False)
 
-        # ignore void class
-        # cm = cm[1:, 1:]
-        # cm = np.delete(cm, self.hparams.ignore_index, 0)
-
-        #
-        # print(cm)
         iou_cls = iou_from_confmat(cm, num_classes=len(labels))
         logger.debug(f"CM - {cm}")
         logger.info(f"CM IoU - {100*iou_cls}")
@@ -317,6 +306,11 @@ class LitSegNet(pl.LightningModule):
         #logger.debug(f"l1 distance {dist.item()}")
 
         return dist
+
+    def reduce_acc_w(self, correct_w):
+        print(correct_w)
+        acc = torch.sum(correct_w["acc_w"], dim=0, keepdim=False) / torch.sum(correct_w["samples_w"], dim=0, keepdim=False)
+        return acc
 
     def test_step(self, batch, batch_idx):
         sample, target_orig = batch
@@ -405,13 +399,18 @@ class LitSegNet(pl.LightningModule):
             cm = self.CM(pred, target)
             # print(cm.shape)
             iou = self.IoU_conv(pred, target)
-            dist_l1, dist_l2, correct = self.dist(pred, target)
+            if self.hparams.loss_weight:
+                weight_map = weight_from_target(target)
+            else:
+                weight_map = None
+            dist_l1, dist_l2, correct, correct_w = self.dist(pred, target, weight_map=weight_map)
 
             self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
             self.log('dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             self.log('dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             self.log('acc', correct, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
+            self.log('acc_w', correct_w, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
             #except Exception as e:
                 #print("Couldn't compute eval metrics",e)
             return pred

@@ -47,11 +47,20 @@ python3 lightning.py --test_checkpoint "lightning_logs/2021-04-01 11-41-freiburg
 Transfer learning from object baseline: 2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt
 ```bash
 # driveability TL - prediction on Freiburg test set
-python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset freiburg --loss kl --debug --workers 10 > "docs/results/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt-freiburg-test.txt" 2>&1
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset freiburg --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt-freiburg-test.txt" 2>&1
 
 # driveability TL - prediction on full Cityscapes
-python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset cityscapes --full --loss kl --debug --workers 10 > "docs/results/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt-cityscapes-full.txt" 2>&1
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset cityscapes --full --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt-cityscapes-full.txt" 2>&1
 
 # driveability TL - prediction on full Kitti
-python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset kitti --full --loss kl --debug --workers 10 > "docs/results/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt-kitti-full.txt" 2>&1
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset kitti --full --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-05 09-26-freiburg-c3-kl-0,1,2-rgb-epoch=94-val_loss=0.0758.ckpt-kitti-full.txt" 2>&1
+```
+
+Training from driveability model: 2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt
+```bash
+# driveability - prediction on Freiburg test set
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset freiburg --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt-freiburg-test.txt" 2>&1
+
+# driveability TL - prediction on full Kitti
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset kitti --full --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt-kitti-full.txt" 2>&1
 ```

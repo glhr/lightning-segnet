@@ -48,10 +48,10 @@ class Distance(nn.Module):
         logger.info(f"Distances: mistakes from {self.mistake_min} to {self.mistake_max}")
 
 
-    def forward(self, output, target, debug=False, already_flattened=False):
+    def forward(self, output, target, debug=False, already_flattened=False, weight_map=None):
 
         if not already_flattened:
-            output, target = losses.flatten_tensors(output, target)
+            bs, output, target, weight_map = losses.prepare_sample(output, target, weight_map=weight_map, masking=self.masking)
             output = torch.argmax(output, dim=-1)
 
         if self.masking:
@@ -60,6 +60,7 @@ class Distance(nn.Module):
             # print(output.shape,target.shape)
             output = output[mask]
             target = target[mask]
+            if weight_map is not None: weight_map = weight_map[mask]
 
 
         target_orig, output_orig = torch.clone(target).float(), torch.clone(output).float()
@@ -70,6 +71,13 @@ class Distance(nn.Module):
         incorrect = (target != output)
         correct = (target == output)
 
+        if weight_map is not None:
+            correct_w = correct.long() * weight_map
+            logger.debug(f"correct_w {correct_w}, {weight_map}")
+        else:
+            correct_w = correct
+
+
         dist_l1 = self.l1(output[incorrect].float(), target[incorrect].float())
         dist_l2 = self.l2(output[incorrect].float(), target[incorrect].float())
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
@@ -77,7 +85,7 @@ class Distance(nn.Module):
         dist_l2 = (dist_l2 - self.mistake_min**2)/(self.mistake_max**2)
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
 
-        return dist_l1, dist_l2, correct
+        return dist_l1, dist_l2, correct, {"acc_w": correct_w, "samples_w": torch.sum(weight_map, dim=0, keepdim=False)}
 
 
 class ConfusionMatrix(nn.Module):
