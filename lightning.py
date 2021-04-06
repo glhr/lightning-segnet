@@ -151,7 +151,7 @@ class LitSegNet(pl.LightningModule):
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
-        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="sord")
+        self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="kl")
         self.dist = Distance(ranks=self.hparams.ranks)
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
@@ -173,6 +173,8 @@ class LitSegNet(pl.LightningModule):
         self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
         logger.info(self.hparams.save_prefix)
         create_folder(f"{self.result_folder}/viz_per_epoch")
+        create_folder(f"{self.result_folder}/gt")
+        create_folder(f"{self.result_folder}/orig")
 
 
     def update_model(self):
@@ -320,7 +322,11 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
             # print(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
-            if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss)
+            if self.hparams.loss_weight:
+                weight_map = weight_from_target(target_orig)
+            else:
+                weight_map = None
+            if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss, weight_map=weight_map)
             pred_orig = torch.softmax(pred_orig, dim=1)
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
@@ -379,17 +385,17 @@ class LitSegNet(pl.LightningModule):
                     # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # logger.debug("Generating argmax pred")
                     self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=folder, filename_prefix=f"orig", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(
-                        iter=batch_idx+i,
-                        orig=o,
-                        gt=t,
-                        pred_cls=c,
-                        pred_proba=test,
-                        folder=folder,
-                        filename_prefix=f"res", dataset_name=self.hparams.dataset)
+                    # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
+                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{segnet_model.result_folder}/orig/", filename_prefix=f"orig", dataset_name=self.hparams.dataset)
+                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{segnet_model.result_folder}/gt/", filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                    # self.test_set.dataset.result_to_image(
+                    #     iter=batch_idx+i,
+                    #     orig=o,
+                    #     gt=t,
+                    #     pred_cls=c,
+                    #     pred_proba=test,
+                    #     folder=folder,
+                    #     filename_prefix=f"res", dataset_name=self.hparams.dataset)
                 # self.test_set.dataset.result_to_image(iter=batch_idx+i, # pred_proba=p.squeeze()[self.test_set.dataset.aff_idx["impossible"]], folder=folder, filename_prefix=f"proba0")
                 # self.test_set.dataset.result_to_image(
                 #     iter=batch_idx+i, gt=t, orig=o,
@@ -400,10 +406,7 @@ class LitSegNet(pl.LightningModule):
             cm = self.CM(pred, target)
             # print(cm.shape)
             iou = self.IoU_conv(pred, target)
-            if self.hparams.loss_weight:
-                weight_map = weight_from_target(target)
-            else:
-                weight_map = None
+
             dist_l1, dist_l2, correct, correct_w = self.dist(pred, target, weight_map=weight_map)
 
             self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)

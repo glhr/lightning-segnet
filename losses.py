@@ -56,7 +56,7 @@ def expected_value(p, ranks=[0,1,2]):
     proba_pref = p[ranks[2]]
     return proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
 
-def viz_loss(output, losses, bs, nclasses, target=None, weight_map=None, show={"gt","argmax","loss"}):
+def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map=None, show={"gt","argmax","loss"}):
 
     single_row = len(losses) == 1
     single_col = len(show) == 1
@@ -65,6 +65,9 @@ def viz_loss(output, losses, bs, nclasses, target=None, weight_map=None, show={"
                              figsize=(5.33*len(show), 2.7*len(losses)))
 
     cols = ["gt","argmax","loss","weight_map"]
+
+    if use_w is None:
+        use_w = {k:True for k,v in losses.items()}
 
 
     for i, (loss_name, (loss_target,loss)) in enumerate(losses.items()):
@@ -78,8 +81,8 @@ def viz_loss(output, losses, bs, nclasses, target=None, weight_map=None, show={"
         for _, elem_name in enumerate(cols):
 
             if elem_name in show:
-                if single_col: ax = axes
-                else: ax = axes[col]
+                if single_col: ax = ax
+                else: ax = ax[col]
 
             if elem_name == "gt" and elem_name in show:
                 # print(target.shape)
@@ -102,8 +105,24 @@ def viz_loss(output, losses, bs, nclasses, target=None, weight_map=None, show={"
 
             elif elem_name == "loss" and elem_name in show:
                 loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
-                nsamples = 240 * 480
-                loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy() / nsamples
+
+                target = torch.reshape(target, (bs,240,480,-1))
+                if weight_map is not None: weight_map = torch.reshape(weight_map, (bs,240,480,-1))
+                mask = target[batch].ge(0)
+
+                if weight_map is None or not use_w[loss_name]:
+                    nsamples = torch.sum(torch.ones_like(target[batch][mask]),axis=-1)
+                    logger.debug(f"unweighted - nsamples {nsamples}")
+                    loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
+                    logger.debug(f"loss viz MAX {np.max(loss_viz)}")
+                    loss_viz = loss_viz/nsamples
+                else:
+                    print(weight_map.shape)
+                    nsamples = torch.sum(weight_map[batch][mask],axis=-1)
+                    logger.debug(f"weight map - nsamples {nsamples}")
+                    loss_viz = loss_reshaped[batch].squeeze().numpy()
+                    logger.debug(f"loss viz MAX {np.max(loss_viz)}")
+                    loss_viz = loss_viz/nsamples
                 # print(loss_reshaped[batch].shape, f"loss sum {np.sum(loss_viz)}")
                 im = ax.imshow(loss_viz, cmap=plt.cm.jet)
                 cbar = fig.colorbar(im, fraction=0.046, pad=0.04)
@@ -151,7 +170,7 @@ class CompareLosses(nn.Module):
         self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks, dist=dist)
         self.returnloss = returnloss
 
-    def forward(self, output, target, weight_map=None, debug=False, viz=True):
+    def forward(self, output, target, weight_map=None, debug=True, viz=True):
         # target = torch.fliplr(target)
         # for i in range(target.shape[0]):
             # driveable = torch.zeros_like(target[i])
@@ -166,10 +185,15 @@ class CompareLosses(nn.Module):
         # weight_map = None
 
         losses = {
-            "kl": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
-            "sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
+            "kl": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=None, debug=debug, reduce=False),
+            "kl_w": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
+            #"sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
         }
-        viz_loss(output, losses = {"kl":losses["kl"]}, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"gt","loss"}, target=target)
+        use_w = {
+            "kl": False,
+            "kl_w": True
+        }
+        viz_loss(output, losses = losses, use_w = use_w, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"loss"}, target=target)
         return losses[self.returnloss][1]
 
 
@@ -191,7 +215,10 @@ class KLLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        n_samples = torch.sum(mask)
+        if weight_map is None:
+            n_samples = torch.sum(mask)
+        else:
+            n_samples = torch.sum(weight_map,axis=-1)
         logger.debug(f"KLLoss n_samples {n_samples}")
 
         if debug: print(output,target)
@@ -202,19 +229,17 @@ class KLLoss(nn.Module):
         if weight_map is not None:
             #print(loss.shape, weight_map.shape)
             #print(torch.min(weight_map).item(),torch.max(weight_map).item())
-            loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
+            if debug: print(loss.shape,weight_map.shape)
+            loss = torch.sum(loss, axis=-1)
+            if debug: print(weight_map[:5], torch.max(weight_map), "before weight map", loss[:5], torch.max(loss))
+            loss *= weight_map
+            if debug: print("after weight map", loss[:5], torch.max(loss))
 
         loss_reduced = torch.sum(loss)/n_samples
         logger.debug(f"KL loss reduced {loss_reduced}")
 
         if reduce:
             return loss_reduced
-
-        loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
-        nsamples = 240 * 480
-        for i in range(bs):
-            loss_viz = torch.sum(loss_reshaped[i].squeeze(), axis=-1).numpy() / nsamples
-            logger.debug(f"loss reshaped b{i}: {np.sum(loss_viz)}")
 
         return target, loss
 
@@ -262,7 +287,10 @@ class SORDLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        n_samples = torch.sum(mask)
+        if weight_map is None:
+            n_samples = torch.sum(mask)
+        else:
+            n_samples = torch.sum(weight_map,axis=-1)
         logger.debug(f"SORDLoss n_samples {n_samples}")
 
         if debug: print("output",output)

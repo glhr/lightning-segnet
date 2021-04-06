@@ -40,6 +40,14 @@ python3 lightning.py --test_checkpoint "lightning_logs/2021-04-01 11-41-freiburg
 python3 lightning.py --test_checkpoint "lightning_logs/2021-04-01 11-41-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset kitti --full --loss kl --debug --workers 10 > "docs/results/2021-04-01 11-41-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt-kitti-full.txt" 2>&1
 ```
 
+#### Trained on Cityscapes
+
+2021-03-30 08-51-cityscapes-c3-kl-rgb-epoch=15-val_loss=0.0915.ckpt
+```bash
+# driveability TL - prediction on Cityscapes test set
+python3 lightning.py --test_checkpoint "lightning_logs/2021-03-30 08-51-cityscapes-c3-kl-rgb-epoch=15-val_loss=0.0915.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-03-30 08-51-cityscapes-c3-kl-rgb-epoch=15-val_loss=0.0915.ckpt-cityscapes-full.txt" 2>&1
+```
+
 ### Loss weighting
 
 #### Trained on Freiburg
@@ -63,4 +71,12 @@ python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 21-24-freiburg
 
 # driveability TL - prediction on full Kitti
 python3 lightning.py --test_checkpoint "lightning_logs/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset kitti --full --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-05 21-24-freiburg-c3-kl-0,1,2-rgb-epoch=12-val_loss=0.0780.ckpt-kitti-full.txt" 2>&1
+```
+
+#### Trained on Cityscapes
+
+2021-04-06 00-52-cityscapes-c30-kl-0,1,2-rgb-epoch=6-val_loss=0.0285.ckpt
+```bash
+# driveability TL - prediction on Cityscapes test set
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-06 00-52-cityscapes-c30-kl-0,1,2-rgb-epoch=6-val_loss=0.0285.ckpt" --num_classes 3 --bs 16 --mode affordances --dataset cityscapes --orig_dataset cityscapes --loss kl --debug --workers 10 --loss_weight > "docs/results/2021-04-06 00-52-cityscapes-c30-kl-0,1,2-rgb-epoch=6-val_loss=0.0285.ckpt-cityscapes-full.txt" 2>&1
 ```

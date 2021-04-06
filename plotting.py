@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
+def display_img(img):
+    plt.figure(figsize=(5,5))
+    plt.imshow(img, cmap=plt.cm.gray)
+    plt.axis('off')
+    plt.show()
 
 def plot_confusion_matrix(array, labels=None, filename=None, folder="", vmax=0.9, cbar=False, cmap="Blues", annot=True, vmin=None):
     l = len(array)
