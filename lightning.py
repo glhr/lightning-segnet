@@ -251,7 +251,7 @@ class LitSegNet(pl.LightningModule):
         self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
         self.log(f'{set}_dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
         self.log(f'{set}_acc', correct, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-        self.log(f'{set}_acc_w', correct_w, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
+        # self.log(f'{set}_acc_w', correct_w, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
         self.log(f'{set}_loss', loss, on_epoch=True)
 
         if save:
