@@ -77,6 +77,11 @@ class Distance(nn.Module):
         else:
             correct_w = correct
 
+        if weight_map is not None:
+            samples_w = torch.sum(weight_map, dim=0, keepdim=False)
+        else:
+            samples_w = torch.sum(torch.ones_like(correct), dim=0, keepdim=False)
+
 
         dist_l1 = self.l1(output[incorrect].float(), target[incorrect].float())
         dist_l2 = self.l2(output[incorrect].float(), target[incorrect].float())
@@ -85,7 +90,7 @@ class Distance(nn.Module):
         dist_l2 = (dist_l2 - self.mistake_min**2)/(self.mistake_max**2)
         logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
 
-        return dist_l1, dist_l2, correct, {"acc_w": correct_w, "samples_w": torch.sum(weight_map, dim=0, keepdim=False)}
+        return dist_l1, dist_l2, correct, {"acc_w": correct_w, "samples_w": samples_w}
 
 
 class ConfusionMatrix(nn.Module):
