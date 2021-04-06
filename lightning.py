@@ -309,7 +309,7 @@ class LitSegNet(pl.LightningModule):
         return dist
 
     def reduce_acc_w(self, correct_w):
-        print(correct_w)
+        # print(correct_w)
         acc = torch.sum(correct_w["acc_w"], dim=0, keepdim=False) / torch.sum(correct_w["samples_w"], dim=0, keepdim=False)
         return acc
 
