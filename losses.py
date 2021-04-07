@@ -56,8 +56,10 @@ def expected_value(p, ranks=[0,1,2]):
     proba_pref = p[ranks[2]]
     return proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
 
+idx = 0
 def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map=None, show={"gt","argmax","loss"}):
-
+    global idx
+    idx += 1
     single_row = len(losses) == 1
     single_col = len(show) == 1
 
@@ -148,7 +150,8 @@ def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map
 
     plt.axis('off')
     plt.tight_layout()
-    plt.show()
+    # plt.show()
+    plt.savefig(f"results/loss_weight/cityscapes/{loss_name} - cityscapes - test{idx} - 2021-03-27 14-54-cityscapes-c3-kl-rgb-epoch=191-val_loss=0.0958.png")
 
 
 def prepare_sample(output_orig, target_orig, weight_map=None, masking=True):
@@ -185,16 +188,16 @@ class CompareLosses(nn.Module):
         # weight_map = None
 
         losses = {
-            "kl": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=None, debug=debug, reduce=False),
-            "kl_w": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
+            #"kldiv": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=None, debug=debug, reduce=False),
+            "kldiv_w": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
             #"sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
         }
         use_w = {
-            "kl": False,
-            "kl_w": True
+            "kldiv": False,
+            "kldiv_w": True
         }
         viz_loss(output, losses = losses, use_w = use_w, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"loss"}, target=target)
-        return losses[self.returnloss][1]
+        return losses["kldiv_w"][1]
 
 
 class KLLoss(nn.Module):
@@ -215,10 +218,8 @@ class KLLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        if weight_map is None:
-            n_samples = torch.sum(mask)
-        else:
-            n_samples = torch.sum(weight_map,axis=-1)
+        n_samples = torch.sum(mask)
+        # n_samples = torch.sum(weight_map,axis=-1)
         logger.debug(f"KLLoss n_samples {n_samples}")
 
         if debug: print(output,target)
@@ -287,10 +288,7 @@ class SORDLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        if weight_map is None:
-            n_samples = torch.sum(mask)
-        else:
-            n_samples = torch.sum(weight_map,axis=-1)
+        n_samples = torch.sum(mask)
         logger.debug(f"SORDLoss n_samples {n_samples}")
 
         if debug: print("output",output)
