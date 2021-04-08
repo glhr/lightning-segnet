@@ -30,11 +30,13 @@ def iou_from_confmat(
 
     return scores
 
-class Distance(nn.Module):
-    def __init__(self, masking=True, ranks=[0,1,2]):
+class Mistakes(nn.Module):
+    def __init__(self, ranks, masking=True):
         super().__init__()
         self.l1 = nn.L1Loss(size_average=False, reduce=False, reduction='none')
         self.l2 = nn.MSELoss(size_average=False, reduce=False, reduction='none')
+        self.logl1 = losses.LogDistance(dist="logl1")
+        self.logl2 = losses.LogDistance(dist="logl2")
         self.masking = masking
         self.ranks = sorted(ranks)
         logger.info(f"Distance ranks {self.ranks}")
@@ -82,15 +84,29 @@ class Distance(nn.Module):
         else:
             samples_w = torch.sum(torch.ones_like(correct), dim=0, keepdim=False)
 
+        target, output = target.float(), output.float()
 
-        dist_l1 = self.l1(output[incorrect].float(), target[incorrect].float())
-        dist_l2 = self.l2(output[incorrect].float(), target[incorrect].float())
-        logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
-        dist_l1 = (dist_l1 - self.mistake_min)/self.mistake_max
-        dist_l2 = (dist_l2 - self.mistake_min**2)/(self.mistake_max**2)
-        logger.debug(f"L1 distance {dist_l1} | L2 distance {dist_l2}")
+        dist_l1 = self.l1(output, target)
+        dist_l2 = self.l2(output, target)
+        dist_logl2 = self.logl2(output, target)
+        dist_logl1 = self.logl1(output, target)
 
-        return dist_l1, dist_l2, correct, {"acc_w": correct_w, "samples_w": samples_w}
+        mistake_severity = self.l1(output[incorrect], target[incorrect])
+        logger.debug(f"L1 distance {dist_l1}")
+        logger.debug(f"L1 distance {dist_l1}")
+
+        result = {
+            "dist_l1": dist_l1,
+            "dist_l2": dist_l2,
+            "dist_logl1": dist_logl1,
+            "dist_logl2": dist_logl2,
+            "dist_mistake_severity": (mistake_severity - self.mistake_min)/self.mistake_max,
+            "correct": correct,
+            "correct_w": correct_w,
+            "samples_w": samples_w
+        }
+
+        return result
 
 
 class ConfusionMatrix(nn.Module):

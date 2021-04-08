@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks.base import Callback
 
 from segnet import SegNet, new_input_channels, new_output_channels
 from losses import SORDLoss, KLLoss, CompareLosses
-from metrics import MaskedIoU, ConfusionMatrix, Distance, iou_from_confmat, weight_from_target
+from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
@@ -101,7 +101,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
         parser.add_argument('--modalities', default="rgb")
-        parser.add_argument('--ranks', default="0,1,2")
+        parser.add_argument('--ranks', default="1,2,3")
         parser.add_argument('--dist', default="l1")
         return parser
 
@@ -135,7 +135,7 @@ class LitSegNet(pl.LightningModule):
         if self.hparams.loss in ["sord","compare"]:
             self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
         else:
-            self.hparams.ranks = [0,1,2]
+            self.hparams.ranks = [1,2,3]
 
 
         self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
@@ -152,7 +152,7 @@ class LitSegNet(pl.LightningModule):
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
         self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="kl")
-        self.dist = Distance(ranks=self.hparams.ranks)
+        self.dist = Mistakes(ranks=self.hparams.ranks)
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
         self.hparams.labels_orig = set(range(self.hparams.num_classes))
         self.hparams.labels_orig = list(self.hparams.labels_orig)
@@ -242,18 +242,15 @@ class LitSegNet(pl.LightningModule):
             target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
             # iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
             # self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
-            dist_l1, dist_l2, correct, correct_w = self.dist(pred_proba_aff, target_aff, weight_map=weight_map)
+            mistakes = self.dist(pred_proba_aff, target_aff, weight_map=weight_map)
         elif self.hparams.mode == "affordances":
             # self.log(f'{set}_iou_aff', iou, on_epoch=True)
-            dist_l1, dist_l2, correct, correct_w = self.dist(x_hat, y, weight_map=weight_map)
+            mistakes = self.dist(x_hat, y, weight_map=weight_map)
         elif self.hparams.mode == "objects":
             # self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            dist_l1, dist_l2, correct, correct_w = self.dist(x_hat, y, weight_map=weight_map)
+            mistakes = self.dist(x_hat, y, weight_map=weight_map)
 
-        self.log(f'{set}_dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-        self.log(f'{set}_dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-        self.log(f'{set}_acc', correct, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-        self.log(f'{set}_acc_w', correct_w, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
+        self.log_mistakes(mistakes, prefix=set)
         self.log(f'{set}_loss', loss, on_epoch=True)
 
         if save:
@@ -305,6 +302,7 @@ class LitSegNet(pl.LightningModule):
 
     def reduce_dist(self, dists):
 
+        # print(dists)
         dist = torch.sum(dists, dim=0, keepdim=False) / dists.shape[0]
         #logger.debug(f"l1 distance {dist.item()}")
 
@@ -312,8 +310,18 @@ class LitSegNet(pl.LightningModule):
 
     def reduce_acc_w(self, correct_w):
         # print(correct_w)
-        acc = torch.sum(correct_w["acc_w"], dim=0, keepdim=False) / torch.sum(correct_w["samples_w"], dim=0, keepdim=False)
+        acc = torch.sum(correct_w["correct_w"], dim=0, keepdim=False) / torch.sum(correct_w["samples_w"], dim=0, keepdim=False)
         return acc
+
+    def log_mistakes(self, mistakes, prefix=""):
+        underscore = '_' * int(len(prefix) > 0)
+        for k, v in mistakes.items():
+            if k == "correct_w":
+                self.log(f"{prefix}{underscore}acc_w", {"correct_w": mistakes["correct_w"], "samples_w": mistakes["samples_w"]}, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
+            elif "dist" in k:
+                self.log(f"{prefix}{underscore}{k}", v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
+            elif k == "correct":
+                self.log(f'{prefix}{underscore}acc', v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
 
     def test_step(self, batch, batch_idx):
         sample, target_orig = batch
@@ -340,12 +348,12 @@ class LitSegNet(pl.LightningModule):
                             pass
                         else:
                             proba_lst.append(map)
-                    if self.save: self.orig_dataset.dataset.result_to_image(
-                        iter=batch_idx+i,
-                        proba_lst=proba_lst,
-                        folder=folder,
-                        filename_prefix=f"probas_orig-{self.test_checkpoint}",
-                        dataset_name=self.hparams.dataset)
+                    # if self.save: self.orig_dataset.dataset.result_to_image(
+                    #     iter=batch_idx+i,
+                    #     proba_lst=proba_lst,
+                    #     folder=folder,
+                    #     filename_prefix=f"probas_orig-{self.test_checkpoint}",
+                    #     dataset_name=self.hparams.dataset)
             else:
                 pred = pred_orig
             pred_cls = torch.argmax(pred, dim=1)
@@ -407,16 +415,14 @@ class LitSegNet(pl.LightningModule):
             # print(cm.shape)
             iou = self.IoU_conv(pred, target)
 
-            dist_l1, dist_l2, correct, correct_w = self.dist(pred, target, weight_map=weight_map)
+            mistakes = self.dist(pred, target, weight_map=weight_map)
+            print(mistakes)
+            self.log_mistakes(mistakes, prefix="test")
+
 
             self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
             self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
-            self.log('dist_l1', dist_l1, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-            self.log('dist_l2', dist_l2, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-            self.log('acc', correct, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
-            self.log('acc_w', correct_w, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
-            #except Exception as e:
-                #print("Couldn't compute eval metrics",e)
+
             return pred
 
 

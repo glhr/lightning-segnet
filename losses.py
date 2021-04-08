@@ -14,12 +14,16 @@ def test_loss():
     input = F.one_hot(input, num_classes=n_cls).float()
     # input = input.expand(2, 1, n_cls)
     print(input)
-    target = torch.tensor([n_cls-1])
-    # target = target.expand(2, 1, 1)
-    print(target)
+    ranks = [1,2,3]
+    sord = SORDLoss(n_classes = n_cls, ranks=ranks, masking=True, dist="logl2", alpha = 3)
     kl = KLLoss(n_classes = n_cls, masking=True)
-    print("KL", kl(input, target, debug=True)/n_cls)
-    sord = SORDLoss(n_classes = n_cls, ranks=[0,1,2], masking=True, dist="l2")
+
+    # target = torch.tensor([0])
+    # target = target.expand(2, 1, 1)
+    input = torch.tensor([[ [[0.0]], [[1.0]],  [[0.0]]],[ [[0.0]], [[1.0]],  [[0.0]]], [ [[0.0]], [[1.0]],  [[0.0]]]], requires_grad=True)
+    target = torch.tensor([[[0]],[[1]],[[2]]])
+    # print(target)
+    # print("KL", kl(input, target, debug=True)/n_cls)
     print("SORD", sord(input, target, debug=True)/n_cls)
 
 def flatten_tensors(inp, target, weight_map=None):
@@ -244,40 +248,60 @@ class KLLoss(nn.Module):
 
         return target, loss
 
+class LogDistance(nn.Module):
+    def __init__(self, dist):
+        super().__init__()
+        self.dist = dist
+
+    def forward(self, target, ranks):
+        # print(target)
+        if self.dist == "logl2":
+            dist = torch.pow(torch.abs(torch.log(target.float()) - torch.log(ranks.float())),2)
+        elif self.dist == "logl1":
+            dist = torch.abs(torch.log(target.float()) - torch.log(ranks.float()))
+        return dist
 
 class SORDLoss(nn.Module):
     """
     https://openaccess.thecvf.com/content_CVPR_2019/papers/Diaz_Soft_Labels_for_Ordinal_Regression_CVPR_2019_paper.pdf
     """
 
-    def __init__(self, n_classes, ranks=None, masking=False, dist="l1"):
+    def __init__(self, n_classes, ranks=None, masking=False, dist="l1", alpha=1):
         super().__init__()
         self.num_classes = n_classes
         if ranks is not None and len(ranks) == self.num_classes:
             self.ranks = ranks
         else:
-            self.ranks = np.arange(0, self.num_classes)
+            self.ranks = np.arange(1, self.num_classes+1)
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
         if dist == "l2":
             logger.info("SORD using L2 distance")
             self.dist = nn.MSELoss(reduction='none')
             print(self.dist)
-        else:
+        elif dist == "l1":
             logger.info("SORD using L1 distance")
             self.dist = nn.L1Loss(reduction='none')
+        elif dist in ["logl1", "logl2"]:
+            logger.info(f"SORD using Log distance {dist}")
+            self.dist = LogDistance(dist=dist)
+        self.alpha = alpha
+        logger.info(f"SORD alpha {self.alpha}")
 
     def forward(self, output_orig, target_orig, weight_map=None, debug=False, mod_input=None, reduce=True):
 
+        target = torch.clone(target_orig)
+        print("target",target_orig,torch.unique(target_orig))
         # if debug: print("target_orig",target_orig,torch.unique(target_orig))
         for i,r in enumerate(self.ranks):
-            target_orig[target_orig==i] = r
+            target[target_orig==i] = r
             if debug: print(f"{i} to {r}")
         # print(torch.unique(target_orig))
+        print("target",target,torch.unique(target))
 
         logger.debug(f"SORD - before flatten: target shape {target_orig.shape} | output shape {output_orig.shape}")
 
-        bs, output, target, weight_map = prepare_sample(output_orig, target_orig, weight_map=weight_map, masking=self.masking)
+        bs, output, target, weight_map = prepare_sample(output_orig, target, weight_map=weight_map, masking=self.masking)
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
 
         if self.masking:
@@ -296,7 +320,7 @@ class SORDLoss(nn.Module):
         if debug: print("ranks",ranks)
         target = target.unsqueeze(1).repeat(1, self.num_classes)
         if debug: print("target",target,torch.unique(target))
-        soft_target = -self.dist(target, ranks)  # should be of size N x num_classes
+        soft_target = -self.alpha * self.dist(target, ranks)  # should be of size N x num_classes
         if debug: print("dist target",soft_target)
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: print("soft target",soft_target)
