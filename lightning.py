@@ -54,34 +54,34 @@ import inspect
 
 class CustomCB(Callback):
     def on_train_epoch_start(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_train_epoch_end(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_validation_epoch_start(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_validation_epoch_end(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_epoch_start(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_epoch_end(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_train_start(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_train_end(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_validation_start(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
     def on_validation_end(self, trainer, pl_module):
-        print(f'{inspect.currentframe().f_code.co_name}')
+        logger.debug(f'{inspect.currentframe().f_code.co_name}')
 
 class LitSegNet(pl.LightningModule):
 
@@ -184,12 +184,12 @@ class LitSegNet(pl.LightningModule):
     def new_output(self):
         self.model = new_output_channels(self.model, 3)
         self.hparams.num_classes = 3
-        print(self.model)
+        logger.debug(self.model)
         self.update_settings()
 
     def forward(self, x):
         # in lightning, forward defines the prediction/inference actions
-        # print(x.shape)
+        # logger.debug(x.shape)
         embedding = self.model(x)
         return embedding
 
@@ -205,7 +205,7 @@ class LitSegNet(pl.LightningModule):
 
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-            # print(p.shape)
+            # logger.debug(p.shape)
             if self.hparams.ranks is not None:
                 test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * self.hparams.ranks[0] \
                  + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * self.hparams.ranks[1] \
@@ -302,14 +302,14 @@ class LitSegNet(pl.LightningModule):
 
     def reduce_dist(self, dists):
 
-        # print(dists)
+        # logger.debug(dists)
         dist = torch.sum(dists, dim=0, keepdim=False) / dists.shape[0]
         #logger.debug(f"l1 distance {dist.item()}")
 
         return dist
 
     def reduce_acc_w(self, correct_w):
-        # print(correct_w)
+        # logger.debug(correct_w)
         acc = torch.sum(correct_w["correct_w"], dim=0, keepdim=False) / torch.sum(correct_w["samples_w"], dim=0, keepdim=False)
         return acc
 
@@ -328,7 +328,7 @@ class LitSegNet(pl.LightningModule):
         folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
 
         if self.test_max is None or batch_idx < self.test_max:
-            # print(torch.min(sample),torch.max(sample))
+            # logger.debug(torch.min(sample),torch.max(sample))
             pred_orig = self.model(sample)
             if self.hparams.loss_weight:
                 weight_map = weight_from_target(target_orig)
@@ -339,7 +339,7 @@ class LitSegNet(pl.LightningModule):
             pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
             if self.hparams.mode == "convert":
-                # print(torch.unique(torch.argmax(pred_orig, dim=1)))
+                # logger.debug(torch.unique(torch.argmax(pred_orig, dim=1)))
                 pred = self.orig_dataset.dataset.labels_obj_to_aff(pred_orig, proba=True)
                 for i, p in enumerate(pred_orig):
                     proba_lst = []
@@ -365,10 +365,10 @@ class LitSegNet(pl.LightningModule):
             else:
                 target = target_orig
 
-            # print("pred",pred_cls.shape,"target",target.shape)
+            # logger.debug("pred",pred_cls.shape,"target",target.shape)
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-                # print(p.shape)
+                # logger.debug(p.shape)
                 proba_imposs = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]]
                 proba_poss = p.squeeze()[self.test_set.dataset.aff_idx["possible"]]
                 proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
@@ -412,11 +412,11 @@ class LitSegNet(pl.LightningModule):
 
             #try:
             cm = self.CM(pred, target)
-            # print(cm.shape)
+            # logger.debug(cm.shape)
             iou = self.IoU_conv(pred, target)
 
             mistakes = self.dist(pred, target, weight_map=weight_map)
-            print(mistakes)
+            logger.debug(mistakes)
             self.log_mistakes(mistakes, prefix="test")
 
 
@@ -481,13 +481,13 @@ class LitSegNet(pl.LightningModule):
             # _, val_set, test_set = random_split(val_set, [train_len, val_len, val_len])
             # train_set, val_set, test_set = train_set.dataset, val_set.dataset, test_set.dataset
 
-            # print(test_set[0])
+            # logger.debug(test_set[0])
 
         elif self.hparams.dataset == "thermalvoc":
             train_set = self.get_dataset(set="train")
             val_set = self.get_dataset(set="test", augment=False)
             test_set = val_set
-            # print(test_set[0])
+            # logger.debug(test_set[0])
 
         elif self.hparams.dataset == "cityscapes":
             train_set = self.get_dataset(set="train")
@@ -509,15 +509,15 @@ class LitSegNet(pl.LightningModule):
             loader = DataLoader(train_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
             for images, _ in loader:
                 batch_samples = images.size(0)  # batch size
-                # print(images.shape)
+                # logger.debug(images.shape)
                 images = images.view(batch_samples, images.size(1), -1)
-                # print(images.shape)
+                # logger.debug(images.shape)
                 mean += images.mean(2).sum(0)
                 std += images.std(2).sum(0)
 
             mean /= len(loader.dataset)
             std /= len(loader.dataset)
-            print("Mean and stdev",mean,std)
+            logger.debug("Mean and stdev",mean,std)
             tf = transforms.Compose([
                 transforms.Normalize(mean=(mean,), std=(std,))
             ])
@@ -541,12 +541,12 @@ parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
 if args.debug: enable_debug()
 
-print(args)
+logger.debug(args)
 segnet_model = LitSegNet(conf=args)
 
 if args.prefix is None:
     args.prefix = segnet_model.hparams.save_prefix
-print(args.prefix)
+logger.debug(args.prefix)
 
 checkpoint_callback = ModelCheckpoint(
     dirpath='lightning_logs',

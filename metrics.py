@@ -58,8 +58,8 @@ class Mistakes(nn.Module):
 
         if self.masking:
             mask = target.ge(0)
-            # print(mask, mask.shape)
-            # print(output.shape,target.shape)
+            # logger.debug(mask, mask.shape)
+            # logger.debug(output.shape,target.shape)
             output = output[mask]
             target = target[mask]
             if weight_map is not None: weight_map = weight_map[mask]
@@ -124,8 +124,8 @@ class ConfusionMatrix(nn.Module):
 
         if self.masking:
             mask = target.ge(0)
-            # print(mask, mask.shape)
-            # print(output.shape,target.shape)
+            # logger.debug(mask, mask.shape)
+            # logger.debug(output.shape,target.shape)
             output = output[mask]
             target = target[mask]
 
@@ -156,8 +156,8 @@ class MaskedIoU(nn.Module):
 
         if self.masking:
             mask = target.ge(0)
-            # print(mask, mask.shape)
-            # print(output.shape,target.shape)
+            # logger.debug(mask, mask.shape)
+            # logger.debug(output.shape,target.shape)
             output = output[mask]
             target = target[mask]
 
@@ -180,13 +180,13 @@ class MaskedIoU(nn.Module):
 
 def weight_from_target(target):
 
-    # print(target.shape)
+    # logger.debug(target.shape)
     distmap = torch.zeros_like(target).float()
     for i,sample in enumerate(target):
         map = np.array(compute_distmap(target[i].detach().cpu().numpy())["combined_map"],dtype=np.float32)
-        # print("map",np.unique(map),map.dtype)
+        # logger.debug("map",np.unique(map),map.dtype)
         distmap[i] = torch.from_numpy(map).float()
-        # print("map", torch.unique(distmap[i]))
+        # logger.debug("map", torch.unique(distmap[i]))
     return distmap
 
 def compute_hmap(image_gray):
@@ -199,7 +199,7 @@ hmap = None
 
 def compute_distmap(image_orig, depth_map=None):
     global hmap
-    # print("img shape",image_orig.shape)
+    # logger.debug("img shape",image_orig.shape)
     img_h, img_w = image_orig.shape[:2]
     if image_orig.shape[-1] == 3:
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
@@ -215,7 +215,7 @@ def compute_distmap(image_orig, depth_map=None):
     # distmap_linear[distmap_linear > 50] = 50
     print_range(distmap_linear, nameof(distmap_linear))
 
-    # print(np.unique(distmap))
+    # logger.debug(np.unique(distmap))
 
     if depth_map is None:
         depth_map = compute_hmap(image_gray) if hmap is None else hmap
@@ -232,7 +232,7 @@ def compute_distmap(image_orig, depth_map=None):
 
     distmap = np.copy(distmap_linear)
     for ix, iy in np.ndindex(distmap_linear.shape):
-        # print(np.max(distmap))
+        # logger.debug(np.max(distmap))
         # pow = np.power(distmap_linear[ix, iy], 1-depth_map[ix, iy])
         pow = 1-np.exp(-(distmap_linear[ix, iy])/(1+30*(1-depth_map[ix, iy]**2)**2))
         # pow = 1-np.exp(-(distmap_linear[ix, iy]/(1+10**(1-depth_map[ix, iy]))))
@@ -277,7 +277,7 @@ if __name__ == "__main__":
     parser.add_argument('--iou', default=False, action="store_true")
     parser.add_argument('--debug', default=True, action="store_true")
     args = parser.parse_args()
-    print(args)
+    logger.debug(args)
 
     if args.debug: enable_debug()
 
@@ -293,7 +293,7 @@ if __name__ == "__main__":
             depth_gray = imread(depth_path, as_gray=True).astype(np.float32)
             depth_gray = cv2.resize(depth_gray, dsize=(480,240))
             depth_gray = np.max(depth_gray) - depth_gray
-            print(np.unique(depth_gray))
+            logger.debug(np.unique(depth_gray))
             result = compute_distmap(image_orig, depth_map=depth_gray)
         else:
             result = compute_distmap(image_orig)
@@ -354,7 +354,7 @@ if __name__ == "__main__":
         seg_gt = imread(gt_path,as_gray=True).astype(np.float32)
         unique,cnts = np.unique(seg_gt,return_counts=True)
         minority_pixels = np.argmin(cnts)
-        print(unique)
+        logger.debug(unique)
         seg_gt[seg_gt == unique[minority_pixels]] = unique[0]
 
         unique,cnts = np.unique(seg_gt,return_counts=True)
@@ -364,14 +364,14 @@ if __name__ == "__main__":
 
         pred = np.copy(seg_gt)
         pred[pred==0] = random_noise(seg_gt,mode='salt',amount=0.5,clip=False)[pred==0]
-        #print(np.unique(pred))
+        #logger.debug(np.unique(pred))
 
         target_tensor = torch.tensor([seg_gt])
         pred_tensor = torch.tensor([pred])
         target_tensor = target_tensor.view(-1,)
         pred_tensor = pred_tensor.view(-1,)
         IoU = MaskedIoU(labels=range(3))
-        print(IoU(pred_tensor, target_tensor, debug=True, already_flattened=True))
+        logger.debug(IoU(pred_tensor, target_tensor, debug=True, already_flattened=True))
 
         fig, axes = plt.subplots(ncols=2, sharex=True, sharey=True,
                                  figsize=(15, 4))
