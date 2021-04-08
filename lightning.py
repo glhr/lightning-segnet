@@ -149,7 +149,7 @@ class LitSegNet(pl.LightningModule):
 
     def update_settings(self):
 
-        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, dist_alpha = self.hparams.dist_alpha)
+        self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, alpha = self.hparams.dist_alpha)
         self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
         self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="kl")
