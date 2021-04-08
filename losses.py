@@ -248,17 +248,24 @@ class KLLoss(nn.Module):
 
         return target, loss
 
-class LogDistance(nn.Module):
+class Distance(nn.Module):
     def __init__(self, dist):
         super().__init__()
         self.dist = dist
+        self.mse = nn.MSELoss(reduction='none')
+        self.l1 = nn.L1Loss(reduction='none')
 
-    def forward(self, target, ranks):
+    def forward(self, target, ranks, alpha):
         # logger.debug(target)
         if self.dist == "logl2":
-            dist = torch.pow(torch.abs(torch.log(target.float()) - torch.log(ranks.float())),2)
+            dist = torch.pow(torch.abs(alpha*(torch.log(target.float()) - torch.log(ranks.float()))),2)
         elif self.dist == "logl1":
-            dist = torch.abs(torch.log(target.float()) - torch.log(ranks.float()))
+            dist = torch.abs(torch.log((target.float() - torch.log(ranks.float()))))
+        elif self.dist == "l2":
+            dist = self.mse(alpha*target, alpha*ranks)
+            #logger.debug(self.dist)
+        elif self.dist == "l1":
+            dist = self.l1(alpha*target, alpha*ranks)
         return dist
 
 class SORDLoss(nn.Module):
@@ -275,17 +282,9 @@ class SORDLoss(nn.Module):
             self.ranks = np.arange(1, self.num_classes+1)
         self.masking = masking
         logger.info(f"SORD ranks: {self.ranks}")
-        if dist == "l2":
-            logger.info("SORD using L2 distance")
-            self.dist = nn.MSELoss(reduction='none')
-            logger.debug(self.dist)
-        elif dist == "l1":
-            logger.info("SORD using L1 distance")
-            self.dist = nn.L1Loss(reduction='none')
-        elif dist in ["logl1", "logl2"]:
-            logger.info(f"SORD using Log distance {dist}")
-            self.dist = LogDistance(dist=dist)
+
         self.alpha = alpha
+        self.dist = Distance(dist=dist)
         logger.info(f"SORD alpha {self.alpha}")
 
     def forward(self, output_orig, target_orig, weight_map=None, debug=False, mod_input=None, reduce=True):
@@ -320,7 +319,7 @@ class SORDLoss(nn.Module):
         if debug: logger.debug(f"ranks {ranks}")
         target = target.unsqueeze(1).repeat(1, self.num_classes)
         if debug: logger.debug(f"target {target} {torch.unique(target)}")
-        soft_target = - self.dist(self.alpha*target, self.alpha*ranks)  # should be of size N x num_classes
+        soft_target = - self.dist(target, ranks, self.alpha)  # should be of size N x num_classes
         if debug: logger.debug(f"dist target {soft_target}")
         soft_target = torch.softmax(soft_target, dim=-1)
         if debug: logger.debug(f"soft target {soft_target}")
