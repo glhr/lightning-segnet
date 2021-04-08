@@ -35,8 +35,8 @@ class Mistakes(nn.Module):
         super().__init__()
         self.l1 = nn.L1Loss(size_average=False, reduce=False, reduction='none')
         self.l2 = nn.MSELoss(size_average=False, reduce=False, reduction='none')
-        self.logl1 = losses.LogDistance(dist="logl1")
-        self.logl2 = losses.LogDistance(dist="logl2")
+        self.logl1 = losses.Distance(dist="logl1")
+        self.logl2 = losses.Distance(dist="logl2")
         self.masking = masking
         self.ranks = sorted(ranks)
         logger.info(f"Distance ranks {self.ranks}")

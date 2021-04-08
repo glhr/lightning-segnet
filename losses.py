@@ -255,7 +255,7 @@ class Distance(nn.Module):
         self.mse = nn.MSELoss(reduction='none')
         self.l1 = nn.L1Loss(reduction='none')
 
-    def forward(self, target, ranks, alpha):
+    def forward(self, target, ranks, alpha=1):
         # logger.debug(target)
         if self.dist == "logl2":
             dist = torch.pow(torch.abs(alpha*(torch.log(target.float()) - torch.log(ranks.float()))),2)
