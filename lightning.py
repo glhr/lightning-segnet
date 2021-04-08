@@ -566,7 +566,7 @@ callbacks = [lr_monitor]
 
 if args.train:
     logger.warning("Training phase")
-    wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False)
+    wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False, name = segnet_model.hparams.save_prefix)
     wandb_logger.log_hyperparams(segnet_model.hparams)
     #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
