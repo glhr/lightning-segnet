@@ -168,7 +168,7 @@ class LitSegNet(pl.LightningModule):
 
         self.result_folder = f"results/{self.hparams.dataset}/"
         self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
-        if self.hparams.loss == "sord" is not None:
+        if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-{self.hparams.dist}'
         self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
