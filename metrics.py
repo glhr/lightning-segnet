@@ -100,7 +100,7 @@ class Mistakes(nn.Module):
             "dist_l2": dist_l2,
             "dist_logl1": dist_logl1,
             "dist_logl2": dist_logl2,
-            "dist_mistake_severity": (mistake_severity - self.mistake_min)/self.mistake_max,
+            "dist_mistake_severity": (mistake_severity - self.mistake_min)/(self.mistake_max - self.mistake_min),
             "correct": correct,
             "correct_w": correct_w,
             "samples_w": samples_w
