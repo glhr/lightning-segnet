@@ -305,7 +305,7 @@ class SORDLoss(nn.Module):
         logger.debug(f"SORD - after flatten: target shape {target.shape} | output shape {output.shape}")
 
         if self.masking:
-            logger.info("SORD masking")
+            logger.debug("SORD masking")
             mask = target.ge(0)
             loss = torch.zeros_like(output)
             target[~mask] = 0
