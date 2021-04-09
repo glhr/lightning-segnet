@@ -40,18 +40,6 @@
  'test_iou': 0.8972585201263428
  ```
 
-2021-04-08 15-23-freiburg-c6-sord-1,2,3-a1-logl1-rgb-epoch=74-val_loss=0.0076.ckpt
-```
-  'test_acc': 0.9417532682418823,
-  'test_acc_w': 0.9417532682418823,
-  'test_dist_l1': 0.059004928916692734,
-  'test_dist_l2': 0.06052134558558464,
-  'test_dist_logl1': 0.03542493283748627,
-  'test_dist_logl2': 0.02276129089295864,
-  'test_dist_mistake_severity': 0.013017183169722557,
-  'test_iou': 0.892068088054657
-```
-
 2021-04-08 14-28-freiburg-c6-sord-1,2,3-a1-logl2-rgb-epoch=74-val_loss=0.0061.ckpt
  ```
  'test_acc': 0.9422792196273804,
@@ -70,49 +58,36 @@
 ```
  'test_acc': 0.9439340829849243,
  'test_acc_w': 0.9439340829849243,
- 'test_dist_l1': 0.05678519606590271,
- 'test_dist_l2': 0.05822374299168587,
- 'test_dist_logl1': 0.03452562168240547,
+ 'test_dist_l1': 0.05678519234061241,
+ 'test_dist_l2': 0.05822373926639557,
+ 'test_dist_logl1': nan,
  'test_dist_logl2': 0.022375261411070824,
- 'test_dist_mistake_severity': 0.012829065322875977,
+ 'test_dist_mistake_severity': 0.012829066254198551,
  'test_iou': 0.8959423303604126
  ```
 
-2021-04-08 16-19-freiburg-c6-sord-1,2,3-a2-l2-rgb-epoch=66-val_loss=0.0643.ckpt
+2021-04-09 08-26-freiburg-c6-sord-1,2,3-a2-l2-rgb-epoch=43-val_loss=0.1179.ckpt
 ```
- 'test_acc': 0.9437924027442932,
- 'test_acc_w': 0.9437924027442932,
- 'test_dist_l1': 0.056840021163225174,
- 'test_dist_l2': 0.05810483172535896,
- 'test_dist_logl1': 0.03463263064622879,
- 'test_dist_logl2': 0.022428585216403008,
- 'test_dist_mistake_severity': 0.011251214891672134,
- 'test_iou': 0.8956990242004395
-```
-
-2021-04-08 17-21-freiburg-c6-sord-1,2,3-a2-logl1-rgb-epoch=66-val_loss=0.0271.ckpt
-```
- 'test_acc': 0.9423035383224487,
- 'test_acc_w': 0.9423035383224487,
- 'test_dist_l1': 0.05848090350627899,
- 'test_dist_l2': 0.060049787163734436,
- 'test_dist_logl1': 0.03551465645432472,
- 'test_dist_logl2': 0.023021886125206947,
- 'test_dist_mistake_severity': 0.01359600480645895,
- 'test_iou': 0.8930296897888184
+ 'test_acc': 0.9431765079498291,
+ 'test_acc_w': 0.9431765079498291,
+ 'test_dist_l1': 0.05776067078113556,
+ 'test_dist_l2': 0.05963503196835518,
+ 'test_dist_logl1': nan,
+ 'test_dist_logl2': 0.023399347439408302,
+ 'test_dist_mistake_severity': 0.01649284176528454,
+ 'test_iou': 0.8945697546005249
 ```
 
-
-2021-04-08 15-51-freiburg-c6-sord-1,2,3-a2-logl2-rgb-epoch=74-val_loss=0.0197.ckpt
+2021-04-09 09-04-freiburg-c6-sord-1,2,3-a2-logl2-rgb-epoch=74-val_loss=0.0498.ckpt
 ```
- 'test_acc': 0.9418748021125793,
- 'test_acc_w': 0.9418748021125793,
- 'test_dist_l1': 0.058796659111976624,
- 'test_dist_l2': 0.06013959273695946,
- 'test_dist_logl1': 0.03544826805591583,
- 'test_dist_logl2': 0.02279670722782612,
- 'test_dist_mistake_severity': 0.011552073992788792,
- 'test_iou': 0.8922308683395386
+ 'test_acc': 0.9405284523963928,
+ 'test_acc_w': 0.9405285120010376,
+ 'test_dist_l1': 0.06030075624585152,
+ 'test_dist_l2': 0.06195925176143646,
+ 'test_dist_logl1': nan,
+ 'test_dist_logl2': 0.023650022223591805,
+ 'test_dist_mistake_severity': 0.013943624682724476,
+ 'test_iou': 0.8899098634719849
 ```
 
 # Cityscapes
