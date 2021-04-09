@@ -8,14 +8,17 @@ import metrics
 
 import matplotlib.pyplot as plt
 
-def test_loss():
+import scipy
+
+def test_loss(alpha, dist, debug=False):
+    logger.warning(f"dist {dist}, alpha {alpha}")
     n_cls = 3
     input = torch.as_tensor([n_cls-1])
     input = F.one_hot(input, num_classes=n_cls).float()
     # input = input.expand(2, 1, n_cls)
     logger.debug(input)
     ranks = [1,2,3]
-    sord = SORDLoss(n_classes = n_cls, ranks=ranks, masking=True, dist="logl2", alpha = 2)
+    sord = SORDLoss(n_classes = n_cls, ranks=ranks, masking=True, dist=dist, alpha = alpha)
     kl = KLLoss(n_classes = n_cls, masking=True)
 
     # target = torch.tensor([0])
@@ -24,7 +27,13 @@ def test_loss():
     target = torch.tensor([[[0]],[[1]],[[2]]])
     # logger.debug(target)
     # logger.debug("KL", kl(input, target, debug=True)/n_cls)
-    logger.debug(f"SORD {sord(input, target, debug=True)/n_cls}")
+    soft,loss = sord(input, target, debug=debug, reduce=False)
+    loss = loss/n_cls
+
+    soft = soft.detach().cpu().numpy()
+    entropy = scipy.stats.entropy(soft, axis=-1)
+    logger.info(f"soft target {soft}")
+    logger.info(f"entropy {entropy}")
 
 def flatten_tensors(inp, target, weight_map=None):
     # ~ logger.debug(inp.shape, target.shape)
@@ -358,12 +367,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # parser.add_argument('--pred', default="pref")
     # parser.add_argument('--gt', default="pref")
-    parser.add_argument('--debug', default=True, action="store_true")
+    parser.add_argument('--debug', default=False, action="store_true")
+    parser.add_argument('--alpha', type=int, default=1)
+    parser.add_argument('--dist', default="l1")
     args = parser.parse_args()
     logger.debug(args)
     if args.debug: enable_debug()
 
-    test_loss()
+    test_loss(alpha=args.alpha, dist=args.dist, debug=args.debug)
 
     # from metrics import MaskedIoU
     #
