@@ -319,7 +319,8 @@ class LitSegNet(pl.LightningModule):
         underscore = '_' * int(len(prefix) > 0)
         for k, v in mistakes.items():
             if k == "correct_w":
-                self.log(f"{prefix}{underscore}acc_w", {"correct_w": mistakes["correct_w"], "samples_w": mistakes["samples_w"]}, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
+                if prefix != "train":
+                    self.log(f"{prefix}{underscore}acc_w", {"correct_w": mistakes["correct_w"], "samples_w": mistakes["samples_w"]}, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
             elif "dist" in k:
                 self.log(f"{prefix}{underscore}{k}", v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             elif k == "correct":
