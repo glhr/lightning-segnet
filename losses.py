@@ -231,7 +231,10 @@ class KLLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        n_samples = torch.sum(mask)
+        if weight_map is None:
+            n_samples = torch.sum(mask)
+        else:
+            n_samples = torch.sum(weight_map,axis=-1)
         # n_samples = torch.sum(weight_map,axis=-1)
         logger.debug(f"KLLoss n_samples {n_samples}")
 
@@ -244,9 +247,8 @@ class KLLoss(nn.Module):
             #logger.debug(loss.shape, weight_map.shape)
             #logger.debug(torch.min(weight_map).item(),torch.max(weight_map).item())
             if debug: logger.debug(f"{loss.shape},{weight_map.shape}")
-            loss = torch.sum(loss, axis=-1)
             if debug: logger.debug(f"{weight_map[:5]}, {torch.max(weight_map)} before weight map {loss[:5]}, {torch.max(loss)}")
-            loss *= weight_map
+            loss *= weight_map.unsqueeze(1).repeat(1, self.num_classes)
             if debug: logger.debug(f"after weight map {loss[:5]} {torch.max(loss)}")
 
         loss_reduced = torch.sum(loss)/n_samples
@@ -320,7 +322,10 @@ class SORDLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        n_samples = torch.sum(mask)
+        if weight_map is None:
+            n_samples = torch.sum(mask)
+        else:
+            n_samples = torch.sum(weight_map,axis=-1)
         logger.debug(f"SORDLoss n_samples {n_samples}")
 
         if debug: logger.debug(f"output {output}")
