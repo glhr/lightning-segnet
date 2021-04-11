@@ -359,7 +359,7 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=True):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=False):
         # print(imgs)
         if imgs["image"] is None:
             img_height, img_width = imgs[self.modalities[0]].shape[:2]
