@@ -46,7 +46,7 @@ parser.add_argument('--prefix', default=None)
 parser.add_argument('--debug', default=False, action="store_true")
 parser.add_argument('--save', default=False, action="store_true")
 parser.add_argument('--viz', default=False, action="store_true")
-parser.add_argument('--full_dataset', default=False, action="store_true")
+parser.add_argument('--test_set', default="test")
 parser.add_argument('--update_output_layer', default=False, action="store_true")
 parser.add_argument('--init', default=False, action="store_true")
 
@@ -106,7 +106,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist_alpha', type=int, default=1)
         return parser
 
-    def __init__(self, conf, viz=False, save=False, full_dataset=False, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
         self.save = save
@@ -118,7 +118,7 @@ class LitSegNet(pl.LightningModule):
         self.hparams.normalize = False
         self.test_checkpoint = test_checkpoint
         self.test_max = test_max
-        self.full = full_dataset
+        self.test_set = test_set
 
         self.model = SegNet(num_classes=self.hparams.num_classes)
         self.hparams.modalities = self.hparams.modalities.split(",")
@@ -449,62 +449,12 @@ class LitSegNet(pl.LightningModule):
         return dataset
 
     def get_dataset_splits(self, normalize=False):
-        if self.hparams.dataset == "freiburg":
-            train_set = self.get_dataset(set="train")
-            if self.full:
-                test_set = self.get_dataset(set="full",augment=False)
-            else:
-                test_set = self.get_dataset(set="test",augment=False)
-            val_set = self.get_dataset(set="test",augment=False)
-            # total_len = len(train_set)
-            # val_len = int(0.1*total_len)
-            # train_len = total_len - val_len
-            # train_set, val_set = random_split(train_set, [train_len, val_len])
-
-        elif self.hparams.dataset == "own":
-            train_set = self.get_dataset(set="train")
-            test_set = self.get_dataset(set="test")
-            val_set = test_set
-            # total_len = len(train_set)
-            # val_len = int(0.1*total_len)
-            # train_len = total_len - val_len
-            # train_set, val_set = random_split(train_set, [train_len, val_len])
-
-        elif self.hparams.dataset == "kitti":
-            train_set = self.get_dataset(set="train")
-            val_set = self.get_dataset(set="val", augment=False)
-            if self.full:
-                test_set = self.get_dataset(set="full", augment=False)
-            else:
-                test_set = self.get_dataset(set="test", augment=False)
-            # total_len = len(train_set)
-            # val_len = int(0.2*total_len)
-            # train_len = total_len - val_len*2
-            # train_set, _, _ = random_split(train_set, [train_len, val_len, val_len])
-            # _, val_set, test_set = random_split(val_set, [train_len, val_len, val_len])
-            # train_set, val_set, test_set = train_set.dataset, val_set.dataset, test_set.dataset
-
-            # logger.debug(test_set[0])
-
-        elif self.hparams.dataset == "thermalvoc":
-            train_set = self.get_dataset(set="train")
-            val_set = self.get_dataset(set="test", augment=False)
-            test_set = val_set
-            # logger.debug(test_set[0])
-
-        elif self.hparams.dataset == "cityscapes":
-            train_set = self.get_dataset(set="train")
-            val_set = self.get_dataset(set="val")
-            if self.full:
-                test_set = self.get_dataset(set="full",augment=False)
-            else:
-                test_set = self.get_dataset(set="test",augment=False)
-
-
-        elif self.hparams.dataset == "synthia":
-            train_set = self.get_dataset(set="train")
-            val_set = self.get_dataset(set="val")
+        train_set = self.get_dataset(set="train")
+        if self.test_set is not None:
+            test_set = self.get_dataset(set=self.test_set,augment=False)
+        else:
             test_set = self.get_dataset(set="test",augment=False)
+        val_set = self.get_dataset(set="val",augment=False)
 
         if normalize:
             mean = 0.
@@ -599,7 +549,7 @@ else:
     trainer = pl.Trainer.from_argparse_args(args)
     chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
-    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, full_dataset=args.full_dataset, conf=args)
+    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
     trained_model.update_model()
     if args.update_output_layer:
         segnet_model.new_output()
