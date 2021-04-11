@@ -528,9 +528,10 @@ if args.train:
     #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
 
-    segnet_model.update_model()
+
     if args.update_output_layer or args.init:
         segnet_model = segnet_model.load_from_checkpoint(checkpoint_path=args.train_checkpoint, conf=args)
+        segnet_model.update_model()
         if args.update_output_layer: segnet_model.new_output()
         trainer = pl.Trainer.from_argparse_args(args,
             check_val_every_n_epoch=1,
@@ -539,6 +540,7 @@ if args.train:
             checkpoint_callback=checkpoint_callback,
             callbacks=callbacks)
     else:
+        segnet_model.update_model()
         trainer = pl.Trainer.from_argparse_args(args,
             check_val_every_n_epoch=1,
             # ~ log_every_n_steps=10,
