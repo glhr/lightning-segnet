@@ -89,7 +89,7 @@ class Mistakes(nn.Module):
         dist_l1 = self.l1(output, target)
         dist_l2 = self.l2(output, target)
         dist_logl2 = self.logl2(output, target)
-        dist_logl1 = self.logl1(output, target)
+        #dist_logl1 = self.logl1(output, target)
 
         mistake_severity = self.l1(output[incorrect], target[incorrect])
         logger.debug(f"L1 distance {dist_l1}")
@@ -98,7 +98,7 @@ class Mistakes(nn.Module):
         result = {
             "dist_l1": dist_l1,
             "dist_l2": dist_l2,
-            "dist_logl1": dist_logl1,
+            #"dist_logl1": dist_logl1,
             "dist_logl2": dist_logl2,
             "dist_mistake_severity": (mistake_severity - self.mistake_min)/(self.mistake_max - self.mistake_min),
             "correct": correct,
