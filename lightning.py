@@ -120,9 +120,10 @@ class LitSegNet(pl.LightningModule):
         self.test_max = test_max
         self.test_set = test_set
 
-        self.model = SegNet(num_classes=self.hparams.num_classes)
         self.hparams.modalities = self.hparams.modalities.split(",")
         logger.warning(f"modalities {self.hparams.modalities}")
+
+        self.model = SegNet(num_classes=self.hparams.num_classes, n_init_features=len(self.hparams.modalities))
 
         self.datasets = {
             "freiburg": FreiburgDataLoader,
@@ -330,7 +331,7 @@ class LitSegNet(pl.LightningModule):
                 self.log(f'{prefix}{underscore}acc', v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
 
     def test_step(self, batch, batch_idx):
-        return self.validation_step(batch, batch_idx)
+        # return self.validation_step(batch, batch_idx)
         sample, target_orig = batch
         folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
 
@@ -556,7 +557,6 @@ else:
     chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
     trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
-    trained_model.update_model()
     if args.update_output_layer:
         segnet_model.new_output()
     trainer.test(trained_model)
