@@ -110,7 +110,7 @@ class MMDataLoader(Dataset):
         else: transformed_imgs = self.data_augmentation(img_dict, apply='resize_only')
         modGT = transformed_imgs['mask']
         if use["rgb"]:
-            modRGB = transformed_imgs['rgb']
+            modRGB = transformed_imgs['image']
         if use["depth"]:
             modDepth = transformed_imgs['depth']
         if use["ir"]:
