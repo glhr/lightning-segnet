@@ -231,10 +231,7 @@ class KLLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        if weight_map is None:
-            n_samples = torch.sum(mask)
-        else:
-            n_samples = torch.sum(weight_map,axis=-1)
+        n_samples = torch.sum(mask)
         # n_samples = torch.sum(weight_map,axis=-1)
         logger.debug(f"KLLoss n_samples {n_samples}")
 
@@ -322,10 +319,7 @@ class SORDLoss(nn.Module):
         else:
             mask = torch.ones_like(target)
 
-        if weight_map is None:
-            n_samples = torch.sum(mask)
-        else:
-            n_samples = torch.sum(weight_map,axis=-1)
+        n_samples = torch.sum(mask)
         logger.debug(f"SORDLoss n_samples {n_samples}")
 
         if debug: logger.debug(f"output {output}")
