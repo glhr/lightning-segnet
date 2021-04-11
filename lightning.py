@@ -184,6 +184,7 @@ class LitSegNet(pl.LightningModule):
     def update_model(self):
         channels = len(self.hparams.modalities)
         self.model = new_input_channels(self.model, channels)
+        logger.warning(f"Model has {channels} input channels")
 
     def new_output(self):
         self.model = new_output_channels(self.model, 3)
@@ -329,6 +330,7 @@ class LitSegNet(pl.LightningModule):
                 self.log(f'{prefix}{underscore}acc', v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
 
     def test_step(self, batch, batch_idx):
+        return self.validation_step(batch, batch_idx)
         sample, target_orig = batch
         folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
 

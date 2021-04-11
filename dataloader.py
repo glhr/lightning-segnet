@@ -108,7 +108,9 @@ class MMDataLoader(Dataset):
 
         if augment: transformed_imgs = self.data_augmentation(img_dict, apply='all')
         else: transformed_imgs = self.data_augmentation(img_dict, apply='resize_only')
-        modRGB, modGT = transformed_imgs['image'], transformed_imgs['mask']
+        modGT = transformed_imgs['mask']
+        if use["rgb"]:
+            modRGB = transformed_imgs['rgb']
         if use["depth"]:
             modDepth = transformed_imgs['depth']
         if use["ir"]:
@@ -137,7 +139,7 @@ class MMDataLoader(Dataset):
 
         imgs = []
         img = {
-            'rgb': modRGB if use["rgb"] is not None else None,
+            'rgb': modRGB if use["rgb"] else None,
             'depth': modDepth if use["depth"] else None,
             'ir': modIR if use["ir"] else None
         }
@@ -357,8 +359,14 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=False):
-        img_height, img_width = imgs["image"].shape[:2]
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=True):
+        # print(imgs)
+        if imgs["image"] is None:
+            img_height, img_width = imgs[self.modalities[0]].shape[:2]
+            imgs["image"] = np.zeros_like(imgs[self.modalities[0]])
+            imgs["image"] = np.dstack([imgs["image"]] * 3)
+        else:
+            img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
 
         additional_targets = dict()
