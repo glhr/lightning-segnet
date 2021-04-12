@@ -21,9 +21,9 @@ class FusionNet(nn.Module):
             # self.encoder_mod1.res_n50_enc.layer3[2].dropout = False
             self.encoder_mod2 = encoders[1]
             # self.encoder_mod2.res_n50_enc.layer3[2].dropout = False
-            self.ssma_s1 = SSMA(24, 6)
-            self.ssma_s2 = SSMA(24, 6)
-            self.ssma_res = SSMA(2048, 16)
+            # self.ssma_s1 = SSMA(24, 6)
+            # self.ssma_s2 = SSMA(24, 6)
+            self.ssma_res = SSMA(512, 16)
             self.fusion = True
         else:
             self.encoder_mod1 = encoders[0]
@@ -63,15 +63,19 @@ class FusionNet(nn.Module):
         feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, feat)
 
         if self.fusion:
-            m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
+            # logger.info("FUSING SHIT :D")
+            feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, feat)
+            #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
             #skip1 = self.ssma_s1(skip1, m2_s1)
-            m1_x = self.ssma_res(m1_x, m2_x)
+            feat = self.ssma_res(feat_1, feat_2)
+        else:
+            feat = feat_1
 
         #m1_x = self.eASPP(m1_x)
         
         # decoder path, upsampling with corresponding indices and size
-        feat = self.decoder_path(self.decoder, feat_1, indices_1, unpool_sizes_1)
+        feat = self.decoder_path(self.decoder, feat, indices_1, unpool_sizes_1)
             
         return self.classifier(feat)
 
@@ -194,5 +198,6 @@ if __name__ == "__main__":
     segnet = SegNet(num_classes=3)
     encoder = segnet.encoders
     #print(encoder)
-    fusion = FusionNet(num_classes=3, encoders=[encoder], decoder=segnet.decoders)
+    fusion = FusionNet( encoders=[encoder], decoder=segnet.decoders, classifier=segnet.classifier)
     print(fusion)
+    print(SSMA(features=512, bottleneck=3))

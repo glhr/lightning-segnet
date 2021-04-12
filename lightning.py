@@ -500,7 +500,7 @@ class LitFusion(LitSegNet):
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         segnet = self.model
-        self.model = FusionNet(encoders=[segnet.encoders], decoder=segnet.decoders, classifier=segnet.classifier)
+        self.model = FusionNet(encoders=[segnet.encoders,segnet.encoders], decoder=segnet.decoders, classifier=segnet.classifier)
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
