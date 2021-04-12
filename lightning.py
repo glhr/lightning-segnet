@@ -276,7 +276,6 @@ class LitSegNet(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss = self.predict(batch, set="val")
-        logger.info(loss)
         return loss
 
     def reduce_cm(self, cms, save=False):
