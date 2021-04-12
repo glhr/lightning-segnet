@@ -12,6 +12,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.callbacks.base import Callback
 
 from segnet import SegNet, new_input_channels, new_output_channels
+from fusion import FusionNet
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
 from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader
@@ -495,12 +496,18 @@ class LitSegNet(pl.LightningModule):
     def test_dataloader(self):
         return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
 
+class LitFusion(LitSegNet):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
+        super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
+        segnet = self.model
+        self.model = FusionNet(encoders=[segnet.encoders], decoder=segnet.decoders, classifier=segnet.classifier)
+
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
 if args.debug: enable_debug()
 
 logger.debug(args)
-segnet_model = LitSegNet(conf=args)
+segnet_model = LitFusion(conf=args)
 
 if args.prefix is None:
     args.prefix = segnet_model.hparams.save_prefix
@@ -556,7 +563,7 @@ else:
     trainer = pl.Trainer.from_argparse_args(args)
     chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
     create_folder(f"{segnet_model.result_folder}/{chkpt}")
-    trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
+    #trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
     if args.update_output_layer:
         segnet_model.new_output()
-    trainer.test(trained_model)
+    trainer.test(segnet_model)

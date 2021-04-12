@@ -6,13 +6,12 @@ from segnet import SegNet
 from utils import logger
 
 
-class Fusion(nn.Module):
+class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, C, encoders, decoder):
-        super(Fusion, self).__init__()
+    def __init__(self, encoders, decoder, classifier):
+        super(FusionNet, self).__init__()
 
-        self.num_categories = C
         self.fusion = False
 
         logger.debug(len(encoders), encoders)
@@ -31,6 +30,21 @@ class Fusion(nn.Module):
 
         self.eASPP = eASPP()
         self.decoder = decoder
+        self.classifier = classifier
+        
+    def encoder_path(self, encoder, feat):        
+        indices = []
+        unpool_sizes = []
+        for i in range(0, 5):
+            (feat, ind), size = encoder[i](feat)
+            indices.append(ind)
+            unpool_sizes.append(size)
+        return feat, indices, unpool_sizes
+        
+    def decoder_path(self, decoder, feat, indices, unpool_sizes):
+        for i in range(0, 5):
+            feat = decoder[i](feat, indices[4 - i], unpool_sizes[4 - i])
+        return feat
 
     def forward(self, mod1, mod2=None):
         """Forward pass
@@ -42,19 +56,27 @@ class Fusion(nn.Module):
         :param mod2: modality 2
         :return: final output and auxiliary output 1 and 2
         """
-        m1_x, skip2, skip1 = self.encoder_mod1(mod1)
+        logger.debug(mod1.shape)
+
+        feat = mod1
+
+        feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, feat)
 
         if self.fusion:
             m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
-            skip2 = self.ssma_s2(skip2, m2_s2)
-            skip1 = self.ssma_s1(skip1, m2_s1)
+            #skip2 = self.ssma_s2(skip2, m2_s2)
+            #skip1 = self.ssma_s1(skip1, m2_s1)
             m1_x = self.ssma_res(m1_x, m2_x)
 
-        m1_x = self.eASPP(m1_x)
+        #m1_x = self.eASPP(m1_x)
+        
+        # decoder path, upsampling with corresponding indices and size
+        feat = self.decoder_path(self.decoder, feat_1, indices_1, unpool_sizes_1)
+            
+        return self.classifier(feat)
 
-        aux1, aux2, res = self.decoder(m1_x, skip1, skip2)
-
-        return aux1, aux2, res
+        #aux1, aux2, res = self.decoder(m1_x, skip1, skip2)
+        #return aux1, aux2, res
 
 class eASPP(nn.Module):
     """PyTorch Module for eASPP"""
@@ -67,7 +89,7 @@ class eASPP(nn.Module):
         super(eASPP, self).__init__()
 
         # branch 1
-        self.branch1_conv = nn.Conv2d(2048, 256, kernel_size=1)
+        self.branch1_conv = nn.Conv2d(512, 256, kernel_size=1)
         self.branch1_bn = nn.BatchNorm2d(256)
 
         self.branch234 = nn.ModuleList([])
@@ -75,7 +97,7 @@ class eASPP(nn.Module):
         for rate in self.branch_rates:
             # branch 2
             branch = nn.Sequential(
-                nn.Conv2d(2048, 64, kernel_size=1),
+                nn.Conv2d(512, 64, kernel_size=1),
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
                 nn.Conv2d(64, 64, kernel_size=3, dilation=rate, padding=rate),
@@ -95,12 +117,12 @@ class eASPP(nn.Module):
                     nn.init.kaiming_uniform_(layer.weight, nonlinearity="relu")
 
         # branch 5
-        self.branch5_conv = nn.Conv2d(2048, 256, 1)
+        self.branch5_conv = nn.Conv2d(512, 256, 1)
         nn.init.kaiming_uniform_(self.branch5_conv.weight, nonlinearity="relu")
         self.branch5_bn = nn.BatchNorm2d(256)
 
         # final layer
-        self.eASPP_fin_conv = nn.Conv2d(1280, 256, kernel_size=1)
+        self.eASPP_fin_conv = nn.Conv2d(512, 256, kernel_size=1)
         nn.init.kaiming_uniform_(self.eASPP_fin_conv.weight, nonlinearity="relu")
         self.eASPP_fin_bn = nn.BatchNorm2d(256)
 
@@ -172,5 +194,5 @@ if __name__ == "__main__":
     segnet = SegNet(num_classes=3)
     encoder = segnet.encoders
     #print(encoder)
-    fusion = Fusion(C=3, encoders=[encoder], decoder=segnet.decoders)
+    fusion = FusionNet(num_classes=3, encoders=[encoder], decoder=segnet.decoders)
     print(fusion)
