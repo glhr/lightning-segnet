@@ -107,47 +107,49 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist_alpha', type=int, default=1)
         return parser
 
-    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
-        self.save = save
-        self.viz = viz
-
         self.save_hyperparameters(conf)
-        self.hparams.resize = (480, 240)
-        self.hparams.masking = True
-        self.hparams.normalize = False
-        self.test_checkpoint = test_checkpoint
-        self.test_max = test_max
-        self.test_set = test_set
 
         self.hparams.modalities = self.hparams.modalities.split(",")
-        logger.warning(f"modalities {self.hparams.modalities}")
+        logger.warning(f"params {self.hparams}")
 
         self.model = SegNet(num_classes=self.hparams.num_classes, n_init_features=len(self.hparams.modalities))
 
-        self.datasets = {
-            "freiburg": FreiburgDataLoader,
-            "cityscapes": CityscapesDataLoader,
-            "kitti": KittiDataLoader,
-            "own": OwnDataLoader,
-            "thermalvoc": ThermalVOCDataLoader,
-            "synthia": SynthiaDataLoader
-        }
-
-        if self.hparams.loss in ["sord","compare"]:
-            self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
-        else:
-            self.hparams.ranks = [1,2,3]
+        if not model_only:
+            self.save = save
+            self.viz = viz
+            self.hparams.resize = (480, 240)
+            self.hparams.masking = True
+            self.hparams.normalize = False
+            self.test_checkpoint = test_checkpoint
+            self.test_max = test_max
+            self.test_set = test_set
 
 
-        self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
-        self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
-            len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
+            self.datasets = {
+                "freiburg": FreiburgDataLoader,
+                "cityscapes": CityscapesDataLoader,
+                "kitti": KittiDataLoader,
+                "own": OwnDataLoader,
+                "thermalvoc": ThermalVOCDataLoader,
+                "synthia": SynthiaDataLoader
+            }
 
-        self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set="test")
+            if self.hparams.loss in ["sord","compare"]:
+                self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
+            else:
+                self.hparams.ranks = [1,2,3]
 
-        self.update_settings()
+
+            self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
+            self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
+                len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
+
+            self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set="test")
+
+            self.update_settings()
 
     def update_settings(self):
 
@@ -274,6 +276,7 @@ class LitSegNet(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         loss = self.predict(batch, set="val")
+        logger.info(loss)
         return loss
 
     def reduce_cm(self, cms, save=False):
@@ -334,7 +337,7 @@ class LitSegNet(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
         sample, target_orig = batch
-        folder = f"{segnet_model.result_folder}/{self.test_checkpoint}"
+        folder = f"{self.result_folder}/{self.test_checkpoint}"
 
         if self.test_max is None or batch_idx < self.test_max:
             # logger.debug(torch.min(sample),torch.max(sample))
@@ -403,8 +406,8 @@ class LitSegNet(pl.LightningModule):
                     # logger.debug("Generating argmax pred")
                     self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{segnet_model.result_folder}/orig/", filename_prefix=f"orig", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{segnet_model.result_folder}/gt/", filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}/orig/", filename_prefix=f"orig", dataset_name=self.hparams.dataset)
+                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}/gt/", filename_prefix=f"gt", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(
                     #     iter=batch_idx+i,
                     #     orig=o,
@@ -496,74 +499,70 @@ class LitSegNet(pl.LightningModule):
     def test_dataloader(self):
         return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=False)
 
-class LitFusion(LitSegNet):
-    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
-        super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
-        segnet = self.model
-        self.model = FusionNet(encoders=[segnet.encoders,segnet.encoders], decoder=segnet.decoders, classifier=segnet.classifier)
 
-parser = LitSegNet.add_model_specific_args(parser)
-args = parser.parse_args()
-if args.debug: enable_debug()
+if __name__ == '__main__':
+    parser = LitSegNet.add_model_specific_args(parser)
+    args = parser.parse_args()
+    if args.debug: enable_debug()
 
-logger.debug(args)
-segnet_model = LitFusion(conf=args)
+    logger.debug(args)
+    segnet_model = LitSegNet(conf=args)
 
-if args.prefix is None:
-    args.prefix = segnet_model.hparams.save_prefix
-logger.debug(args.prefix)
+    if args.prefix is None:
+        args.prefix = segnet_model.hparams.save_prefix
+    logger.debug(args.prefix)
 
-checkpoint_callback = ModelCheckpoint(
-    dirpath='lightning_logs',
-    filename=args.prefix+'-{epoch}-{val_loss:.4f}',
-    verbose=True,
-    monitor='val_loss',
-    mode='min',
-    save_last=True
-)
-checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
+    checkpoint_callback = ModelCheckpoint(
+        dirpath='lightning_logs',
+        filename=args.prefix+'-{epoch}-{val_loss:.4f}',
+        verbose=True,
+        monitor='val_loss',
+        mode='min',
+        save_last=True
+    )
+    checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
 
-custom_callback = CustomCB()
+    custom_callback = CustomCB()
 
-lr_monitor = LearningRateMonitor(logging_interval='step')
+    lr_monitor = LearningRateMonitor(logging_interval='step')
 
-callbacks = [lr_monitor]
+    callbacks = [lr_monitor]
 
-if args.train:
-    logger.warning("Training phase")
-    wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False, name = segnet_model.hparams.save_prefix)
-    wandb_logger.log_hyperparams(segnet_model.hparams)
-    #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
+    if args.train:
+        logger.warning("Training phase")
+        wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False, name = segnet_model.hparams.save_prefix)
+        wandb_logger.log_hyperparams(segnet_model.hparams)
+        #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
 
 
-    if args.update_output_layer or args.init:
-        segnet_model = segnet_model.load_from_checkpoint(checkpoint_path=args.train_checkpoint, conf=args)
-        segnet_model.update_model()
-        if args.update_output_layer: segnet_model.new_output()
-        trainer = pl.Trainer.from_argparse_args(args,
-            check_val_every_n_epoch=1,
-            # ~ log_every_n_steps=10,
-            logger=wandb_logger,
-            checkpoint_callback=checkpoint_callback,
-            callbacks=callbacks)
+        if args.update_output_layer or args.init:
+            segnet_model = segnet_model.load_from_checkpoint(checkpoint_path=args.train_checkpoint, conf=args)
+            segnet_model.update_model()
+            if args.update_output_layer: segnet_model.new_output()
+            trainer = pl.Trainer.from_argparse_args(args,
+                check_val_every_n_epoch=1,
+                # ~ log_every_n_steps=10,
+                logger=wandb_logger,
+                checkpoint_callback=checkpoint_callback,
+                callbacks=callbacks)
+        else:
+            segnet_model.update_model()
+            trainer = pl.Trainer.from_argparse_args(args,
+                check_val_every_n_epoch=1,
+                # ~ log_every_n_steps=10,
+                logger=wandb_logger,
+                checkpoint_callback=checkpoint_callback,
+                callbacks=callbacks,
+                resume_from_checkpoint=args.train_checkpoint)
+        trainer.fit(segnet_model)
+
     else:
-        segnet_model.update_model()
-        trainer = pl.Trainer.from_argparse_args(args,
-            check_val_every_n_epoch=1,
-            # ~ log_every_n_steps=10,
-            logger=wandb_logger,
-            checkpoint_callback=checkpoint_callback,
-            callbacks=callbacks,
-            resume_from_checkpoint=args.train_checkpoint)
-    trainer.fit(segnet_model)
-
-else:
-    logger.warning("Testing phase")
-    trainer = pl.Trainer.from_argparse_args(args)
-    chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
-    create_folder(f"{segnet_model.result_folder}/{chkpt}")
-    #trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
-    if args.update_output_layer:
-        segnet_model.new_output()
-    trainer.test(segnet_model)
+        logger.warning("Testing phase")
+        trainer = pl.Trainer.from_argparse_args(args)
+        chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
+        create_folder(f"{segnet_model.result_folder}/{chkpt}")
+        #trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
+        if args.update_output_layer:
+            segnet_model.new_output()
+        trainer.test(segnet_model)
