@@ -4,6 +4,8 @@ import torch
 from segnet import SegNet
 
 from utils import logger
+from plotting import display_img
+import numpy as np
 
 
 class FusionNet(nn.Module):
@@ -28,7 +30,7 @@ class FusionNet(nn.Module):
         else:
             self.encoder_mod1 = encoders[0]
 
-        self.eASPP = eASPP()
+        # self.eASPP = eASPP()
         self.decoder = decoder
         self.classifier = classifier
         
@@ -60,7 +62,9 @@ class FusionNet(nn.Module):
 
         if self.fusion:
             # logger.info("FUSING SHIT :D")
+            # display_img(mod[0,0,:,:])
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod[:,0,:,:].unsqueeze(1))
+            # logger.debug(f"indices_1 {indices_1[0]}, {len(indices_1)} | unpool_sizes {len(unpool_sizes_1[0])}  {len(unpool_sizes_1)}")
             feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, mod[:,1,:,:].unsqueeze(1))
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)

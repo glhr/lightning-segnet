@@ -6,6 +6,20 @@ class LitFusion(LitSegNet):
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
         self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier)
+        
+    def configure_optimizers(self):
+        params = [
+            {"params": self.encoder_mod1.parameters(), "lr": self.hparams.lr/10},
+            {"params": self.encoder_mod2.parameters(), "lr": self.hparams.lr/10},
+            {"params": self.ssma_res.parameters(), "lr": self.hparams.lr},
+            {"params": self.decoder.parameters(), "lr": self.hparams.lr},
+            {"params": self.classifier.parameters(), "lr": self.hparams.lr}
+        ]
+        if self.hparams.optim == "SGD":
+            optimizer = torch.optim.SGD(params, lr=self.hparams.lr, momentum=self.hparams.momentum)
+        else:
+            optimizer = torch.optim.Adam(params, lr=self.hparams.lr)
+        return optimizer
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
