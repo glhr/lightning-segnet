@@ -309,7 +309,7 @@ class MMDataLoader(Dataset):
         if orig is not None:
             if torch.is_tensor(orig):
                 orig = orig.detach().cpu().numpy()
-            for modality in orig:
+            for m,modality in enumerate(orig):
                 # print("orig shape",modality.shape)
                 if np.max(modality) <= 1: modality = (modality*255)
                 modality = modality.astype(np.uint8)
@@ -317,6 +317,10 @@ class MMDataLoader(Dataset):
                     modality = np.stack((modality,)*3, axis=-1)
                     # print(np.min(orig),np.max(orig))
                     concat = concat + [modality]
+                    img = Image.fromarray(modality, 'RGB')
+                    folder = "" if folder is None else folder
+                    dataset_name = self.name if dataset_name is None else dataset_name
+                    img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}-{m}_{self.mode}.png')
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()

@@ -121,6 +121,7 @@ class LitSegNet(pl.LightningModule):
 
         if not model_only:
             self.save = save
+            logger.info(f"Save {self.save}")
             self.viz = viz
             self.hparams.resize = (480, 240)
             self.hparams.masking = True
@@ -403,6 +404,7 @@ class LitSegNet(pl.LightningModule):
                         #     dataset_name=self.hparams.dataset)
                 # logger.debug("Generating proba map")
                 if self.save:
+                    # logger.info("Saving")
                     # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # logger.debug("Generating argmax pred")
                     self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
@@ -563,7 +565,7 @@ if __name__ == '__main__':
         trainer = pl.Trainer.from_argparse_args(args)
         chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
         create_folder(f"{segnet_model.result_folder}/{chkpt}")
-        #trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
+        trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
         if args.update_output_layer:
             segnet_model.new_output()
-        trainer.test(segnet_model)
+        trainer.test(trained_model)
