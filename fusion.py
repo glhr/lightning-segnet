@@ -64,7 +64,7 @@ class FusionNet(nn.Module):
             # logger.info("FUSING SHIT :D")
             # display_img(mod[0,0,:,:])
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod[:,0,:,:].unsqueeze(1))
-            # logger.debug(f"indices_1 {indices_1[0]}, {len(indices_1)} | unpool_sizes {len(unpool_sizes_1[0])}  {len(unpool_sizes_1)}")
+            #logger.debug(f"indices_1 {indices_1[0]}, {len(indices_1)} | unpool_sizes {len(unpool_sizes_1[0])}  {len(unpool_sizes_1)}")
             feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, mod[:,1,:,:].unsqueeze(1))
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
@@ -75,9 +75,24 @@ class FusionNet(nn.Module):
             feat = feat_1
 
         #m1_x = self.eASPP(m1_x)
-        
+        if self.fusion:
         # decoder path, upsampling with corresponding indices and size
-        feat = self.decoder_path(self.decoder, feat, indices_1, unpool_sizes_1)
+            idx_fused = []
+            for i,layer_idx in enumerate(indices_1):
+                #print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
+                combo = torch.stack((indices_1[i],indices_2[i]))
+                #print(combo.shape)
+                mean = torch.mean(combo.float(),dim=0, keepdim=True).long().squeeze(1)
+                #print(mean.shape, mean[0][0][:5])
+                idx_fused.append(mean)
+            # logger.debug(f"idx {torch.stack((indices_1)).shape}")
+            # c
+            # logger.debug(f"cat {cat[0]} {cat.shape}")
+            indices = idx_fused
+        else:
+            indices = indices_1
+        
+        feat = self.decoder_path(self.decoder, feat, indices, unpool_sizes_1)
             
         return self.classifier(feat)
 
