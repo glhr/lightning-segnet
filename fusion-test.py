@@ -9,11 +9,11 @@ class LitFusion(LitSegNet):
         
     def configure_optimizers(self):
         params = [
-            {"params": self.encoder_mod1.parameters(), "lr": self.hparams.lr/10},
-            {"params": self.encoder_mod2.parameters(), "lr": self.hparams.lr/10},
-            {"params": self.ssma_res.parameters(), "lr": self.hparams.lr},
-            {"params": self.decoder.parameters(), "lr": self.hparams.lr},
-            {"params": self.classifier.parameters(), "lr": self.hparams.lr}
+            {"params": self.model.encoder_mod1.parameters(), "lr": self.hparams.lr/10},
+            {"params": self.model.encoder_mod2.parameters(), "lr": self.hparams.lr/10},
+            {"params": self.model.ssma_res.parameters(), "lr": self.hparams.lr},
+            {"params": self.model.decoder.parameters(), "lr": self.hparams.lr},
+            {"params": self.model.classifier.parameters(), "lr": self.hparams.lr}
         ]
         if self.hparams.optim == "SGD":
             optimizer = torch.optim.SGD(params, lr=self.hparams.lr, momentum=self.hparams.momentum)
