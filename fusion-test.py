@@ -17,9 +17,9 @@ class LitFusion(LitSegNet):
             {"params": self.model.pooling_fusion.parameters(), "lr": self.hparams.lr}
         ]
         if self.hparams.optim == "SGD":
-            optimizer = torch.optim.SGD(params, lr=self.hparams.lr, momentum=self.hparams.momentum)
+            optimizer = torch.optim.SGD(params, lr=self.hparams.lr, momentum=self.hparams.momentum, weight_decay=self.hparams.wd)
         else:
-            optimizer = torch.optim.Adam(params, lr=self.hparams.lr)
+            optimizer = torch.optim.Adam(params, lr=self.hparams.lr, weight_decay=self.hparams.wd)
         return optimizer
 
 parser = LitSegNet.add_model_specific_args(parser)

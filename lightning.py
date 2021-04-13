@@ -93,6 +93,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--lr', type=float, default=None)
         parser.add_argument('--momentum', type=int, default=None)
         parser.add_argument('--optim', type=str, default=None)
+        parser.add_argument('--wd', type=float, default=0)
         parser.add_argument('--num_classes', type=int, default=3)
         parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
