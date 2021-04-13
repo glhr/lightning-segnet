@@ -79,11 +79,13 @@ class FusionNet(nn.Module):
         # decoder path, upsampling with corresponding indices and size
             idx_fused = []
             for i,layer_idx in enumerate(indices_1):
-                #print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
+                # print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
+                # print(indices_1[i].shape)
                 combo = torch.stack((indices_1[i],indices_2[i]))
-                #print(combo.shape)
-                mean = torch.mean(combo.float(),dim=0, keepdim=True).long().squeeze(1)
-                #print(mean.shape, mean[0][0][:5])
+                # print(combo.shape)
+                mean = torch.mean(combo.float(),dim=0, keepdim=True).long().squeeze(0)
+                # print(mean.shape, mean[0][0][:5])
+                # print(mean.shape)
                 idx_fused.append(mean)
             # logger.debug(f"idx {torch.stack((indices_1)).shape}")
             # c
