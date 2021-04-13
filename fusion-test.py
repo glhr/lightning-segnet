@@ -30,9 +30,9 @@ def parse_chkpt(checkpoint):
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
 
-segnet_rgb = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints["rgb"], conf=args)
+segnet_rgb = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints["rgb"], modalities="rgb", conf=args)
 
-segnet_d = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints["d"], conf=args)
+segnet_d = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints["d"], modalities="depth", conf=args)
 
 models = {
     "rgb": segnet_rgb.model,

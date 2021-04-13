@@ -46,7 +46,7 @@ class FusionNet(nn.Module):
             feat = decoder[i](feat, indices[4 - i], unpool_sizes[4 - i])
         return feat
 
-    def forward(self, mod1, mod2=None):
+    def forward(self, mod):
         """Forward pass
 
         In the case of AdapNet++, only 1 modality is used (either the RGB-image, or the Depth-image). With 'AdapNet++
@@ -56,20 +56,18 @@ class FusionNet(nn.Module):
         :param mod2: modality 2
         :return: final output and auxiliary output 1 and 2
         """
-        logger.debug(mod1.shape)
-
-        feat = mod1
-
-        feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, feat)
+        logger.debug(f"{mod.shape}, {mod[:,0,:,:].unsqueeze(1).shape}")
 
         if self.fusion:
             # logger.info("FUSING SHIT :D")
-            feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, feat)
+            feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod[:,0,:,:].unsqueeze(1))
+            feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, mod[:,1,:,:].unsqueeze(1))
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
             #skip1 = self.ssma_s1(skip1, m2_s1)
             feat = self.ssma_res(feat_1, feat_2)
         else:
+            feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod)
             feat = feat_1
 
         #m1_x = self.eASPP(m1_x)

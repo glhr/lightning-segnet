@@ -107,11 +107,13 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist_alpha', type=int, default=1)
         return parser
 
-    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, **kwargs):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, modalities=None, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
         self.save_hyperparameters(conf)
 
+        if modalities is not None:
+            self.hparams.modalities = modalities
         self.hparams.modalities = self.hparams.modalities.split(",")
         logger.warning(f"params {self.hparams}")
 

@@ -316,7 +316,7 @@ class MMDataLoader(Dataset):
                 if modality.shape[-1] != 3:
                     modality = np.stack((modality,)*3, axis=-1)
                     # print(np.min(orig),np.max(orig))
-                    concat = [modality] + concat
+                    concat = concat + [modality]
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
