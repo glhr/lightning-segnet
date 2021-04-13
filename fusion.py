@@ -188,7 +188,7 @@ class SSMA(nn.Module):
             nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
             nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=1),
-            nn.Sigmoid()
+            nn.Softmax()
         )
         self.final_conv = nn.Sequential(
             nn.Conv2d(double_features, features, kernel_size=3, stride=1, padding=1),
