@@ -365,6 +365,16 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
+    def load_depth(self, path):
+        depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
+        if isinstance(depth_image[0][0], np.uint16):
+            depth_image_8u = cv2.convertScaleAbs(depth_image, alpha=(255.0/65535.0))
+        else:
+            depth_image_8u = depth_image
+        # if np.max(depth_image_8u) <= 1:
+        #     depth_image_8u = depth_image_8u*100
+        return depth_image_8u
+
     def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all'):
         # print(imgs)
         if imgs["image"] is None:
@@ -417,8 +427,6 @@ class MMDataLoader(Dataset):
         # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))
         if self.viz:
-            if "depth" in imgs:
-                logger.info(f"depth image range: {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
             visualize_data_aug(imgs=imgs, augmented=transformed_final)
 
         return transformed_final
@@ -507,7 +515,7 @@ class FreiburgDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.base_folders[sample_id] + "/rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
-        pilDep = Image.open(self.base_folders[sample_id] + "/depth_gray/" + self.filenames[sample_id] + self.suffixes['depth']).convert('L')
+        pilDep = self.load_depth(self.base_folders[sample_id] + "/depth_gray/" + self.filenames[sample_id] + self.suffixes['depth'])
         pilIR = Image.open(self.base_folders[sample_id] + "/nir_gray/" + self.filenames[sample_id] + self.suffixes['ir']).convert('L')
 
         # print(self.path + "GT_color/" + a + suffixes['gt'])
@@ -581,9 +589,8 @@ class CityscapesDataLoader(MMDataLoader):
     def get_image_pairs(self, sample_id):
 
         pilRGB = Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
-        pilDep = Image.open(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png").convert('L')
-        if self.viz:
-            logger.info(f"depth image range: {np.min(pilDep)} to {np.max(pilDep)}")
+        #pilDep = self.load_depth(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png")
+        pilDep = self.load_depth(self.path + "depthcomp/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_depthcomp.png")
         imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 
@@ -629,9 +636,10 @@ class KittiDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
-        pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
+        # pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
+        pilDep = self.load_depth(self.path + "data_scene_flow/" + self.split_path + "depthcomp/" + f"{self.filenames[sample_id]}")
         imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
-        return pilRGB, None, None, imgGT
+        return pilRGB, pilDep, None, imgGT
 
 class ThermalVOCDataLoader(MMDataLoader):
 
@@ -725,9 +733,7 @@ class SynthiaDataLoader(MMDataLoader):
     def get_image_pairs(self, sample_id):
 
         pilRGB = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
-        pilDep = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('L')
-        if self.viz:
-            logger.info(f"depth image range: {np.min(pilDep)} to {np.max(pilDep)}")
+        pilDep = self.load_depth(self.path + "SYNTHIA-SEQS-05-SPRING/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
         imgGT = np.asarray(imageio.imread(self.path + "SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
         print(np.unique(imgGT))
         return pilRGB, pilDep, None, imgGT

@@ -433,9 +433,9 @@ class LitSegNet(pl.LightningModule):
     def get_dataset_splits(self, normalize=False):
         train_set = self.get_dataset(set="train")
         if self.test_set is not None:
-            test_set = self.get_dataset(set=self.test_set,augment=False)
+            test_set = self.get_dataset(set=self.test_set, augment=self.hparams.augment)
         else:
-            test_set = self.get_dataset(set="test",augment=False)
+            test_set = self.get_dataset(set="test", augment=self.hparams.augment)
         val_set = self.get_dataset(set="val",augment=False)
 
         if normalize:

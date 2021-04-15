@@ -1,6 +1,7 @@
 import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
@@ -53,13 +54,16 @@ def visualize_data_aug(imgs, augmented):
     axes[0][indices["image"]].axis('off')
 
     if imgs.get("depth") is not None:
-        axes[0][indices["depth"]].imshow(imgs["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
+        axes[0][indices["depth"]].imshow(imgs["depth"], cmap=plt.cm.gray)
         axes[0][indices["depth"]].set_title('Depth')
         axes[0][indices["depth"]].axis('off')
+        logger.info(f"depth range (before aug) {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
+        logger.debug(f"{np.unique(imgs['depth'])}")
     if imgs.get("ir") is not None:
         axes[0][indices["ir"]].imshow(imgs["ir"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[0][indices["ir"]].set_title('IR')
         axes[0][indices["ir"]].axis('off')
+        logger.info(f"IR range (before aug) {np.min(imgs['ir'])} to {np.max(imgs['ir'])}")
 
     axes[1][indices["mask"]].imshow(augmented["mask"])
     axes[1][indices["mask"]].axis('off')
@@ -68,11 +72,13 @@ def visualize_data_aug(imgs, augmented):
     axes[1][indices["image"]].axis('off')
 
     if imgs.get("depth") is not None:
-        axes[1][indices["depth"]].imshow(augmented["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
+        axes[1][indices["depth"]].imshow(augmented["depth"], cmap=plt.cm.gray)
         axes[1][indices["depth"]].axis('off')
+        logger.info(f"depth range (after aug) {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
     if imgs.get("ir") is not None:
         axes[1][indices["ir"]].imshow(augmented["ir"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[1][indices["ir"]].axis('off')
+        logger.info(f"IR range (after aug) {np.min(imgs['ir'])} to {np.max(imgs['ir'])}")
 
     plt.tight_layout()
     plt.show()
