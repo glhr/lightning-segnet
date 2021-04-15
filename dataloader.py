@@ -30,7 +30,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class MMDataLoader(Dataset):
-    def __init__(self, modalities, name, mode, augment, resize, transform=None):
+    def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False):
         self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
@@ -65,6 +65,8 @@ class MMDataLoader(Dataset):
 
         self.transform = transform
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.viz = viz
 
     def read_img(self, path, grayscale=True):
         return np.array(Image.open(path).convert('L'))
@@ -363,7 +365,7 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', viz=False):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all'):
         # print(imgs)
         if imgs["image"] is None:
             img_height, img_width = imgs[self.modalities[0]].shape[:2]
@@ -414,7 +416,10 @@ class MMDataLoader(Dataset):
 
         # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))
-        if viz: visualize_data_aug(imgs=imgs, augmented=transformed_final)
+        if self.viz:
+            if "depth" in imgs:
+                logger.info(f"depth image range: {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
+            visualize_data_aug(imgs=imgs, augmented=transformed_final)
 
         return transformed_final
 
@@ -446,7 +451,7 @@ class MMDataLoader(Dataset):
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -481,6 +486,7 @@ class FreiburgDataLoader(MMDataLoader):
             self.path = path + '**/'
 
         self.augment = augment
+        self.viz = viz
 
         self.base_folders = []
 
@@ -519,7 +525,7 @@ class FreiburgDataLoader(MMDataLoader):
 
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -556,6 +562,7 @@ class CityscapesDataLoader(MMDataLoader):
         }
 
         self.augment = augment
+        self.viz = viz
         self.base_folders = []
 
         for filepath in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png'):
@@ -575,13 +582,15 @@ class CityscapesDataLoader(MMDataLoader):
 
         pilRGB = Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
         pilDep = Image.open(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png").convert('L')
+        if self.viz:
+            logger.info(f"depth image range: {np.min(pilDep)} to {np.max(pilDep)}")
         imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -609,6 +618,7 @@ class KittiDataLoader(MMDataLoader):
             self.split_path = 'testing/'
 
         self.augment = augment
+        self.viz = viz
 
         for img in glob.glob(self.path + "data_semantics/" + self.split_path + "semantic/*.png"):
             img = img.split("/")[-1]
@@ -625,7 +635,7 @@ class KittiDataLoader(MMDataLoader):
 
 class ThermalVOCDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -656,6 +666,7 @@ class ThermalVOCDataLoader(MMDataLoader):
         self.path = path + 'train/'
 
         self.augment = augment
+        self.viz = viz
 
         for img in glob.glob(self.path + 'SegmentationClass/*.png'):
             img = img.split("/")[-1]
@@ -679,7 +690,7 @@ class ThermalVOCDataLoader(MMDataLoader):
 
 class SynthiaDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/synthia/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/synthia/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
         super().__init__(modalities, resize=resize, name="synthia", mode=mode, augment=augment)
         self.path = path
 
@@ -700,6 +711,7 @@ class SynthiaDataLoader(MMDataLoader):
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
         self.augment = augment
+        self.viz = viz
 
         for img in glob.glob(self.path + 'SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/' + '**/*.png'):
 
@@ -714,13 +726,15 @@ class SynthiaDataLoader(MMDataLoader):
 
         pilRGB = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
         pilDep = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('L')
+        if self.viz:
+            logger.info(f"depth image range: {np.min(pilDep)} to {np.max(pilDep)}")
         imgGT = np.asarray(imageio.imread(self.path + "SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
         print(np.unique(imgGT))
         return pilRGB, pilDep, None, imgGT
 
 
 class OwnDataLoader(MMDataLoader):
-    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False):
+    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
         super().__init__(modalities, resize=resize, name="own", mode=mode, augment=augment)
         self.path = path
 
@@ -744,6 +758,7 @@ class OwnDataLoader(MMDataLoader):
             self.split_path = 'testing/'
 
         self.augment = augment
+        self.viz = viz
 
         print(self.path + self.split_path + "rgb/*.jpg")
         for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):

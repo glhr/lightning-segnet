@@ -53,37 +53,6 @@ parser.add_argument('--init', default=False, action="store_true")
 
 import inspect
 
-class CustomCB(Callback):
-    def on_train_epoch_start(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_train_epoch_end(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_validation_epoch_start(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_validation_epoch_end(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_epoch_start(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_epoch_end(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_train_start(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_train_end(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_validation_start(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
-    def on_validation_end(self, trainer, pl_module):
-        logger.debug(f'{inspect.currentframe().f_code.co_name}')
-
 class LitSegNet(pl.LightningModule):
 
     @staticmethod
@@ -454,7 +423,7 @@ class LitSegNet(pl.LightningModule):
             name = self.hparams.dataset
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:
@@ -525,8 +494,6 @@ if __name__ == '__main__':
         save_last=True
     )
     checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
-
-    custom_callback = CustomCB()
 
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
