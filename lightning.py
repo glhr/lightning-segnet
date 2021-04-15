@@ -72,6 +72,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default="freiburg")
         parser.add_argument('--modalities', default="rgb")
+        parser.add_argument('--init_channels', type=int, default=None)
         parser.add_argument('--ranks', default="1,2,3")
         parser.add_argument('--dist', default="l1")
         parser.add_argument('--dist_alpha', type=int, default=1)
@@ -87,7 +88,9 @@ class LitSegNet(pl.LightningModule):
         self.hparams.modalities = self.hparams.modalities.split(",")
         logger.warning(f"params {self.hparams}")
 
-        self.model = SegNet(num_classes=self.hparams.num_classes, n_init_features=len(self.hparams.modalities))
+        init_channels = len(self.hparams.modalities) if self.hparams.init_channels is None else self.hparams.init_channels
+
+        self.model = SegNet(num_classes=self.hparams.num_classes, n_init_features=init_channels)
 
         if not model_only:
             self.save = save
