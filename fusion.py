@@ -32,6 +32,19 @@ class FusionNet(nn.Module):
         self.decoder = decoder
         self.classifier = classifier
 
+    def init_decoder(self):
+        for d in self.decoder.children():
+            for layer in d.features:
+                #print(layer)
+                if hasattr(layer, 'reset_parameters'):
+                    #print("before reset", layer.weight[0])
+                    layer.reset_parameters()
+                    #print("after reset",layer.weight[:5])
+                    if isinstance(layer, nn.Conv2d):
+                        nn.init.kaiming_uniform_(layer.weight, nonlinearity="relu")
+                        #print("after kaiming",layer.weight[:5])
+        nn.init.kaiming_uniform_(self.classifier.weight)
+
     def encoder_path(self, encoder, feat):
         indices = []
         unpool_sizes = []

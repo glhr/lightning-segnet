@@ -6,6 +6,7 @@ class LitFusion(LitSegNet):
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
         self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier)
+        self.model.init_decoder()
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
