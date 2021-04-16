@@ -11,7 +11,7 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, encoders, decoder, classifier, filter_config):
+    def __init__(self, encoders, decoder, classifier, filter_config, init_decoder=True):
         super(FusionNet, self).__init__()
 
         self.fusion = False
@@ -30,7 +30,7 @@ class FusionNet(nn.Module):
             self.pooling_fusion = nn.ModuleList()
             for f in self.filter_config:
                 self.pooling_fusion.append(PoolingFusion(f))
-            
+
             self.fusion = True
         else:
             self.encoder_mod1 = encoders[0]
@@ -38,8 +38,22 @@ class FusionNet(nn.Module):
         # self.eASPP = eASPP()
         self.decoder = decoder
         self.classifier = classifier
-        
-    def encoder_path(self, encoder, feat):        
+
+        if init_decoder:
+            for d in self.decoder.children():
+                for layer in d.features:
+                    #print(layer)
+                    if hasattr(layer, 'reset_parameters'):
+                        #print("before reset", layer.weight[0])
+                        layer.reset_parameters()
+                        #print("after reset",layer.weight[:5])
+                        if isinstance(layer, nn.Conv2d):
+                            nn.init.kaiming_uniform_(layer.weight, nonlinearity="relu")
+                            #print("after kaiming",layer.weight[:5])
+            nn.init.kaiming_uniform_(self.classifier.weight)
+
+
+    def encoder_path(self, encoder, feat):
         indices = []
         unpool_sizes = []
         feats = []
@@ -49,7 +63,7 @@ class FusionNet(nn.Module):
             unpool_sizes.append(size)
             feats.append(feat)
         return feats, indices, unpool_sizes
-        
+
     def decoder_path(self, decoder, feat, indices, unpool_sizes):
         for i in range(0, 5):
             feat = decoder[i](feat, indices[4 - i], unpool_sizes[4 - i])
@@ -97,12 +111,12 @@ class FusionNet(nn.Module):
             # logger.debug(f"idx {torch.stack((indices_1)).shape}")
             # c
             # logger.debug(f"cat {cat[0]} {cat.shape}")
-            indices = idx_fused
+            indices = indices_1
         else:
             indices = indices_1
-        
+
         feat = self.decoder_path(self.decoder, feat, indices, unpool_sizes_1)
-            
+
         return self.classifier(feat)
 
         #aux1, aux2, res = self.decoder(m1_x, skip1, skip2)
@@ -191,12 +205,12 @@ class PoolingFusion(nn.Module):
             nn.Conv2d(channels*2, 1, kernel_size=1, stride=1),
             nn.ReLU(),
             nn.Conv2d(1, channels*2, kernel_size=1, stride=1),
-            
+
         )
 
         nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
         nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
-        
+
         self.sm = nn.Softmax(dim=1)
 
     def forward(self, m1, m2, i1, i2):
@@ -205,10 +219,10 @@ class PoolingFusion(nn.Module):
         :param x2: input data from encoder 2
         :return: Fused feature maps
         """
-        
+
         i_12 = torch.cat((m1, m2), dim=1)
         #print(i1.shape,i2.shape, i_12.shape)
-        
+
 
         i_12_w = self.link(i_12)
         b,c,h,w = i_12_w.shape
@@ -216,10 +230,10 @@ class PoolingFusion(nn.Module):
         #print(i_12_w.shape)
         i_12_w = self.sm(i_12_w)
         #print(i_12_w.shape)
-        
+
         #x_12 = torch.sum(i_12_w, dim=1)
         x_12 = torch.unbind(i_12_w, dim=1)
-        
+
         #print(i1.shape, x_12[0].shape)
         fused = (i1 * x_12[0]) + (i2 * x_12[1])
         #print(torch.unique(fused.long()))
