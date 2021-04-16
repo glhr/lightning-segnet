@@ -6,6 +6,7 @@ class LitFusion(LitSegNet):
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
         self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier, filter_config=segnet_rgb.filter_config)
+        self.model.init_decoder()
 
     def configure_optimizers(self):
         params = [
