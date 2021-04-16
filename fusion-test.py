@@ -9,17 +9,17 @@ class LitFusion(LitSegNet):
 
     def configure_optimizers(self):
         params = [
-            {"params": self.model.encoder_mod1.parameters(), "lr": self.hparams.lr/10},
-            {"params": self.model.encoder_mod2.parameters(), "lr": self.hparams.lr/10},
+            {"params": self.model.encoder_mod1.parameters(), "lr": self.hparams.lr},
+            {"params": self.model.encoder_mod2.parameters(), "lr": self.hparams.lr},
             {"params": self.model.ssma_res.parameters(), "lr": self.hparams.lr},
             {"params": self.model.decoder.parameters(), "lr": self.hparams.lr},
             {"params": self.model.classifier.parameters(), "lr": self.hparams.lr},
             {"params": self.model.pooling_fusion.parameters(), "lr": self.hparams.lr}
         ]
         if self.hparams.optim == "SGD":
-            optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.lr, momentum=self.hparams.momentum, weight_decay=self.hparams.wd)
+            optimizer = torch.optim.SGD(params, lr=self.hparams.lr, momentum=self.hparams.momentum, weight_decay=self.hparams.wd)
         else:
-            optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.wd)
+            optimizer = torch.optim.Adam(params, lr=self.hparams.lr, weight_decay=self.hparams.wd)
         return optimizer
 
 parser = LitSegNet.add_model_specific_args(parser)
