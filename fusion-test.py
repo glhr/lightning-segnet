@@ -5,23 +5,7 @@ class LitFusion(LitSegNet):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
-        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier, filter_config=segnet_rgb.filter_config)
-        self.model.init_decoder()
-
-    def configure_optimizers(self):
-        params = [
-            {"params": self.model.encoder_mod1.parameters(), "lr": self.hparams.lr},
-            {"params": self.model.encoder_mod2.parameters(), "lr": self.hparams.lr},
-            {"params": self.model.ssma_res.parameters(), "lr": self.hparams.lr},
-            {"params": self.model.decoder.parameters(), "lr": self.hparams.lr},
-            {"params": self.model.classifier.parameters(), "lr": self.hparams.lr},
-            {"params": self.model.pooling_fusion.parameters(), "lr": self.hparams.lr}
-        ]
-        if self.hparams.optim == "SGD":
-            optimizer = torch.optim.SGD(params, lr=self.hparams.lr, momentum=self.hparams.momentum, weight_decay=self.hparams.wd)
-        else:
-            optimizer = torch.optim.Adam(params, lr=self.hparams.lr, weight_decay=self.hparams.wd)
-        return optimizer
+        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier)
 
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
