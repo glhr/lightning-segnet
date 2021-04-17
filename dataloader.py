@@ -35,8 +35,15 @@ class MMDataLoader(Dataset):
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.idx_to_obj = {}
-        self.modalities = modalities
-        logger.warning(f"dataset modalities {self.modalities}")
+
+        self.modalities = modalities.copy()
+        if "depthraw" in modalities:
+            self.depth_completion = False
+            self.modalities[self.modalities.index('depthraw')] = 'depth'
+        else:
+            self.depth_completion = True
+
+        logger.warning(f"dataset modalities {self.modalities}, depth completion {self.depth_completion}")
 
         self.idx_to_color['objects'] = self.idx_to_color.get('objects', dict())
         self.class_to_idx['objects'] = self.class_to_idx.get('objects', dict())
@@ -545,6 +552,8 @@ class CityscapesDataLoader(MMDataLoader):
         super().__init__(modalities, resize=resize, name="cityscapes", mode=mode, augment=augment)
         self.path = path
 
+        print(modalities)
+
         classes = np.loadtxt(path + "classes.txt", dtype=str)
         # print(classes)
 
@@ -590,11 +599,14 @@ class CityscapesDataLoader(MMDataLoader):
 
         self.color_GT = False
 
+
     def get_image_pairs(self, sample_id):
 
         pilRGB = Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
-        #pilDep = self.load_depth(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png")
-        pilDep = self.load_depth(self.path + "depthcomp/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_depthcomp.png")
+        if not self.depth_completion:
+            pilDep = self.load_depth(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png")
+        else:
+            pilDep = self.load_depth(self.path + "depthcomp/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_depthcomp.png")
         imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 

@@ -422,10 +422,12 @@ class LitSegNet(pl.LightningModule):
         return optimizer
 
     def get_dataset(self, set, name=None, augment=None):
+        logger.info(f"Loading {set} set")
         if name is None:
             name = self.hparams.dataset
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
+        logger.info(self.hparams.modalities)
         dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
