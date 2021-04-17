@@ -421,8 +421,8 @@ class MMDataLoader(Dataset):
 
         elif apply == 'all':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
-            transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], depth=transformed_resized["depth"], ir=transformed_resized["ir"])
-            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_color["depth"], ir=transformed_color["ir"])
+            transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
+            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"], ir=transformed_color["ir"])
             transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
             if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
             if "ir" in imgs: transformed_gray["ir"] = transformed_geom["ir"]

@@ -54,7 +54,7 @@ def visualize_data_aug(imgs, augmented):
     axes[0][indices["image"]].axis('off')
 
     if imgs.get("depth") is not None:
-        axes[0][indices["depth"]].imshow(imgs["depth"], cmap=plt.cm.gray)
+        axes[0][indices["depth"]].imshow(imgs["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[0][indices["depth"]].set_title('Depth')
         axes[0][indices["depth"]].axis('off')
         logger.info(f"depth range (before aug) {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
@@ -72,7 +72,7 @@ def visualize_data_aug(imgs, augmented):
     axes[1][indices["image"]].axis('off')
 
     if imgs.get("depth") is not None:
-        axes[1][indices["depth"]].imshow(augmented["depth"], cmap=plt.cm.gray)
+        axes[1][indices["depth"]].imshow(augmented["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[1][indices["depth"]].axis('off')
         logger.info(f"depth range (after aug) {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
     if imgs.get("ir") is not None:
