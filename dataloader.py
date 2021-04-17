@@ -367,10 +367,14 @@ class MMDataLoader(Dataset):
 
     def load_depth(self, path):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
+        logger.debug(f"load_depth {np.min(depth_image)} - {np.max(depth_image)} ({type(depth_image[0][0])})")
         if isinstance(depth_image[0][0], np.uint16):
             depth_image_8u = cv2.convertScaleAbs(depth_image, alpha=(255.0/65535.0))
         else:
             depth_image_8u = depth_image
+
+        depth_image_8u = depth_image_8u - np.min(depth_image_8u)
+        depth_image_8u = (255 * (depth_image_8u / np.max(depth_image_8u))).astype(np.uint8)
         # if np.max(depth_image_8u) <= 1:
         #     depth_image_8u = depth_image_8u*100
         return depth_image_8u
@@ -399,7 +403,7 @@ class MMDataLoader(Dataset):
         color_transform = A.Compose([
             A.RandomToneCurve(scale=0.1, p=p),
             A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p)
-            ], p=1)
+            ], p=1, additional_targets=additional_targets)
         geom_transform = A.Compose([
             A.GridDistortion(num_steps=3, p=p),
             A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
@@ -417,8 +421,8 @@ class MMDataLoader(Dataset):
 
         elif apply == 'all':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
-            transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
-            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"], ir=transformed_resized["ir"])
+            transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], depth=transformed_resized["depth"], ir=transformed_resized["ir"])
+            transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_color["depth"], ir=transformed_color["ir"])
             transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
             if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
             if "ir" in imgs: transformed_gray["ir"] = transformed_geom["ir"]
