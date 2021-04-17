@@ -100,3 +100,43 @@ DATALOADER:0 TEST RESULTS
  'test_dist_mistake_severity': 0.02404315583407879,
  'test_iou': 0.7878786325454712}
 ```
+
+# Cityscapes
+
+## Baseline (RGB)
+
+2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918.ckpt
+```bash
+INFO] CM IoU - tensor([98.0204, 67.9424, 93.7633])
+[INFO] precision tensor([98.8983, 75.2056, 98.4099], dtype=torch.float64) (90.83792570294355) | recall tensor([99.1025, 87.5544, 95.2057], dtype=torch.float64) (93.95421391434033)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████| 233/233 [09:54<00:00,  2.55s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9691147208213806,
+ 'test_acc_w': 0.9723863005638123,
+ 'test_dist_l1': 0.03461460769176483,
+ 'test_dist_l2': 0.042073216289281845,
+ 'test_dist_logl2': 0.011372342705726624,
+ 'test_dist_mistake_severity': 0.1207469254732132,
+ 'test_iou': 0.942446231842041}
+```
+
+## raw depth (geom_transform)
+
+2021-04-17 16-57-cityscapes-c30-kl-depthraw-epoch=24-val_loss=0.1171.ckpt
+```bash
+[INFO] CM IoU - tensor([97.1225, 60.3898, 92.7963])
+[INFO] precision tensor([97.9205, 78.5141, 96.5344], dtype=torch.float64) (90.98965298612902) | recall tensor([99.1679, 72.3458, 95.9942], dtype=torch.float64) (89.16929546786605)
+Testing: 100%|███████████████████████████████████████████████| 233/233 [06:52<00:00,  1.77s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.962385356426239,
+ 'test_acc_w': 0.9714696407318115,
+ 'test_dist_l1': 0.044036414474248886,
+ 'test_dist_l2': 0.056880030781030655,
+ 'test_dist_logl2': 0.016112593933939934,
+ 'test_dist_mistake_severity': 0.1707264631986618,
+ 'test_iou': 0.9285829663276672}
+```
