@@ -241,9 +241,9 @@ class PoolingFusion(nn.Module):
         x_12 = torch.unbind(i_12_w, dim=1)
 
         #print(i1.shape, x_12[0].shape)
-        print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
+        #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
         fused = (i1 * x_12[0]) + (i2 * x_12[1])
-        print(fused.long()[0][0][0][:5])
+        #print(fused.long()[0][0][0][:5])
 
         return fused.long()
 
