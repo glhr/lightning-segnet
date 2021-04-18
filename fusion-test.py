@@ -5,7 +5,7 @@ class LitFusion(LitSegNet):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
-        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier, filter_config=segnet_rgb.filter_config)
+        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier, filter_config=segnet_rgb.filter_config, pooling_fusion=pooling_fusion)
         # self.model.init_decoder()
 
 parser.add_argument('--pooling_fusion', default="fuse")

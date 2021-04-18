@@ -16,6 +16,7 @@ class FusionNet(nn.Module):
         self.fusion = False
         self.filter_config = filter_config
         self.pooling_fusion = pooling_fusion
+        logger.info(pooling_fusion)
 
         logger.debug(len(encoders), encoders)
 
@@ -93,6 +94,8 @@ class FusionNet(nn.Module):
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod)
             feat = feat_1[-1]
 
+        # logger.info(self.pooling_fusion)
+
         if self.pooling_fusion == "fuse":
         # decoder path, upsampling with corresponding indices and size
             idx_fused = []
@@ -101,10 +104,13 @@ class FusionNet(nn.Module):
                 # print(indices_1[i].shape)
                 # combo = torch.stack((indices_1[i],indices_2[i]))
                 # print(combo.shape)
+                # print("id1",indices_1[0][0][0][0][:5])
+                # print("id2",indices_2[0][0][0][0][:5])
                 indices_fused = self.pooling_fusion_block[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
                 # print(mean.shape, mean[0][0][:5])
                 # print(mean.shape)
                 idx_fused.append(indices_fused)
+                # print("idx",idx_fused[0][0][0][0][:5])
             # logger.debug(f"idx {torch.stack((indices_1)).shape}")
             # c
             # logger.debug(f"cat {cat[0]} {cat.shape}")
