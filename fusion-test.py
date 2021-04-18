@@ -22,27 +22,35 @@ segnet_d = LitSegNet(conf=args, model_only=True)
 trainer = pl.Trainer.from_argparse_args(args)
 
 checkpoints = {
-    "rgb": "lightning_logs/2021-04-10 18-58-freiburg-c6-sord-1,2,3-a1-l2-rgb-epoch=66-val_loss=0.0311.ckpt",
-    "d": "lightning_logs/2021-04-11 16-17-freiburg-c6-sord-1,2,3-a1-l2-depth-epoch=98-val_loss=0.0685.ckpt"
+    "freiburg": {
+        "rgb": "lightning_logs/2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt",
+        "d": "lightning_logs/2021-04-17 14-18-freiburg-c6-kl-depth-epoch=149-val_loss=0.3106.ckpt"
+    },
+    "cityscapes": {
+        "rgb": "lightning_logs/2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918.ckpt",
+        "d": "lightning_logs/2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt"
+    }
 }
+
+dataset = segnet_rgb.hparams.dataset
 
 def parse_chkpt(checkpoint):
     c = "fusion"+checkpoint.split("/")[-1].replace(".ckpt", "")
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
 
-segnet_rgb = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints["rgb"], modalities="rgb", conf=args)
+segnet_rgb = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints[dataset]["rgb"], modalities="rgb", conf=args)
 
-segnet_d = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints["d"], modalities="depth", conf=args)
+segnet_d = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints[dataset]["d"], modalities="depth", conf=args)
 
 models = {
     "rgb": segnet_rgb.model,
     "d": segnet_d.model
 }
 
-fusionnet = LitFusion(models = models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
+fusionnet = LitFusion(models = models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
 
-create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints["rgb"])}')
+create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
 
 
 #trainer.test(fusionnet)
