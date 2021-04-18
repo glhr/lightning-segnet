@@ -207,16 +207,15 @@ class PoolingFusion(nn.Module):
         """
         super(PoolingFusion, self).__init__()
 
-        reduce_size = 2
+        reduce_size = int(channels / bottleneck)
         self.link = nn.Sequential(
-            nn.Conv2d(channels*2, reduce_size, kernel_size=1, stride=1),
+            nn.Conv2d(channels*2, reduce_size, kernel_size=3, stride=1),
             nn.ReLU(),
-            nn.Conv2d(reduce_size, channels*2, kernel_size=1, stride=1),
-
+            nn.Conv2d(reduce_size, channels*2, kernel_size=3, stride=1),
         )
 
-        nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
-        nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
+        # nn.init.ones_(self.link[0].weight)
+        # nn.init.ones_(self.link[2].weight)
 
         self.sm = nn.Softmax(dim=1)
 
@@ -242,8 +241,9 @@ class PoolingFusion(nn.Module):
         x_12 = torch.unbind(i_12_w, dim=1)
 
         #print(i1.shape, x_12[0].shape)
+        print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
         fused = (i1 * x_12[0]) + (i2 * x_12[1])
-        #print(torch.unique(fused.long()))
+        print(fused.long()[0][0][0][:5])
 
         return fused.long()
 
