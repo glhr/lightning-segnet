@@ -27,7 +27,7 @@ class FusionNet(nn.Module):
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
             self.ssma_res = SSMA(512, 16)
-            if self.pooling_fusion_block == "fuse":
+            if self.pooling_fusion == "fuse":
                 self.pooling_fusion_block = nn.ModuleList()
                 for f in self.filter_config:
                     self.pooling_fusion_block.append(PoolingFusion(f))
