@@ -108,7 +108,9 @@ class FusionNet(nn.Module):
             # indices = idx_fused
             feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
             feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
-            return self.classifier(feat1, feat1)
+            out = self.classifier(feat1, feat2)
+            print(out.shape)
+            return out
         else:
             # decoder path, upsampling with corresponding indices and size
             feat = self.decoder_path(self.decoder, feat, indices_1, unpool_sizes_1)
@@ -242,16 +244,19 @@ class PoolingFusion(nn.Module):
 class SSMA(nn.Module):
     """PyTorch Module for SSMA"""
 
-    def __init__(self, features, bottleneck=None, out=None):
+    def __init__(self, features, bottleneck=16, out=None):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
         """
         super(SSMA, self).__init__()
-        if bottleneck is not None:
-            reduce_size = int(features / bottleneck)
+
+        reduce_size = int(features / bottleneck)
+        if out is None:
+            self.final = False
+            out = features
         else:
-            reduce_size = out
+            self.final = True
         double_features = int(2 * features)
         self.link = nn.Sequential(
             nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=1),
@@ -260,9 +265,11 @@ class SSMA(nn.Module):
             nn.Sigmoid()
         )
         self.final_conv = nn.Sequential(
-            nn.Conv2d(double_features, features, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(features)
+            nn.Conv2d(double_features, out, kernel_size=3, stride=1, padding=1),
         )
+
+        if not self.final:
+            self.bn = nn.BatchNorm2d(features)
 
         nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
         nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
@@ -279,6 +286,9 @@ class SSMA(nn.Module):
         x_12_est = self.link(x_12)
         x_12 = x_12 * x_12_est
         x_12 = self.final_conv(x_12)
+
+        if not self.final:
+            x_12 = self.bn(x_12)
 
         return x_12
 
