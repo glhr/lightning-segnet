@@ -108,7 +108,7 @@ class FusionNet(nn.Module):
             # logger.debug(f"idx {torch.stack((indices_1)).shape}")
             # c
             # logger.debug(f"cat {cat[0]} {cat.shape}")
-            indices = indices_1
+            indices = idx_fused
         elif self.pooling_fusion == "rgb":
             indices = indices_1
 
