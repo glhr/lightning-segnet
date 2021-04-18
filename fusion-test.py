@@ -1,13 +1,14 @@
 from lightning import *
 
 class LitFusion(LitSegNet):
-    def __init__(self, models, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, models, conf, pooling_fusion, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
-        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier)
+        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier, filter_config=segnet_rgb.filter_config)
         # self.model.init_decoder()
 
+parser.add_argument('--pooling_fusion', default="fuse")
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
 if args.debug: enable_debug()
@@ -48,7 +49,7 @@ models = {
     "d": segnet_d.model
 }
 
-fusionnet = LitFusion(models = models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
+fusionnet = LitFusion(models = models, conf=args, pooling_fusion = args.pooling_fusion, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
 
 create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
 

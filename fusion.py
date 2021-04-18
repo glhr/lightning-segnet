@@ -4,15 +4,17 @@ import torch
 from segnet import SegNet
 
 from utils import logger
-
+from plotting import display_img
+import numpy as np
 
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, encoders, decoder, classifier):
+    def __init__(self, encoders, decoder, classifier, filter_config, pooling_fusion="rgb"):
         super(FusionNet, self).__init__()
 
         self.fusion = False
+        self.filter_config = filter_config
 
         logger.debug(len(encoders), encoders)
 
@@ -24,6 +26,9 @@ class FusionNet(nn.Module):
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
             self.ssma_res = SSMA(512, 16)
+            self.pooling_fusion = nn.ModuleList()
+            for f in self.filter_config:
+                self.pooling_fusion.append(PoolingFusion(f))
             self.fusion = True
         else:
             self.encoder_mod1 = encoders[0]
@@ -31,6 +36,7 @@ class FusionNet(nn.Module):
         self.eASPP = eASPP()
         self.decoder = decoder
         self.classifier = classifier
+        self.pooling_fusion = pooling_fusion
 
     def init_decoder(self):
         for d in self.decoder.children():
@@ -48,11 +54,13 @@ class FusionNet(nn.Module):
     def encoder_path(self, encoder, feat):
         indices = []
         unpool_sizes = []
+        feats = []
         for i in range(0, 5):
             (feat, ind), size = encoder[i](feat)
             indices.append(ind)
             unpool_sizes.append(size)
-        return feat, indices, unpool_sizes
+            feats.append(feat)
+        return feats, indices, unpool_sizes
 
     def decoder_path(self, decoder, feat, indices, unpool_sizes):
         for i in range(0, 5):
@@ -78,15 +86,32 @@ class FusionNet(nn.Module):
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
             #skip1 = self.ssma_s1(skip1, m2_s1)
-            feat = self.ssma_res(feat_1, feat_2)
+            feat = self.ssma_res(feat_1[-1], feat_2[-1])
         else:
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod)
-            feat = feat_1
+            feat = feat_1[-1]
 
-        #m1_x = self.eASPP(m1_x)
+        if self.pooling_fusion == "fuse":
+        # decoder path, upsampling with corresponding indices and size
+            idx_fused = []
+            for i,layer_idx in enumerate(indices_1):
+                # print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
+                # print(indices_1[i].shape)
+                # combo = torch.stack((indices_1[i],indices_2[i]))
+                # print(combo.shape)
+                indices_fused = self.pooling_fusion[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
+                # print(mean.shape, mean[0][0][:5])
+                # print(mean.shape)
+                idx_fused.append(indices_fused)
+            # logger.debug(f"idx {torch.stack((indices_1)).shape}")
+            # c
+            # logger.debug(f"cat {cat[0]} {cat.shape}")
+            indices = indices_1
+        elif self.pooling_fusion == "rgb":
+            indices = indices_1
 
         # decoder path, upsampling with corresponding indices and size
-        feat = self.decoder_path(self.decoder, feat, indices_1, unpool_sizes_1)
+        feat = self.decoder_path(self.decoder, feat, indices, unpool_sizes_1)
 
         return self.classifier(feat)
 
@@ -164,6 +189,55 @@ class eASPP(nn.Module):
         out = torch.cat((out, x), 1)
 
         return torch.relu(self.eASPP_fin_bn(self.eASPP_fin_conv(out)))
+
+
+class PoolingFusion(nn.Module):
+    def __init__(self, channels, bottleneck):
+        """Constructor
+        :param features: number of feature maps
+        :param bottleneck: bottleneck compression rate
+        """
+        super(PoolingFusion, self).__init__()
+
+        reduce_size = int(channels / bottleneck)
+        self.link = nn.Sequential(
+            nn.Conv2d(channels*2, reduce_size, kernel_size=1, stride=1),
+            nn.ReLU(),
+            nn.Conv2d(reduce_size, channels*2, kernel_size=1, stride=1),
+
+        )
+
+        nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
+        nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
+
+        self.sm = nn.Softmax(dim=1)
+
+    def forward(self, m1, m2, i1, i2):
+        """Forward pass
+        :param x1: input data from encoder 1
+        :param x2: input data from encoder 2
+        :return: Fused feature maps
+        """
+
+        i_12 = torch.cat((m1, m2), dim=1)
+        #print(i1.shape,i2.shape, i_12.shape)
+
+
+        i_12_w = self.link(i_12)
+        b,c,h,w = i_12_w.shape
+        i_12_w = i_12_w.view(b,2,int(c/2),h,w)
+        #print(i_12_w.shape)
+        i_12_w = self.sm(i_12_w)
+        #print(i_12_w.shape)
+
+        #x_12 = torch.sum(i_12_w, dim=1)
+        x_12 = torch.unbind(i_12_w, dim=1)
+
+        #print(i1.shape, x_12[0].shape)
+        fused = (i1 * x_12[0]) + (i2 * x_12[1])
+        #print(torch.unique(fused.long()))
+
+        return fused.long()
 
 class SSMA(nn.Module):
     """PyTorch Module for SSMA"""
