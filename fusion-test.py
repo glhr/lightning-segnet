@@ -79,7 +79,8 @@ if args.train:
         check_val_every_n_epoch=1,
         # ~ log_every_n_steps=10,
         logger=wandb_logger,
-        checkpoint_callback=checkpoint_callback)
+        checkpoint_callback=checkpoint_callback,
+        resume_from_checkpoint=args.train_checkpoint)
     trainer.fit(fusionnet)
 else:
     logger.warning("Testing phase")
