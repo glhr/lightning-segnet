@@ -85,6 +85,7 @@ class FusionNet(nn.Module):
         if self.fusion:
             # logger.info("FUSING SHIT :D")
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod[:,0,:,:].unsqueeze(1))
+            # print(feat_1[-1].shape)
             feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, mod[:,1,:,:].unsqueeze(1))
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
@@ -200,18 +201,18 @@ class eASPP(nn.Module):
 
 
 class PoolingFusion(nn.Module):
-    def __init__(self, channels, bottleneck=16):
+    def __init__(self, channels):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
         """
         super(PoolingFusion, self).__init__()
 
-        reduce_size = int(channels / bottleneck)
+        reduce_size = 2
         self.link = nn.Sequential(
-            nn.Conv2d(channels*2, reduce_size, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(channels*2, reduce_size, kernel_size=1, stride=1),
             nn.ReLU(),
-            nn.Conv2d(reduce_size, channels*2, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(reduce_size, channels*2, kernel_size=1, stride=1),
         )
 
         # nn.init.ones_(self.link[0].weight)
