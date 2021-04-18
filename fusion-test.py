@@ -5,7 +5,12 @@ class LitFusion(LitSegNet):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         segnet_rgb = models["rgb"]
         segnet_d = models["d"]
-        self.model = FusionNet(encoders=[segnet_rgb.encoders,segnet_d.encoders], decoder=segnet_rgb.decoders, classifier=segnet_rgb.classifier, filter_config=segnet_rgb.filter_config, pooling_fusion=pooling_fusion)
+        self.model = FusionNet(
+            encoders=[segnet_rgb.encoders, segnet_d.encoders],
+            decoders=[segnet_rgb.decoders, segnet_d.decoders],
+            classifier=segnet_rgb.classifier,
+            filter_config=segnet_rgb.filter_config,
+            pooling_fusion=pooling_fusion)
         # self.model.init_decoder()
 
 parser.add_argument('--pooling_fusion', default="fuse")
@@ -50,6 +55,8 @@ models = {
 }
 
 fusionnet = LitFusion(models = models, conf=args, pooling_fusion = args.pooling_fusion, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
+
+# fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-18 17-08-cityscapes-c3-kl-rgb,depthraw-epoch=9-val_loss=0.0926.ckpt", models = models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, pooling_fusion = "rgb")
 
 create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
 

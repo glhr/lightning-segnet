@@ -10,7 +10,7 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, encoders, decoder, classifier, filter_config, pooling_fusion="rgb"):
+    def __init__(self, encoders, decoders, classifier, filter_config, pooling_fusion="rgb"):
         super(FusionNet, self).__init__()
 
         self.fusion = False
@@ -27,7 +27,7 @@ class FusionNet(nn.Module):
             # self.encoder_mod2.res_n50_enc.layer3[2].dropout = False
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
-            self.ssma_res = SSMA(512, 16)
+            self.ssma_res = SSMA(filter_config[-1], bottleneck=16)
             if self.pooling_fusion == "fuse":
                 self.pooling_fusion_block = nn.ModuleList()
                 for f in self.filter_config:
@@ -37,22 +37,12 @@ class FusionNet(nn.Module):
             self.encoder_mod1 = encoders[0]
 
         self.eASPP = eASPP()
-        self.decoder = decoder
-        self.classifier = classifier
-
-
-    def init_decoder(self):
-        for d in self.decoder.children():
-            for layer in d.features:
-                #print(layer)
-                if hasattr(layer, 'reset_parameters'):
-                    #print("before reset", layer.weight[0])
-                    layer.reset_parameters()
-                    #print("after reset",layer.weight[:5])
-                    if isinstance(layer, nn.Conv2d):
-                        nn.init.kaiming_uniform_(layer.weight, nonlinearity="relu")
-                        #print("after kaiming",layer.weight[:5])
-        nn.init.kaiming_uniform_(self.classifier.weight)
+        if len(decoders) > 1:
+            self.decoder_mod1 = decoders[0]
+            self.decoder_mod2 = decoders[1]
+            self.classifier = SSMA(filter_config[0], out=3)
+        else:
+            self.classifier = classifier
 
     def encoder_path(self, encoder, feat):
         indices = []
@@ -97,32 +87,32 @@ class FusionNet(nn.Module):
 
         # logger.info(self.pooling_fusion)
 
-        if self.pooling_fusion == "fuse":
+        if self.fusion:
         # decoder path, upsampling with corresponding indices and size
-            idx_fused = []
-            for i,layer_idx in enumerate(indices_1):
-                # print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
-                # print(indices_1[i].shape)
-                # combo = torch.stack((indices_1[i],indices_2[i]))
-                # print(combo.shape)
-                # print("id1",indices_1[0][0][0][0][:5])
-                # print("id2",indices_2[0][0][0][0][:5])
-                indices_fused = self.pooling_fusion_block[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
-                # print(mean.shape, mean[0][0][:5])
-                # print(mean.shape)
-                idx_fused.append(indices_fused)
-                # print("idx",idx_fused[0][0][0][0][:5])
+            # idx_fused = []
+            # for i,layer_idx in enumerate(indices_1):
+            #     # print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
+            #     # print(indices_1[i].shape)
+            #     # combo = torch.stack((indices_1[i],indices_2[i]))
+            #     # print(combo.shape)
+            #     print("id1", indices_1[0][0][1][1][:5])
+            #     print("id2",indices_2[0][0][1][1][:5])
+            #     indices_fused = self.pooling_fusion_block[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
+            #     # print(mean.shape, mean[0][0][:5])
+            #     # print(mean.shape)
+            #     idx_fused.append(indices_fused)
+            #     print("idx",idx_fused[0][0][1][1][:5])
             # logger.debug(f"idx {torch.stack((indices_1)).shape}")
             # c
             # logger.debug(f"cat {cat[0]} {cat.shape}")
-            indices = idx_fused
-        elif self.pooling_fusion == "rgb":
-            indices = indices_1
-
-        # decoder path, upsampling with corresponding indices and size
-        feat = self.decoder_path(self.decoder, feat, indices, unpool_sizes_1)
-
-        return self.classifier(feat)
+            # indices = idx_fused
+            feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
+            feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
+            return self.classifier(feat1, feat1)
+        else:
+            # decoder path, upsampling with corresponding indices and size
+            feat = self.decoder_path(self.decoder, feat, indices_1, unpool_sizes_1)
+            return self.classifier(feat)
 
         #aux1, aux2, res = self.decoder(m1_x, skip1, skip2)
         #return aux1, aux2, res
@@ -241,23 +231,27 @@ class PoolingFusion(nn.Module):
         #x_12 = torch.sum(i_12_w, dim=1)
         x_12 = torch.unbind(i_12_w, dim=1)
 
+
         #print(i1.shape, x_12[0].shape)
         #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
         fused = (i1 * x_12[0]) + (i2 * x_12[1])
-        #print(fused.long()[0][0][0][:5])
+        print(x_12[1][0][0][0],x_12[0][0][0][0])
 
         return fused.long()
 
 class SSMA(nn.Module):
     """PyTorch Module for SSMA"""
 
-    def __init__(self, features, bottleneck):
+    def __init__(self, features, bottleneck=None, out=None):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
         """
         super(SSMA, self).__init__()
-        reduce_size = int(features / bottleneck)
+        if bottleneck is not None:
+            reduce_size = int(features / bottleneck)
+        else:
+            reduce_size = out
         double_features = int(2 * features)
         self.link = nn.Sequential(
             nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=1),
