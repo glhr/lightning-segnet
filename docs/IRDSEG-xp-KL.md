@@ -140,3 +140,22 @@ DATALOADER:0 TEST RESULTS
  'test_dist_mistake_severity': 0.1707264631986618,
  'test_iou': 0.9285829663276672}
 ```
+
+## completed depth (geom_transform)
+
+2021-04-17 23-19-cityscapes-c30-kl-depth-epoch=23-val_loss=0.1222.ckpt
+```bash
+[INFO] CM IoU - tensor([96.6319, 56.8444, 91.2543])
+[INFO] precision tensor([98.1365, 77.9055, 94.5590], dtype=torch.float64) (90.20034427003742) | recall tensor([98.4382, 67.7698, 96.3114], dtype=torch.float64) (87.50646139651317)
+Testing: 100%|███████████████████████████████████████████████████████████████| 233/233 [06:51<00:00,  1.76s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9564067125320435,
+ 'test_acc_w': 0.9650793671607971,
+ 'test_dist_l1': 0.05336569622159004,
+ 'test_dist_l2': 0.07291053980588913,
+ 'test_dist_logl2': 0.020412862300872803,
+ 'test_dist_mistake_severity': 0.2241726815700531,
+ 'test_iou': 0.9182785153388977}
+```

@@ -372,7 +372,7 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
-    def load_depth(self, path):
+    def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
         logger.debug(f"load_depth {np.min(depth_image)} - {np.max(depth_image)} ({type(depth_image[0][0])})")
         if isinstance(depth_image[0][0], np.uint16):
@@ -382,6 +382,8 @@ class MMDataLoader(Dataset):
 
         depth_image_8u = depth_image_8u - np.min(depth_image_8u)
         depth_image_8u = (255 * (depth_image_8u / np.max(depth_image_8u))).astype(np.uint8)
+        if invert:
+            depth_image_8u = 255 - depth_image_8u
         # if np.max(depth_image_8u) <= 1:
         #     depth_image_8u = depth_image_8u*100
         return depth_image_8u
@@ -604,7 +606,7 @@ class CityscapesDataLoader(MMDataLoader):
 
         pilRGB = Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
         if not self.depth_completion:
-            pilDep = self.load_depth(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png")
+            pilDep = self.load_depth(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png", invert=True)
         else:
             pilDep = self.load_depth(self.path + "depthcomp/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_depthcomp.png")
         imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
