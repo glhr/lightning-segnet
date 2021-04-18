@@ -109,7 +109,7 @@ class FusionNet(nn.Module):
             feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
             feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
             out = self.classifier(feat1, feat2)
-            print(out.shape)
+            # print(out.shape)
             return out
         else:
             # decoder path, upsampling with corresponding indices and size
