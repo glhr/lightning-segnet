@@ -192,7 +192,7 @@ class eASPP(nn.Module):
 
 
 class PoolingFusion(nn.Module):
-    def __init__(self, channels, bottleneck):
+    def __init__(self, channels, bottleneck=16):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
