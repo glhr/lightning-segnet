@@ -209,9 +209,9 @@ class PoolingFusion(nn.Module):
 
         reduce_size = int(channels / bottleneck)
         self.link = nn.Sequential(
-            nn.Conv2d(channels*2, reduce_size, kernel_size=3, stride=1),
+            nn.Conv2d(channels*2, reduce_size, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
-            nn.Conv2d(reduce_size, channels*2, kernel_size=3, stride=1),
+            nn.Conv2d(reduce_size, channels*2, kernel_size=3, stride=1, padding=1),
         )
 
         # nn.init.ones_(self.link[0].weight)
