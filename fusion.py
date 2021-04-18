@@ -207,7 +207,7 @@ class PoolingFusion(nn.Module):
         """
         super(PoolingFusion, self).__init__()
 
-        reduce_size = int(channels / bottleneck)
+        reduce_size = 2
         self.link = nn.Sequential(
             nn.Conv2d(channels*2, reduce_size, kernel_size=1, stride=1),
             nn.ReLU(),
