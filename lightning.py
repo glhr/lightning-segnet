@@ -76,6 +76,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--ranks', default="1,2,3")
         parser.add_argument('--dist', default="l1")
         parser.add_argument('--dist_alpha', type=int, default=1)
+        parser.add_argument('--save_xp', default=None)
         return parser
 
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, modalities=None, **kwargs):
@@ -312,7 +313,15 @@ class LitSegNet(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
         sample, target_orig = batch
-        folder = f"{self.result_folder}/{self.test_checkpoint}"
+        if self.hparams.save_xp is None:
+            result_folder = f"{self.result_folder}/{self.test_checkpoint}"
+            gt_folder = f"{self.result_folder}/gt/"
+            orig_folder = f"{self.result_folder}/orig/"
+        else:
+            result_folder = f"{self.result_folder}/{self.hparams.save_xp}"
+            gt_folder = result_folder
+            orig_folder = result_folder
+            create_folder(result_folder)
 
         if self.test_max is None or batch_idx < self.test_max:
             # logger.debug(torch.min(sample),torch.max(sample))
@@ -380,10 +389,11 @@ class LitSegNet(pl.LightningModule):
                     # logger.info("Saving")
                     # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # logger.debug("Generating argmax pred")
-                    self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                    mod = ','.join(self.hparams.modalities)
+                    self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}/orig/", filename_prefix=f"orig", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}/gt/", filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities)
+                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(
                     #     iter=batch_idx+i,
                     #     orig=o,

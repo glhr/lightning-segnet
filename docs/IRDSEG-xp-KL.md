@@ -124,21 +124,21 @@ DATALOADER:0 TEST RESULTS
 
 ## raw depth (geom_transform)
 
-2021-04-17 16-57-cityscapes-c30-kl-depthraw-epoch=24-val_loss=0.1171.ckpt
+2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt
 ```bash
-[INFO] CM IoU - tensor([97.1225, 60.3898, 92.7963])
-[INFO] precision tensor([97.9205, 78.5141, 96.5344], dtype=torch.float64) (90.98965298612902) | recall tensor([99.1679, 72.3458, 95.9942], dtype=torch.float64) (89.16929546786605)
-Testing: 100%|███████████████████████████████████████████████| 233/233 [06:52<00:00,  1.77s/it]
+[INFO] CM IoU - tensor([97.0499, 58.9325, 92.5515])
+[INFO] precision tensor([98.1186, 78.5044, 95.8151], dtype=torch.float64) (90.81271156321739) | recall tensor([98.8901, 70.2720, 96.4504], dtype=torch.float64) (88.5375019229798)
+Testing: 100%|███████████████████████████████████████████████████████████████| 233/233 [07:01<00:00,  1.81s/it]
 --------------------------------------------------------------------------------
 DATALOADER:0 TEST RESULTS
 {'cm': 0.0,
- 'test_acc': 0.962385356426239,
- 'test_acc_w': 0.9714696407318115,
- 'test_dist_l1': 0.044036414474248886,
- 'test_dist_l2': 0.056880030781030655,
- 'test_dist_logl2': 0.016112593933939934,
- 'test_dist_mistake_severity': 0.1707264631986618,
- 'test_iou': 0.9285829663276672}
+ 'test_acc': 0.9611240029335022,
+ 'test_acc_w': 0.9701394438743591,
+ 'test_dist_l1': 0.04556168243288994,
+ 'test_dist_l2': 0.05893317982554436,
+ 'test_dist_logl2': 0.01663348264992237,
+ 'test_dist_mistake_severity': 0.1719764918088913,
+ 'test_iou': 0.926399827003479}
 ```
 
 ## completed depth (geom_transform)
@@ -147,7 +147,7 @@ DATALOADER:0 TEST RESULTS
 ```bash
 [INFO] CM IoU - tensor([96.6319, 56.8444, 91.2543])
 [INFO] precision tensor([98.1365, 77.9055, 94.5590], dtype=torch.float64) (90.20034427003742) | recall tensor([98.4382, 67.7698, 96.3114], dtype=torch.float64) (87.50646139651317)
-Testing: 100%|███████████████████████████████████████████████████████████████| 233/233 [06:51<00:00,  1.76s/it]
+Testing: 100%|███████████████████████████████████████████████████████████████| 233/233 [07:09<00:00,  1.84s/it]
 --------------------------------------------------------------------------------
 DATALOADER:0 TEST RESULTS
 {'cm': 0.0,

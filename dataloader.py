@@ -305,7 +305,7 @@ class MMDataLoader(Dataset):
 
         return mask_out
 
-    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, dataset_name=None):
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, dataset_name=None, modalities=None):
         if filename_prefix is None:
             filename_prefix = self.name
 
@@ -318,6 +318,7 @@ class MMDataLoader(Dataset):
         if orig is not None:
             if torch.is_tensor(orig):
                 orig = orig.detach().cpu().numpy()
+            n_modalities = len(orig)
             for m,modality in enumerate(orig):
                 # print("orig shape",modality.shape)
                 if np.max(modality) <= 1: modality = (modality*255)
@@ -326,10 +327,17 @@ class MMDataLoader(Dataset):
                     modality = np.stack((modality,)*3, axis=-1)
                     # print(np.min(orig),np.max(orig))
                     concat = concat + [modality]
-                    img = Image.fromarray(modality, 'RGB')
+
                     folder = "" if folder is None else folder
                     dataset_name = self.name if dataset_name is None else dataset_name
-                    img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}-{m}_{self.mode}.png')
+                    # mod_i =  if n_modalities > 1 else ''
+                    mod_i = '' if modalities is None else f'{modalities[m]}'
+                    # if mod_i == "depth":
+                    #     modality = 255 - cv2.applyColorMap(
+                    #         np.uint8(modality / np.amax(modality) * 255),
+                    #         cv2.COLORMAP_JET)
+                    img = Image.fromarray(modality, 'RGB')
+                    img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}{mod_i}_{self.mode}.png')
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
@@ -370,7 +378,8 @@ class MMDataLoader(Dataset):
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
         dataset_name = self.name if dataset_name is None else dataset_name
-        img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+        if orig is None:
+            img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
