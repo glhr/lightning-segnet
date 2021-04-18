@@ -15,6 +15,7 @@ class FusionNet(nn.Module):
 
         self.fusion = False
         self.filter_config = filter_config
+        self.pooling_fusion = pooling_fusion
 
         logger.debug(len(encoders), encoders)
 
@@ -26,9 +27,10 @@ class FusionNet(nn.Module):
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
             self.ssma_res = SSMA(512, 16)
-            self.pooling_fusion = nn.ModuleList()
-            for f in self.filter_config:
-                self.pooling_fusion.append(PoolingFusion(f))
+            if self.pooling_fusion_block == "fuse":
+                self.pooling_fusion_block = nn.ModuleList()
+                for f in self.filter_config:
+                    self.pooling_fusion_block.append(PoolingFusion(f))
             self.fusion = True
         else:
             self.encoder_mod1 = encoders[0]
@@ -36,7 +38,7 @@ class FusionNet(nn.Module):
         self.eASPP = eASPP()
         self.decoder = decoder
         self.classifier = classifier
-        self.pooling_fusion = pooling_fusion
+
 
     def init_decoder(self):
         for d in self.decoder.children():
@@ -99,7 +101,7 @@ class FusionNet(nn.Module):
                 # print(indices_1[i].shape)
                 # combo = torch.stack((indices_1[i],indices_2[i]))
                 # print(combo.shape)
-                indices_fused = self.pooling_fusion[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
+                indices_fused = self.pooling_fusion_block[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
                 # print(mean.shape, mean[0][0][:5])
                 # print(mean.shape)
                 idx_fused.append(indices_fused)
