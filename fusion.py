@@ -186,10 +186,10 @@ class SSMACustom(nn.Module):
             self.final_conv = nn.Sequential(
                 nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1),
             )
-            nn.init.kaiming_uniform_(self.final_conv[0].weight, nonlinearity="relu")
+            #nn.init.kaiming_uniform_(self.final_conv[0].weight, 1/9)
 
-        nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
-        nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
+        nn.init.constant_(self.link[0].weight, 1/9)
+        nn.init.constant_(self.link[2].weight, 1/9)
 
 
         # nn.init.ones_(self.link[0].weight)
