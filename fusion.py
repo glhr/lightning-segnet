@@ -10,39 +10,35 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, encoders, decoders, classifier, filter_config, pooling_fusion="rgb"):
+    def __init__(self, segnet_models=None, num_classes=3):
         super(FusionNet, self).__init__()
 
         self.fusion = False
-        self.filter_config = filter_config
-        self.pooling_fusion = pooling_fusion
-        logger.info(pooling_fusion)
 
-        logger.debug(len(encoders), encoders)
-
-        if len(encoders) > 1:
-            self.encoder_mod1 = encoders[0]
+        if segnet_models is None:
+            segnet_models = [
+                SegNet(num_classes=3),
+                SegNet(num_classes=3)
+            ]
+        if len(segnet_models) > 1:
+            self.encoder_mod1 = segnet_models[0].encoders
             # self.encoder_mod1.res_n50_enc.layer3[2].dropout = False
-            self.encoder_mod2 = encoders[1]
+            self.encoder_mod2 = segnet_models[1].encoders
             # self.encoder_mod2.res_n50_enc.layer3[2].dropout = False
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
-            self.ssma_res = SSMA(filter_config[-1], bottleneck=16)
-            if self.pooling_fusion == "fuse":
-                self.pooling_fusion_block = nn.ModuleList()
-                for f in self.filter_config:
-                    self.pooling_fusion_block.append(PoolingFusion(f))
+            self.ssma_res = SSMA(segnet_models[0].filter_config[-1], bottleneck=16)
+
+            self.decoder_mod1 = segnet_models[0].decoders
+            self.decoder_mod2 = segnet_models[1].decoders
+            self.classifier = SSMA(segnet_models[0].filter_config[0], out=num_classes)
+
             self.fusion = True
         else:
-            self.encoder_mod1 = encoders[0]
+            self.encoder_mod1 = segnet_models[0].encoders
+            self.decoder_mod1 = segnet_models[0].decoders
+            self.classifier = segnet_models[0].classifier
 
-        self.eASPP = eASPP()
-        if len(decoders) > 1:
-            self.decoder_mod1 = decoders[0]
-            self.decoder_mod2 = decoders[1]
-            self.classifier = SSMA(filter_config[0], out=3)
-        else:
-            self.classifier = classifier
 
     def encoder_path(self, encoder, feat):
         indices = []
@@ -88,24 +84,6 @@ class FusionNet(nn.Module):
         # logger.info(self.pooling_fusion)
 
         if self.fusion:
-        # decoder path, upsampling with corresponding indices and size
-            # idx_fused = []
-            # for i,layer_idx in enumerate(indices_1):
-            #     # print(indices_1[i].shape, indices_1[i][0][0][:5], indices_2[i][0][0][:5])
-            #     # print(indices_1[i].shape)
-            #     # combo = torch.stack((indices_1[i],indices_2[i]))
-            #     # print(combo.shape)
-            #     print("id1", indices_1[0][0][1][1][:5])
-            #     print("id2",indices_2[0][0][1][1][:5])
-            #     indices_fused = self.pooling_fusion_block[i](feat_1[i], feat_2[i], indices_1[i], indices_2[i])
-            #     # print(mean.shape, mean[0][0][:5])
-            #     # print(mean.shape)
-            #     idx_fused.append(indices_fused)
-            #     print("idx",idx_fused[0][0][1][1][:5])
-            # logger.debug(f"idx {torch.stack((indices_1)).shape}")
-            # c
-            # logger.debug(f"cat {cat[0]} {cat.shape}")
-            # indices = idx_fused
             feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
             feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
             out = self.classifier(feat1, feat2)
@@ -118,128 +96,6 @@ class FusionNet(nn.Module):
 
         #aux1, aux2, res = self.decoder(m1_x, skip1, skip2)
         #return aux1, aux2, res
-
-class eASPP(nn.Module):
-    """PyTorch Module for eASPP"""
-
-    def __init__(self):
-        """Constructor
-        Initializes the 5 branches of the eASPP network.
-        """
-
-        super(eASPP, self).__init__()
-
-        # branch 1
-        self.branch1_conv = nn.Conv2d(512, 256, kernel_size=1)
-        self.branch1_bn = nn.BatchNorm2d(256)
-
-        self.branch234 = nn.ModuleList([])
-        self.branch_rates = [3, 6, 12]
-        for rate in self.branch_rates:
-            # branch 2
-            branch = nn.Sequential(
-                nn.Conv2d(512, 64, kernel_size=1),
-                nn.BatchNorm2d(64),
-                nn.ReLU(),
-                nn.Conv2d(64, 64, kernel_size=3, dilation=rate, padding=rate),
-                nn.BatchNorm2d(64),
-                nn.ReLU(),
-                nn.Conv2d(64, 64, kernel_size=3, dilation=rate, padding=rate),
-                nn.BatchNorm2d(64),
-                nn.ReLU(),
-                nn.Conv2d(64, 256, kernel_size=1),
-                nn.BatchNorm2d(256),
-                nn.ReLU(),
-            )
-            self.branch234.append(branch)
-        for i, sequence in enumerate(self.branch234):
-            for ii, layer in enumerate(sequence):
-                if str(type(layer)) == "<class 'torch.nn.modules.conv.Conv2d'>":
-                    nn.init.kaiming_uniform_(layer.weight, nonlinearity="relu")
-
-        # branch 5
-        self.branch5_conv = nn.Conv2d(512, 256, 1)
-        nn.init.kaiming_uniform_(self.branch5_conv.weight, nonlinearity="relu")
-        self.branch5_bn = nn.BatchNorm2d(256)
-
-        # final layer
-        self.eASPP_fin_conv = nn.Conv2d(512, 256, kernel_size=1)
-        nn.init.kaiming_uniform_(self.eASPP_fin_conv.weight, nonlinearity="relu")
-        self.eASPP_fin_bn = nn.BatchNorm2d(256)
-
-    def forward(self, x):
-        """Forward pass
-        :param x: input from encoder (in stage 1) or from fused encoders (in stage 2 and 3)
-        :return: feature maps to be forwarded to decoder
-        """
-        # branch 1: 1x1 convolution
-        out = torch.relu(self.branch1_bn(self.branch1_conv(x)))
-
-        # branch 2-4: atrous pooling
-        y = self.branch234[0](x)
-        out = torch.cat((out, y), 1)
-        y = self.branch234[1](x)
-        out = torch.cat((out, y), 1)
-        y = self.branch234[2](x)
-        out = torch.cat((out, y), 1)
-
-        # branch 5: image pooling
-        x = nn.AdaptiveAvgPool2d((1, 1))(x)
-        x = torch.relu(self.branch5_bn(self.branch5_conv(x)))
-        x = nn.Upsample((24, 48), mode="bilinear")(x)
-        out = torch.cat((out, x), 1)
-
-        return torch.relu(self.eASPP_fin_bn(self.eASPP_fin_conv(out)))
-
-
-class PoolingFusion(nn.Module):
-    def __init__(self, channels):
-        """Constructor
-        :param features: number of feature maps
-        :param bottleneck: bottleneck compression rate
-        """
-        super(PoolingFusion, self).__init__()
-
-        reduce_size = 2
-        self.link = nn.Sequential(
-            nn.Conv2d(channels*2, reduce_size, kernel_size=1, stride=1),
-            nn.ReLU(),
-            nn.Conv2d(reduce_size, channels*2, kernel_size=1, stride=1),
-        )
-
-        # nn.init.ones_(self.link[0].weight)
-        # nn.init.ones_(self.link[2].weight)
-
-        self.sm = nn.Softmax(dim=1)
-
-    def forward(self, m1, m2, i1, i2):
-        """Forward pass
-        :param x1: input data from encoder 1
-        :param x2: input data from encoder 2
-        :return: Fused feature maps
-        """
-
-        i_12 = torch.cat((m1, m2), dim=1)
-        #print(i1.shape,i2.shape, i_12.shape)
-
-
-        i_12_w = self.link(i_12)
-        b,c,h,w = i_12_w.shape
-        i_12_w = i_12_w.view(b,2,int(c/2),h,w)
-        #print(i_12_w.shape)
-        i_12_w = self.sm(i_12_w)
-        #print(i_12_w.shape)
-
-        #x_12 = torch.sum(i_12_w, dim=1)
-        x_12 = torch.unbind(i_12_w, dim=1)
-
-
-        #print(i1.shape, x_12[0].shape)
-        #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
-        fused = (i1 * x_12[0]) + (i2 * x_12[1])
-        print(x_12[1][0][0][0],x_12[0][0][0][0])
-
-        return fused.long()
 
 class SSMA(nn.Module):
     """PyTorch Module for SSMA"""

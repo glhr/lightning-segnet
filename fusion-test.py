@@ -1,17 +1,13 @@
 from lightning import *
 
 class LitFusion(LitSegNet):
-    def __init__(self, models, conf, pooling_fusion, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, conf, segnet_models=None, pooling_fusion="fuse", viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
-        segnet_rgb = models["rgb"]
-        segnet_d = models["d"]
-        self.model = FusionNet(
-            encoders=[segnet_rgb.encoders, segnet_d.encoders],
-            decoders=[segnet_rgb.decoders, segnet_d.decoders],
-            classifier=segnet_rgb.classifier,
-            filter_config=segnet_rgb.filter_config,
-            pooling_fusion=pooling_fusion)
-        # self.model.init_decoder()
+        if segnet_models is not None:
+            self.model = FusionNet(segnet_models=segnet_models)
+            # self.model.init_decoder()
+        else:
+            self.model = FusionNet()
 
 parser.add_argument('--pooling_fusion', default="fuse")
 parser = LitSegNet.add_model_specific_args(parser)
@@ -27,6 +23,9 @@ segnet_d = LitSegNet(conf=args, model_only=True)
 
 trainer = pl.Trainer.from_argparse_args(args)
 
+dataset = segnet_rgb.hparams.dataset
+raw_depth = "depthraw" in segnet_rgb.hparams.modalities
+
 checkpoints = {
     "freiburg": {
         "rgb": "lightning_logs/2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt",
@@ -34,11 +33,13 @@ checkpoints = {
     },
     "cityscapes": {
         "rgb": "lightning_logs/2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918.ckpt",
-        "d": "lightning_logs/2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt"
+        "d": "lightning_logs/2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt" if raw_depth else "lightning_logs/2021-04-17 23-19-cityscapes-c30-kl-depth-epoch=23-val_loss=0.1222.ckpt"
     }
 }
 
-dataset = segnet_rgb.hparams.dataset
+logger.info(f'using {checkpoints[dataset]["d"]} for depth')
+
+
 
 def parse_chkpt(checkpoint):
     c = "fusion"+checkpoint.split("/")[-1].replace(".ckpt", "")
@@ -54,9 +55,9 @@ models = {
     "d": segnet_d.model
 }
 
-fusionnet = LitFusion(models = models, conf=args, pooling_fusion = args.pooling_fusion, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
+fusionnet = LitFusion(segnet_models=[models["rgb"], models["d"]], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set)
 
-# fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-18 17-08-cityscapes-c3-kl-rgb,depthraw-epoch=9-val_loss=0.0926.ckpt", models = models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, pooling_fusion = "rgb")
+fusionnet = fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-18 23-49-cityscapes-c3-kl-rgb,depthraw-epoch=15-val_loss=0.0888.ckpt", conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, strict=False)
 
 create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
 
