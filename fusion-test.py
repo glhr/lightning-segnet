@@ -58,7 +58,7 @@ models = {
 
 fusionnet = LitFusion(segnet_models=[models["rgb"], models["d"]], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck)
 
-fusionnet = fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-19 10-02-cityscapes-c3-kl-rgb,depthraw-epoch=6-val_loss=0.0897.ckpt", conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
+
 
 create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
 
@@ -93,4 +93,5 @@ if args.train:
     trainer.fit(fusionnet)
 else:
     logger.warning("Testing phase")
+    fusionnet = fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-19 10-02-cityscapes-c3-kl-rgb,depthraw-epoch=6-val_loss=0.0897.ckpt", conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
     trainer.test(fusionnet)
