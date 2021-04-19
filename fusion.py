@@ -10,10 +10,15 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, segnet_models=None, num_classes=3):
+    def __init__(self, fusion, bottleneck, segnet_models=None, num_classes=3):
         super(FusionNet, self).__init__()
 
         self.fusion = False
+
+        fusion_module = {
+            "ssma": SSMA,
+            "custom": SSMACustom
+        }
 
         if segnet_models is None:
             segnet_models = [
@@ -27,11 +32,16 @@ class FusionNet(nn.Module):
             # self.encoder_mod2.res_n50_enc.layer3[2].dropout = False
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
-            self.ssma_res = SSMA(segnet_models[0].filter_config[-1], bottleneck=16)
+            self.ssma_res = fusion_module[fusion](
+                segnet_models[0].filter_config[-1],
+                bottleneck=bottleneck)
 
             self.decoder_mod1 = segnet_models[0].decoders
             self.decoder_mod2 = segnet_models[1].decoders
-            self.classifier = SSMA(segnet_models[0].filter_config[0], out=num_classes)
+            self.classifier = fusion_module[fusion](
+                segnet_models[0].filter_config[0],
+                bottleneck=bottleneck,
+                out=num_classes)
 
             self.fusion = True
         else:
@@ -100,7 +110,7 @@ class FusionNet(nn.Module):
 class SSMA(nn.Module):
     """PyTorch Module for SSMA"""
 
-    def __init__(self, features, bottleneck=16, out=None):
+    def __init__(self, features, bottleneck, out=None):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
@@ -147,6 +157,76 @@ class SSMA(nn.Module):
             x_12 = self.bn(x_12)
 
         return x_12
+
+class SSMACustom(nn.Module):
+    def __init__(self, features, bottleneck, out=None):
+        """Constructor
+        :param features: number of feature maps
+        :param bottleneck: bottleneck compression rate
+        """
+        super(SSMACustom, self).__init__()
+
+        reduce_size = 2
+        reduce_size = int(features / bottleneck)
+        if out is None:
+            self.final = False
+        else:
+            self.final = True
+        double_features = int(2 * features)
+        self.link = nn.Sequential(
+            nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=1),
+        )
+        self.sm = nn.Softmax(dim=1)
+
+        if not self.final:
+            self.bn = nn.BatchNorm2d(features)
+        else:
+            self.final_conv = nn.Sequential(
+                nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1),
+            )
+            nn.init.kaiming_uniform_(self.final_conv[0].weight, nonlinearity="relu")
+
+        nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
+        nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
+
+
+        # nn.init.ones_(self.link[0].weight)
+        # nn.init.ones_(self.link[2].weight)
+
+
+
+    def forward(self, m1, m2):
+        """Forward pass
+        :param x1: input data from encoder 1
+        :param x2: input data from encoder 2
+        :return: Fused feature maps
+        """
+
+        i_12 = torch.cat((m1, m2), dim=1)
+        #print(i1.shape,i2.shape, i_12.shape)
+
+        i_12_w = self.link(i_12)
+        b,c,h,w = i_12_w.shape
+        i_12_w = i_12_w.view(b,2,int(c/2),h,w)
+        #print(i_12_w.shape)
+        i_12_w = self.sm(i_12_w)
+        #print(i_12_w.shape)
+
+        #x_12 = torch.sum(i_12_w, dim=1)
+        x_12 = torch.unbind(i_12_w, dim=1)
+
+        #print(i1.shape, x_12[0].shape)
+        #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
+        fused = (m1 * x_12[0]) + (m2 * x_12[1])
+        #print(fused.long()[0][0][0][:5])
+        if not self.final:
+            fused = self.bn(fused)
+        else:
+            fused = self.final_conv(fused)
+
+        return fused
 
 if __name__ == "__main__":
     segnet = SegNet(num_classes=3)
