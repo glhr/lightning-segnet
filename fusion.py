@@ -180,9 +180,7 @@ class SSMACustom(nn.Module):
         )
         self.sm = nn.Softmax(dim=1)
 
-        if not self.final:
-            self.bn = nn.BatchNorm2d(features)
-        else:
+        if self.final:
             self.final_conv = nn.Sequential(
                 nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1),
             )
@@ -221,9 +219,7 @@ class SSMACustom(nn.Module):
         #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
         fused = (m1 * x_12[0]) + (m2 * x_12[1])
         #print(fused.long()[0][0][0][:5])
-        if not self.final:
-            fused = self.bn(fused)
-        else:
+        if self.final:
             fused = self.final_conv(fused)
 
         return fused
