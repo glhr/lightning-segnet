@@ -53,7 +53,8 @@ logger.info(f'using {checkpoints[dataset]["d"]} for depth')
 
 
 def parse_chkpt(checkpoint):
-    c = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-"+checkpoint.split("/")[-1].replace(".ckpt", "")
+    c = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
+    # +checkpoint.split("/")[-1].replace(".ckpt", "")
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
 
@@ -70,7 +71,7 @@ fusionnet = LitFusion(segnet_models=[models["rgb"], models["d"]], conf=args, tes
 
 
 
-create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
+# create_folder(f'{fusionnet.result_folder}/{parse_chkpt(checkpoints[dataset]["rgb"])}')
 
 
 #trainer.test(fusionnet)
@@ -103,5 +104,8 @@ if args.train:
     trainer.fit(fusionnet)
 else:
     logger.warning("Testing phase")
-    #fusionnet = fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-19 11-51-freiburg-c3-kl-rgb,depth-epoch=106-val_loss=0.1363.ckpt", conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
+    if args.test_checkpoint is not None:
+        chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
+        create_folder(f"{fusionnet.result_folder}/{chkpt}")
+        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=args.test_checkpoint, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
     trainer.test(fusionnet)
