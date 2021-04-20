@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils import RANDOM_SEED
+from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
@@ -15,7 +15,6 @@ torch.backends.cudnn.benchmark = False
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
-
 
 def new_input_channels(segnet, channels):
     conv1 = segnet.encoders[0].features[0]
@@ -49,7 +48,7 @@ class SegNet(nn.Module):
         filter_config (list of 5 ints): number of output features at each level
     """
     def __init__(self, num_classes, n_init_features=1, drop_rate=0.5,
-                 filter_config=(64, 128, 256, 512, 512)):
+                 filter_config=(64, 128, 256, 512, 512), depthwise_conv=False):
         super(SegNet, self).__init__()
 
         self.encoders = nn.ModuleList()
@@ -62,10 +61,11 @@ class SegNet(nn.Module):
         self.filter_config = filter_config
 
         for i in range(0, 5):
+            dw = (depthwise_conv) and (i == 0)
             # encoder architecture
             self.encoders.append(_Encoder(encoder_filter_config[i],
                                           encoder_filter_config[i + 1],
-                                          encoder_n_layers[i], drop_rate))
+                                          encoder_n_layers[i], drop_rate, depthwise=dw))
 
             # decoder architecture
             self.decoders.append(_Decoder(decoder_filter_config[i],
@@ -94,7 +94,7 @@ class SegNet(nn.Module):
 
 
 class _Encoder(nn.Module):
-    def __init__(self, n_in_feat, n_out_feat, n_blocks=2, drop_rate=0.5):
+    def __init__(self, n_in_feat, n_out_feat, n_blocks=2, drop_rate=0.5, depthwise=False):
         """Encoder layer follows VGG rules + keeps pooling indices
         Args:
             n_in_feat (int): number of input features
@@ -105,7 +105,7 @@ class _Encoder(nn.Module):
         super(_Encoder, self).__init__()
         # print(f"encoder {n_in_feat}, {n_out_feat}")
 
-        layers = [nn.Conv2d(n_in_feat, n_out_feat, 3, 1, 1),
+        layers = [nn.Conv2d(n_in_feat, n_out_feat, 3, 1, 1, groups=n_in_feat if depthwise else 1),
                   nn.BatchNorm2d(n_out_feat),
                   nn.ReLU(inplace=True)]
 
