@@ -9,6 +9,15 @@ class LitFusion(LitSegNet):
         else:
             self.model = FusionNet(fusion=fusion, bottleneck=bottleneck)
 
+        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        if self.hparams.loss == "sord":
+            self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
+            self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
+        if self.hparams.loss_weight:
+            self.hparams.save_prefix += "-lw"
+        self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
+        logger.info(self.hparams.save_prefix)
+
 parser.add_argument('--fusion', default="ssma")
 parser.add_argument('--bottleneck', type=int, default=16)
 parser = LitSegNet.add_model_specific_args(parser)
@@ -93,5 +102,5 @@ if args.train:
     trainer.fit(fusionnet)
 else:
     logger.warning("Testing phase")
-    fusionnet = fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-19 10-02-cityscapes-c3-kl-rgb,depthraw-epoch=6-val_loss=0.0897.ckpt", conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
+    #fusionnet = fusionnet.load_from_checkpoint("lightning_logs/fusion2021-04-19 11-51-freiburg-c3-kl-rgb,depth-epoch=106-val_loss=0.1363.ckpt", conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
     trainer.test(fusionnet)

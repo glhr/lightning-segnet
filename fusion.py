@@ -42,6 +42,8 @@ class FusionNet(nn.Module):
                 segnet_models[0].filter_config[0],
                 bottleneck=bottleneck,
                 out=num_classes)
+            if fusion=="custom":
+                self.classifier.final_conv = segnet_models[0].classifier
 
             self.fusion = True
         else:
@@ -137,9 +139,9 @@ class SSMA(nn.Module):
         if not self.final:
             self.bn = nn.BatchNorm2d(features)
 
-        nn.init.kaiming_uniform_(self.link[0].weight, nonlinearity="relu")
-        nn.init.kaiming_uniform_(self.link[2].weight, nonlinearity="relu")
-        nn.init.kaiming_uniform_(self.final_conv[0].weight, nonlinearity="relu")
+        nn.init.kaiming_normal_(self.link[0].weight, nonlinearity="relu")
+        nn.init.xavier_uniform_(self.link[2].weight)
+        nn.init.kaiming_normal_(self.final_conv[0].weight, nonlinearity="relu")
 
     def forward(self, x1, x2):
         """Forward pass
@@ -184,15 +186,9 @@ class SSMACustom(nn.Module):
             self.final_conv = nn.Sequential(
                 nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1),
             )
-            #nn.init.kaiming_uniform_(self.final_conv[0].weight, 1/9)
 
-        nn.init.constant_(self.link[0].weight, 1/9)
-        nn.init.constant_(self.link[2].weight, 1/9)
-
-
-        # nn.init.ones_(self.link[0].weight)
-        # nn.init.ones_(self.link[2].weight)
-
+        nn.init.kaiming_normal_(self.link[0].weight, nonlinearity="relu")
+        nn.init.xavier_uniform_(self.link[2].weight)
 
 
     def forward(self, m1, m2):
