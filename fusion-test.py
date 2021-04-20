@@ -1,15 +1,15 @@
 from lightning import *
 
 class LitFusion(LitSegNet):
-    def __init__(self, conf, fusion, bottleneck, segnet_models=None, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, conf, fusion, bottleneck, decoders, segnet_models=None, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         if segnet_models is not None:
-            self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck)
+            self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck, decoders=decoders)
             # self.model.init_decoder()
         else:
-            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck)
+            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders)
 
-        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
@@ -20,6 +20,7 @@ class LitFusion(LitSegNet):
 
 parser.add_argument('--fusion', default="ssma")
 parser.add_argument('--bottleneck', type=int, default=16)
+parser.add_argument('--decoders', default="multi")
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
 if args.debug: enable_debug()
@@ -52,7 +53,7 @@ logger.info(f'using {checkpoints[dataset]["d"]} for depth')
 
 
 def parse_chkpt(checkpoint):
-    c = f"fusion-{args.fusion}{args.bottleneck}-"+checkpoint.split("/")[-1].replace(".ckpt", "")
+    c = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-"+checkpoint.split("/")[-1].replace(".ckpt", "")
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
 
@@ -65,7 +66,7 @@ models = {
     "d": segnet_d.model
 }
 
-fusionnet = LitFusion(segnet_models=[models["rgb"], models["d"]], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck)
+fusionnet = LitFusion(segnet_models=[models["rgb"], models["d"]], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders)
 
 
 

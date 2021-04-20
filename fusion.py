@@ -10,7 +10,7 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, fusion, bottleneck, segnet_models=None, num_classes=3):
+    def __init__(self, fusion, bottleneck, segnet_models=None, num_classes=3, decoders="multi"):
         super(FusionNet, self).__init__()
 
         self.fusion = False
@@ -37,13 +37,17 @@ class FusionNet(nn.Module):
                 bottleneck=bottleneck)
 
             self.decoder_mod1 = segnet_models[0].decoders
-            self.decoder_mod2 = segnet_models[1].decoders
-            self.classifier = fusion_module[fusion](
-                segnet_models[0].filter_config[0],
-                bottleneck=bottleneck,
-                out=num_classes)
-            if fusion=="custom":
-                self.classifier.final_conv = segnet_models[0].classifier
+            if decoders == "multi":
+                self.decoder_mod2 = segnet_models[1].decoders
+                self.classifier = fusion_module[fusion](
+                    segnet_models[0].filter_config[0],
+                    bottleneck=bottleneck,
+                    out=num_classes)
+                if fusion=="custom":
+                    self.classifier.final_conv = segnet_models[0].classifier
+            elif decoders == "single":
+                self.decoder_mod2 = None
+                self.classifier = segnet_models[0].classifier
 
             self.fusion = True
         else:
@@ -97,8 +101,11 @@ class FusionNet(nn.Module):
 
         if self.fusion:
             feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
-            feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
-            out = self.classifier(feat1, feat2)
+            if self.decoder_mod2 is not None:
+                feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
+                out = self.classifier(feat1, feat2)
+            else:
+                out = self.classifier(feat1)
             # print(out.shape)
             return out
         else:
