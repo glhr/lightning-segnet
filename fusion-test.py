@@ -106,6 +106,7 @@ else:
     logger.warning("Testing phase")
     if args.test_checkpoint is not None:
         chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
+        print(chkpt)
         create_folder(f"{fusionnet.result_folder}/{chkpt}")
-        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=args.test_checkpoint, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False)
+        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders)
     trainer.test(fusionnet)
