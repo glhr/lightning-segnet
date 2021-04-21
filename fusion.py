@@ -46,7 +46,7 @@ class FusionNet(nn.Module):
                     out=num_classes)
                 if fusion=="custom" and pretrained_last_layer:
                     self.classifier.final_conv = segnet_models[0].classifier
-                else:
+                elif fusion=="custom" and self.classifier.final_conv is not None:
                     nn.init.xavier_uniform_(self.classifier.final_conv[0].weight)
             elif decoders == "single":
                 self.decoder_mod2 = None
@@ -177,6 +177,8 @@ class SSMACustom(nn.Module):
             self.final_conv = nn.Sequential(
                 nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1),
             )
+        else:
+            self.final_conv = None
 
         nn.init.kaiming_normal_(self.link[0].weight, nonlinearity="relu")
         nn.init.xavier_uniform_(self.link[2].weight)
