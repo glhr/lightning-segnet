@@ -37,20 +37,24 @@ trainer = pl.Trainer.from_argparse_args(args)
 dataset = segnet_rgb.hparams.dataset
 raw_depth = "depthraw" in segnet_rgb.hparams.modalities
 
+logger.info(segnet_rgb.hparams.modalities)
+
 checkpoints = {
     "freiburg": {
         "rgb": "lightning_logs/2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474.ckpt",
-        "d": "lightning_logs/2021-04-17 14-18-freiburg-c6-kl-depth-epoch=149-val_loss=0.3106.ckpt"
+        "depth": "lightning_logs/2021-04-17 14-18-freiburg-c6-kl-depth-epoch=149-val_loss=0.3106.ckpt",
+        "ir": "lightning_logs/2021-04-17 13-16-freiburg-c6-kl-ir-epoch=128-val_loss=0.1708.ckpt"
     },
     "cityscapes": {
         "rgb": "lightning_logs/2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918.ckpt",
-        "d": "lightning_logs/2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt" if raw_depth else "lightning_logs/2021-04-17 23-19-cityscapes-c30-kl-depth-epoch=23-val_loss=0.1222.ckpt"
+        "depthraw": "lightning_logs/2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt", "depth": "lightning_logs/2021-04-17 23-19-cityscapes-c30-kl-depth-epoch=23-val_loss=0.1222.ckpt"
     }
 }
 
-logger.info(f'using {checkpoints[dataset]["d"]} for depth')
+# logger.info(f'using {checkpoints[dataset]["d"]} for depth')
 
-
+mod1 = segnet_rgb.hparams.modalities[0]
+mod2 = segnet_rgb.hparams.modalities[1]
 
 def parse_chkpt(checkpoint):
     c = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
@@ -58,16 +62,11 @@ def parse_chkpt(checkpoint):
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
 
-segnet_rgb = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints[dataset]["rgb"], modalities="rgb", conf=args)
+segnet_mod1 = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod1], modalities=mod1, conf=args)
 
-segnet_d = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints[dataset]["d"], modalities="depth", conf=args)
+segnet_mod2 = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod2], modalities=mod2, conf=args)
 
-models = {
-    "rgb": segnet_rgb.model,
-    "d": segnet_d.model
-}
-
-fusionnet = LitFusion(segnet_models=[models["rgb"], models["d"]], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset]["rgb"]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders)
+fusionnet = LitFusion(segnet_models=[segnet_mod1.model, segnet_mod2.model], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mod1]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders)
 
 
 
