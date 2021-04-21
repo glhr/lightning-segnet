@@ -7,10 +7,11 @@ from utils import logger
 from plotting import display_img
 import numpy as np
 
+
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, fusion, bottleneck, segnet_models=None, num_classes=3, decoders="multi"):
+    def __init__(self, fusion, bottleneck, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False):
         super(FusionNet, self).__init__()
 
         self.fusion = False
@@ -43,8 +44,10 @@ class FusionNet(nn.Module):
                     segnet_models[0].filter_config[0],
                     bottleneck=bottleneck,
                     out=num_classes)
-                if fusion=="custom":
+                if fusion=="custom" and pretrained_last_layer:
                     self.classifier.final_conv = segnet_models[0].classifier
+                else:
+                    nn.init.xavier_uniform_(self.classifier.final_conv[0].weight)
             elif decoders == "single":
                 self.decoder_mod2 = None
                 self.classifier = segnet_models[0].classifier
@@ -73,15 +76,6 @@ class FusionNet(nn.Module):
         return feat
 
     def forward(self, mod):
-        """Forward pass
-
-        In the case of AdapNet++, only 1 modality is used (either the RGB-image, or the Depth-image). With 'AdapNet++
-        with fusion architecture' two modalities are used (both the RGB-image and the Depth-image).
-
-        :param mod1: modality 1
-        :param mod2: modality 2
-        :return: final output and auxiliary output 1 and 2
-        """
         logger.debug(f"{mod.shape}, {mod[:,0,:,:].unsqueeze(1).shape}")
 
         if self.fusion:
@@ -117,7 +111,6 @@ class FusionNet(nn.Module):
         #return aux1, aux2, res
 
 class SSMA(nn.Module):
-    """PyTorch Module for SSMA"""
 
     def __init__(self, features, bottleneck, out=None):
         """Constructor
@@ -151,11 +144,6 @@ class SSMA(nn.Module):
         nn.init.kaiming_normal_(self.final_conv[0].weight, nonlinearity="relu")
 
     def forward(self, x1, x2):
-        """Forward pass
-        :param x1: input data from encoder 1
-        :param x2: input data from encoder 2
-        :return: Fused feature maps
-        """
         x_12 = torch.cat((x1, x2), dim=1)
 
         x_12_est = self.link(x_12)
@@ -169,10 +157,6 @@ class SSMA(nn.Module):
 
 class SSMACustom(nn.Module):
     def __init__(self, features, bottleneck, out=None):
-        """Constructor
-        :param features: number of feature maps
-        :param bottleneck: bottleneck compression rate
-        """
         super(SSMACustom, self).__init__()
 
         reduce_size = 2
@@ -199,12 +183,6 @@ class SSMACustom(nn.Module):
 
 
     def forward(self, m1, m2):
-        """Forward pass
-        :param x1: input data from encoder 1
-        :param x2: input data from encoder 2
-        :return: Fused feature maps
-        """
-
         i_12 = torch.cat((m1, m2), dim=1)
         #print(i1.shape,i2.shape, i_12.shape)
 
