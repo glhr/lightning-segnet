@@ -69,7 +69,7 @@ segnet_mod1 = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints[datase
 
 segnet_mod2 = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod2], modalities=mod2, conf=args)
 
-fusionnet = LitFusion(segnet_models=[segnet_mod1.model, segnet_mod2.model], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mod1]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=late_dilation)
+fusionnet = LitFusion(segnet_models=[segnet_mod1.model, segnet_mod2.model], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mod1]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation)
 
 
 
@@ -110,5 +110,5 @@ else:
         chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
         print(chkpt)
         create_folder(f"{fusionnet.result_folder}/{chkpt}")
-        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=late_dilation)
+        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation)
     trainer.test(fusionnet)
