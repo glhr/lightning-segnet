@@ -1,6 +1,8 @@
 # Freiburg
 
-## SSMA
+## V + D
+
+### SSMA
 
 python3 fusion-test.py  --bs 1 --fusion ssma --dataset freiburg --modalities rgb,depth --save --bs 1 --save_xp fusion --decoders single --test_checkpoint "lightning_logs/fusionfusion-ssma16-single-2021-04-20 15-20-freiburg-c3-kl-rgb,depth-epoch=83-val_loss=0.1917.ckpt" --loss_weight
 
@@ -38,7 +40,7 @@ DATALOADER:0 TEST RESULTS
  'test_iou': 0.8773732781410217}
 ```
 
-## Custom
+### Custom
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth --save --bs 1 --save_xp fusion --decoders single --test_checkpoint "lightning_logs/fusionfusion-custom16-single-2021-04-20 18-31-freiburg-c3-kl-rgb,depth-epoch=43-val_loss=0.1429.ckpt" --loss_weight
 
@@ -73,6 +75,34 @@ DATALOADER:0 TEST RESULTS
  'test_dist_logl2': 0.019895028322935104,
  'test_dist_mistake_severity': 0.011522334069013596,
  'test_iou': 0.9053769707679749}
+```
+
+## V + NIR
+
+### SSMA
+
+python3 fusion-test.py  --bs 1 --fusion ssma --dataset freiburg --modalities rgb,ir --save --bs 1 --save_xp fusion-rgb,ir --decoders single --test_checkpoint "lightning_logs/fusionfusion-ssma16-single-2021-04-22 18-56-freiburg-c3-kl-rgb,ir-epoch=118-val_loss=0.1322.ckpt" --loss_weight
+
+```bash
+
+```
+
+python3 fusion-test.py  --bs 1 --fusion ssma --dataset freiburg --modalities rgb,ir --save --bs 1 --save_xp fusion-rgb,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-ssma16-multi-2021-04-22 17-47-freiburg-c3-kl-rgb,ir-epoch=149-val_loss=0.1251.ckpt" --loss_weight
+```bash
+
+```
+
+### Custom
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,ir --save --bs 1 --save_xp fusion-rgb,ir --decoders single --test_checkpoint "lightning_logs/fusionfusion-custom16-single-2021-04-22 16-04-freiburg-c3-kl-rgb,ir-epoch=120-val_loss=0.1227.ckpt" --loss_weight
+
+```bash
+
+```
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,ir --save --bs 1 --save_xp fusion-rgb,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16-multi-2021-04-22 14-55-freiburg-c3-kl-rgb,ir-epoch=93-val_loss=0.1186.ckpt" --loss_weight
+```bash
+
 ```
 
 # Cityscapes
