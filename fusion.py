@@ -128,13 +128,13 @@ class SSMA(nn.Module):
             dilation = late_dilation
         double_features = int(2 * features)
         self.link = nn.Sequential(
-            nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=1, dilation=dilation),
+            nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
             nn.ReLU(),
-            nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=1, dilation=dilation),
+            nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
             nn.Sigmoid()
         )
         self.final_conv = nn.Sequential(
-            nn.Conv2d(double_features, out, kernel_size=3, stride=1, padding=1, dilation=dilation),
+            nn.Conv2d(double_features, out, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
         )
 
         if not self.final:
@@ -173,15 +173,15 @@ class SSMACustom(nn.Module):
             dilation = late_dilation
         double_features = int(2 * features)
         self.link = nn.Sequential(
-            nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=1, dilation=dilation),
+            nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
             nn.ReLU(),
-            nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=1, dilation=dilation),
+            nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
         )
         self.sm = nn.Softmax(dim=1)
 
         if self.final:
             self.final_conv = nn.Sequential(
-                nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1, dilation=dilation)
+                nn.Conv2d(features, out, kernel_size=3, stride=1, padding=dilation, dilation=dilation)
             )
             nn.init.xavier_uniform_(self.final_conv[0].weight)
         else:
