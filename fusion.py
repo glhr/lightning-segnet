@@ -178,7 +178,7 @@ class SSMACustom(nn.Module):
             self.final_conv = nn.Sequential(
                 nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1),
             )
-            nn.init.xavier_uniform_(self.classifier.final_conv[0].weight)
+            nn.init.xavier_uniform_(self.final_conv[0].weight)
         else:
             self.final_conv = None
 
