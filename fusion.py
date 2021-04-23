@@ -134,7 +134,7 @@ class SSMA(nn.Module):
             nn.Sigmoid()
         )
         self.final_conv = nn.Sequential(
-            nn.Conv2d(double_features, out, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
+            nn.Conv2d(double_features, out, kernel_size=3, stride=1, padding=1),
         )
 
         if not self.final:
@@ -181,7 +181,7 @@ class SSMACustom(nn.Module):
 
         if self.final:
             self.final_conv = nn.Sequential(
-                nn.Conv2d(features, out, kernel_size=3, stride=1, padding=dilation, dilation=dilation)
+                nn.Conv2d(features, out, kernel_size=3, stride=1, padding=1)
             )
             nn.init.xavier_uniform_(self.final_conv[0].weight)
         else:
