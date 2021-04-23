@@ -10,7 +10,9 @@ class LitFusion(LitSegNet):
         else:
             self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation)
 
-        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        rll = "rll" if (not pretrained_last_layer and fusion=="custom" and decoders == "multi") else ""
+
+        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}{rll}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
@@ -22,7 +24,7 @@ class LitFusion(LitSegNet):
 parser.add_argument('--fusion', default="ssma")
 parser.add_argument('--bottleneck', type=int, default=16)
 parser.add_argument('--decoders', default="multi")
-parser.add_argument('--pretrained_last_layer', action="store_true")
+parser.add_argument('--pretrained_last_layer', action="store_true", default=False)
 parser.add_argument('--late_dilation', type=int, default=1)
 parser = LitSegNet.add_model_specific_args(parser)
 args = parser.parse_args()
@@ -60,7 +62,8 @@ mod1 = segnet_rgb.hparams.modalities[0]
 mod2 = segnet_rgb.hparams.modalities[1]
 
 def parse_chkpt(checkpoint):
-    c = f"fusion-{args.fusion}{args.bottleneck}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
+    rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders == "multi") else ""
+    c = f"fusion-{args.fusion}{args.bottleneck}{rll}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
     # +checkpoint.split("/")[-1].replace(".ckpt", "")
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
