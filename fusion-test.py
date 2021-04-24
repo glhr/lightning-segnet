@@ -8,7 +8,7 @@ class LitFusion(LitSegNet):
             self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ)
             # self.model.init_decoder()
         else:
-            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ)
+            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ, branches=len(args.modalities))
 
         rll = "rll" if (not pretrained_last_layer and fusion=="custom" and decoders == "multi") else ""
         activ = "-sig" if (fusion_activ == "sigmoid" and fusion=="custom") else ""
