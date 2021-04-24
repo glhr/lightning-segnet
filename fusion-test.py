@@ -14,7 +14,7 @@ class LitFusion(LitSegNet):
         activ = "-sig" if (fusion_activ == "sigmoid" and fusion=="custom") else ""
         activ = "-softm" if (args.fusion_activ == "softmax" and args.fusion=="ssma") else activ
 
-        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}{rll}-{activ}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}{rll}{activ}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
@@ -68,7 +68,7 @@ def parse_chkpt(checkpoint):
     rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders == "multi") else ""
     activ = "-sig" if (args.fusion_activ == "sigmoid" and args.fusion=="custom") else ""
     activ = "-softm" if (args.fusion_activ == "softmax" and args.fusion=="ssma") else activ
-    c = f"fusion-{args.fusion}{args.bottleneck}{rll}-{activ}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
+    c = f"fusion-{args.fusion}{args.bottleneck}{rll}{activ}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
     # +checkpoint.split("/")[-1].replace(".ckpt", "")
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
