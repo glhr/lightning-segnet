@@ -191,6 +191,51 @@ DATALOADER:0 TEST RESULTS
  'test_iou': 0.9138084650039673}
 ```
 
+## V + D + IR
+
+### SSMA
+
+python3 fusion-test.py  --bs 1 --fusion ssma --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-ssma16-multi-2021-04-24 15-05-freiburg-c3-kl-rgb,depth,ir-epoch=131-val_loss=0.1341.ckpt" --loss_weight
+```bash
+[INFO] CM IoU - tensor([94.6043, 83.0012, 84.0250])
+[INFO] precision tensor([95.3924, 93.6559, 96.8194], dtype=torch.float64) (95.28924957927956) | recall tensor([99.1343, 87.9458, 86.4101], dtype=torch.float64) (91.1634092287135)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 136/136 [03:10<00:00,  1.40s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.950654149055481,
+ 'test_acc_w': 0.9498316049575806,
+ 'test_dist_l1': 0.05060974508523941,
+ 'test_dist_l2': 0.05313757434487343,
+ 'test_dist_logl2': 0.020610442385077477,
+ 'test_dist_mistake_severity': 0.025613397359848022,
+ 'test_iou': 0.907735288143158}
+```
+
+### Custom
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16-multi-2021-04-24 13-20-freiburg-c3-kl-rgb,depth,ir-epoch=62-val_loss=0.1147.ckpt" --loss_weight --pretrained_last_layer --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([95.5378, 85.6061, 85.4833])
+[INFO] precision tensor([97.0633, 92.6208, 96.0788], dtype=torch.float64) (95.25429211091705) | recall tensor([98.3816, 91.8721, 88.5734], dtype=torch.float64) (92.94235223851976)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 136/136 [03:08<00:00,  1.39s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9580974578857422,
+ 'test_acc_w': 0.9579818844795227,
+ 'test_dist_l1': 0.04256784915924072,
+ 'test_dist_l2': 0.04389852657914162,
+ 'test_dist_logl2': 0.016783028841018677,
+ 'test_dist_mistake_severity': 0.015878261998295784,
+ 'test_iou': 0.9209979772567749}
+-----------------------------------
+```
+
+## Custom,rll
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/" --loss_weight --fusion_activ softmax
+
 # Cityscapes
 
 ## Baselines
