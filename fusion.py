@@ -38,7 +38,9 @@ class FusionNet(nn.Module):
                 self.encoder_mod3 = None
             self.ssma_res = fusion_module[fusion](
                 segnet_models[0].filter_config[-1],
-                bottleneck=bottleneck)
+                bottleneck=bottleneck,
+                branches=branches,
+                fusion_activ=fusion_activ)
 
             self.decoder_mod1 = segnet_models[0].decoders
             if decoders == "multi":
@@ -181,7 +183,6 @@ class SSMACustom(nn.Module):
     def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="softmax", branches=2):
         super(SSMACustom, self).__init__()
 
-        reduce_size = 2
         reduce_size = int(features / bottleneck)
         if out is None:
             self.final = False
