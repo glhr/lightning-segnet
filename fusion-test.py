@@ -11,9 +11,9 @@ class LitFusion(LitSegNet):
             self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ)
 
         rll = "rll" if (not pretrained_last_layer and fusion=="custom" and decoders == "multi") else ""
-        rll = "sfm" if (not fusion_activ == "softmax" and fusion=="custom") else ""
+        activ = "sig" if (fusion_activ == "sigmoid" and fusion=="custom") else ""
 
-        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}{rll}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}{rll}-{activ}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
