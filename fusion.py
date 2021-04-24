@@ -11,7 +11,7 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, fusion, bottleneck, fusion_activ, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False, late_dilation=1):
+    def __init__(self, fusion, bottleneck, fusion_activ, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False, late_dilation=1, branches=2):
         super(FusionNet, self).__init__()
 
         self.fusion = False
@@ -22,10 +22,9 @@ class FusionNet(nn.Module):
         }
 
         if segnet_models is None:
-            segnet_models = [
-                SegNet(num_classes=3),
-                SegNet(num_classes=3)
-            ]
+            segnet_models = [SegNet(num_classes=num_classes) for i in range(branches)]
+        else:
+            branches = len(segnet_models)
         if len(segnet_models) > 1:
             self.encoder_mod1 = segnet_models[0].encoders
             # self.encoder_mod1.res_n50_enc.layer3[2].dropout = False
@@ -33,6 +32,10 @@ class FusionNet(nn.Module):
             # self.encoder_mod2.res_n50_enc.layer3[2].dropout = False
             # self.ssma_s1 = SSMA(24, 6)
             # self.ssma_s2 = SSMA(24, 6)
+            if branches == 3:
+                self.encoder_mod3 = segnet_models[2].encoders
+            else:
+                self.encoder_mod3 = None
             self.ssma_res = fusion_module[fusion](
                 segnet_models[0].filter_config[-1],
                 bottleneck=bottleneck)
@@ -40,10 +43,15 @@ class FusionNet(nn.Module):
             self.decoder_mod1 = segnet_models[0].decoders
             if decoders == "multi":
                 self.decoder_mod2 = segnet_models[1].decoders
+                if branches == 3:
+                    self.decoder_mod3 = segnet_models[2].decoders
+                else:
+                    self.decoder_mod3 = None
                 self.classifier = fusion_module[fusion](
                     segnet_models[0].filter_config[0],
                     bottleneck=bottleneck,
                     out=num_classes,
+                    branches=branches,
                     late_dilation=late_dilation,
                     fusion_activ=fusion_activ)
                 if fusion=="custom" and pretrained_last_layer:
@@ -83,10 +91,15 @@ class FusionNet(nn.Module):
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod[:,0,:,:].unsqueeze(1))
             # print(feat_1[-1].shape)
             feat_2, indices_2, unpool_sizes_2 = self.encoder_path(self.encoder_mod2, mod[:,1,:,:].unsqueeze(1))
+
+            last_feats = [feat_1[-1], feat_2[-1]]
+            if self.encoder_mod3 is not None:
+                feat_3, indices_3, unpool_sizes_3 = self.encoder_path(self.encoder_mod3, mod[:,2,:,:].unsqueeze(1))
+                last_feats.append(feat_3[-1])
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
             #skip1 = self.ssma_s1(skip1, m2_s1)
-            feat = self.ssma_res(feat_1[-1], feat_2[-1])
+            feat = self.ssma_res(last_feats)
         else:
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod)
             feat = feat_1[-1]
@@ -97,7 +110,11 @@ class FusionNet(nn.Module):
             feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
             if self.decoder_mod2 is not None:
                 feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
-                out = self.classifier(feat1, feat2)
+                feats = [feat1,feat2]
+                if self.decoder_mod3 is not None:
+                    feat3 = self.decoder_path(self.decoder_mod3, feat, indices_3, unpool_sizes_3)
+                    feats.append(feat3)
+                out = self.classifier(feats)
             else:
                 out = self.classifier(feat1)
             # print(out.shape)
@@ -112,7 +129,7 @@ class FusionNet(nn.Module):
 
 class SSMA(nn.Module):
 
-    def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="sigmoid"):
+    def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="sigmoid", branches=2):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
@@ -127,7 +144,7 @@ class SSMA(nn.Module):
         else:
             self.final = True
             dilation = late_dilation
-        double_features = int(2 * features)
+        double_features = int(branches * features)
         self.link = nn.Sequential(
             nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
             nn.ReLU(),
@@ -148,8 +165,8 @@ class SSMA(nn.Module):
         nn.init.xavier_uniform_(self.link[2].weight)
 
 
-    def forward(self, x1, x2):
-        x_12 = torch.cat((x1, x2), dim=1)
+    def forward(self, x_lst):
+        x_12 = torch.cat(x_lst, dim=1)
 
         x_12_est = self.link(x_12)
         x_12 = x_12 * x_12_est
@@ -161,7 +178,7 @@ class SSMA(nn.Module):
         return x_12
 
 class SSMACustom(nn.Module):
-    def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="softmax"):
+    def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="softmax", branches=2):
         super(SSMACustom, self).__init__()
 
         reduce_size = 2
@@ -172,7 +189,7 @@ class SSMACustom(nn.Module):
         else:
             self.final = True
             dilation = late_dilation
-        double_features = int(2 * features)
+        double_features = int(branches * features)
         self.link = nn.Sequential(
             nn.Conv2d(double_features, reduce_size, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
             nn.ReLU(),
@@ -191,14 +208,16 @@ class SSMACustom(nn.Module):
         nn.init.kaiming_normal_(self.link[0].weight, nonlinearity="relu")
         nn.init.xavier_uniform_(self.link[2].weight)
 
+        self.branches = branches
 
-    def forward(self, m1, m2):
-        i_12 = torch.cat((m1, m2), dim=1)
+
+    def forward(self, m_lst):
+        i_12 = torch.cat(m_lst, dim=1)
         #print(i1.shape,i2.shape, i_12.shape)
 
         i_12_w = self.link(i_12)
         b,c,h,w = i_12_w.shape
-        i_12_w = i_12_w.view(b,2,int(c/2),h,w)
+        i_12_w = i_12_w.view(b,self.branches,int(c/self.branches),h,w)
         #print(i_12_w.shape)
         i_12_w = self.sm(i_12_w)
         #print(i_12_w.shape)
@@ -208,7 +227,9 @@ class SSMACustom(nn.Module):
 
         #print(i1.shape, x_12[0].shape)
         #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
-        fused = (m1 * x_12[0]) + (m2 * x_12[1])
+        fused = m_lst[0] * x_12[0]
+        for f in range(1,len(self.branches)):
+            fused += (m_lst[f] * x_12[f])
         #print(fused.long()[0][0][0][:5])
         if self.final:
             fused = self.final_conv(fused)

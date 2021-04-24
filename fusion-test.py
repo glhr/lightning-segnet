@@ -23,6 +23,16 @@ class LitFusion(LitSegNet):
         self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
         logger.info(self.hparams.save_prefix)
 
+
+def parse_chkpt(checkpoint):
+    rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders == "multi") else ""
+    activ = "-sig" if (args.fusion_activ == "sigmoid" and args.fusion=="custom") else ""
+    activ = "-softm" if (args.fusion_activ == "softmax" and args.fusion=="ssma") else activ
+    c = f"fusion-{args.fusion}{args.bottleneck}{rll}{activ}-{args.decoders}-" + f'{segnet.hparams.dataset}-{args.modalities}'
+    # +checkpoint.split("/")[-1].replace(".ckpt", "")
+    return c
+#create_folder(f"{segnet.result_folder}/{chkpt}")
+
 parser.add_argument('--fusion', default="ssma")
 parser.add_argument('--bottleneck', type=int, default=16)
 parser.add_argument('--decoders', default="multi")
@@ -37,15 +47,14 @@ logger.debug(args)
 
 logger.warning("Testing phase")
 
-segnet_rgb = LitSegNet(conf=args, model_only=True)
-segnet_d = LitSegNet(conf=args, model_only=True)
+segnet = LitSegNet(conf=args, model_only=True)
 
 trainer = pl.Trainer.from_argparse_args(args)
 
-dataset = segnet_rgb.hparams.dataset
-raw_depth = "depthraw" in segnet_rgb.hparams.modalities
+dataset = segnet.hparams.dataset
+raw_depth = "depthraw" in segnet.hparams.modalities
 
-logger.info(segnet_rgb.hparams.modalities)
+logger.info(segnet.hparams.modalities)
 
 checkpoints = {
     "freiburg": {
@@ -61,23 +70,12 @@ checkpoints = {
 
 # logger.info(f'using {checkpoints[dataset]["d"]} for depth')
 
-mod1 = segnet_rgb.hparams.modalities[0]
-mod2 = segnet_rgb.hparams.modalities[1]
+mods = segnet.hparams.modalities
+models = []
+for mod in mods:
+    models.append(segnet.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args).model)
 
-def parse_chkpt(checkpoint):
-    rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders == "multi") else ""
-    activ = "-sig" if (args.fusion_activ == "sigmoid" and args.fusion=="custom") else ""
-    activ = "-softm" if (args.fusion_activ == "softmax" and args.fusion=="ssma") else activ
-    c = f"fusion-{args.fusion}{args.bottleneck}{rll}{activ}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
-    # +checkpoint.split("/")[-1].replace(".ckpt", "")
-    return c
-#create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
-
-segnet_mod1 = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod1], modalities=mod1, conf=args)
-
-segnet_mod2 = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod2], modalities=mod2, conf=args)
-
-fusionnet = LitFusion(segnet_models=[segnet_mod1.model, segnet_mod2.model], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mod1]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
+fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mods[0]]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
 
 
 
