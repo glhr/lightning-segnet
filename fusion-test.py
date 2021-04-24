@@ -65,7 +65,8 @@ mod2 = segnet_rgb.hparams.modalities[1]
 
 def parse_chkpt(checkpoint):
     rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders == "multi") else ""
-    c = f"fusion-{args.fusion}{args.bottleneck}{rll}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
+    activ = "sig" if (args.fusion_activ == "sigmoid" and args.fusion=="custom") else ""
+    c = f"fusion-{args.fusion}{args.bottleneck}{rll}-{activ}-{args.decoders}-" + f'{segnet_rgb.hparams.dataset}-{args.modalities}'
     # +checkpoint.split("/")[-1].replace(".ckpt", "")
     return c
 #create_folder(f"{segnet_rgb.result_folder}/{chkpt}")
