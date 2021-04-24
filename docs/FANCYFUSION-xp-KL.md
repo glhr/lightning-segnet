@@ -79,7 +79,7 @@ DATALOADER:0 TEST RESULTS
 
 ## Custom rll
 
-python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth --save --bs 1 --save_xp fusion-rgb,d --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-23 12-22-freiburg-c3-kl-rgb,depth-epoch=102-val_loss=0.1522.ckpt" --loss_weight
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth --save --bs 1 --save_xp fusion-rgb,d --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-23 12-22-freiburg-c3-kl-rgb,depth-epoch=102-val_loss=0.1522.ckpt" --loss_weight --fusion_activ softmax
 ```bash
 [INFO] CM IoU - tensor([94.5802, 82.1125, 78.9374])
 [INFO] precision tensor([96.5935, 89.0463, 97.8751], dtype=torch.float64) (94.50495446522828) | recall tensor([97.8437, 91.3384, 80.3138], dtype=torch.float64) (89.83196850844925)
@@ -174,7 +174,7 @@ DATALOADER:0 TEST RESULTS
 
 ## Custom rll
 
-python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,ir --save --bs 1 --save_xp fusion-rgb,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-23 09-27-freiburg-c3-kl-rgb,ir-epoch=148-val_loss=0.1258.ckpt" --loss_weight
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,ir --save --bs 1 --save_xp fusion-rgb,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-23 09-27-freiburg-c3-kl-rgb,ir-epoch=148-val_loss=0.1258.ckpt" --loss_weight --fusion_activ softmax
 ```bash
 [INFO] CM IoU - tensor([95.3169, 84.5052, 82.1763])
 [INFO] precision tensor([96.9198, 91.0575, 97.9184], dtype=torch.float64) (95.29855683635589) | recall tensor([98.2945, 92.1530, 83.6375], dtype=torch.float64) (91.3616600609887)
@@ -195,6 +195,23 @@ DATALOADER:0 TEST RESULTS
 
 ### SSMA
 
+python3 fusion-test.py --bs 1 --fusion ssma --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders single --test_checkpoint "lightning_logs/fusionfusion-ssma16-single-2021-04-24 19-43-freiburg-c3-kl-rgb,depth,ir-epoch=60-val_loss=0.1593.ckpt" --loss_weight
+```bash
+[INFO] CM IoU - tensor([93.4948, 80.7195, 80.8209])
+[INFO] precision tensor([94.3604, 92.6093, 98.0549], dtype=torch.float64) (95.00820769886028) | recall tensor([99.0284, 86.2774, 82.1377], dtype=torch.float64) (89.14784029043568)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 136/136 [07:15<00:00,  3.20s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9418808817863464,
+ 'test_acc_w': 0.9424326419830322,
+ 'test_dist_l1': 0.06122485175728798,
+ 'test_dist_l2': 0.06743630021810532,
+ 'test_dist_logl2': 0.025922482833266258,
+ 'test_dist_mistake_severity': 0.053437210619449615,
+ 'test_iou': 0.8925763964653015}
+```
+
 python3 fusion-test.py  --bs 1 --fusion ssma --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-ssma16-multi-2021-04-24 15-05-freiburg-c3-kl-rgb,depth,ir-epoch=131-val_loss=0.1341.ckpt" --loss_weight
 ```bash
 [INFO] CM IoU - tensor([94.6043, 83.0012, 84.0250])
@@ -213,6 +230,23 @@ DATALOADER:0 TEST RESULTS
 ```
 
 ### Custom
+
+python3 fusion-test.py --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders single --test_checkpoint "lightning_logs/fusionfusion-custom16-single-2021-04-24 18-29-freiburg-c3-kl-rgb,depth,ir-epoch=103-val_loss=0.1281.ckpt" --loss_weight --pretrained_last_layer --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([95.4166, 84.2346, 80.1194])
+[INFO] precision tensor([97.1593, 90.1370, 98.0967], dtype=torch.float64) (95.13098548051411) | recall tensor([98.1549, 92.7869, 81.3845], dtype=torch.float64) (90.77541296416882)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 136/136 [03:09<00:00,  1.39s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9529568552970886,
+ 'test_acc_w': 0.9507584571838379,
+ 'test_dist_l1': 0.047727227210998535,
+ 'test_dist_l2': 0.049095433205366135,
+ 'test_dist_logl2': 0.017887389287352562,
+ 'test_dist_mistake_severity': 0.014542070217430592,
+ 'test_iou': 0.9118808507919312}
+```
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16-multi-2021-04-24 13-20-freiburg-c3-kl-rgb,depth,ir-epoch=62-val_loss=0.1147.ckpt" --loss_weight --pretrained_last_layer --fusion_activ softmax
 ```bash
@@ -234,7 +268,24 @@ DATALOADER:0 TEST RESULTS
 
 ## Custom,rll
 
-python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/" --loss_weight --fusion_activ softmax
+python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburg --modalities rgb,depth,ir --save --bs 1 --save_xp fusion-rgb,d,ir --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-24 16-46-freiburg-c3-kl-rgb,depth,ir-epoch=62-val_loss=0.1102.ckpt" --loss_weight --fusion_activ softmax
+
+```bash
+[INFO] CM IoU - tensor([95.7264, 86.2496, 85.9825])
+[INFO] precision tensor([97.6446, 92.1615, 95.3133], dtype=torch.float64) (95.03982726477034) | recall tensor([97.9890, 93.0775, 89.7782], dtype=torch.float64) (93.6149172747264)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 136/136 [03:20<00:00,  1.47s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9597962498664856,
+ 'test_acc_w': 0.9603586196899414,
+ 'test_dist_l1': 0.04079478234052658,
+ 'test_dist_l2': 0.041976869106292725,
+ 'test_dist_logl2': 0.015998302027583122,
+ 'test_dist_mistake_severity': 0.014701212756335735,
+ 'test_iou': 0.924061119556427}
+```
+
 
 # Cityscapes
 
@@ -331,7 +382,7 @@ DATALOADER:0 TEST RESULTS
 
 ## Custom RLL
 
-python3 fusion-test.py  --bs 1 --fusion custom --dataset cityscapes --modalities rgb,depthraw --save --bs 1 --save_xp fusion-rgb,draw --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-23 10-38-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0888.ckpt" --loss_weight
+python3 fusion-test.py  --bs 1 --fusion custom --dataset cityscapes --modalities rgb,depthraw --save --bs 1 --save_xp fusion-rgb,draw --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-23 10-38-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0888.ckpt" --loss_weight --fusion_activ softmax
 ```bash
 [INFO] CM IoU - tensor([98.2434, 67.9050, 93.6971])
 [INFO] precision tensor([99.0142, 74.2801, 98.6583], dtype=torch.float64) (90.65085822812549) | recall tensor([99.2139, 88.7792, 94.9064], dtype=torch.float64) (94.2998128257718)
@@ -424,4 +475,23 @@ DATALOADER:0 TEST RESULTS
  'test_dist_logl2': 0.010415713302791119,
  'test_dist_mistake_severity': 0.11399666219949722,
  'test_iou': 0.9459006786346436}
+```
+
+## Custom,RLL
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset cityscapes --modalities rgb,depth --save --bs 1 --save_xp fusion-rgb,d --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-04-24 05-51-cityscapes-c3-kl-rgb,depth-epoch=7-val_loss=0.0880.ckpt" --loss_weight --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([98.1971, 68.4923, 93.8900])
+[INFO] precision tensor([98.9395, 75.2437, 98.6587], dtype=torch.float64) (90.94731359544971) | recall tensor([99.2417, 88.4170, 95.1040], dtype=torch.float64) (94.25421596993053)
+Testing: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 233/233 [05:47<00:00,  1.49s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9700967073440552,
+ 'test_acc_w': 0.9729014039039612,
+ 'test_dist_l1': 0.033069830387830734,
+ 'test_dist_l2': 0.03940286859869957,
+ 'test_dist_logl2': 0.010480721481144428,
+ 'test_dist_mistake_severity': 0.10589193552732468,
+ 'test_iou': 0.9441050291061401}
 ```
