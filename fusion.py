@@ -229,7 +229,7 @@ class SSMACustom(nn.Module):
         #print(i1.shape, x_12[0].shape)
         #print(i1.long()[0][0][0][:5], i2.long()[0][0][0][:5])
         fused = m_lst[0] * x_12[0]
-        for f in range(1,len(self.branches)):
+        for f in range(1,self.branches):
             fused += (m_lst[f] * x_12[f])
         #print(fused.long()[0][0][0][:5])
         if self.final:
