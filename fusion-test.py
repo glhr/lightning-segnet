@@ -2,15 +2,16 @@ from lightning import *
 
 
 class LitFusion(LitSegNet):
-    def __init__(self, conf, fusion, bottleneck, pretrained_last_layer, late_dilation, decoders, segnet_models=None, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
+    def __init__(self, conf, fusion, bottleneck, fusion_activ, pretrained_last_layer, late_dilation, decoders, segnet_models=None, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, **kwargs):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         if segnet_models is not None:
-            self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation)
+            self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ)
             # self.model.init_decoder()
         else:
-            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation)
+            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ)
 
         rll = "rll" if (not pretrained_last_layer and fusion=="custom" and decoders == "multi") else ""
+        rll = "sfm" if (not fusion_activ == "softmax" and fusion=="custom") else ""
 
         self.hparams.save_prefix = f"fusion-{args.fusion}{args.bottleneck}{rll}-{args.decoders}-" + f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.loss == "sord":
@@ -24,6 +25,7 @@ class LitFusion(LitSegNet):
 parser.add_argument('--fusion', default="ssma")
 parser.add_argument('--bottleneck', type=int, default=16)
 parser.add_argument('--decoders', default="multi")
+parser.add_argument('--fusion_activ', default="sigmoid")
 parser.add_argument('--pretrained_last_layer', action="store_true", default=False)
 parser.add_argument('--late_dilation', type=int, default=1)
 parser = LitSegNet.add_model_specific_args(parser)
@@ -72,7 +74,7 @@ segnet_mod1 = segnet_rgb.load_from_checkpoint(checkpoint_path=checkpoints[datase
 
 segnet_mod2 = segnet_d.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod2], modalities=mod2, conf=args)
 
-fusionnet = LitFusion(segnet_models=[segnet_mod1.model, segnet_mod2.model], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mod1]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation)
+fusionnet = LitFusion(segnet_models=[segnet_mod1.model, segnet_mod2.model], conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mod1]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
 
 
 
@@ -113,5 +115,5 @@ else:
         chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
         print(chkpt)
         create_folder(f"{fusionnet.result_folder}/{chkpt}")
-        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation)
+        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
     trainer.test(fusionnet)

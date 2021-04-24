@@ -11,7 +11,7 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, fusion, bottleneck, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False, late_dilation=1):
+    def __init__(self, fusion, bottleneck, fusion_activ, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False, late_dilation=1):
         super(FusionNet, self).__init__()
 
         self.fusion = False
@@ -44,7 +44,8 @@ class FusionNet(nn.Module):
                     segnet_models[0].filter_config[0],
                     bottleneck=bottleneck,
                     out=num_classes,
-                    late_dilation=late_dilation)
+                    late_dilation=late_dilation,
+                    fusion_activ=fusion_activ)
                 if fusion=="custom" and pretrained_last_layer:
                     self.classifier.final_conv = segnet_models[0].classifier
             elif decoders == "single":
@@ -111,7 +112,7 @@ class FusionNet(nn.Module):
 
 class SSMA(nn.Module):
 
-    def __init__(self, features, bottleneck, out=None, late_dilation=1):
+    def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="sigmoid"):
         """Constructor
         :param features: number of feature maps
         :param bottleneck: bottleneck compression rate
@@ -160,7 +161,7 @@ class SSMA(nn.Module):
         return x_12
 
 class SSMACustom(nn.Module):
-    def __init__(self, features, bottleneck, out=None, late_dilation=1):
+    def __init__(self, features, bottleneck, out=None, late_dilation=1, fusion_activ="softmax"):
         super(SSMACustom, self).__init__()
 
         reduce_size = 2
@@ -177,7 +178,7 @@ class SSMACustom(nn.Module):
             nn.ReLU(),
             nn.Conv2d(reduce_size, double_features, kernel_size=3, stride=1, padding=dilation, dilation=dilation),
         )
-        self.sm = nn.Softmax(dim=1)
+        self.sm = nn.Softmax(dim=1) if fusion_activ == "softmax" else nn.Sigmoid()
 
         if self.final:
             self.final_conv = nn.Sequential(
