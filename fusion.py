@@ -174,8 +174,8 @@ class SSMA(nn.Module):
         x_12 = x_12 * x_12_est
         x_12 = self.final_conv(x_12)
 
-        if not self.final:
-            x_12 = self.bn(x_12)
+        # if not self.final:
+        #     x_12 = self.bn(x_12)
 
         return x_12
 
