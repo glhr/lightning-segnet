@@ -43,7 +43,7 @@ class FusionNet(nn.Module):
                 fusion_activ=fusion_activ)
 
             self.decoder_mod1 = segnet_models[0].decoders
-            if decoders == "multi":
+            if decoders == "multi" or decoders == "late":
                 self.decoder_mod2 = segnet_models[1].decoders
                 if branches == 3:
                     self.decoder_mod3 = segnet_models[2].decoders
@@ -62,7 +62,7 @@ class FusionNet(nn.Module):
                 self.decoder_mod2 = None
                 self.classifier = segnet_models[0].classifier
 
-            self.fusion = True
+            self.fusion = decoders
         else:
             self.encoder_mod1 = segnet_models[0].encoders
             self.decoder_mod1 = segnet_models[0].decoders
@@ -98,10 +98,14 @@ class FusionNet(nn.Module):
             if self.encoder_mod3 is not None:
                 feat_3, indices_3, unpool_sizes_3 = self.encoder_path(self.encoder_mod3, mod[:,2,:,:].unsqueeze(1))
                 last_feats.append(feat_3[-1])
+
+            if self.fusion == "multi":
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
             #skip1 = self.ssma_s1(skip1, m2_s1)
-            feat = self.ssma_res(last_feats)
+                feat = self.ssma_res(last_feats)
+            elif self.fusion == "late":
+                feat = last_feats
         else:
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod)
             feat = feat_1[-1]
