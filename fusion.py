@@ -113,16 +113,29 @@ class FusionNet(nn.Module):
         # logger.info(self.pooling_fusion)
 
         if self.fusion:
-            feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
-            if self.decoder_mod2 is not None:
-                feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
-                feats = [feat1,feat2]
-                if self.decoder_mod3 is not None:
-                    feat3 = self.decoder_path(self.decoder_mod3, feat, indices_3, unpool_sizes_3)
-                    feats.append(feat3)
-                out = self.classifier(feats)
-            else:
-                out = self.classifier(feat1)
+            if self.fusion == "late":
+                feat1 = self.decoder_path(self.decoder_mod1, feat[0], indices_1, unpool_sizes_1)
+                if self.decoder_mod2 is not None:
+                    feat2 = self.decoder_path(self.decoder_mod2, feat[1], indices_2, unpool_sizes_2)
+                    feats = [feat1,feat2]
+                    if self.decoder_mod3 is not None:
+                        feat3 = self.decoder_path(self.decoder_mod3, feat[2], indices_3, unpool_sizes_3)
+                        feats.append(feat3)
+                    out = self.classifier(feats)
+                else:
+                    out = self.classifier(feat1)
+                # print(out.shape)
+            elif self.fusion == "multi":
+                feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
+                if self.decoder_mod2 is not None:
+                    feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
+                    feats = [feat1,feat2]
+                    if self.decoder_mod3 is not None:
+                        feat3 = self.decoder_path(self.decoder_mod3, feat, indices_3, unpool_sizes_3)
+                        feats.append(feat3)
+                    out = self.classifier(feats)
+                else:
+                    out = self.classifier(feat1)
             # print(out.shape)
             return out
         else:
