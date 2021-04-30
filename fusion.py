@@ -11,10 +11,11 @@ import numpy as np
 class FusionNet(nn.Module):
     """PyTorch module for 'AdapNet++' and 'AdapNet++ with fusion architecture' """
 
-    def __init__(self, fusion, bottleneck, fusion_activ, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False, late_dilation=1, branches=2):
+    def __init__(self, fusion, bottleneck, fusion_activ, segnet_models=None, num_classes=3, decoders="multi", pretrained_last_layer=False, late_dilation=1, branches=2, viz=False):
         super(FusionNet, self).__init__()
 
         self.fusion = False
+        self.viz = viz
 
         fusion_module = {
             "ssma": SSMA,
@@ -106,6 +107,8 @@ class FusionNet(nn.Module):
                 feat = self.ssma_res(last_feats)
             elif self.fusion == "late":
                 feat = last_feats
+                if self.viz:
+                    display_img(feat[0][::,-1].squeeze().detach().cpu().numpy())
         else:
             feat_1, indices_1, unpool_sizes_1 = self.encoder_path(self.encoder_mod1, mod)
             feat = feat_1[-1]

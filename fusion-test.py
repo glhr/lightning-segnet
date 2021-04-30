@@ -5,12 +5,12 @@ class LitFusion(LitSegNet):
     def __init__(self, conf, fusion, bottleneck, fusion_activ, pretrained_last_layer, late_dilation, decoders, segnet_models=None, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, branches=None, **kwargs):
         super().__init__(conf, viz, save, test_set, test_checkpoint, test_max)
         if segnet_models is not None:
-            self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ)
+            self.model = FusionNet(segnet_models=segnet_models, fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ, viz=viz)
             # self.model.init_decoder()
         else:
-            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ, branches=branches)
+            self.model = FusionNet(fusion=fusion, bottleneck=bottleneck, decoders=decoders, pretrained_last_layer=pretrained_last_layer, late_dilation=late_dilation, fusion_activ=fusion_activ, branches=branches, viz=viz)
 
-        rll = "rll" if (not pretrained_last_layer and fusion=="custom" and decoders == "multi") else ""
+        rll = "rll" if (not pretrained_last_layer and fusion=="custom" and decoders in ["multi","late"]) else ""
         activ = "-sig" if (fusion_activ == "sigmoid" and fusion=="custom") else ""
         activ = "-softm" if (args.fusion_activ == "softmax" and args.fusion=="ssma") else activ
 
