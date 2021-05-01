@@ -25,7 +25,7 @@ class LitFusion(LitSegNet):
 
 
 def parse_chkpt(checkpoint):
-    rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders == "multi") else ""
+    rll = "rll" if (not args.pretrained_last_layer and args.fusion=="custom" and args.decoders in ["multi","late"]) else ""
     activ = "-sig" if (args.fusion_activ == "sigmoid" and args.fusion=="custom") else ""
     activ = "-softm" if (args.fusion_activ == "softmax" and args.fusion=="ssma") else activ
     c = f"fusion-{args.fusion}{args.bottleneck}{rll}{activ}-{args.decoders}-" + f'{segnet.hparams.dataset}-{args.modalities}'

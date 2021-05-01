@@ -100,7 +100,7 @@ class FusionNet(nn.Module):
                 feat_3, indices_3, unpool_sizes_3 = self.encoder_path(self.encoder_mod3, mod[:,2,:,:].unsqueeze(1))
                 last_feats.append(feat_3[-1])
 
-            if self.fusion == "multi":
+            if self.fusion in ["multi","single"]:
             #m2_x, m2_s2, m2_s1 = self.encoder_mod2(mod2)
             #skip2 = self.ssma_s2(skip2, m2_s2)
             #skip1 = self.ssma_s1(skip1, m2_s1)
@@ -128,7 +128,7 @@ class FusionNet(nn.Module):
                 else:
                     out = self.classifier(feat1)
                 # print(out.shape)
-            elif self.fusion == "multi":
+            elif self.fusion in ["multi","single"]:
                 feat1 = self.decoder_path(self.decoder_mod1, feat, indices_1, unpool_sizes_1)
                 if self.decoder_mod2 is not None:
                     feat2 = self.decoder_path(self.decoder_mod2, feat, indices_2, unpool_sizes_2)
