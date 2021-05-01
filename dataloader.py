@@ -163,10 +163,10 @@ class MMDataLoader(Dataset):
     def remap_classes(self, idx_to_color):
 
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat','pedestrian']
-        void = ['void','egovehicle','outofroi','rectificationborder','unlabeled']
+        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat','pedestrian','_background_','fence','vegetation']
+        void = ['void','egovehicle','outofroi','rectificationborder','unlabeled','_ignore_']
         driveable = ['road','path','ground','lanemarking']
-        between = ['grass','terrain','sidewalk','parking','railtrack']
+        between = ['grass','terrain','sidewalk','parking','railtrack','ground_sidewalk','curb']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -389,8 +389,11 @@ class MMDataLoader(Dataset):
         else:
             depth_image_8u = depth_image
 
+        logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
         depth_image_8u = depth_image_8u - np.min(depth_image_8u)
+        logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
         depth_image_8u = (255 * (depth_image_8u / np.max(depth_image_8u))).astype(np.uint8)
+        logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
         if invert:
             depth_image_8u = 255 - depth_image_8u
         # if np.max(depth_image_8u) <= 1:
@@ -549,6 +552,83 @@ class FreiburgDataLoader(MMDataLoader):
             self.suffixes['gt'] = "_mask.png"
             # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
             imgGT = Image.open(self.base_folders[sample_id] + "/GT_color/" + self.filenames[sample_id] + self.suffixes['gt']).convert('RGB')
+
+        return pilRGB, pilDep, pilIR, imgGT
+
+
+class FreiburgThermalDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-thermal/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="freiburgthermal", mode=mode, augment=augment)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        if self.mode == "objects":
+            self.cls_labels = [0]*len(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+            if self.mode == "objects":
+                self.cls_labels[x[4]] = x[0].lower()
+
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if set == "train":
+            self.path = path + 'train/'
+        elif set in ["val", "test"]:
+            self.path = path + 'train/'
+        elif set == "full":
+            self.path = path + '**/'
+
+        self.augment = augment
+        self.viz = viz
+
+        self.base_folders = []
+
+        for filepath in glob.glob(self.path + 'seq_*_day/**/fl_rgb_labels/*.png'):
+            img = '_'.join(filepath.split("/")[-1].split("_")[-2:])
+            self.filenames.append(img)
+            self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
+        print(self.filenames[0], self.base_folders[0])
+
+        self.prefixes = {
+            "rgb": "fl_rgb",
+            "ir": "fl_ir_aligned",
+            "gt": "fl_rgb_labels"
+        }
+        self.color_GT = False
+
+    def load_cropped_ir(self,path):
+        ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
+        height, width = ir_image.shape
+        resize = (300, 0, width-300, height)
+        ir_image = ir_image[:,300:-300]
+        logger.debug(f"ir_image {np.min(ir_image)} - {np.max(ir_image)} ({type(ir_image[0][0])})")
+        ir_image_8u = ir_image - np.min(ir_image)
+        ir_image_8u = (255 * (ir_image_8u / np.max(ir_image_8u))).astype(np.uint8)
+
+        return ir_image_8u
+
+    def get_image_pairs(self, sample_id):
+        pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.prefixes['rgb']}_{self.filenames[sample_id]}").convert('RGB')
+
+        pilIR = self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.prefixes['ir']}_{self.filenames[sample_id]}")
+
+        imgGT = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['gt']}/{self.prefixes['gt']}_{self.filenames[sample_id]}").convert('L')
+        print(np.unique(imgGT))
+        pilDep = None
 
         return pilRGB, pilDep, pilIR, imgGT
 

@@ -15,7 +15,7 @@ from segnet import SegNet, new_input_channels, new_output_channels
 from fusion import FusionNet
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
-from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader, FreiburgThermalDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
@@ -112,6 +112,7 @@ class LitSegNet(pl.LightningModule):
 
             self.datasets = {
                 "freiburg": FreiburgDataLoader,
+                "freiburgthermal": FreiburgThermalDataLoader,
                 "cityscapes": CityscapesDataLoader,
                 "kitti": KittiDataLoader,
                 "own": OwnDataLoader,
