@@ -585,12 +585,14 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if set == "train":
+        if set in ["val", "test", "train", "full"]:
             self.path = path + 'train/'
-        elif set in ["val", "test"]:
-            self.path = path + 'train/'
-        elif set == "full":
-            self.path = path + '**/'
+
+        sequences = {
+            "val": ["seq_03_day/00", "seq_03_day/01"],
+            "test": ["seq_03_day/02", "seq_03_day/03", "seq_03_day/04", "seq_03_day/05"],
+        }
+        exclude_from_train = sum(sequences.values(), [])
 
         self.augment = augment
         self.viz = viz
@@ -599,8 +601,11 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
         for filepath in glob.glob(self.path + 'seq_*_day/**/fl_rgb_labels/*.png'):
             img = '_'.join(filepath.split("/")[-1].split("_")[-2:])
-            self.filenames.append(img)
-            self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
+            seq = '/'.join(filepath.split("/")[-4:-2])
+            # print(seq, set)
+            if (set == "full") or (set in ["val","test"] and seq in sequences[set]) or (set == "train" and seq not in exclude_from_train):
+                self.filenames.append(img)
+                self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
         print(self.filenames[0], self.base_folders[0])
 
         self.prefixes = {
@@ -610,8 +615,10 @@ class FreiburgThermalDataLoader(MMDataLoader):
         }
         self.color_GT = False
 
-    def load_cropped_ir(self,path):
+    def load_cropped_ir(self,path,resize=None):
         ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
+        if resize is not None:
+            ir_image = cv2.resize(ir_image, resize)
         height, width = ir_image.shape
         resize = (300, 0, width-300, height)
         ir_image = ir_image[:,300:-300]
@@ -623,11 +630,18 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.prefixes['rgb']}_{self.filenames[sample_id]}").convert('RGB')
+        width, height = pilRGB.size
+        resize = (300, 0, width-300, height)
+        # print(pilRGB.size)
+        pilRGB = pilRGB.crop(resize)
 
-        pilIR = self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.prefixes['ir']}_{self.filenames[sample_id]}")
+        pilIR = self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.prefixes['ir']}_{self.filenames[sample_id]}", resize=(width, height))
+        # print(pilIR.size)
 
         imgGT = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['gt']}/{self.prefixes['gt']}_{self.filenames[sample_id]}").convert('L')
-        print(np.unique(imgGT))
+        # print(imgGT.size)
+        imgGT = imgGT.resize((width, height), resample=Image.NEAREST)
+        imgGT = imgGT.crop(resize)
         pilDep = None
 
         return pilRGB, pilDep, pilIR, imgGT
