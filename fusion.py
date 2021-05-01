@@ -178,7 +178,7 @@ class SSMA(nn.Module):
         )
 
         if not self.final:
-            self.bn = nn.BatchNorm2d(features, affine=False)
+            self.bn = nn.BatchNorm2d(features)
             nn.init.kaiming_normal_(self.final_conv[0].weight, nonlinearity="relu")
         else:
             nn.init.xavier_uniform_(self.final_conv[0].weight)
@@ -194,8 +194,8 @@ class SSMA(nn.Module):
         x_12 = x_12 * x_12_est
         x_12 = self.final_conv(x_12)
 
-        if not self.final:
-            x_12 = self.bn(x_12)
+        # if not self.final:
+        #     x_12 = self.bn(x_12)
 
         return x_12
 

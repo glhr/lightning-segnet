@@ -74,7 +74,9 @@ def visualize_data_aug(imgs, augmented):
     if imgs.get("depth") is not None:
         axes[1][indices["depth"]].imshow(augmented["depth"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[1][indices["depth"]].axis('off')
-        logger.info(f"depth range (after aug) {np.min(imgs['depth'])} to {np.max(imgs['depth'])}")
+        logger.info(f"depth range (after aug) {np.min(imgs['depth'])} to {np.max(imgs['depth'])} (depth shape {augmented['depth'].shape} vs image {augmented['image'].shape})")
+        cm = np.corrcoef(augmented["depth"].flat, augmented["image"][:,:,0].flat)
+        print(cm[0, 1])
     if imgs.get("ir") is not None:
         axes[1][indices["ir"]].imshow(augmented["ir"], cmap=plt.cm.gray, vmin=0, vmax=255)
         axes[1][indices["ir"]].axis('off')

@@ -499,7 +499,7 @@ if __name__ == '__main__':
     if args.debug: enable_debug()
 
     logger.debug(args)
-    segnet_model = LitSegNet(conf=args)
+    segnet_model = LitSegNet(conf=args, viz=args.viz)
 
     if args.prefix is None:
         args.prefix = segnet_model.hparams.save_prefix
@@ -551,9 +551,12 @@ if __name__ == '__main__':
     else:
         logger.warning("Testing phase")
         trainer = pl.Trainer.from_argparse_args(args)
-        chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
-        create_folder(f"{segnet_model.result_folder}/{chkpt}")
-        trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
+        if args.test_checkpoint is not None:
+            chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
+            create_folder(f"{segnet_model.result_folder}/{chkpt}")
+            trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
+        else:
+            trained_model = segnet_model
         if args.update_output_layer:
             segnet_model.new_output()
         trainer.test(trained_model)
