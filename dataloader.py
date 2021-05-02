@@ -616,6 +616,7 @@ class FreiburgThermalDataLoader(MMDataLoader):
         self.color_GT = False
 
     def load_cropped_ir(self,path,resize=None):
+        print(path)
         ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
         if resize is not None:
             ir_image = cv2.resize(ir_image, resize)
