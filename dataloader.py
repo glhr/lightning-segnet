@@ -598,12 +598,13 @@ class FreiburgThermalDataLoader(MMDataLoader):
         self.viz = viz
 
         self.base_folders = []
+        exclude_files = ["1578919617_1287424700.png"]
 
         for filepath in glob.glob(self.path + 'seq_*_day/**/fl_ir_aligned/*.png'):
             img = '_'.join(filepath.split("/")[-1].split("_")[-2:])
             seq = '/'.join(filepath.split("/")[-4:-2])
             # print(seq, set)
-            if (set == "full") or (set in ["val","test"] and seq in sequences[set]) or (set == "train" and seq not in exclude_from_train):
+            if (set == "full") or (set in ["val","test"] and seq in sequences[set]) or (set == "train" and seq not in exclude_from_train) and img not in exclude_files:
                 self.filenames.append(img)
                 self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
         print(self.filenames[0], self.base_folders[0])
