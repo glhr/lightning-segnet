@@ -599,7 +599,7 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
         self.base_folders = []
 
-        for filepath in glob.glob(self.path + 'seq_*_day/**/fl_rgb_labels/*.png'):
+        for filepath in glob.glob(self.path + 'seq_*_day/**/fl_ir_aligned/*.png'):
             img = '_'.join(filepath.split("/")[-1].split("_")[-2:])
             seq = '/'.join(filepath.split("/")[-4:-2])
             # print(seq, set)
