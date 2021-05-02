@@ -616,18 +616,20 @@ class FreiburgThermalDataLoader(MMDataLoader):
         self.color_GT = False
 
     def load_cropped_ir(self,path,resize=None):
-        print(path)
-        ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
-        if resize is not None:
-            ir_image = cv2.resize(ir_image, resize)
-        height, width = ir_image.shape
-        resize = (300, 0, width-300, height)
-        ir_image = ir_image[:,300:-300]
-        logger.debug(f"ir_image {np.min(ir_image)} - {np.max(ir_image)} ({type(ir_image[0][0])})")
-        ir_image_8u = ir_image - np.min(ir_image)
-        ir_image_8u = (255 * (ir_image_8u / np.max(ir_image_8u))).astype(np.uint8)
-
-        return ir_image_8u
+        try:
+            ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
+            if resize is not None:
+                ir_image = cv2.resize(ir_image, resize)
+            height, width = ir_image.shape
+            resize = (300, 0, width-300, height)
+            ir_image = ir_image[:,300:-300]
+            logger.debug(f"ir_image {np.min(ir_image)} - {np.max(ir_image)} ({type(ir_image[0][0])})")
+            ir_image_8u = ir_image - np.min(ir_image)
+            ir_image_8u = (255 * (ir_image_8u / np.max(ir_image_8u))).astype(np.uint8)
+            return ir_image_8u
+        except Exception as e:
+            logger.info(f"Failed to read file {path}")
+            return None
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.prefixes['rgb']}_{self.filenames[sample_id]}").convert('RGB')
