@@ -165,8 +165,8 @@ class MMDataLoader(Dataset):
         undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
         'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat','pedestrian','_background_','fence','vegetation']
         void = ['void','egovehicle','outofroi','rectificationborder','unlabeled','_ignore_']
-        driveable = ['road','path','ground','lanemarking']
-        between = ['grass','terrain','sidewalk','parking','railtrack','ground_sidewalk','curb']
+        driveable = ['road','path','ground','lanemarking','curb']
+        between = ['grass','terrain','sidewalk','parking','railtrack','ground_sidewalk']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
