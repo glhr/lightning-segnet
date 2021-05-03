@@ -72,12 +72,19 @@ checkpoints = {
     }
 }
 
+orig_numclasses = {
+    "freiburgthermal": {
+        "rgb": 30,
+        "ir": 13
+    }
+}
+
 # logger.info(f'using {checkpoints[dataset]["d"]} for depth')
 
 mods = segnet.hparams.modalities
 models = []
 for mod in mods:
-    models.append(segnet.load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args).model)
+    models.append(LitSegNet(conf=args, model_only=True, num_classes = orig_numclasses[dataset][mod]).load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args).model)
 
 fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mods[0]]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
 

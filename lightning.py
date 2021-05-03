@@ -80,7 +80,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--save_xp', default=None)
         return parser
 
-    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, modalities=None, **kwargs):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
         self.save_hyperparameters(conf)
@@ -93,7 +93,7 @@ class LitSegNet(pl.LightningModule):
         init_channels = len(self.hparams.modalities) if self.hparams.init_channels is None else self.hparams.init_channels
 
         self.model = SegNet(
-            num_classes=self.hparams.num_classes,
+            num_classes=self.hparams.num_classes if num_classes is None else num_classes,
             n_init_features=init_channels,
             depthwise_conv=self.hparams.depthwise_conv
         )
