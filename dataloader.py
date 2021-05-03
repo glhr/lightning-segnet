@@ -609,6 +609,9 @@ class FreiburgThermalDataLoader(MMDataLoader):
                 self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
         print(self.filenames[0], self.base_folders[0])
 
+        if set == "test":
+            self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
+
         self.prefixes = {
             "rgb": "fl_rgb",
             "ir": "fl_ir_aligned",
