@@ -12,7 +12,7 @@ parser.add_argument('--rgb', default=False, action="store_true")
 parser.add_argument('--gt', default=False, action="store_true")
 args = parser.parse_args()
 
-alpha = 0.5
+alpha = 0.4
 
 for i in range(2000):
     try:
@@ -30,19 +30,24 @@ for i in range(2000):
 
         dst = cv.addWeighted(img_rgb, alpha, img_pred, beta, 0.0)
 
+        spacing = np.ones_like(img_gt)[:,:10,:]*255
+
         stack = []
         if args.rgb:
             stack.append(img_rgb)
         if args.ir:
             img_ir = cv.imread(f_ir)
             stack.append(img_ir)
+        if args.gt:
+            stack.append(img_gt)
+            stack.append(spacing)
         stack.append(dst)
         if args.model2:
+            stack.append(spacing)
             img_pred2 = cv.imread(f_pred2)
             dst2 = cv.addWeighted(img_rgb, alpha, img_pred2, beta, 0.0)
             stack.append(dst2)
-        if args.gt:
-            stack.append(img_gt)
+
         out = np.hstack(stack)
         # cv.imshow('dst', out)
         # cv.waitKey(0)
