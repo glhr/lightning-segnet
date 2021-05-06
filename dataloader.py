@@ -685,7 +685,7 @@ class CityscapesDataLoader(MMDataLoader):
         elif set in ["test", "val"]:
             self.split_path = 'val/'
         else:
-            self.split_path = '**/'
+            self.split_path = ['train/','val/']
 
         cities = {
             "val": ["frankfurt"],
@@ -696,7 +696,14 @@ class CityscapesDataLoader(MMDataLoader):
         self.viz = viz
         self.base_folders = []
 
-        for filepath in glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png'):
+        if set == "full":
+            file_pattern = []
+            for i,folder in enumerate(self.split_path):
+                file_pattern += glob.glob(self.path + 'gtFine/' + self.split_path[i] + f'**/*labelIds.png')
+        else:
+            file_pattern = glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png')
+
+        for filepath in file_pattern:
 
             img = '_'.join('/'.join(filepath.split("/")[-2:]).split("_")[:3])
             city = img.split("/")[0]

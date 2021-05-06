@@ -1,7 +1,11 @@
 ## FReiburg thermal
 
+### Single modality
 
+python3 lightning.py --bs 1 --dataset freiburgthermal --test_checkpoint "lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt" --save --save_xp mishmash --modalities rgb --loss_weight
+```bash
 
+```
 
 ### Fusion
 
@@ -50,6 +54,23 @@ DATALOADER:0 TEST RESULTS
 ### Single modality
 
 python3 lightning.py --bs 1 --dataset thermalvoc --test_checkpoint "lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt" --save --save_xp mishmash --modalities rgb --loss_weight
+```bash
+[INFO] CM IoU - tensor([88.7696,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333370561293) | recall tensor([88.7696,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████████████████████████| 1659/1659 [33:09<00:00,  1.20s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8876955509185791,
+ 'test_acc_w': 0.8374802470207214,
+ 'test_dist_l1': 0.14250725507736206,
+ 'test_dist_l2': 0.20291279256343842,
+ 'test_dist_logl2': 0.07589922100305557,
+ 'test_dist_mistake_severity': 0.2689364552497864,
+ 'test_iou': 0.8158679604530334}
+```
 
 ### Fusion
 

@@ -3,13 +3,17 @@
 ## Objects
 python3 lightning.py --test_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --num_classes 6 --bs 1 --mode convert --dataset freiburg --workers 10 --save --save_xp driv # done
 
-python3 lightning.py --test_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --num_classes 6 --bs 1 --mode convert --dataset kitti --workers 10 --save --save_xp driv --test_set full
+python3 lightning.py --test_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --num_classes 6 --bs 1 --mode convert --dataset kitti --orig_dataset freiburg --workers 10 --save --save_xp driv --test_set full
 
-python3 lightning.py --test_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --num_classes 6 --bs 1 --mode convert --dataset cityscapes --workers 10 --save --save_xp driv --test_set full
+python3 lightning.py --test_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --num_classes 6 --bs 1 --mode convert --dataset kitti --orig_dataset freiburg --workers 10 --save --save_xp driv --test_set full
 
 ## Driv
 
 python3 lightning.py --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset freiburg --workers 10 --save --save_xp driv # done
+
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset kitti --orig_dataset freiburg --workers 10 --save --save_xp driv --test_set full
+
+python3 lightning.py --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --orig_dataset freiburg --workers 10 --save --save_xp driv --test_set full
 
 ## Transfer learning
 
