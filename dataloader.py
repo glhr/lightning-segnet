@@ -67,11 +67,9 @@ class MMDataLoader(Dataset):
             "preferable": 2
         }
 
-        self.fda_refs = glob.glob('../../datasets/fda/Rob10 scenes/*.jpg')
         self.resize = resize
 
         self.transform = transform
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.viz = viz
 
@@ -250,13 +248,13 @@ class MMDataLoader(Dataset):
             # labels = labels.squeeze()
             # print(labels.shape)
             s = labels.shape
-            new_proba = torch.zeros((labels.shape[0], num_cls, s[2], s[3])).to(self.device)
+            new_proba = torch.zeros((labels.shape[0], num_cls, s[2], s[3])).to(labels.device)
             # print(new_proba.shape)
             # print(new_proba[3])
             for idx in self.idx_mappings.keys():
                 indices = [i for i in self.idx_mappings[idx] if i < labels.shape[1]]
                 # print(indices)
-                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices).to(self.device))
+                select = torch.index_select(labels,dim=1,index=torch.LongTensor(indices).to(labels.device))
                 # print(select.shape)
                 s = torch.sum(select,dim=1,keepdim=True)
                 # print(s.shape)
@@ -872,24 +870,7 @@ class OwnDataLoader(MMDataLoader):
         super().__init__(modalities, resize=resize, name="own", mode=mode, augment=augment)
         self.path = path
 
-        classes = np.loadtxt(path + "classes.txt", dtype=str)
-        # print(classes)
-
-        for x in classes:
-            x = [int(i) if i.isdigit() or "-" in i else i for i in x]
-            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
-            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
-            self.class_to_idx['objects'][x[0].lower()] = x[4]
-
-        # print("class to idx: ", self.class_to_idx['objects'])
-        # print("color to idx: ", self.color_to_idx['objects'].values())
-
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
-
-        if set == "train":
-            self.split_path = 'training/'
-        else:
-            self.split_path = 'testing/'
+        self.split_path = 'testing/'
 
         self.augment = augment
         self.viz = viz
@@ -922,28 +903,6 @@ class KAISTPedestrianDataLoader(MMDataLoader):
         super().__init__(modalities, resize=resize, name="kaistped", mode=mode, augment=augment)
         self.path = path
 
-        classes = np.loadtxt(path + "classes.txt", dtype=str)
-        # print(classes)
-
-        if self.mode == "objects":
-            self.cls_labels = [0]*len(classes)
-
-        for x in classes:
-            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
-            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
-            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
-            self.class_to_idx['objects'][x[0].lower()] = x[4]
-            if self.mode == "objects":
-                self.cls_labels[x[4]] = x[0].lower()
-
-        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
-        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
-
-        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
-
-        if set in ["val", "test", "train", "full"]:
-            self.path = path
-
         sequences = {
             "val": [],
             "test": ["set00/V000"]
@@ -959,7 +918,7 @@ class KAISTPedestrianDataLoader(MMDataLoader):
         for filepath in glob.glob(self.path + 'set**/V**/lwir/*.png'):
             img = filepath.split("/")[-1]
             seq = '/'.join(filepath.split("/")[-4:-2])
-            print(seq, set)
+            # print(seq, set)
             if (set == "full") or (set in ["val","test"] and seq in sequences[set]) or (set == "train" and seq not in exclude_from_train) and img not in exclude_files:
                 self.filenames.append(img)
                 self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
@@ -975,6 +934,7 @@ class KAISTPedestrianDataLoader(MMDataLoader):
             "ir": "lwir"
         }
         self.color_GT = False
+        self.has_affordance_labels = True
 
     def load_cropped_ir(self,path):
         try:

@@ -1,5 +1,10 @@
 ## FReiburg thermal
 
+
+
+
+### Fusion
+
 RGB encoder initialized with obj model from cityscapes
 IR encoder trained on obj classes from freiburg thermal
 then put into fusion architecture, with output layer = 3 to learn driveability
@@ -41,6 +46,12 @@ DATALOADER:0 TEST RESULTS
 ```
 
 ## ThermalVOC
+
+### Single modality
+
+python3 lightning.py --bs 1 --dataset thermalvoc --test_checkpoint "lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt" --save --save_xp mishmash --modalities rgb --loss_weight
+
+### Fusion
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038.ckpt" --loss_weight
 ```bash
