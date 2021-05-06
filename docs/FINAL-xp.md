@@ -39,3 +39,44 @@ DATALOADER:0 TEST RESULTS
  'test_dist_mistake_severity': 0.16209959983825684,
  'test_iou': 0.9177820682525635}
 ```
+
+## ThermalVOC
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038.ckpt" --loss_weight
+```bash
+[INFO] CM IoU - tensor([96.1628,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.333333298420875) | recall tensor([96.1628,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 1659/1659 [43:49<00:00,  1.58s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9616280794143677,
+ 'test_acc_w': 0.9513047337532043,
+ 'test_dist_l1': 0.046021562069654465,
+ 'test_dist_l2': 0.06132075935602188,
+ 'test_dist_logl2': 0.02399332821369171,
+ 'test_dist_mistake_severity': 0.19935385882854462,
+ 'test_iou': 0.9399399161338806}
+```
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016.ckpt" --loss_weight
+
+```bash
+[INFO] CM IoU - tensor([96.0871,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333320796612) | recall tensor([96.0871,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|█████████████████████████████████████████████████████████████████████████████████████████████| 1659/1659 [43:33<00:00,  1.58s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9608707427978516,
+ 'test_acc_w': 0.9478398561477661,
+ 'test_dist_l1': 0.04797082021832466,
+ 'test_dist_l2': 0.06565381586551666,
+ 'test_dist_logl2': 0.02522311359643936,
+ 'test_dist_mistake_severity': 0.22595582902431488,
+ 'test_iou': 0.9385401606559753}
+```

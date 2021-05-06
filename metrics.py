@@ -21,12 +21,16 @@ def iou_from_confmat(
     absent_score: float = 0.0
 ):
 
+    logger.debug(confmat)
+
     intersection = torch.diag(confmat)
     union = confmat.sum(0) + confmat.sum(1) - intersection
 
     # If this class is absent in both target AND pred (union == 0), then use the absent_score for this class.
     scores = intersection.float() / union.float()
     scores[union == 0] = float('nan')
+
+    logger.debug(scores)
 
     return scores
 
