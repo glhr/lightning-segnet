@@ -2,6 +2,10 @@ import cv2 as cv
 import numpy as np
 from argparse import ArgumentParser
 
+from utils import create_folder
+
+# fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016_affordances
+
 parser = ArgumentParser()
 parser.add_argument('--dataset', default="freiburgthermal")
 parser.add_argument('--xp', default="mishmash")
@@ -14,13 +18,15 @@ args = parser.parse_args()
 
 alpha = 0.4
 
+create_folder(f'results/{args.dataset}/{args.xp}/overlay')
+
 for i in range(2000):
     try:
-        f_rgb = f"{args.dataset}/{args.xp}/{args.dataset}{i}-orig-rgb_affordances.png"
-        f_gt = f"{args.dataset}/{args.xp}/{args.dataset}{i}-gt_affordances.png"
-        f_ir = f"{args.dataset}/{args.xp}/{args.dataset}{i}-orig-ir_affordances.png"
-        f_pred = f"{args.dataset}/{args.xp}/{args.dataset}{i}-cls-{args.model}.png"
-        f_pred2 = f"{args.dataset}/{args.xp}/{args.dataset}{i}-cls-{args.model2}.png"
+        f_rgb = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-orig-rgb_affordances.png"
+        f_gt = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-gt_affordances.png"
+        f_ir = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-orig-ir_affordances.png"
+        f_pred = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-cls-{args.model}.png"
+        f_pred2 = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-cls-{args.model2}.png"
 
         img_rgb = cv.imread(f_rgb)
         img_gt = cv.imread(f_gt)
@@ -54,7 +60,7 @@ for i in range(2000):
         # cv.destroyAllWindows()
         i_str = str(i)
         i_str = "0"*(5-len(i_str)) + i_str
-        cv.imwrite(f"{args.dataset}/{args.xp}/overlay/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
+        cv.imwrite(f"results/{args.dataset}/{args.xp}/overlay/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
     except Exception as e:
     	print(e)
     	continue
