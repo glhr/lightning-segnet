@@ -42,9 +42,11 @@ for i in range(2000):
         stack = []
         if args.rgb:
             stack.append(img_rgb)
+            stack.append(spacing)
         if args.ir:
             img_ir = cv.imread(f_ir)
             stack.append(img_ir)
+            stack.append(spacing)
         if args.gt:
             stack.append(img_gt)
             stack.append(spacing)
