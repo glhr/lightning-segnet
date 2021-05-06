@@ -18,7 +18,8 @@ args = parser.parse_args()
 
 alpha = 0.4
 
-create_folder(f'results/{args.dataset}/{args.xp}/overlay')
+save_folder = "overlay" if args.model2 is None else "overlay_modelcomp"
+create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
 
 for i in range(2000):
     try:
@@ -60,7 +61,7 @@ for i in range(2000):
         # cv.destroyAllWindows()
         i_str = str(i)
         i_str = "0"*(5-len(i_str)) + i_str
-        cv.imwrite(f"results/{args.dataset}/{args.xp}/overlay/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
+        cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
     except Exception as e:
     	print(e)
     	continue
