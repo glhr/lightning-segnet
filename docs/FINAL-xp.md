@@ -4,7 +4,19 @@
 
 python3 lightning.py --bs 1 --dataset freiburgthermal --test_checkpoint "lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt" --save --save_xp mishmash --modalities rgb --loss_weight
 ```bash
-
+[INFO] CM IoU - tensor([96.9616, 61.0726, 90.2493])
+[INFO] precision tensor([98.1684, 73.6862, 96.1385], dtype=torch.float64) (89.33102728174495) | recall tensor([98.7480, 78.1074, 93.6439], dtype=torch.float64) (90.1664395770831)
+Testing: 100%|██████████████████████████████| 1115/1115 [23:08<00:00,  1.25s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9560766816139221,
+ 'test_acc_w': 0.959296703338623,
+ 'test_dist_l1': 0.050574589520692825,
+ 'test_dist_l2': 0.06387706100940704,
+ 'test_dist_logl2': 0.018044644966721535,
+ 'test_dist_mistake_severity': 0.1514282375574112,
+ 'test_iou': 0.9185949563980103}
 ```
 
 ### Fusion
