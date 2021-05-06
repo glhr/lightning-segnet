@@ -69,6 +69,10 @@ checkpoints = {
     "freiburgthermal": {
         "rgb": "lightning_logs/2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310.ckpt",
         "ir": "lightning_logs/2021-05-02 22-07-freiburgthermal-c13-kl-ir-epoch=56-val_loss=0.5759.ckpt"
+    },
+    "kaistped": {
+        "rgb": "lightning_logs/2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310.ckpt",
+        "ir": "lightning_logs/2021-05-02 22-07-freiburgthermal-c13-kl-ir-epoch=56-val_loss=0.5759.ckpt"
     }
 }
 
@@ -76,17 +80,16 @@ orig_numclasses = {
     "freiburgthermal": {
         "rgb": 30,
         "ir": 13
+    },
+    "kaistped": {
+        "rgb": 30,
+        "ir": 13
     }
 }
 
 # logger.info(f'using {checkpoints[dataset]["d"]} for depth')
 
-mods = segnet.hparams.modalities
-models = []
-for mod in mods:
-    models.append(LitSegNet(conf=args, model_only=True, num_classes = orig_numclasses[dataset][mod]).load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args, num_classes = orig_numclasses[dataset][mod]).model)
 
-fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mods[0]]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
 
 
 
@@ -95,21 +98,30 @@ fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samp
 
 #trainer.test(fusionnet)
 
-if args.prefix is None:
-    args.prefix = "fusion"+fusionnet.hparams.save_prefix
-logger.debug(args.prefix)
 
-checkpoint_callback = ModelCheckpoint(
-    dirpath='lightning_logs',
-    filename=args.prefix+'-{epoch}-{val_loss:.4f}',
-    verbose=True,
-    monitor='val_loss',
-    mode='min',
-    save_last=True
-)
-checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
+mods = segnet.hparams.modalities
 
 if args.train:
+
+    if args.prefix is None:
+        args.prefix = "fusion"+fusionnet.hparams.save_prefix
+    logger.debug(args.prefix)
+
+    checkpoint_callback = ModelCheckpoint(
+        dirpath='lightning_logs',
+        filename=args.prefix+'-{epoch}-{val_loss:.4f}',
+        verbose=True,
+        monitor='val_loss',
+        mode='min',
+        save_last=True
+    )
+    checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
+    models = []
+    for mod in mods:
+        models.append(LitSegNet(conf=args, model_only=True, num_classes = orig_numclasses.get(dataset,dict()).get(mod,3)).load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args, num_classes = orig_numclasses.get(dataset,dict()).get(mod,3)).model)
+
+    fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mods[0]]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
+
     logger.warning("Training phase")
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False, name = args.prefix)
     wandb_logger.log_hyperparams(fusionnet.hparams)
@@ -126,6 +138,7 @@ else:
     if args.test_checkpoint is not None:
         chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
         print(chkpt)
-        create_folder(f"{fusionnet.result_folder}/{chkpt}")
-        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ, branches=len(mods))
+        fusionnet = LitFusion(models = [], conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ, branches=len(mods))
+        fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, models = [], conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ, branches=len(mods))
+        if args.save_xp is not None: create_folder(f"{fusionnet.result_folder}/{chkpt}")
     trainer.test(fusionnet)
