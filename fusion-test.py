@@ -143,5 +143,5 @@ else:
         print(chkpt)
         fusionnet = LitFusion(models = [], conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ, branches=len(mods))
         fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, models = [], conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ, branches=len(mods), dataset_seq=args.dataset_seq)
-        if args.save_xp is not None: create_folder(f"{fusionnet.result_folder}/{chkpt}")
+        if args.save_xp is None: create_folder(f"{fusionnet.result_folder}/{chkpt}")
     trainer.test(fusionnet)
