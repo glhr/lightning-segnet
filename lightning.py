@@ -167,9 +167,10 @@ class LitSegNet(pl.LightningModule):
             self.hparams.save_prefix += "-lw"
         self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
         logger.info(self.hparams.save_prefix)
-        create_folder(f"{self.result_folder}/viz_per_epoch")
-        create_folder(f"{self.result_folder}/gt")
-        create_folder(f"{self.result_folder}/orig")
+        if self.hparams.save_xp is None:
+            create_folder(f"{self.result_folder}/viz_per_epoch")
+            create_folder(f"{self.result_folder}/gt")
+            create_folder(f"{self.result_folder}/orig")
 
 
     def update_model(self):
