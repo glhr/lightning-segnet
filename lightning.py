@@ -50,6 +50,7 @@ parser.add_argument('--viz', default=False, action="store_true")
 parser.add_argument('--test_set', default="test")
 parser.add_argument('--update_output_layer', default=False, action="store_true")
 parser.add_argument('--init', default=False, action="store_true")
+parser.add_argument('--dataset_seq', default=None)
 
 import inspect
 
@@ -80,7 +81,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--save_xp', default=None)
         return parser
 
-    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, **kwargs):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
         self.save_hyperparameters(conf)
@@ -108,6 +109,7 @@ class LitSegNet(pl.LightningModule):
             self.test_checkpoint = test_checkpoint
             self.test_max = test_max
             self.test_set = test_set
+            self.dataset_seq = dataset_seq
 
 
             self.datasets = {
@@ -401,7 +403,8 @@ class LitSegNet(pl.LightningModule):
                     self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
                     self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                    if not self.test_set.dataset.noGT:
+                        self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(
                     #     iter=batch_idx+i,
                     #     orig=o,
@@ -416,18 +419,19 @@ class LitSegNet(pl.LightningModule):
                 #     folder=f"{self.result_folder}/viz_per_epoch",
                 #     filename_prefix=f"gt")
 
-            #try:
-            cm = self.CM(pred, target)
-            # logger.debug(cm.shape)
-            iou = self.IoU_conv(pred, target)
+            if not self.test_set.dataset.noGT:
+                #try:
+                cm = self.CM(pred, target)
+                # logger.debug(cm.shape)
+                iou = self.IoU_conv(pred, target)
 
-            mistakes = self.dist(pred, target, weight_map=weight_map)
-            logger.debug(mistakes)
-            self.log_mistakes(mistakes, prefix="test")
+                mistakes = self.dist(pred, target, weight_map=weight_map)
+                logger.debug(mistakes)
+                self.log_mistakes(mistakes, prefix="test")
 
 
-            self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-            self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
 
             return pred
 
@@ -446,7 +450,8 @@ class LitSegNet(pl.LightningModule):
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
         logger.info(self.hparams.modalities)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz)
+        logger.info(self.dataset_seq)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:
@@ -502,7 +507,7 @@ if __name__ == '__main__':
     if args.debug: enable_debug()
 
     logger.debug(args)
-    segnet_model = LitSegNet(conf=args, viz=args.viz)
+    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq)
 
     if args.prefix is None:
         args.prefix = segnet_model.hparams.save_prefix
@@ -557,7 +562,7 @@ if __name__ == '__main__':
         if args.test_checkpoint is not None:
             chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
             create_folder(f"{segnet_model.result_folder}/{chkpt}")
-            trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args)
+            trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args, dataset_seq=args.dataset_seq)
         else:
             trained_model = segnet_model
         if args.update_output_layer:
