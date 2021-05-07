@@ -88,6 +88,7 @@ class MMDataLoader(Dataset):
                 modGT = self.labels_to_obj(modGT)
 
         if self.mode == "affordances" and not self.has_affordance_labels: modGT = self.labels_obj_to_aff(modGT)
+        # print(torch.unique(modGT))
 
         return modGT
 
@@ -976,6 +977,20 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
         """
         super().__init__(modalities, resize=resize, name="kaistpedann", mode=mode, augment=augment)
         self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
         sequences = {
             "val": [],
