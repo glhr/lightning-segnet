@@ -33,27 +33,33 @@ while True:
         f_pred2 = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-cls-{args.model2}.png"
         f_pred3 = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-cls-{args.model3}.png"
 
+        print(f_rgb)
         img_rgb = cv.imread(f_rgb)
+        print(f_gt)
         img_gt = cv.imread(f_gt)
 
+        print(f_pred)
         img_pred = cv.imread(f_pred)
         beta = (1.0 - alpha)
 
         dst = cv.addWeighted(img_rgb, alpha, img_pred, beta, 0.0)
 
-        spacing = np.ones_like(img_gt)[:,:10,:]*255
+        spacing = np.ones_like(img_rgb)[:,:10,:]*255
 
         stack = []
         if args.rgb:
+
             stack.append(img_rgb)
             stack.append(spacing)
         if args.ir:
+            print(f_ir)
             img_ir = cv.imread(f_ir)
             stack.append(img_ir)
             stack.append(spacing)
         if args.gt:
             stack.append(img_gt)
             stack.append(spacing)
+
         stack.append(dst)
         if args.model2:
             stack.append(spacing)
@@ -75,7 +81,7 @@ while True:
         cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
         i += 1
     except Exception as e:
-    	print(f"stopped at i={i}")
+    	print(f"stopped at i={i}",e)
     	break
 
 
