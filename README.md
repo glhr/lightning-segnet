@@ -1,3 +1,31 @@
+# Visualization
+
+### Data samples
+
+will show image before and after pre-processing/data aug
+
+python3 lightning.py --dataset kaistped --viz --modalities rgb,ir
+python3 lightning.py --dataset freiburg --viz --modalities rgb,depth,ir
+python3 lightning.py --dataset cityscapes --viz --modalities rgb,depthraw
+python3 lightning.py --dataset cityscapes --viz --modalities rgb,depth
+python3 lightning.py --dataset kitti --viz --modalities rgb,depthraw
+python3 lightning.py --dataset kitti --viz --modalities rgb,depth
+python3 lightning.py --dataset thermalvoc --viz --modalities rgb,ir
+
+optionally, add --augment to see effect of augmentation on test samples
+can also add --test_set train/val/test
+
+### Loss weighting
+```bash
+
+ # visualize pixel loss on predictions
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-27 14-54-cityscapes-c3-kl-rgb-epoch=191-val_loss=0.0958.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --loss compare --test_samples 10 --debug
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset freiburg --loss compare --test_samples 10 --debug
+
+# visualize a loss weight map
+python3 metrics.py --distmap
+```
+
 # Results
 
 trained on Freiburg
@@ -24,6 +52,28 @@ python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 11-41
 
 ## sord
 python3 lightning.py --gpus 0 --test_checkpoint lightning_logs/2021-03-22\ 11-22-freiburg-c3-sord-epoch\=689-val_loss\=0.0164.ckpt --num_classes 3 --bs 2 --mode affordances --loss sord --dataset freiburg
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-02 13-35-freiburg-c6-sord-0,1,2-rgb-epoch=17-val_loss=0.0338.ckpt" --num_classes 3 --bs 2 --mode affordances --loss sord --dataset freiburg
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-02 15-40-freiburg-c3-sord-0,1,2-rgb-epoch=75-val_loss=0.0309.ckpt" --num_classes 3 --bs 2 --mode affordances --loss sord --dataset freiburg
+
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-02 13-35-freiburg-c6-sord-0,1,2-rgb-epoch=43-val_loss=0.0290.ckpt" --num_classes 3 --bs 2 --mode affordances --loss sord --dataset freiburg
+2021-04-02 15-40-freiburg-c3-sord-0,1,2-rgb-last.ckpt
+2021-04-02 13-35-freiburg-c6-sord-0,1,2-rgb-epoch=43-val_loss=0.0290.ckpt
+
+python3 lightning.py --test_samples 0 --train --bs 8 --lr 0.001 --optim adam --num_classes 6 --mode affordances --dataset freiburg --max_epochs 100 --augment --orig_dataset freiburg --workers 10 --train_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --update_output_layer --loss sord --ranks 0,1,2 --dist l2
+
+python3 lightning.py --test_samples 0 --train --bs 3 --lr 0.0001 --optim adam --num_classes 6 --mode affordances --dataset freiburg --max_epochs 100 --augment --orig_dataset freiburg --workers 10 --train_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --update_output_layer --loss sord --ranks 0,2,4 --dist l2 --gpu 0
+
+python3 lightning.py --test_samples 0 --train --bs 8 --lr 0.00001 --optim adam --num_classes 6 --mode affordances --dataset freiburg --max_epochs 100 --augment --orig_dataset freiburg --workers 10 --train_checkpoint "lightning_logs/2021-03-31 08-51-freiburg-c6-kl-rgb-epoch=673-val_loss=0.2363.ckpt" --update_output_layer --loss sord --ranks 0,1,2 --dist l2
+
+
+
+python3 lightning.py --test_samples 0 --train --bs 8 --lr 0.0001 --optim adam --num_classes 3 --mode affordances --dataset freiburg --max_epochs 100 --augment --orig_dataset freiburg --workers 10 --train_checkpoint "lightning_logs/2021-04-02 13-35-freiburg-c6-sord-0,1,2-rgb-epoch=43-val_loss=0.0290.ckpt" --loss sord --ranks 0,1,2 --dist l2
+
+python3 lightning.py --test_samples 0 --train --bs 8 --lr 0.00001 --optim adam --num_classes 3 --mode affordances --dataset freiburg --max_epochs 100 --augment --orig_dataset freiburg --workers 10 --train_checkpoint "lightning_logs/2021-04-02 15-40-freiburg-c3-sord-0,1,2-rgb-last.ckpt" --loss sord --ranks 0,1,2 --dist l2
+
+
 ```
 
 trained on Cityscapes

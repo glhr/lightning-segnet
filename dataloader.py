@@ -29,6 +29,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+
+
 class MMDataLoader(Dataset):
     def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False):
         self.idx = 0
@@ -94,24 +96,17 @@ class MMDataLoader(Dataset):
 
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False):
 
-        imgGT_orig = np.array(imgGT)
-
         use = {
             "rgb": "rgb" in self.modalities and pilRGB is not None,
             "depth": "depth" in self.modalities and pilDep is not None,
             "ir": "ir" in self.modalities and pilIR is not None
         }
 
-        if use["rgb"]: imgRGB_orig = np.array(pilRGB)
-        #logger.debug(f"RGB range {np.min(imgRGB_orig)} {np.max(imgRGB_orig)}")
-        if use["depth"]: imgDep_orig = np.array(pilDep)
-        if use["ir"]: imgIR_orig = np.array(pilIR)
-
         img_dict = {
-            'image': imgRGB_orig if use["rgb"] else None,
-            'depth': imgDep_orig if use["depth"] else None,
-            'ir': imgIR_orig if use["ir"] else None,
-            'mask': imgGT_orig
+            'image': np.array(pilRGB) if use["rgb"] else None,
+            'depth': np.array(pilDep) if use["depth"] else None,
+            'ir': np.array(pilIR) if use["ir"] else None,
+            'mask': np.array(imgGT)
             }
 
         if augment: transformed_imgs = self.data_augmentation(img_dict, apply='all')
@@ -480,6 +475,86 @@ class MMDataLoader(Dataset):
             s[0] = self.transform(s[0])
         return s
 
+
+class DemoDataLoader(MMDataLoader):
+    def __init__(self, modalities, name, resize, transform=None, viz=False, **kwargs):
+        self.name = name
+
+        self.modalities = modalities.copy()
+        if "depthraw" in modalities:
+            self.depth_completion = False
+            self.modalities[self.modalities.index('depthraw')] = 'depth'
+        else:
+            self.depth_completion = True
+        logger.warning(f"dataset modalities {self.modalities}")
+        self.filenames = []
+
+        self.img_transforms = transforms.Compose([transforms.ToTensor()])
+
+        self.resize = resize
+        self.transform = transform
+        self.viz = viz
+
+    def sample(self, sample_id, augment):
+        pilRGB, pilDep, pilIR = self.get_image_pairs(sample_id)
+        return self.prepare_data(pilRGB, pilDep, pilIR)
+
+    def prepare_data(self, pilRGB, pilDep, pilIR):
+
+        use = {
+            "rgb": "rgb" in self.modalities and pilRGB is not None,
+            "depth": "depth" in self.modalities and pilDep is not None,
+            "ir": "ir" in self.modalities and pilIR is not None
+        }
+
+        img_dict = {
+            'image': np.array(pilRGB) if use["rgb"] else None,
+            'depth': np.array(pilDep) if use["depth"] else None,
+            'ir': np.array(pilIR) if use["ir"] else None,
+            }
+        ref = [img for img in img_dict.values() if img is not None]
+        img_dict['mask'] = np.zeros_like(ref[0])
+
+        transformed_imgs = self.data_augmentation(img_dict, apply='resize_only')
+        if use["rgb"]:
+            modRGB = transformed_imgs['image']
+        if use["depth"]:
+            modDepth = transformed_imgs['depth']
+        if use["ir"]:
+            modIR = transformed_imgs['ir']
+
+        if use["rgb"]:
+            if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
+            # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
+        if use["depth"]:
+            if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
+            # logger.debug(f"D range {np.min(modDepth)} {np.max(modDepth)}")
+        if use["ir"]:
+            if len(modIR.shape) == 3: modIR = modIR[:,:,2]
+            # logger.debug(f"IR range {np.min(modIR)} {np.max(modIR)}")
+
+        imgs = []
+        img = {
+            'rgb': modRGB if use["rgb"] else None,
+            'depth': modDepth if use["depth"] else None,
+            'ir': modIR if use["ir"] else None
+        }
+        for mod in self.modalities:
+            if use[mod] and img.get(mod) is not None:
+                imgs.append(torch.from_numpy(img[mod].copy()).float())
+
+        # logger.debug(torch.unique(modGT))
+
+        return [torch.stack(imgs), torch.zeros_like(imgs[0])]
+
+    def __getitem__(self, idx):
+        # print(self.sample(idx))
+        self.idx = idx
+        s = self.sample(idx, augment=False)
+
+        if self.transform:
+            s[0] = self.transform(s[0])
+        return s
 
 class FreiburgDataLoader(MMDataLoader):
 
@@ -899,51 +974,40 @@ class OwnDataLoader(MMDataLoader):
         return pilRGB, None, None, imgGT
 
 
-class KAISTPedestrianDataLoader(MMDataLoader):
+class KAISTPedestrianDataLoader(DemoDataLoader):
 
     # /home/robotlab/rob10/learning-driveability-heatmaps/datasets/kaist-pedestrian/data/kaist-rgbt/images/set00/V000
 
-    def __init__(self, resize, set="train", path = "../../datasets/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False):
+    def __init__(self, resize, set="train", path = "../../datasets/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, sequences=["set06/V000"]):
         """
         Initializes the data loader
         :param path: the path to the data
         """
         super().__init__(modalities, resize=resize, name="kaistped", mode=mode, augment=augment)
         self.path = path
-
-        sequences = {
-            "val": [],
-            "test": ["set00/V000"]
-        }
-        exclude_from_train = sum(sequences.values(), [])
-
-        self.augment = augment
+        sequences = sequences
         self.viz = viz
-
         self.base_folders = []
 
         for filepath in glob.glob(self.path + 'set**/V**/lwir/*.png'):
             img = filepath.split("/")[-1]
             seq = '/'.join(filepath.split("/")[-4:-2])
             # print(seq, set)
-            if (set == "full") or (set in ["val","test"] and seq in sequences[set]) or (set == "train" and seq not in exclude_from_train):
+            if seq in sequences:
                 self.filenames.append(img)
                 self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
 
         if len(self.filenames):
-            print(self.filenames[0], self.base_folders[0])
+            logger.debug(self.filenames[0], self.base_folders[0])
 
-        if set == "test":
-            self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
+        self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
 
         self.prefixes = {
             "rgb": "visible",
             "ir": "lwir"
         }
-        self.color_GT = False
-        self.has_affordance_labels = True
 
-    def load_cropped_ir(self,path):
+    def load_ir(self,path):
         try:
             ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
             logger.debug(f"ir_image {np.min(ir_image)} - {np.max(ir_image)} ({type(ir_image[0][0])})")
@@ -955,16 +1019,13 @@ class KAISTPedestrianDataLoader(MMDataLoader):
             return None
 
     def get_image_pairs(self, sample_id):
+        logger.info(sample_id)
         pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.filenames[sample_id]}").convert('RGB')
 
-        pilIR = self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.filenames[sample_id]}")
+        pilIR = self.load_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.filenames[sample_id]}")
         # print(pilIR.size)
 
-        width, height = pilRGB.size
-        imgGT = Image.new('L', (width, height))
-        pilDep = None
-
-        return pilRGB, pilDep, pilIR, imgGT
+        return pilRGB, None, pilIR
 
 class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
