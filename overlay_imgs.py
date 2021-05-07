@@ -23,7 +23,7 @@ alpha = args.alpha
 save_folder = "overlay" if args.model2 is None else "overlay_modelcomp"
 create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
 
-for i in range(2000):
+for i in range(1,10000):
     try:
         f_rgb = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-orig-rgb_affordances.png"
         f_gt = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-gt_affordances.png"
@@ -74,7 +74,7 @@ for i in range(2000):
         cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
     except Exception as e:
     	print(e)
-    	continue
+    	break
 
 
 # ffmpeg -r 5 -f image2 -s 1920x1080 -i overlay/freiburgthermal%05d-pred_overlay.png -vcodec libx264 -crf 25  -pix_fmt yuv420p test.mp4
