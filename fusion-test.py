@@ -104,6 +104,12 @@ mods = segnet.hparams.modalities
 
 if args.train:
 
+    models = []
+    for mod in mods:
+        models.append(LitSegNet(conf=args, model_only=True, num_classes = orig_numclasses.get(dataset,dict()).get(mod,3)).load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args, num_classes = orig_numclasses.get(dataset,dict()).get(mod,3)).model)
+
+    fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mods[0]]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
+
     if args.prefix is None:
         args.prefix = "fusion"+fusionnet.hparams.save_prefix
     logger.debug(args.prefix)
@@ -117,11 +123,6 @@ if args.train:
         save_last=True
     )
     checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
-    models = []
-    for mod in mods:
-        models.append(LitSegNet(conf=args, model_only=True, num_classes = orig_numclasses.get(dataset,dict()).get(mod,3)).load_from_checkpoint(checkpoint_path=checkpoints[dataset][mod], modalities=mod, conf=args, num_classes = orig_numclasses.get(dataset,dict()).get(mod,3)).model)
-
-    fusionnet = LitFusion(segnet_models=models, conf=args, test_max = args.test_samples, test_checkpoint=parse_chkpt(checkpoints[dataset][mods[0]]), save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ)
 
     logger.warning("Training phase")
     wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False, name = args.prefix)
