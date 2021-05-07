@@ -23,7 +23,8 @@ alpha = args.alpha
 save_folder = "overlay" if args.model2 is None else "overlay_modelcomp"
 create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
 
-for i in range(1,10000):
+i = 1
+while True:
     try:
         f_rgb = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-orig-rgb_affordances.png"
         f_gt = f"results/{args.dataset}/{args.xp}/{args.dataset}{i}-gt_affordances.png"
@@ -72,8 +73,9 @@ for i in range(1,10000):
         i_str = str(i)
         i_str = "0"*(5-len(i_str)) + i_str
         cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
+        i += 1
     except Exception as e:
-    	print(e)
+    	print(f"stopped at i={i}")
     	break
 
 

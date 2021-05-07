@@ -67,7 +67,8 @@ checkpoints = {
         "depthraw": "lightning_logs/2021-04-18 13-12-cityscapes-c30-kl-depthraw-epoch=22-val_loss=0.1251.ckpt", "depth": "lightning_logs/2021-04-17 23-19-cityscapes-c30-kl-depth-epoch=23-val_loss=0.1222.ckpt"
     },
     "freiburgthermal": {
-        "rgb": "lightning_logs/2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310.ckpt",
+        # "rgb": "lightning_logs/2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310.ckpt",
+        "rgb": "lightning_logs/2021-05-04 14-29-freiburgthermal-c13-kl-rgb-epoch=55-val_loss=0.3102.ckpt",
         "ir": "lightning_logs/2021-05-02 22-07-freiburgthermal-c13-kl-ir-epoch=56-val_loss=0.5759.ckpt"
     },
     "kaistped": {
