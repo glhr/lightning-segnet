@@ -562,7 +562,8 @@ if __name__ == '__main__':
         trainer = pl.Trainer.from_argparse_args(args)
         if args.test_checkpoint is not None:
             chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
-            create_folder(f"{segnet_model.result_folder}/{chkpt}")
+            if args.save_xp is None:
+                create_folder(f"{segnet_model.result_folder}/{chkpt}")
             trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args, dataset_seq=args.dataset_seq)
         else:
             trained_model = segnet_model
