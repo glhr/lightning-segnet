@@ -79,7 +79,8 @@ checkpoints = {
 
 orig_numclasses = {
     "freiburgthermal": {
-        "rgb": 30,
+        #"rgb": 30,
+        "rgb": 13,
         "ir": 13
     },
     "kaistped": {
