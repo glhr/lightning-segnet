@@ -11,6 +11,7 @@ from torch.utils.data import Dataset, DataLoader
 import cv2
 from PIL import Image, ImageFile
 import imageio
+imageio.plugins.freeimage.download()
 
 import albumentations as A
 
