@@ -158,11 +158,11 @@ class MMDataLoader(Dataset):
 
     def remap_classes(self, idx_to_color):
 
-        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle',
+        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone','curve','color_cone',
         'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat','pedestrian','_background_','fence','vegetation']
         void = ['void','egovehicle','outofroi','rectificationborder','unlabeled','_ignore_']
         driveable = ['road','path','ground','lanemarking','curb']
-        between = ['grass','terrain','sidewalk','parking','railtrack','ground_sidewalk']
+        between = ['grass','terrain','sidewalk','parking','railtrack','ground_sidewalk','bump']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -908,6 +908,79 @@ class ThermalVOCDataLoader(MMDataLoader):
 
         return pilRGB, pilDep, pilIR, imgGT
 
+
+class MIRMultispectral(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/mir-multispectral-seg/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="thermalvoc", mode=mode, augment=augment)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        if self.mode == "objects":
+            self.cls_labels = [0]*len(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+            if self.mode == "objects":
+                self.cls_labels[x[4]] = x[0].lower()
+
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+        logger.debug(self.idx_to_idx["convert"])
+
+        self.path = path
+
+        filenames = {}
+
+        with open(path + 'train.txt') as f:
+            filenames["train"] = f.read().splitlines()
+        with open(path + 'test.txt') as f:
+            filenames["test"] = f.read().splitlines()
+        with open(path + 'val.txt') as f:
+            filenames["val"] = f.read().splitlines()
+
+        self.augment = augment
+        self.viz = viz
+
+        for img in glob.glob(self.path + 'labels/*D.png'):
+            img = img.split("/")[-1]
+            file = img.replace(".png","")
+            if file in filenames[set]:
+                self.filenames.append(file)
+        # logger.debug(self.filenames)
+
+        self.color_GT = False
+
+    def load_ir(self,path):
+        try:
+            ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
+            logger.debug(f"ir_image {np.min(ir_image)} - {np.max(ir_image)} ({type(ir_image[0][0])})")
+            ir_image_8u = ir_image - np.min(ir_image)
+            ir_image_8u = (255 * (ir_image_8u / np.max(ir_image_8u))).astype(np.uint8)
+            return ir_image_8u
+        except Exception as e:
+            logger.info(f"Failed to read file {path}")
+            return None
+
+    def get_image_pairs(self, sample_id):
+        pilRGB = Image.open(self.path + "images_sep/" + self.filenames[sample_id] + "_rgb.png").convert('RGB')
+
+        pilIR = self.load_ir(self.path + "images_sep/" + self.filenames[sample_id] + "_thermal.png")
+
+        imgGT = Image.open(self.path + "labels/" + self.filenames[sample_id] + ".png").convert('L')
+
+        return pilRGB, None, pilIR, imgGT
 
 class SynthiaDataLoader(MMDataLoader):
 
