@@ -856,13 +856,13 @@ class LostFoundDataLoader(MMDataLoader):
         for filepath in file_pattern:
 
             img = '_'.join('/'.join(filepath.split("/")[-3:]).split("_")[:-2])
-            city = img.split("/")[0]
+            city = img.split("/")[1]
             base_folder = '/'.join(filepath.split("/")[-3:-2])
-            logger.debug(f"{img}, {base_folder}")
+            logger.debug(f"{img}, {base_folder}, {city}")
             if set in ["test","full"] or city in cities[set]:
                 self.filenames.append(img)
                 self.base_folders.append(base_folder)
-        # print(self.filenames[0])
+        print(self.filenames[0])
         # print(len(self.filenames))
 
         self.color_GT = False
