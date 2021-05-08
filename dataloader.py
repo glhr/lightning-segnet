@@ -909,13 +909,22 @@ class KittiDataLoader(MMDataLoader):
         else:
             self.split_path = 'testing/'
 
+        filenames = {}
+
+        with open(path + 'train.txt') as f:
+            filenames["train"] = f.read().splitlines()
+        with open(path + 'test.txt') as f:
+            filenames["test"] = f.read().splitlines()
+            filenames["val"] = f.read().splitlines()
+
         self.augment = augment
         self.viz = viz
 
         for img in glob.glob(self.path + "data_semantics/" + self.split_path + "semantic/*.png"):
             img = img.split("/")[-1]
             # print(img)
-            self.filenames.append(img)
+            if set == "full" or img in filenames[set]:
+                self.filenames.append(img)
         # print(self.filenames)
         self.color_GT = False
 
@@ -988,7 +997,7 @@ class MIRMultispectral(MMDataLoader):
         Initializes the data loader
         :param path: the path to the data
         """
-        super().__init__(modalities, resize=resize, name="thermalvoc", mode=mode, augment=augment)
+        super().__init__(modalities, resize=resize, name="multispectralseg", mode=mode, augment=augment)
         self.path = path
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
@@ -1028,7 +1037,7 @@ class MIRMultispectral(MMDataLoader):
         for img in glob.glob(self.path + 'labels/*D.png'):
             img = img.split("/")[-1]
             file = img.replace(".png","")
-            if file in filenames[set]:
+            if set == "full" or file in filenames[set]:
                 self.filenames.append(file)
         # logger.debug(self.filenames)
 
