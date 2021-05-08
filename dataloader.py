@@ -984,7 +984,7 @@ class MIRMultispectral(MMDataLoader):
 
 class SynthiaDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/synthia/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/synthia/", modalities=["rgb"], mode="affordances", augment=False, viz=False, sort=False, **kwargs):
         super().__init__(modalities, resize=resize, name="synthia", mode=mode, augment=augment)
         self.path = path
 
@@ -1019,6 +1019,8 @@ class SynthiaDataLoader(MMDataLoader):
             self.filenames.append(img)
         # print(self.filenames[0])
         # print(len(self.filenames))
+        if sort == False:
+            np.random.shuffle(self.filenames)
 
         self.color_GT = False
 
@@ -1027,7 +1029,7 @@ class SynthiaDataLoader(MMDataLoader):
         pilRGB = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
         pilDep = self.load_depth(self.path + "SYNTHIA-SEQS-05-SPRING/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
         imgGT = np.asarray(imageio.imread(self.path + "SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
-        print(np.unique(imgGT))
+        # print(np.unique(imgGT))
         return pilRGB, pilDep, None, imgGT
 
 
