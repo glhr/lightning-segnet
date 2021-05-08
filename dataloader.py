@@ -934,7 +934,13 @@ class SynthiaDataLoader(MMDataLoader):
         self.augment = augment
         self.viz = viz
 
-        for img in glob.glob(self.path + 'SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/' + '**/*.png'):
+        seqs = {
+            "train": "SYNTHIA-SEQS-04-SOFTRAIN",
+            "val": "SYNTHIA-SEQS-05-SPRING",
+            "test": "SYNTHIA-SEQS-05-SPRING",
+        }
+
+        for img in glob.glob(self.path + f'{seqs[set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
 
             img = '/'.join(img.split("/")[-2:])
             self.filenames.append(img)

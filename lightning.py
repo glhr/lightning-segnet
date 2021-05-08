@@ -5,7 +5,7 @@ import random
 import torch
 from torch import nn
 from torchvision import transforms
-from torch.utils.data import DataLoader, random_split, Subset
+from torch.utils.data import DataLoader, random_split, Subset, ConcatDataset
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
@@ -68,6 +68,8 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
+        parser.add_argument('--dataset_combo', default="freiburg,cityscapes")
+        parser.add_argument('--dataset_combo_ntrain', type=int, default=100)
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss_weight', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
@@ -123,6 +125,8 @@ class LitSegNet(pl.LightningModule):
                 "kaistped": KAISTPedestrianDataLoader,
                 "kaistpedann": KAISTPedestrianAnnDataLoader
             }
+            if self.hparams.dataset_combo is not None:
+                self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
 
             if self.hparams.loss in ["sord","compare"]:
                 self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
@@ -268,7 +272,10 @@ class LitSegNet(pl.LightningModule):
 
     def reduce_cm(self, cms, save=False):
 
-        labels = self.train_set.dataset.cls_labels
+        if self.hparams.dataset_combo is not None:
+            labels = self.train_set.dataset.datasets[0].dataset.cls_labels
+        else:
+            labels = self.train_set.dataset.cls_labels
 
         cms = torch.reshape(cms, (-1, self.num_cls, self.num_cls))
         cm = torch.sum(cms, dim=0, keepdim=False)
@@ -323,6 +330,9 @@ class LitSegNet(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
+
+        dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.dataset.datasets[0].dataset
+
         sample, target_orig = batch
         if self.hparams.save_xp is None:
             result_folder = f"{self.result_folder}/{self.test_checkpoint}"
@@ -376,10 +386,10 @@ class LitSegNet(pl.LightningModule):
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
                 # logger.debug(p.shape)
-                proba_imposs = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]]
-                proba_poss = p.squeeze()[self.test_set.dataset.aff_idx["possible"]]
-                proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
-                test = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
+                # proba_imposs = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]]
+                # proba_poss = p.squeeze()[self.test_set.dataset.aff_idx["possible"]]
+                # proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
+                # test = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
                 iter = batch_idx*self.hparams.bs + i
 
 
@@ -403,9 +413,9 @@ class LitSegNet(pl.LightningModule):
                     mod = ','.join(self.hparams.modalities)
                     self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities)
-                    if not self.test_set.dataset.noGT:
-                        self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                    dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities)
+                    if not dataset_obj.noGT:
+                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(
                     #     iter=batch_idx+i,
                     #     orig=o,
@@ -420,7 +430,7 @@ class LitSegNet(pl.LightningModule):
                 #     folder=f"{self.result_folder}/viz_per_epoch",
                 #     filename_prefix=f"gt")
 
-            if not self.test_set.dataset.noGT:
+            if not dataset_obj.noGT:
                 #try:
                 cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
@@ -459,13 +469,29 @@ class LitSegNet(pl.LightningModule):
             dataset = Subset(dataset, indices=range(len(dataset)))
         return dataset
 
+    def get_dataset_combo(self, set, augment=None):
+        subsets = []
+
+        if set == "test": test = "val"
+        n_samples = self.hparams.dataset_combo_ntrain if set == "train" else int(self.hparams.dataset_combo_ntrain/10)
+
+        for name in self.hparams.dataset_combo:
+            dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False)
+            subsets.append(Subset(dataset, indices=range(n_samples)))
+
+        combo = ConcatDataset(subsets)
+        out = Subset(combo, indices=range(n_samples*len(subsets)))
+        #print(dir(out.dataset),out.dataset.datasets[0].dataset)
+        return out
+
     def get_dataset_splits(self, normalize=False):
-        train_set = self.get_dataset(set="train")
+        dataset_func = self.get_dataset_combo if self.hparams.dataset == "combo" else self.get_dataset
+        train_set = dataset_func(set="train")
         if self.test_set is not None:
-            test_set = self.get_dataset(set=self.test_set, augment=self.hparams.augment)
+            test_set = dataset_func(set=self.test_set, augment=self.hparams.augment)
         else:
-            test_set = self.get_dataset(set="test", augment=self.hparams.augment)
-        val_set = self.get_dataset(set="val",augment=False)
+            test_set = dataset_func(set="test", augment=self.hparams.augment)
+        val_set = dataset_func(set="val",augment=False)
 
         if normalize:
             mean = 0.
@@ -508,7 +534,7 @@ if __name__ == '__main__':
     if args.debug: enable_debug()
 
     logger.debug(args)
-    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq)
+    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq, save=args.save, save_xp=args.save_xp, test_set=args.test_set)
 
     if args.prefix is None:
         args.prefix = segnet_model.hparams.save_prefix
