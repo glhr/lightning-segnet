@@ -15,7 +15,7 @@ from segnet import SegNet, new_input_channels, new_output_channels
 from fusion import FusionNet
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
-from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader, FreiburgThermalDataLoader, KAISTPedestrianDataLoader, KAISTPedestrianAnnDataLoader, MIRMultispectral
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader, FreiburgThermalDataLoader, KAISTPedestrianDataLoader, KAISTPedestrianAnnDataLoader, MIRMultispectral, LostFoundDataLoader
 from plotting import plot_confusion_matrix
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
@@ -68,7 +68,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
-        parser.add_argument('--dataset_combo', default="freiburg,cityscapes")
+        parser.add_argument('--dataset_combo', default=None)
         parser.add_argument('--dataset_combo_ntrain', type=int, default=100)
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss_weight', action="store_true", default=False)
@@ -124,7 +124,8 @@ class LitSegNet(pl.LightningModule):
                 "synthia": SynthiaDataLoader,
                 "kaistped": KAISTPedestrianDataLoader,
                 "kaistpedann": KAISTPedestrianAnnDataLoader,
-                "multispectralseg": MIRMultispectral
+                "multispectralseg": MIRMultispectral,
+                "lostfound": LostFoundDataLoader
             }
             if self.hparams.dataset_combo is not None:
                 self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")

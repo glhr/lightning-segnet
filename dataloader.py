@@ -807,6 +807,77 @@ class CityscapesDataLoader(MMDataLoader):
         imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
         return pilRGB, pilDep, None, imgGT
 
+class LostFoundDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/lostfound/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="lostfound", mode=mode, augment=augment)
+        self.path = path
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if set in ["train", "val"]:
+            self.split_path = 'train/'
+        elif set == "test":
+            self.split_path = 'test/'
+        elif set == "full":
+            self.split_path = '*/'
+
+        cities = {
+            "val": ["10_Schlossberg_9"],
+            "train": ["01_Hanns_Klemm_Str_45", "03_Hanns_Klemm_Str_19", "06_Galgenbergstr_40", "11_Parkplatz_Flugfeld", "12_Umberto_Nobile_Str", "13_Elly_Beinhorn_Str", "14_Otto_Lilienthal_Str_24"]
+        }
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+
+        file_pattern = glob.glob(self.path + 'gtCoarse/' + self.split_path + f'**/*labelIds.png')
+
+        for filepath in file_pattern:
+
+            img = '_'.join('/'.join(filepath.split("/")[-3:]).split("_")[:-2])
+            city = img.split("/")[0]
+            base_folder = '/'.join(filepath.split("/")[-3:-2])
+            logger.debug(f"{img}, {base_folder}")
+            if set in ["test","full"] or city in cities[set]:
+                self.filenames.append(img)
+                self.base_folders.append(base_folder)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = False
+
+
+    def get_image_pairs(self, sample_id):
+
+        pilRGB = Image.open(self.path + "leftImg8bit" + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+        # if not self.depth_completion:
+        #     pilDep = self.load_depth(self.path + "disparity" + f"/{self.filenames[sample_id]}_disparity.png", invert=True)
+        # else:
+        #     pilDep = self.load_depth(self.path + "depthcomp/" + f"/{self.filenames[sample_id]}_depthcomp.png")
+        imgGT = Image.open(self.path + "gtCoarse" + f"/{self.filenames[sample_id]}_gtCoarse_labelIds.png").convert('L')
+        # print(np.unique(imgGT))
+        return pilRGB, None, None, imgGT
 
 class KittiDataLoader(MMDataLoader):
 
