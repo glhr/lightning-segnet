@@ -133,3 +133,5 @@ DATALOADER:0 TEST RESULTS
  'test_dist_mistake_severity': 0.22595582902431488,
  'test_iou': 0.9385401606559753}
 ```
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt" --loss_weight

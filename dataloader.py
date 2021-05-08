@@ -1058,12 +1058,6 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        sequences = {
-            "val": [],
-            "test": ["set00/V000"]
-        }
-        exclude_from_train = sum(sequences.values(), [])
-
         self.augment = augment
         self.viz = viz
 
@@ -1075,26 +1069,22 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
             "gt": "labeled"
         }
 
-        for filepath in glob.glob(self.path + f'set**/V**/{self.prefixes["gt"]}/*.png'):
+        self.base_folder = self.path + "selected_samples"
+
+        for filepath in glob.glob(self.base_folder + f'/*{self.prefixes["gt"]}.png'):
             img = filepath.split("/")[-1]
-            img = img.replace(f"{self.prefixes['gt']}_","")
+            # img = img.replace(f"_{self.prefixes['gt']}","")
             seq = '/'.join(filepath.split("/")[-4:-2])
             # print(seq, set)
-            if (set == "full") or (set in ["val","test"] and seq in sequences[set]) or (set == "train" and seq not in exclude_from_train):
-                self.filenames.append(img)
-                self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
+            self.filenames.append(img)
 
         if len(self.filenames):
-            print(self.filenames[0], self.base_folders[0])
-
-        if set == "test":
-            self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
-
+            print(self.filenames[0])
 
         self.color_GT = True
         self.has_affordance_labels = True
 
-    def load_cropped_ir(self,path):
+    def load_ir(self,path):
         try:
             ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
             logger.debug(f"ir_image {np.min(ir_image)} - {np.max(ir_image)} ({type(ir_image[0][0])})")
@@ -1106,12 +1096,12 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
             return None
 
     def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.filenames[sample_id]}").convert('RGB')
+        pilRGB = Image.open(f"{self.base_folder}/{self.filenames[sample_id].replace(self.prefixes['gt'],self.prefixes['rgb'])}").convert('RGB')
 
-        pilIR = self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.filenames[sample_id]}")
+        pilIR = self.load_ir(f"{self.base_folder}/{self.filenames[sample_id].replace(self.prefixes['gt'],self.prefixes['ir'])}")
         # print(pilIR.size)
 
-        imgGT = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['gt']}/{self.prefixes['gt']}_{self.filenames[sample_id]}").convert('RGB')
+        imgGT = Image.open(f"{self.base_folder}/{self.filenames[sample_id]}").convert('RGB')
         pilDep = None
 
         return pilRGB, pilDep, pilIR, imgGT
