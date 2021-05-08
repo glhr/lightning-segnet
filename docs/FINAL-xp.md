@@ -27,14 +27,38 @@ then put into fusion architecture, with output layer = 3 to learn driveability
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburgthermal --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038.ckpt" --loss_weight --fusion_activ softmax
 ```bash
-
+[INFO] CM IoU - tensor([96.8845, 61.2904, 90.1812])
+[INFO] precision tensor([97.9077, 74.6868, 96.2584], dtype=torch.float64) (89.61764044109266) | recall tensor([98.9328, 77.3603, 93.4572], dtype=torch.float64) (89.91677552326452)
+Testing: 100%|█████████████████████████████████████████████████████████| 1115/1115 [28:33<00:00,  1.54s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9560661315917969,
+ 'test_acc_w': 0.9596188068389893,
+ 'test_dist_l1': 0.051289044320583344,
+ 'test_dist_l2': 0.06599943339824677,
+ 'test_dist_logl2': 0.018726205453276634,
+ 'test_dist_mistake_severity': 0.16741521656513214,
+ 'test_iou': 0.918484628200531}
 ```
 
 with loss weighting
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburgthermal --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016.ckpt" --loss_weight --fusion_activ softmax
 ```bash
-
+[INFO] CM IoU - tensor([96.9692, 61.5706, 90.4489])
+[INFO] precision tensor([97.9649, 76.0129, 96.0158], dtype=torch.float64) (89.99787428072003) | recall tensor([98.9627, 76.4184, 93.9760], dtype=torch.float64) (89.78571661945155)
+Testing: 100%|█████████████████████████████████████████████████████████| 1115/1115 [28:17<00:00,  1.52s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9571654200553894,
+ 'test_acc_w': 0.9612782001495361,
+ 'test_dist_l1': 0.04996063560247421,
+ 'test_dist_l2': 0.06421279907226562,
+ 'test_dist_logl2': 0.018208062276244164,
+ 'test_dist_mistake_severity': 0.166362926363945,
+ 'test_iou': 0.9204030632972717}
 ```
 
 RGB encoder trained on obj classes from freiburg thermal

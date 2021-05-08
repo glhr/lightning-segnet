@@ -1078,13 +1078,14 @@ class SynthiaDataLoader(MMDataLoader):
         self.augment = augment
         self.viz = viz
 
-        seqs = {
+        self.seqs = {
             "train": "SYNTHIA-SEQS-04-SOFTRAIN",
             "val": "SYNTHIA-SEQS-05-SPRING",
             "test": "SYNTHIA-SEQS-05-SPRING",
         }
+        self.set = set
 
-        for img in glob.glob(self.path + f'{seqs[set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
+        for img in glob.glob(self.path + f'{self.seqs[self.set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
 
             img = '/'.join(img.split("/")[-2:])
             self.filenames.append(img)
@@ -1097,9 +1098,9 @@ class SynthiaDataLoader(MMDataLoader):
 
     def get_image_pairs(self, sample_id):
 
-        pilRGB = Image.open(self.path + "SYNTHIA-SEQS-05-SPRING/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
-        pilDep = self.load_depth(self.path + "SYNTHIA-SEQS-05-SPRING/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
-        imgGT = np.asarray(imageio.imread(self.path + "SYNTHIA-SEQS-05-SPRING/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
+        pilRGB = Image.open(self.path + f"{self.seqs[self.set]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
+        pilDep = self.load_depth(self.path + f"{self.seqs[self.set]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
+        imgGT = np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
         # print(np.unique(imgGT))
         return pilRGB, pilDep, None, imgGT
 
