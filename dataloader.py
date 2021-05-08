@@ -929,6 +929,7 @@ class KittiDataLoader(MMDataLoader):
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
+        print(sample_id)
         pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
         # pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
         pilDep = self.load_depth(self.path + "data_scene_flow/" + self.split_path + "depthcomp/" + f"{self.filenames[sample_id]}")
