@@ -78,7 +78,8 @@ DATALOADER:0 TEST RESULTS
  'test_iou': 0.942446231842041}
 ```
 
-WEIGHT 2021-04-09 10-00-cityscapes-c30-kl-rgb-epoch=6-val_loss=0.0283.ckpt
+python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --test_checkpoint "lightning_logs/2021-04-09 10-00-cityscapes-c30-kl-rgb-epoch=6-val_loss=0.0283.ckpt" --save --save_xp lw --modalities rgb --gpus 0
+WEIGHT
 ```bash
 [INFO] CM IoU - tensor([97.9321, 66.8624, 93.5493])
 [INFO] precision tensor([98.7867, 74.6277, 98.3586], dtype=torch.float64) (90.59098521932918) | recall tensor([99.1244, 86.5334, 95.0329], dtype=torch.float64) (93.56355974125469)
@@ -93,4 +94,21 @@ DATALOADER:0 TEST RESULTS
  'test_dist_logl2': 0.011837306432425976,
  'test_dist_mistake_severity': 0.12086509168148041,
  'test_iou': 0.9402391910552979}
+```
+
+python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --test_checkpoint "lightning_logs/2021-05-09 10-53-cityscapes-c3-kl-lw-rgb-epoch=23-val_loss=0.0284.ckpt" --save --save_xp lw --modalities rgb --gpus 0
+```bash
+[INFO] CM IoU - tensor([98.0286, 66.5581, 93.3087])
+[INFO] precision tensor([98.8716, 73.4529, 98.4820], dtype=torch.float64) (90.26883589461838) | recall tensor([99.1378, 87.6400, 94.6703], dtype=torch.float64) (93.81604108830288)
+Testing: 100%|███████████████████████████████████████████████████████████| 233/233 [03:54<00:00,  1.01s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9674034118652344,
+ 'test_acc_w': 0.9674034118652344,
+ 'test_dist_l1': 0.036246929317712784,
+ 'test_dist_l2': 0.04354766756296158,
+ 'test_dist_logl2': 0.01158237550407648,
+ 'test_dist_mistake_severity': 0.11198629438877106,
+ 'test_iou': 0.9397504329681396}
 ```

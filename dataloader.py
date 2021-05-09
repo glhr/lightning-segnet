@@ -1092,7 +1092,7 @@ class SynthiaDataLoader(MMDataLoader):
         self.seqs = {
             "train": "SYNTHIA-SEQS-04-SOFTRAIN",
             "val": "SYNTHIA-SEQS-05-SPRING",
-            "test": "SYNTHIA-SEQS-05-SPRING",
+            "test": "SYNTHIA-SEQS-02-FALL",
         }
         self.set = set
 
