@@ -380,17 +380,17 @@ class MMDataLoader(Dataset):
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
-        logger.debug(f"load_depth {np.min(depth_image)} - {np.max(depth_image)} ({type(depth_image[0][0])})")
+        # logger.debug(f"load_depth {np.min(depth_image)} - {np.max(depth_image)} ({type(depth_image[0][0])})")
         if isinstance(depth_image[0][0], np.uint16):
             depth_image_8u = cv2.convertScaleAbs(depth_image, alpha=(255.0/65535.0))
         else:
             depth_image_8u = depth_image
 
-        logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
+        # logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
         depth_image_8u = depth_image_8u - np.min(depth_image_8u)
-        logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
+        # logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
         depth_image_8u = (255 * (depth_image_8u / np.max(depth_image_8u))).astype(np.uint8)
-        logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
+        # logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
         if invert:
             depth_image_8u = 255 - depth_image_8u
         # if np.max(depth_image_8u) <= 1:
@@ -453,13 +453,14 @@ class MMDataLoader(Dataset):
 
         return transformed_final
 
-    def write_loader(self, dataset_name, set, filenames):
-        with open(f'loaders/loader_{dataset_name}_{set}.txt', 'w') as f:
-            for item in filenames:
+    def write_loader(self, set):
+        with open(f'loaders/loader_{self.name}_{set}.txt', 'w') as f:
+            for item in self.filenames:
                 f.write("%s\n" % item)
 
     def sample(self, sample_id, augment):
         try:
+            logger.debug(f"{self.name}, {self.filenames[sample_id]}")
             pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
 
             return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
@@ -622,7 +623,7 @@ class FreiburgDataLoader(MMDataLoader):
         }
         self.color_GT = True
 
-        self.write_loader("freiburg", set, self.filenames)
+        self.write_loader(set)
 
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.base_folders[sample_id] + "/rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
@@ -705,7 +706,7 @@ class FreiburgThermalDataLoader(MMDataLoader):
         }
         self.color_GT = False
 
-        self.write_loader("freiburgthermal", set, self.filenames)
+        self.write_loader(set)
 
     def load_cropped_ir(self,path,resize=None):
         try:
@@ -806,7 +807,7 @@ class CityscapesDataLoader(MMDataLoader):
 
         self.color_GT = False
 
-        self.write_loader("cityscapes", set, self.filenames)
+        self.write_loader(set)
 
 
     def get_image_pairs(self, sample_id):
@@ -879,7 +880,7 @@ class LostFoundDataLoader(MMDataLoader):
 
         self.color_GT = False
 
-        self.write_loader("lostfound", set, self.filenames)
+        self.write_loader(set)
 
 
     def get_image_pairs(self, sample_id):
@@ -940,7 +941,7 @@ class KittiDataLoader(MMDataLoader):
                 self.filenames.append(img)
         # print(self.filenames)
         self.color_GT = False
-        self.write_loader("kitti", set, self.filenames)
+        self.write_loader(set)
 
     def get_image_pairs(self, sample_id):
         # print(sample_id)
@@ -1002,7 +1003,7 @@ class ThermalVOCDataLoader(MMDataLoader):
                 self.filenames.append(img)
         # logger.debug(self.filenames)
 
-        self.write_loader("thermalvoc", set, self.filenames)
+        self.write_loader(set)
 
         self.color_GT = True
 
@@ -1070,7 +1071,7 @@ class MIRMultispectral(MMDataLoader):
                 self.filenames.append(file)
         # logger.debug(self.filenames)
 
-        self.write_loader("multispectralseg", set, self.filenames)
+        self.write_loader(set)
         self.color_GT = False
 
     def load_ir(self,path):
@@ -1134,11 +1135,10 @@ class SynthiaDataLoader(MMDataLoader):
         if sort == False:
             np.random.shuffle(self.filenames)
 
-        self.write_loader("synthia", set, self.filenames)
+        self.write_loader(set)
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
-
         pilRGB = Image.open(self.path + f"{self.seqs[self.set]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
         pilDep = self.load_depth(self.path + f"{self.seqs[self.set]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
         imgGT = np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
@@ -1206,7 +1206,7 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
             "ir": "lwir"
         }
 
-        self.write_loader("kaistped", set, self.filenames)
+        self.write_loader(set)
 
     def load_ir(self,path):
         try:
@@ -1280,7 +1280,7 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
         self.color_GT = True
         self.has_affordance_labels = True
 
-        self.write_loader("kaistpedann", set, self.filenames)
+        self.write_loader(set)
 
     def load_ir(self,path):
         try:
