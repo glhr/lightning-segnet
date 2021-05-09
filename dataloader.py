@@ -460,7 +460,10 @@ class MMDataLoader(Dataset):
 
     def sample(self, sample_id, augment):
         try:
-            logger.debug(f"{self.name}, {self.filenames[sample_id]}")
+            try:
+                logger.debug(f"{self.name}, {self.filenames[sample_id]}")
+            except IndexError:
+                logger.warning(f"{self.name} {sample_id} isn't a thing :(")
             pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
 
             return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
