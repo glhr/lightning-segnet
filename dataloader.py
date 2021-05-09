@@ -453,6 +453,11 @@ class MMDataLoader(Dataset):
 
         return transformed_final
 
+    def write_loader(self, dataset_name, set, filenames):
+        with open(f'loaders/loader_{dataset_name}_{set}.txt', 'w') as f:
+            for item in filenames:
+                f.write("%s\n" % item)
+
     def sample(self, sample_id, augment):
         try:
             pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
@@ -617,6 +622,8 @@ class FreiburgDataLoader(MMDataLoader):
         }
         self.color_GT = True
 
+        self.write_loader("freiburg", set, self.filenames)
+
     def get_image_pairs(self, sample_id):
         pilRGB = Image.open(self.base_folders[sample_id] + "/rgb/" + self.filenames[sample_id] + self.suffixes['rgb']).convert('RGB')
         pilDep = self.load_depth(self.base_folders[sample_id] + "/depth_gray/" + self.filenames[sample_id] + self.suffixes['depth'])
@@ -697,6 +704,8 @@ class FreiburgThermalDataLoader(MMDataLoader):
             "gt": "fl_rgb_labels"
         }
         self.color_GT = False
+
+        self.write_loader("freiburgthermal", set, self.filenames)
 
     def load_cropped_ir(self,path,resize=None):
         try:
@@ -797,6 +806,8 @@ class CityscapesDataLoader(MMDataLoader):
 
         self.color_GT = False
 
+        self.write_loader("cityscapes", set, self.filenames)
+
 
     def get_image_pairs(self, sample_id):
 
@@ -868,6 +879,8 @@ class LostFoundDataLoader(MMDataLoader):
 
         self.color_GT = False
 
+        self.write_loader("lostfound", set, self.filenames)
+
 
     def get_image_pairs(self, sample_id):
 
@@ -927,6 +940,7 @@ class KittiDataLoader(MMDataLoader):
                 self.filenames.append(img)
         # print(self.filenames)
         self.color_GT = False
+        self.write_loader("kitti", set, self.filenames)
 
     def get_image_pairs(self, sample_id):
         # print(sample_id)
@@ -968,13 +982,27 @@ class ThermalVOCDataLoader(MMDataLoader):
 
         self.path = path + 'train/'
 
+        filenames = {}
+        exclude = []
+        with open(path + 'train.txt') as f:
+            filenames["train"] = f.read().splitlines()
+        with open(path + 'test.txt') as f:
+            filenames["test"] = f.read().splitlines()
+        with open(path + 'val.txt') as f:
+            filenames["val"] = f.read().splitlines()
+        with open(path + 'exclude.txt') as f:
+            exclude = f.read().splitlines()
+
         self.augment = augment
         self.viz = viz
 
         for img in glob.glob(self.path + 'SegmentationClass/*.png'):
             img = img.split("/")[-1]
-            self.filenames.append(img)
+            if img not in exclude and (set == "full" or img in filenames[set]):
+                self.filenames.append(img)
         # logger.debug(self.filenames)
+
+        self.write_loader("thermalvoc", set, self.filenames)
 
         self.color_GT = True
 
@@ -1042,6 +1070,7 @@ class MIRMultispectral(MMDataLoader):
                 self.filenames.append(file)
         # logger.debug(self.filenames)
 
+        self.write_loader("multispectralseg", set, self.filenames)
         self.color_GT = False
 
     def load_ir(self,path):
@@ -1105,6 +1134,7 @@ class SynthiaDataLoader(MMDataLoader):
         if sort == False:
             np.random.shuffle(self.filenames)
 
+        self.write_loader("synthia", set, self.filenames)
         self.color_GT = False
 
     def get_image_pairs(self, sample_id):
@@ -1175,6 +1205,8 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
             "rgb": "visible",
             "ir": "lwir"
         }
+
+        self.write_loader("kaistped", set, self.filenames)
 
     def load_ir(self,path):
         try:
@@ -1247,6 +1279,8 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
         self.color_GT = True
         self.has_affordance_labels = True
+
+        self.write_loader("kaistpedann", set, self.filenames)
 
     def load_ir(self,path):
         try:

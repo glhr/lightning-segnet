@@ -51,6 +51,7 @@ parser.add_argument('--test_set', default="test")
 parser.add_argument('--update_output_layer', default=False, action="store_true")
 parser.add_argument('--init', default=False, action="store_true")
 parser.add_argument('--dataset_seq', default=None)
+parser.add_argument('--nopredict', default=False, action="store_true")
 
 import inspect
 
@@ -597,4 +598,6 @@ if __name__ == '__main__':
             trained_model = segnet_model
         if args.update_output_layer:
             segnet_model.new_output()
-        trainer.test(trained_model)
+
+        if not args.nopredict:
+            trainer.test(trained_model)
