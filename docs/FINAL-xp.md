@@ -67,7 +67,104 @@ then put into fusion architecture, with output layer = 3 to learn driveability
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset freiburgthermal --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt" --loss_weight --fusion_activ softmax
 ```bash
+[INFO] CM IoU - tensor([97.0429, 62.8041, 90.3248])
+[INFO] precision tensor([97.9790, 74.8229, 96.7056], dtype=torch.float64) (89.83584262440912) | recall tensor([99.0251, 79.6327, 93.1923], dtype=torch.float64) (90.61669930707464)
+Testing: 100%|█████████████████████████████████████████████████████████| 1115/1115 [24:50<00:00,  1.34s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9575048089027405,
+ 'test_acc_w': 0.9607035517692566,
+ 'test_dist_l1': 0.04968160018324852,
+ 'test_dist_l2': 0.06405442208051682,
+ 'test_dist_logl2': 0.018049761652946472,
+ 'test_dist_mistake_severity': 0.16911114752292633,
+ 'test_iou': 0.9212123155593872}
+```
 
+## MIRMultispectral
+
+### Single modality
+
+python3 lightning.py --bs 1 --dataset multispectralseg --test_checkpoint "lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt" --save --save_xp mishmash --modalities rgb --loss_weight
+```bash
+[INFO] CM IoU - tensor([94.5401,  2.6614,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9999,  2.8784,  0.0000], dtype=torch.float64) (34.29274004499045) | recall tensor([94.5402, 26.0966,     nan], dtype=torch.float64) (nan)
+Testing: 100%|███████████████████████████████████████████████████████████| 205/205 [03:47<00:00,  1.11s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9427615404129028,
+ 'test_acc_w': 0.9349221587181091,
+ 'test_dist_l1': 0.07764925807714462,
+ 'test_dist_l2': 0.11847079545259476,
+ 'test_dist_logl2': 0.04142793267965317,
+ 'test_dist_mistake_severity': 0.3565916419029236,
+ 'test_iou': 0.8735736608505249}
+```
+
+### Fusion
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset multispectralseg --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038.ckpt" --loss_weight --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([96.1810,  1.7197,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9997,  1.9460,  0.0000], dtype=torch.float64) (33.98190676839572) | recall tensor([96.1813, 12.8783,     nan], dtype=torch.float64) (nan)
+
+Testing: 100%|██████████| 205/205 [04:26<00:00,  1.30s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9585992097854614,
+ 'test_acc_w': 0.9603090286254883,
+ 'test_dist_l1': 0.05440276861190796,
+ 'test_dist_l2': 0.08040668815374374,
+ 'test_dist_logl2': 0.02827558107674122,
+ 'test_dist_mistake_severity': 0.3140508532524109,
+ 'test_iou': 0.8987904787063599}
+```
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset multispectralseg --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016.ckpt" --loss_weight --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([96.2520,  1.5697,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9996,  1.7964,  0.0000], dtype=torch.float64) (33.932005208396276) | recall tensor([96.2524, 11.0603,     nan], dtype=torch.float64) (nan)
+
+Testing: 100%|██████████| 205/205 [04:21<00:00,  1.28s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9592364430427551,
+ 'test_acc_w': 0.9624342918395996,
+ 'test_dist_l1': 0.054765719920396805,
+ 'test_dist_l2': 0.08276993781328201,
+ 'test_dist_logl2': 0.028674017637968063,
+ 'test_dist_mistake_severity': 0.34349533915519714,
+ 'test_iou': 0.898539125919342}
+```
+
+python3 fusion-test.py  --bs 1 --fusion custom --dataset multispectralseg --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt" --loss_weight --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([96.6721,  3.0150,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9996,  3.5246,  0.0000], dtype=torch.float64) (34.50808206962013) | recall tensor([96.6725, 17.2531,     nan], dtype=torch.float64) (nan)
+
+Testing: 100%|██████████| 205/205 [04:18<00:00,  1.26s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9636601805686951,
+ 'test_acc_w': 0.9685664772987366,
+ 'test_dist_l1': 0.05126519128680229,
+ 'test_dist_l2': 0.08111584186553955,
+ 'test_dist_logl2': 0.02729484811425209,
+ 'test_dist_mistake_severity': 0.4107149541378021,
+ 'test_iou': 0.9043029546737671}
 ```
 
 ## ThermalVOC
@@ -97,13 +194,61 @@ DATALOADER:0 TEST RESULTS
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038.ckpt" --loss_weight --fusion_activ softmax
 ```bash
+[INFO] CM IoU - tensor([95.4998,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333333309305) | recall tensor([95.4998,     nan,     nan], dtype=torch.float64) (nan)
 
+Testing: 100%|██████████| 1659/1659 [40:39<00:00,  1.47s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9549983739852905,
+ 'test_acc_w': 0.9422537088394165,
+ 'test_dist_l1': 0.05543939396739006,
+ 'test_dist_l2': 0.07631490379571915,
+ 'test_dist_logl2': 0.02920415997505188,
+ 'test_dist_mistake_severity': 0.2319416105747223,
+ 'test_iou': 0.9303010106086731}
 ```
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016.ckpt" --loss_weight --fusion_activ softmax
 
 ```bash
+[INFO] CM IoU - tensor([95.5020,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333235678637) | recall tensor([95.5020,     nan,     nan], dtype=torch.float64) (nan)
 
+Testing: 100%|██████████| 1659/1659 [34:58<00:00,  1.27s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9550195336341858,
+ 'test_acc_w': 0.939590573310852,
+ 'test_dist_l1': 0.0573839470744133,
+ 'test_dist_l2': 0.08219075947999954,
+ 'test_dist_logl2': 0.03062206320464611,
+ 'test_dist_mistake_severity': 0.2757505476474762,
+ 'test_iou': 0.9298356175422668}
 ```
 
 python3 fusion-test.py  --bs 1 --fusion custom --dataset thermalvoc --modalities rgb,ir --save --bs 1 --save_xp mishmash --decoders multi --test_checkpoint "lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt" --loss_weight --fusion_activ softmax
+```bash
+[INFO] CM IoU - tensor([96.4065,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333268073761) | recall tensor([96.4065,     nan,     nan], dtype=torch.float64) (nan)
+
+Testing: 100%|██████████| 1659/1659 [35:17<00:00,  1.28s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9640647768974304,
+ 'test_acc_w': 0.9497789144515991,
+ 'test_dist_l1': 0.04254225268959999,
+ 'test_dist_l2': 0.05575614050030708,
+ 'test_dist_logl2': 0.022065144032239914,
+ 'test_dist_mistake_severity': 0.18385663628578186,
+ 'test_iou': 0.9370779395103455}
+ ```
