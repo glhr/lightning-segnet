@@ -342,6 +342,8 @@ class LitSegNet(pl.LightningModule):
 
         dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.dataset.datasets[0].dataset
 
+        orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.dataset.datasets[0].dataset
+
         sample, target_orig = batch
         if self.hparams.save_xp is None:
             result_folder = f"{self.result_folder}/{self.test_checkpoint}"
@@ -366,7 +368,7 @@ class LitSegNet(pl.LightningModule):
 
             if self.hparams.mode == "convert":
                 # logger.debug(torch.unique(torch.argmax(pred_orig, dim=1)))
-                pred = self.orig_dataset.dataset.labels_obj_to_aff(pred_orig, proba=True)
+                pred = orig_dataset_obj.labels_obj_to_aff(pred_orig, proba=True)
                 for i, p in enumerate(pred_orig):
                     proba_lst = []
                     for cls, map in enumerate(p.squeeze()):
@@ -420,7 +422,7 @@ class LitSegNet(pl.LightningModule):
                     # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # logger.debug("Generating argmax pred")
                     mod = ','.join(self.hparams.modalities)
-                    self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                    orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
                     dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities)
                     if not dataset_obj.noGT:
