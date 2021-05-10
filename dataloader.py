@@ -156,7 +156,6 @@ class MMDataLoader(Dataset):
                 assert modGT.shape == img[mod].shape
         # logger.debug(torch.unique(modGT))
 
-
         return [torch.stack(imgs), modGT]
 
     def remap_classes(self, idx_to_color):
@@ -304,16 +303,18 @@ class MMDataLoader(Dataset):
 
         return mask_out
 
-    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, dataset_name=None, modalities=None):
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None):
         if filename_prefix is None:
             filename_prefix = self.name
 
         # print(bs,np.max(b))
         concat = []
-        filename = self.filenames[iter].replace(".png","").split("/")[-1]
 
         if iter is None:
             iter = self.idx
+
+        if filename is None:
+            filename = iter
 
         if orig is not None:
             if torch.is_tensor(orig):
@@ -478,15 +479,18 @@ class MMDataLoader(Dataset):
             return pilRGB, pilDep, pilIR, imgGT
 
     def sample(self, sample_id, augment):
+
         try:
             try:
-                logger.debug(f"{self.name}, {self.filenames[sample_id]}")
+                filename = self.filenames[sample_id].replace(".png","").split("/")[-1]
+                logger.debug(f"{self.name}, {filename}")
             except IndexError:
                 logger.warning(f"{self.name} {sample_id} isn't a thing :(")
 
             try:
                 pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
-                return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
+                sample = self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
+                return {"sample": sample, "filename" : filename }
             except Exception as e:
                 logger.warning(f"{self.name} {sample_id} couldn't load sample: {e}")
         except IOError as e:
@@ -506,7 +510,7 @@ class MMDataLoader(Dataset):
             s = self.sample(idx, augment=False)
 
         if self.transform:
-            s[0] = self.transform(s[0])
+            s["sample"][0] = self.transform(s["sample"][0])
         return s
 
 
@@ -604,7 +608,7 @@ class DemoDataLoader(MMDataLoader):
         s = self.sample(idx, augment=False)
 
         if self.transform:
-            s[0] = self.transform(s[0])
+            s["sample"][0] = self.transform(s["sample"][0])
         return s
 
 class FreiburgDataLoader(MMDataLoader):
@@ -1172,8 +1176,6 @@ class SynthiaDataLoader(MMDataLoader):
             self.filenames.append(img)
         # print(self.filenames[0])
         # print(len(self.filenames))
-        if sort == False:
-            np.random.shuffle(self.filenames)
 
         self.write_loader(set)
         self.color_GT = False

@@ -134,7 +134,7 @@ class LitSegNet(pl.LightningModule):
             if self.hparams.orig_dataset is None and self.hparams.mode in ["affordances", "objects"]:
                 self.hparams.orig_dataset = self.hparams.dataset
 
-            if not (self.hparams.dataset == "combo"):    
+            if not (self.hparams.dataset == "combo"):
                 self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
             else:
                 self.orig_dataset = self.get_dataset_combo(set=self.test_set)
@@ -232,7 +232,7 @@ class LitSegNet(pl.LightningModule):
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
     def predict(self, batch, set, save=False, batch_idx=None):
-        x, y = batch
+        x, y = batch["sample"]
         x_hat = self.model(x)
 
         if self.hparams.loss_weight:
@@ -345,7 +345,8 @@ class LitSegNet(pl.LightningModule):
 
         orig_dataset_obj = self.orig_dataset.dataset
 
-        sample, target_orig = batch
+        sample, target_orig = batch["sample"]
+        filename = batch["filename"][0]
         if self.hparams.save_xp is None:
             result_folder = f"{self.result_folder}/{self.test_checkpoint}"
             gt_folder = f"{self.result_folder}/gt/"
@@ -423,11 +424,11 @@ class LitSegNet(pl.LightningModule):
                     # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                     # logger.debug("Generating argmax pred")
                     mod = ','.join(self.hparams.modalities)
-                    orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                    orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities)
+                    dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
                     if not dataset_obj.noGT:
-                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset)
+                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
                     # self.test_set.dataset.result_to_image(
                     #     iter=batch_idx+i,
                     #     orig=o,
@@ -489,7 +490,8 @@ class LitSegNet(pl.LightningModule):
         for name in self.hparams.dataset_combo:
             # print(name, set)
             dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False)
-            subsets.append(Subset(dataset, indices=range(n_samples)))
+            random_indices = np.random.choice(range(len(dataset)), replace=True, size=n_samples)
+            subsets.append(Subset(dataset, indices=random_indices))
 
         combo = ConcatDataset(subsets)
         out = Subset(combo, indices=range(n_samples*len(subsets)))
