@@ -1,0 +1,4 @@
+black 0 0 0 -1
+red 255 0 0 0
+yellow 255 255 0 1
+green 0 255 0 2

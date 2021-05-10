@@ -524,12 +524,27 @@ class DemoDataLoader(MMDataLoader):
         logger.warning(f"dataset modalities {self.modalities}")
         self.filenames = []
 
+        classes = np.loadtxt("classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
         self.img_transforms = transforms.Compose([transforms.ToTensor()])
 
         self.resize = resize
         self.transform = transform
         self.viz = viz
         self.noGT = True
+        self.has_affordance_labels = True
 
     def sample(self, sample_id, augment):
         pilRGB, pilDep, pilIR = self.get_image_pairs(sample_id)
