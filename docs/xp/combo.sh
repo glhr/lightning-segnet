@@ -1,5 +1,5 @@
-checkpoint = "2021-05-10 19-34-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=49-val_loss=0.0053.ckpt"
-xp = combo
+checkpoint="2021-05-10 19-34-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=49-val_loss=0.0053.ckpt"
+xp=combo
 
 for dataset in freiburg cityscapes thermalvoc synthia kitti multispectralseg freiburgthermal lostfound
 do
