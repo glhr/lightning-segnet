@@ -342,11 +342,6 @@ class LitSegNet(pl.LightningModule):
 
         dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.dataset.datasets[0].dataset
 
-        if self.hparams.mode == "convert":
-            orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.dataset.datasets[0].dataset
-        else:
-            orig_dataset_obj = dataset_obj
-
         sample, target_orig = batch
         if self.hparams.save_xp is None:
             result_folder = f"{self.result_folder}/{self.test_checkpoint}"
