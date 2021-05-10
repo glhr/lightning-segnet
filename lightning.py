@@ -74,7 +74,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss_weight', action="store_true", default=False)
         parser.add_argument('--loss', default=None)
-        parser.add_argument('--orig_dataset', default="freiburg")
+        parser.add_argument('--orig_dataset', default=None)
         parser.add_argument('--modalities', default="rgb")
         parser.add_argument('--init_channels', type=int, default=None)
         parser.add_argument('--depthwise_conv', action="store_true", default=False)
@@ -131,17 +131,19 @@ class LitSegNet(pl.LightningModule):
             if self.hparams.dataset_combo is not None:
                 self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
 
+            if self.hparams.orig_dataset is None and self.hparams.mode in ["affordances", "objects"]:
+                self.hparams.orig_dataset = self.hparams.dataset
+
+            self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
+
             if self.hparams.loss in ["sord","compare"]:
                 self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
             else:
                 self.hparams.ranks = [1,2,3]
 
-
             self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
             self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
                 len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
-
-            self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set="test")
 
             self.update_settings()
 

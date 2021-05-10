@@ -308,6 +308,7 @@ class MMDataLoader(Dataset):
 
         # print(bs,np.max(b))
         concat = []
+        filename = self.filenames[iter].replace(".png","").split("/")[-1]
 
         if iter is None:
             iter = self.idx
@@ -334,7 +335,7 @@ class MMDataLoader(Dataset):
                     #         np.uint8(modality / np.amax(modality) * 255),
                     #         cv2.COLORMAP_JET)
                     img = Image.fromarray(modality, 'RGB')
-                    img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}{mod_i}_{self.mode}.png')
+                    img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
@@ -376,7 +377,7 @@ class MMDataLoader(Dataset):
         folder = "" if folder is None else folder
         dataset_name = self.name if dataset_name is None else dataset_name
         if orig is None:
-            img.save(f'{folder}/{dataset_name}{str(iter + 1)}-{filename_prefix}_{self.mode}.png')
+            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
