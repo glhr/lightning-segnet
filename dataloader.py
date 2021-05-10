@@ -1002,7 +1002,7 @@ class ThermalVOCDataLoader(MMDataLoader):
 
         for img in glob.glob(self.path + 'SegmentationClass/*.png'):
             img = img.split("/")[-1]
-            if img not in exclude and (set == "full" or img in filenames[set]):
+            if img.replace(".png","") not in exclude and (set == "full" or img in filenames[set]):
                 self.filenames.append(img)
         # logger.debug(self.filenames)
 
