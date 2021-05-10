@@ -1169,8 +1169,8 @@ class SynthiaDataLoader(MMDataLoader):
     def get_depth(self, sample_id):
         return self.load_depth(self.path + f"{self.seqs[self.set]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
 
-    def return_gt(self, sample_id):
-        np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
+    def get_gt(self, sample_id):
+        return np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
 
 
 class OwnDataLoader(MMDataLoader):
