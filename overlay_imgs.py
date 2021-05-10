@@ -87,15 +87,7 @@ for i in filenames:
         # cv.destroyAllWindows()
         i_str = str(i)
         i_str = "0"*(5-len(i_str)) + i_str
-
-        description = ""
-        if args.gt: description += "Gt"
-        if args.rgb:  description += "Rgb"
-        if args.ir:  description += "Ir"
-        if len(description): description += "-"
-
-
-        cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}-{description}pred_overlay.png",out)
+        cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}-pred_overlay.png",out)
     except Exception as e:
     	print(f"stopped at i={i}",e)
 
