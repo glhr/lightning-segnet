@@ -1224,7 +1224,7 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
                 self.base_folders.append(self.path + '/'.join(filepath.split("/")[-4:-2]))
 
         if len(self.filenames):
-            logger.debug(self.filenames[0], self.base_folders[0])
+            logger.debug(f"{self.filenames[0]}, {self.base_folders[0]}")
 
         self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
 
