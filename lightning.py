@@ -346,7 +346,7 @@ class LitSegNet(pl.LightningModule):
         orig_dataset_obj = self.orig_dataset.dataset
 
         sample, target_orig = batch["sample"]
-        filename = batch["filename"][0]
+
         if self.hparams.save_xp is None:
             result_folder = f"{self.result_folder}/{self.test_checkpoint}"
             gt_folder = f"{self.result_folder}/gt/"
@@ -404,6 +404,8 @@ class LitSegNet(pl.LightningModule):
                 # proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
                 # test = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
                 iter = batch_idx*self.hparams.bs + i
+
+                filename = batch["filename"][i]
 
 
                 for cls,map in enumerate(p.squeeze()):
