@@ -132,11 +132,12 @@ class LitSegNet(pl.LightningModule):
                 self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
 
             if self.hparams.orig_dataset is None and self.hparams.mode in ["affordances", "objects"]:
-                if not (self.hparams.dataset == "combo"):
-                    self.hparams.orig_dataset = self.hparams.dataset
-                    self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
-                else:
-                    self.orig_dataset = self.get_dataset_combo(set=self.test_set)
+                self.hparams.orig_dataset = self.hparams.dataset
+
+            if not (self.hparams.dataset == "combo"):    
+                self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
+            else:
+                self.orig_dataset = self.get_dataset_combo(set=self.test_set)
 
 
 
