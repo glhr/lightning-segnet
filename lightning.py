@@ -134,10 +134,11 @@ class LitSegNet(pl.LightningModule):
             if self.hparams.orig_dataset is None and self.hparams.mode in ["affordances", "objects"]:
                 if not (self.hparams.dataset == "combo"):
                     self.hparams.orig_dataset = self.hparams.dataset
+                    self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
                 else:
-                    self.hparams.orig_dataset = "freiburg"
+                    self.orig_dataset = self.get_dataset(name="freiburg", set="test")
 
-            self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
+
 
             if self.hparams.loss in ["sord","compare"]:
                 self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
