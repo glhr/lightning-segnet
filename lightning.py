@@ -132,7 +132,10 @@ class LitSegNet(pl.LightningModule):
                 self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
 
             if self.hparams.orig_dataset is None and self.hparams.mode in ["affordances", "objects"]:
-                self.hparams.orig_dataset = self.hparams.dataset
+                if not (self.hparams.dataset == "combo"):
+                    self.hparams.orig_dataset = self.hparams.dataset
+                else:
+                    self.hparams.orig_dataset = "freiburg"
 
             self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
 
