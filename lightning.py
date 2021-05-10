@@ -481,7 +481,7 @@ class LitSegNet(pl.LightningModule):
     def get_dataset_combo(self, set, augment=None):
         subsets = []
 
-        n_samples = self.hparams.dataset_combo_ntrain if set == "train" else int(self.hparams.dataset_combo_ntrain/10)
+        n_samples = self.hparams.dataset_combo_ntrain if set == "train" else int(self.hparams.dataset_combo_ntrain/9)
 
         for name in self.hparams.dataset_combo:
             dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False)
