@@ -474,7 +474,7 @@ class MMDataLoader(Dataset):
 
         else:
             imgGT = self.get_gt(sample_id)
-            assert pilRGB.size == imgGT.size
+            # assert pilRGB.size == imgGT.size
             return pilRGB, pilDep, pilIR, imgGT
 
     def sample(self, sample_id, augment):
