@@ -111,7 +111,7 @@ class LitSegNet(pl.LightningModule):
             self.hparams.normalize = False
             self.test_checkpoint = test_checkpoint
             self.test_max = test_max
-            self.test_set = test_set
+            self.test_set = test_set if test_set is not None else "test"
             self.dataset_seq = dataset_seq
 
 
@@ -136,7 +136,7 @@ class LitSegNet(pl.LightningModule):
                     self.hparams.orig_dataset = self.hparams.dataset
                     self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
                 else:
-                    self.orig_dataset = self.get_dataset(name="freiburg", set="test")
+                    self.orig_dataset = self.get_dataset_combo(set=self.test_set)
 
 
 
@@ -484,6 +484,7 @@ class LitSegNet(pl.LightningModule):
         n_samples = self.hparams.dataset_combo_ntrain if set == "train" else int(self.hparams.dataset_combo_ntrain/9)
 
         for name in self.hparams.dataset_combo:
+            # print(name, set)
             dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False)
             subsets.append(Subset(dataset, indices=range(n_samples)))
 
