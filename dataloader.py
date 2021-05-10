@@ -152,8 +152,10 @@ class MMDataLoader(Dataset):
         for mod in self.modalities:
             if use[mod] and img.get(mod) is not None:
                 imgs.append(torch.from_numpy(img[mod].copy()).float())
-
+                # print(self.name, modGT.shape, img[mod].shape)
+                assert modGT.shape == img[mod].shape
         # logger.debug(torch.unique(modGT))
+
 
         return [torch.stack(imgs), modGT]
 
@@ -459,15 +461,34 @@ class MMDataLoader(Dataset):
             for item in self.filenames:
                 f.write("%s\n" % item)
 
+    def get_image_pairs(self, sample_id):
+        # print(sample_id)
+        pilRGB = self.get_rgb(sample_id) if "rgb" in self.modalities else None
+
+        pilDep = self.get_depth(sample_id) if "depth" in self.modalities else None
+
+        pilIR = self.get_ir(sample_id) if "ir" in self.modalities else None
+
+        if self.noGT:
+            return pilRGB, pilDep, pilIR
+
+        else:
+            imgGT = self.get_gt(sample_id)
+            assert pilRGB.size == imgGT.size
+            return pilRGB, pilDep, pilIR, imgGT
+
     def sample(self, sample_id, augment):
         try:
             try:
                 logger.debug(f"{self.name}, {self.filenames[sample_id]}")
             except IndexError:
                 logger.warning(f"{self.name} {sample_id} isn't a thing :(")
-            pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
 
-            return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
+            try:
+                pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
+                return self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
+            except Exception as e:
+                logger.warning(f"{self.name} {sample_id} couldn't load sample: {e}")
         except IOError as e:
             print("Error loading " + self.filenames[sample_id], e)
         return False, False, False
@@ -712,7 +733,13 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
         self.write_loader(set)
 
-    def load_cropped_ir(self,path,resize=None):
+        pilRGB = Image.open(f"{self.base_folders[0]}/{self.prefixes['rgb']}/{self.prefixes['rgb']}_{self.filenames[0]}").convert('RGB')
+
+        width, height = pilRGB.size
+        self.crop_dims = (300, 0, width-300, height)
+        self.resize_dims = (width, height)
+
+    def load_cropped_ir(self, path, resize=None):
         try:
             ir_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
             if resize is not None:
@@ -728,24 +755,14 @@ class FreiburgThermalDataLoader(MMDataLoader):
             logger.info(f"Failed to read file {path}")
             return None
 
-    def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.prefixes['rgb']}_{self.filenames[sample_id]}").convert('RGB')
-        width, height = pilRGB.size
-        resize = (300, 0, width-300, height)
-        # print(pilRGB.size)
-        pilRGB = pilRGB.crop(resize)
+    def get_rgb(self, sample_id):
+        return Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.prefixes['rgb']}_{self.filenames[sample_id]}").convert('RGB').crop(self.crop_dims)
 
-        pilIR = self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.prefixes['ir']}_{self.filenames[sample_id]}", resize=(width, height))
-        # print(pilIR.size)
+    def get_ir(self, sample_id):
+        return self.load_cropped_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.prefixes['ir']}_{self.filenames[sample_id]}", resize=self.resize_dims)
 
-        imgGT = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['gt']}/{self.prefixes['gt']}_{self.filenames[sample_id]}").convert('L')
-        # print(imgGT.size)
-        imgGT = imgGT.resize((width, height), resample=Image.NEAREST)
-        imgGT = imgGT.crop(resize)
-        pilDep = None
-
-        return pilRGB, pilDep, pilIR, imgGT
-
+    def get_gt(self, sample_id):
+        return Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['gt']}/{self.prefixes['gt']}_{self.filenames[sample_id]}").convert('L').resize(self.resize_dims, resample=Image.NEAREST).crop(self.crop_dims)
 
 class CityscapesDataLoader(MMDataLoader):
 
@@ -813,16 +830,18 @@ class CityscapesDataLoader(MMDataLoader):
 
         self.write_loader(set)
 
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
 
-    def get_image_pairs(self, sample_id):
-
-        pilRGB = Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+    def get_depth(self, sample_id):
         if not self.depth_completion:
             pilDep = self.load_depth(self.path + "disparity/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_disparity.png", invert=True)
         else:
             pilDep = self.load_depth(self.path + "depthcomp/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_depthcomp.png")
-        imgGT = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
-        return pilRGB, pilDep, None, imgGT
+        return pilDep
+
+    def get_gt(self, sample_id):
+        return Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
 
 class LostFoundDataLoader(MMDataLoader):
 
@@ -886,17 +905,18 @@ class LostFoundDataLoader(MMDataLoader):
 
         self.write_loader(set)
 
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + "leftImg8bit" + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
 
-    def get_image_pairs(self, sample_id):
+    def get_gt(self, sample_id):
+        return Image.open(self.path + "gtCoarse" + f"/{self.filenames[sample_id]}_gtCoarse_labelIds.png").convert('L')
 
-        pilRGB = Image.open(self.path + "leftImg8bit" + f"/{self.filenames[sample_id]}_leftImg8bit.png").convert('RGB')
+    def get_depth(self, sample_id):
+        raise NotImplementedError
         # if not self.depth_completion:
         #     pilDep = self.load_depth(self.path + "disparity" + f"/{self.filenames[sample_id]}_disparity.png", invert=True)
         # else:
         #     pilDep = self.load_depth(self.path + "depthcomp/" + f"/{self.filenames[sample_id]}_depthcomp.png")
-        imgGT = Image.open(self.path + "gtCoarse" + f"/{self.filenames[sample_id]}_gtCoarse_labelIds.png").convert('L')
-        # print(np.unique(imgGT))
-        return pilRGB, None, None, imgGT
 
 class KittiDataLoader(MMDataLoader):
 
@@ -947,13 +967,15 @@ class KittiDataLoader(MMDataLoader):
         self.color_GT = False
         self.write_loader(set)
 
-    def get_image_pairs(self, sample_id):
-        # print(sample_id)
-        pilRGB = Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + "data_scene_flow/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
+
+    def get_depth(self, sample_id):
         # pilDep = Image.open(self.path + "data_scene_flow/" + self.split_path + "disp_occ_0/" + f"{self.filenames[sample_id]}").convert('L')
-        pilDep = self.load_depth(self.path + "data_scene_flow/" + self.split_path + "depthcomp/" + f"{self.filenames[sample_id]}")
-        imgGT = Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
-        return pilRGB, pilDep, None, imgGT
+        return self.load_depth(self.path + "data_scene_flow/" + self.split_path + "depthcomp/" + f"{self.filenames[sample_id]}")
+
+    def get_gt(self, sample_id):
+        return Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
 
 class ThermalVOCDataLoader(MMDataLoader):
 
@@ -1011,18 +1033,17 @@ class ThermalVOCDataLoader(MMDataLoader):
 
         self.color_GT = True
 
-    def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + "ColorImages/" + self.filenames[sample_id]).convert('RGB')
-        pilDep = None
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + "ColorImages/" + self.filenames[sample_id]).convert('RGB')
+
+    def get_ir(self, sample_id):
         thermal = np.load(self.path + "ThermalImages/" + self.filenames[sample_id].replace(".png",".npy"))
         thermal = (thermal - np.min(thermal))
         thermal = thermal/np.max(thermal)
-        pilIR = Image.fromarray(thermal* 255.0).convert('L')
+        return Image.fromarray(thermal* 255.0).convert('L')
 
-        imgGT = Image.open(self.path + "SegmentationClass/" + self.filenames[sample_id]).convert('RGB')
-
-        return pilRGB, pilDep, pilIR, imgGT
-
+    def get_gt(self, sample_id):
+        return Image.open(self.path + "SegmentationClass/" + self.filenames[sample_id]).convert('RGB')
 
 class MIRMultispectral(MMDataLoader):
 
@@ -1142,12 +1163,14 @@ class SynthiaDataLoader(MMDataLoader):
         self.write_loader(set)
         self.color_GT = False
 
-    def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + f"{self.seqs[self.set]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
-        pilDep = self.load_depth(self.path + f"{self.seqs[self.set]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
-        imgGT = np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
-        # print(np.unique(imgGT))
-        return pilRGB, pilDep, None, imgGT
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + f"{self.seqs[self.set]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
+
+    def get_depth(self, sample_id):
+        return self.load_depth(self.path + f"{self.seqs[self.set]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
+
+    def return_gt(self, sample_id):
+        np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
 
 
 class OwnDataLoader(MMDataLoader):
@@ -1223,14 +1246,11 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
             logger.info(f"Failed to read file {path}")
             return None
 
-    def get_image_pairs(self, sample_id):
-        logger.debug(sample_id)
-        pilRGB = Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.filenames[sample_id]}").convert('RGB')
+    def get_rgb(self, sample_id):
+        return Image.open(f"{self.base_folders[sample_id]}/{self.prefixes['rgb']}/{self.filenames[sample_id]}").convert('RGB')
 
-        pilIR = self.load_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.filenames[sample_id]}")
-        # print(pilIR.size)
-
-        return pilRGB, None, pilIR
+    def get_ir(self, sample_id):
+        return self.load_ir(f"{self.base_folders[sample_id]}/{self.prefixes['ir']}/{self.filenames[sample_id]}")
 
 class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
