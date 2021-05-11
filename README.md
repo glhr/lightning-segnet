@@ -25,3 +25,10 @@ python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16
 
 # visualize a loss weight map
 python3 metrics.py --distmap
+```
+
+### Dataset stats
+
+will output the proportion of pixels in each class
+
+python3 lightning.py --dataset freiburg --nopredict --test_set full --workers 10

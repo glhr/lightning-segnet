@@ -84,7 +84,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--save_xp', default=None)
         return parser
 
-    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, **kwargs):
+    def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
         self.save_hyperparameters(conf)
@@ -113,6 +113,7 @@ class LitSegNet(pl.LightningModule):
             self.test_max = test_max
             self.test_set = test_set if test_set is not None else "test"
             self.dataset_seq = dataset_seq
+            self.nopredict = nopredict
 
 
             self.datasets = {
@@ -233,6 +234,7 @@ class LitSegNet(pl.LightningModule):
 
     def predict(self, batch, set, save=False, batch_idx=None):
         x, y = batch["sample"]
+
         x_hat = self.model(x)
 
         if self.hparams.loss_weight:
@@ -338,6 +340,26 @@ class LitSegNet(pl.LightningModule):
             elif k == "correct":
                 self.log(f'{prefix}{underscore}acc', v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
 
+    def reduce_stats(self, count):
+        # print(count)
+        count = torch.reshape(count, (-1, self.num_cls + 1))
+        # print(count)
+        count_total = torch.sum(count, dim=0, keepdim=True)
+        count_total = count_total.float() / torch.sum(count_total)
+        logger.info(f"GT STATS - class count: {count_total}")
+
+        return 0
+
+    def gt_stats(self, gt):
+
+        # print(torch.unique(gt))
+        count = torch.LongTensor([0] * (self.hparams.num_classes + 1))
+        gt_values = torch.unique(gt)
+        for val in gt_values:
+            count[val+1] = torch.sum((gt == val))
+
+        return count
+
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
 
@@ -347,119 +369,125 @@ class LitSegNet(pl.LightningModule):
 
         sample, target_orig = batch["sample"]
 
-        if self.hparams.save_xp is None:
-            result_folder = f"{self.result_folder}/{self.test_checkpoint}"
-            gt_folder = f"{self.result_folder}/gt/"
-            orig_folder = f"{self.result_folder}/orig/"
-        else:
-            result_folder = f"{self.result_folder}/{self.hparams.save_xp}"
-            gt_folder = result_folder
-            orig_folder = result_folder
-            create_folder(result_folder)
-
-        if self.test_max is None or batch_idx < self.test_max:
-            # logger.debug(torch.min(sample),torch.max(sample))
-            pred_orig = self.model(sample)
-            if self.hparams.loss_weight:
-                weight_map = weight_from_target(target_orig)
+        if not self.nopredict:
+            if self.hparams.save_xp is None:
+                result_folder = f"{self.result_folder}/{self.test_checkpoint}"
+                gt_folder = f"{self.result_folder}/gt/"
+                orig_folder = f"{self.result_folder}/orig/"
             else:
-                weight_map = None
-            if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss, weight_map=weight_map)
-            pred_orig = torch.softmax(pred_orig, dim=1)
-            pred_cls_orig = torch.argmax(pred_orig, dim=1)
+                result_folder = f"{self.result_folder}/{self.hparams.save_xp}"
+                gt_folder = result_folder
+                orig_folder = result_folder
+                create_folder(result_folder)
 
-            if self.hparams.mode == "convert":
-                # logger.debug(torch.unique(torch.argmax(pred_orig, dim=1)))
-                pred = orig_dataset_obj.labels_obj_to_aff(pred_orig, proba=True)
-                for i, p in enumerate(pred_orig):
-                    proba_lst = []
-                    for cls, map in enumerate(p.squeeze()):
-                        if self.hparams.orig_dataset == "freiburg" and cls==0: # ignore void
-                            pass
-                        else:
-                            proba_lst.append(map)
-                    # if self.save: self.orig_dataset.dataset.result_to_image(
-                    #     iter=batch_idx+i,
-                    #     proba_lst=proba_lst,
-                    #     folder=folder,
-                    #     filename_prefix=f"probas_orig-{self.test_checkpoint}",
-                    #     dataset_name=self.hparams.dataset)
-            else:
-                pred = pred_orig
-            pred_cls = torch.argmax(pred, dim=1)
+            if self.test_max is None or batch_idx < self.test_max:
+                # logger.debug(torch.min(sample),torch.max(sample))
+                pred_orig = self.model(sample)
+                if self.hparams.loss_weight:
+                    weight_map = weight_from_target(target_orig)
+                else:
+                    weight_map = None
+                if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss, weight_map=weight_map)
+                pred_orig = torch.softmax(pred_orig, dim=1)
+                pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
-            if len(target_orig) > 1:
-                target_orig = target_orig.squeeze()
-            if self.hparams.mode == "convert":
-                target = self.test_set.dataset.labels_obj_to_aff(target_orig)
-            else:
-                target = target_orig
-
-            # logger.debug("pred",pred_cls.shape,"target",target.shape)
-
-            for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-                # logger.debug(p.shape)
-                # proba_imposs = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]]
-                # proba_poss = p.squeeze()[self.test_set.dataset.aff_idx["possible"]]
-                # proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
-                # test = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
-                iter = batch_idx*self.hparams.bs + i
-
-                filename = batch["filename"][i]
-
-
-                for cls,map in enumerate(p.squeeze()):
-                    proba_lst = []
-                    if self.hparams.mode == "objects" and self.hparams.orig_dataset == "freiburg" and cls==0: # ignore void
-                        pass
-                    else:
-                        proba_lst.append(map)
-                        # self.orig_dataset.dataset.result_to_image(
+                if self.hparams.mode == "convert":
+                    # logger.debug(torch.unique(torch.argmax(pred_orig, dim=1)))
+                    pred = orig_dataset_obj.labels_obj_to_aff(pred_orig, proba=True)
+                    for i, p in enumerate(pred_orig):
+                        proba_lst = []
+                        for cls, map in enumerate(p.squeeze()):
+                            if self.hparams.orig_dataset == "freiburg" and cls==0: # ignore void
+                                pass
+                            else:
+                                proba_lst.append(map)
+                        # if self.save: self.orig_dataset.dataset.result_to_image(
                         #     iter=batch_idx+i,
                         #     proba_lst=proba_lst,
                         #     folder=folder,
-                        #     filename_prefix=f"probas{cls}-{self.test_checkpoint}",
+                        #     filename_prefix=f"probas_orig-{self.test_checkpoint}",
                         #     dataset_name=self.hparams.dataset)
-                # logger.debug("Generating proba map")
-                if self.save:
-                    # logger.info("Saving")
-                    # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
-                    # logger.debug("Generating argmax pred")
-                    mod = ','.join(self.hparams.modalities)
-                    orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
-                    # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
-                    if not dataset_obj.noGT:
-                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                else:
+                    pred = pred_orig
+                pred_cls = torch.argmax(pred, dim=1)
+
+                if len(target_orig) > 1:
+                    target_orig = target_orig.squeeze()
+                if self.hparams.mode == "convert":
+                    target = self.test_set.dataset.labels_obj_to_aff(target_orig)
+                else:
+                    target = target_orig
+
+                # logger.debug("pred",pred_cls.shape,"target",target.shape)
+
+                for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
+                    # logger.debug(p.shape)
+                    # proba_imposs = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]]
+                    # proba_poss = p.squeeze()[self.test_set.dataset.aff_idx["possible"]]
+                    # proba_pref = p.squeeze()[self.test_set.dataset.aff_idx["preferable"]]
+                    # test = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
+                    iter = batch_idx*self.hparams.bs + i
+
+                    filename = batch["filename"][i]
+
+
+                    for cls,map in enumerate(p.squeeze()):
+                        proba_lst = []
+                        if self.hparams.mode == "objects" and self.hparams.orig_dataset == "freiburg" and cls==0: # ignore void
+                            pass
+                        else:
+                            proba_lst.append(map)
+                            # self.orig_dataset.dataset.result_to_image(
+                            #     iter=batch_idx+i,
+                            #     proba_lst=proba_lst,
+                            #     folder=folder,
+                            #     filename_prefix=f"probas{cls}-{self.test_checkpoint}",
+                            #     dataset_name=self.hparams.dataset)
+                    # logger.debug("Generating proba map")
+                    if self.save:
+                        # logger.info("Saving")
+                        # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
+                        # logger.debug("Generating argmax pred")
+                        mod = ','.join(self.hparams.modalities)
+                        orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                        # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
+                        dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
+                        if not dataset_obj.noGT:
+                            dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                        # self.test_set.dataset.result_to_image(
+                        #     iter=batch_idx+i,
+                        #     orig=o,
+                        #     gt=t,
+                        #     pred_cls=c,
+                        #     pred_proba=test,
+                        #     folder=folder,
+                        #     filename_prefix=f"res", dataset_name=self.hparams.dataset)
+                    # self.test_set.dataset.result_to_image(iter=batch_idx+i, # pred_proba=p.squeeze()[self.test_set.dataset.aff_idx["impossible"]], folder=folder, filename_prefix=f"proba0")
                     # self.test_set.dataset.result_to_image(
-                    #     iter=batch_idx+i,
-                    #     orig=o,
-                    #     gt=t,
-                    #     pred_cls=c,
-                    #     pred_proba=test,
-                    #     folder=folder,
-                    #     filename_prefix=f"res", dataset_name=self.hparams.dataset)
-                # self.test_set.dataset.result_to_image(iter=batch_idx+i, # pred_proba=p.squeeze()[self.test_set.dataset.aff_idx["impossible"]], folder=folder, filename_prefix=f"proba0")
-                # self.test_set.dataset.result_to_image(
-                #     iter=batch_idx+i, gt=t, orig=o,
-                #     folder=f"{self.result_folder}/viz_per_epoch",
-                #     filename_prefix=f"gt")
+                    #     iter=batch_idx+i, gt=t, orig=o,
+                    #     folder=f"{self.result_folder}/viz_per_epoch",
+                    #     filename_prefix=f"gt")
 
-            if not dataset_obj.noGT:
-                #try:
-                cm = self.CM(pred, target)
-                # logger.debug(cm.shape)
-                iou = self.IoU_conv(pred, target)
+                if not dataset_obj.noGT:
+                    #try:
+                    cm = self.CM(pred, target)
+                    # logger.debug(cm.shape)
+                    iou = self.IoU_conv(pred, target)
 
-                mistakes = self.dist(pred, target, weight_map=weight_map)
-                logger.debug(mistakes)
-                self.log_mistakes(mistakes, prefix="test")
+                    mistakes = self.dist(pred, target, weight_map=weight_map)
+                    logger.debug(mistakes)
+                    self.log_mistakes(mistakes, prefix="test")
 
 
-                self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-                self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                    self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                    self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
 
-            return pred
+                return pred
+
+        else:
+            count = self.gt_stats(target_orig)
+            self.log('gt_cls_count', count, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_stats)
+
 
 
     def configure_optimizers(self):
@@ -550,7 +578,7 @@ if __name__ == '__main__':
     if args.debug: enable_debug()
 
     logger.debug(args)
-    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq, save=args.save, save_xp=args.save_xp, test_set=args.test_set)
+    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq, save=args.save, save_xp=args.save_xp, test_set=args.test_set, nopredict=args.nopredict)
 
     if args.prefix is None:
         args.prefix = segnet_model.hparams.save_prefix
@@ -606,11 +634,10 @@ if __name__ == '__main__':
             chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
             if args.save_xp is None:
                 create_folder(f"{segnet_model.result_folder}/{chkpt}")
-            trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args, dataset_seq=args.dataset_seq)
+            trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args, dataset_seq=args.dataset_seq, nopredict=args.nopredict)
         else:
             trained_model = segnet_model
         if args.update_output_layer:
             segnet_model.new_output()
 
-        if not args.nopredict:
-            trainer.test(trained_model)
+        trainer.test(trained_model)
