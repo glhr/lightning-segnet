@@ -551,8 +551,12 @@ class DemoDataLoader(MMDataLoader):
         self.has_affordance_labels = True
 
     def sample(self, sample_id, augment):
+        filename = self.filenames[sample_id].replace(".png","").split("/")[-1]
+        logger.debug(f"{self.name}, {filename}")
         pilRGB, pilDep, pilIR = self.get_image_pairs(sample_id)
-        return self.prepare_data(pilRGB, pilDep, pilIR)
+
+        sample = self.prepare_data(pilRGB, pilDep, pilIR)
+        return {"sample": sample, "filename" : filename }
 
     def prepare_data(self, pilRGB, pilDep, pilIR):
 
@@ -1190,7 +1194,7 @@ class SynthiaDataLoader(MMDataLoader):
         return np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
 
 
-class OwnDataLoader(MMDataLoader):
+class OwnDataLoader(DemoDataLoader):
     def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
         super().__init__(modalities, resize=resize, name="own", mode=mode, augment=augment)
         self.path = path
@@ -1208,12 +1212,10 @@ class OwnDataLoader(MMDataLoader):
         print(self.filenames)
         self.color_GT = False
         self.has_affordance_labels = True
+        self.noGT = True
 
-    def get_image_pairs(self, sample_id):
-        pilRGB = Image.open(self.path + self.split_path + "rgb/" + f"{self.filenames[sample_id]}").convert('RGB')
-        width, height = pilRGB.size
-        imgGT = Image.new('L', (width, height))
-        return pilRGB, None, None, imgGT
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + self.split_path + "rgb/" + f"{self.filenames[sample_id]}").convert('RGB')
 
 
 class KAISTPedestrianDataLoader(DemoDataLoader):
