@@ -16,7 +16,7 @@ do
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --rgb
   fi
 
-  checkpoint2="2021-05-10 22-40-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=51-val_loss=0.0023"
+  checkpoint2="2021-05-10 22-40-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=52-val_loss=0.0023"
   txtoutput="results/${dataset}/${xp}/txt/${checkpoint2}.txt"
   if [ ! -f "$txtoutput" ]; then
     mkdir -p results/$dataset/$xp/txt
