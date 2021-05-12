@@ -5,6 +5,7 @@ fusioncheckpoints=(
 )
 
 xp=thermo
+arg=$1
 
 for checkpoint in "${fusioncheckpoints[@]}"
 do
