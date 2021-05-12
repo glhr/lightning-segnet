@@ -31,4 +31,4 @@ python3 metrics.py --distmap
 
 will output the proportion of pixels in each class
 
-python3 lightning.py --dataset freiburg --nopredict --test_set full --workers 10
+python3 lightning.py --nopredict --test_set full --workers 10 --dataset freiburg
