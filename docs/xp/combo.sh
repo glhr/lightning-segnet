@@ -40,6 +40,8 @@ do
   fi
   if [[ $arg == "overlay" ]]; then
     echo "--> generating overlays for ${dataset}"
+    python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint2}_affordances" --rgb --gt
+    python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint2}_affordances" --rgb
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --model2 "${checkpoint2}_affordances" --rgb --gt
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --model2 "${checkpoint2}_affordances" --rgb
   fi
