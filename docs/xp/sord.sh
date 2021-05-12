@@ -1,4 +1,4 @@
-## Freiburg
+xp=sord
 
 run() {
   mkdir -p results/$dataset/$xp/txt
@@ -8,15 +8,12 @@ run() {
     echo "$checkpoint"
     if [ ! -f "$txtoutput" ]; then
       echo "--> running eval"
-      python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp sord > "$txtoutput" 2>&1
-    else
-      echo "--> summary"
-      tail -14 "$txtoutput"
+      python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp > "$txtoutput" 2>&1
     fi
+    echo "--> summary"
+    tail -14 "$txtoutput"
   done
 }
-
-xp=sord
 
 dataset=freiburg
 checkpoints=(
