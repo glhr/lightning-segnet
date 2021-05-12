@@ -1176,14 +1176,16 @@ class SynthiaDataLoader(MMDataLoader):
         self.set = set
 
         self.base_folders = []
+        self.filenames_short = []
 
-        for img in glob.glob(self.path + f'{self.seqs[self.set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
+        for f in glob.glob(self.path + f'{self.seqs[self.set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
             if not set == "full":
                 self.base_folders.append(self.seqs[self.set])
             else:
-                self.base_folders.append(img.split("/")[-6])
-            img = '/'.join(img.split("/")[-2:])
-            self.filenames.append(img)
+                self.base_folders.append(f.split("/")[-6])
+            img = '/'.join(f.split("/")[-2:])
+            self.filenames.append('_'.join(f.split("/")[-2:]))
+            self.filenames_short.append(img)
         # print(self.filenames[0])
         # print(len(self.filenames))
 
@@ -1191,13 +1193,13 @@ class SynthiaDataLoader(MMDataLoader):
         self.color_GT = False
 
     def get_rgb(self, sample_id):
-        return Image.open(self.path + f"{self.base_folders[sample_id]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
+        return Image.open(self.path + f"{self.base_folders[sample_id]}/RGB/Stereo_Left/" + f"{self.filenames_short[sample_id]}").convert('RGB')
 
     def get_depth(self, sample_id):
-        return self.load_depth(self.path + f"{self.base_folders[sample_id]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
+        return self.load_depth(self.path + f"{self.base_folders[sample_id]}/Depth/Stereo_Left/" + f"{self.filenames_short[sample_id]}")
 
     def get_gt(self, sample_id):
-        return np.asarray(imageio.imread(self.path + f"{self.base_folders[sample_id]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
+        return np.asarray(imageio.imread(self.path + f"{self.base_folders[sample_id]}/GT/LABELS/Stereo_Left/" + f"{self.filenames_short[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
 
 
 class OwnDataLoader(DemoDataLoader):
