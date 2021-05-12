@@ -25,7 +25,7 @@ do
   echo "--> summary for ${dataset} | ${checkpoint1}"
   tail -14 "$txtoutput"
 
-  checkpoint2="no"
+  checkpoint2="2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023"
   txtoutput="results/${dataset}/${xp}/txt/${checkpoint2}.txt"
 
   isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
