@@ -1171,6 +1171,7 @@ class SynthiaDataLoader(MMDataLoader):
             "train": "SYNTHIA-SEQS-04-SOFTRAIN",
             "val": "SYNTHIA-SEQS-05-SPRING",
             "test": "SYNTHIA-SEQS-02-FALL",
+            "full": "**"
         }
         self.set = set
 
