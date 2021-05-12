@@ -1,5 +1,7 @@
 xp=lw
 
+arg=$1
+
 run() {
   mkdir -p results/$dataset/$xp/txt
   for checkpoint in "${checkpoints[@]}"
@@ -13,7 +15,8 @@ run() {
     fi
     echo "--> summary"
     tail -14 "$txtoutput"
-    if [[ $1 == "overlay" ]]; then
+    if [[ $arg == "overlay" ]]; then
+      echo "--> generating overlay"
       python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoints[0]}_affordances" --model2 "${checkpoints[1]}_affordances" --gt
     fi
   done
