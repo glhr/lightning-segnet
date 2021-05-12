@@ -35,7 +35,11 @@ if len(description): description += "-"
 
 save_folder = save_folder.replace("overlay",f"overlay{description}")
 
-create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
+try:
+    create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
+except OSError:
+    save_folder = save_folder[:100]
+    create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
 
 filenames = []
 
