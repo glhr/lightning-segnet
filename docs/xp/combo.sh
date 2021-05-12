@@ -11,7 +11,7 @@ do
   if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
     mkdir -p results/$dataset/$xp/txt
     echo "Running evaluation for ${dataset} | ${checkpoint1}"
-    if [ -f "lightning_logs/${checkpoint1}.ckpt" ] ] ; then
+    if [ -f "lightning_logs/${checkpoint1}.ckpt" ] ; then
       python3 lightning.py --dataset $dataset --bs 1 --save --save_xp $xp --save --dataset_combo_ntrain 180 --test_checkpoint "lightning_logs/${checkpoint1}.ckpt" --loss_weight > "$txtoutput" 2>&1
     else
       echo "checkpoint ${checkpoint1} not found :( bye"
@@ -32,7 +32,7 @@ do
   if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
     mkdir -p results/$dataset/$xp/txt
     echo "Running evaluation for ${dataset} | ${checkpoint2}"
-    if [ -f "lightning_logs/${checkpoint2}.ckpt" ] ] ; then
+    if [ -f "lightning_logs/${checkpoint2}.ckpt" ] ; then
       python3 lightning.py --dataset $dataset --bs 1 --save --save_xp $xp --save --dataset_combo_ntrain 180 --test_checkpoint "lightning_logs/${checkpoint2}.ckpt" --loss_weight > "$txtoutput" 2>&1
     else
       echo "checkpoint ${checkpoint2} not found :( bye"
