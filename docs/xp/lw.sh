@@ -6,7 +6,8 @@ run() {
   do
     txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
     echo "$checkpoint"
-    if [ ! -f "$txtoutput" ]; then
+    isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
+    if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
       python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --loss_weight > "$txtoutput" 2>&1
     fi
