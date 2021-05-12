@@ -18,7 +18,7 @@ do
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --rgb --gt
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --rgb
   fi
-  echo "--> summary"
+  echo "--> summary for ${dataset} | ${checkpoint2}"
   tail -14 "$txtoutput"
 
   checkpoint2="2021-05-10 22-40-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=52-val_loss=0.0023"
@@ -35,7 +35,7 @@ do
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --model2 "${checkpoint2}_affordances" --rgb --gt
     python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint1}_affordances" --model2 "${checkpoint2}_affordances" --rgb
   fi
-  echo "--> summary"
+  echo "--> summary for ${dataset} | ${checkpoint2}"
   tail -14 "$txtoutput"
 
 done
