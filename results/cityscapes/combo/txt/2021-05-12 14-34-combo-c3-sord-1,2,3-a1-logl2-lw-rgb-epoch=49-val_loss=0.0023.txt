@@ -1,0 +1,163 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              cityscapes
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               None
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] cityscapes - train 2975 | val 267 | test 233
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 17-59-cityscapes-c3-None-lw-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              cityscapes
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               2021-05-12 17-59-cityscapes-c3-None-lw-rgb
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] cityscapes - train 2975 | val 267 | test 233
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 17-59-cityscapes-c3-None-lw-rgb
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+['rgb']
+['rgb']
+['rgb']
+['rgb']
+['rgb']
+['rgb']
+['rgb']
+['rgb']
+Testing: 0it [00:00, ?it/s]Testing:   0%|          | 1/233 [00:01<05:54,  1.53s/it]Testing:   1%|          | 2/233 [00:02<05:24,  1.41s/it]Testing:   1%|▏         | 3/233 [00:04<05:03,  1.32s/it]Testing:   2%|▏         | 4/233 [00:05<04:55,  1.29s/it]Testing:   2%|▏         | 5/233 [00:06<04:44,  1.25s/it]Testing:   3%|▎         | 6/233 [00:07<04:39,  1.23s/it]Testing:   3%|▎         | 7/233 [00:08<04:40,  1.24s/it]Testing:   3%|▎         | 8/233 [00:10<04:34,  1.22s/it]Testing:   4%|▍         | 9/233 [00:11<04:29,  1.20s/it]Testing:   4%|▍         | 10/233 [00:12<04:29,  1.21s/it]Testing:   5%|▍         | 11/233 [00:13<04:29,  1.21s/it]Testing:   5%|▌         | 12/233 [00:14<04:25,  1.20s/it]Testing:   6%|▌         | 13/233 [00:16<04:24,  1.20s/it]Testing:   6%|▌         | 14/233 [00:17<04:25,  1.21s/it]Testing:   6%|▋         | 15/233 [00:18<04:23,  1.21s/it]Testing:   7%|▋         | 16/233 [00:19<04:21,  1.21s/it]Testing:   7%|▋         | 17/233 [00:20<04:18,  1.20s/it]Testing:   8%|▊         | 18/233 [00:22<04:14,  1.18s/it]Testing:   8%|▊         | 19/233 [00:23<04:12,  1.18s/it]Testing:   9%|▊         | 20/233 [00:24<04:11,  1.18s/it]Testing:   9%|▉         | 21/233 [00:25<04:11,  1.19s/it]Testing:   9%|▉         | 22/233 [00:26<04:09,  1.18s/it]Testing:  10%|▉         | 23/233 [00:27<04:07,  1.18s/it]Testing:  10%|█         | 24/233 [00:29<04:08,  1.19s/it]Testing:  11%|█         | 25/233 [00:30<04:09,  1.20s/it]Testing:  11%|█         | 26/233 [00:31<04:08,  1.20s/it]Testing:  12%|█▏        | 27/233 [00:32<04:06,  1.20s/it]Testing:  12%|█▏        | 28/233 [00:33<04:03,  1.19s/it]Testing:  12%|█▏        | 29/233 [00:35<04:03,  1.19s/it]Testing:  13%|█▎        | 30/233 [00:36<04:11,  1.24s/it]Testing:  13%|█▎        | 31/233 [00:37<04:08,  1.23s/it]Testing:  14%|█▎        | 32/233 [00:38<04:03,  1.21s/it]Testing:  14%|█▍        | 33/233 [00:40<04:01,  1.21s/it]Testing:  15%|█▍        | 34/233 [00:41<03:57,  1.20s/it]Testing:  15%|█▌        | 35/233 [00:42<03:58,  1.20s/it]Testing:  15%|█▌        | 36/233 [00:43<03:57,  1.21s/it]Testing:  16%|█▌        | 37/233 [00:44<03:57,  1.21s/it]Testing:  16%|█▋        | 38/233 [00:46<03:57,  1.22s/it]Testing:  17%|█▋        | 39/233 [00:47<03:54,  1.21s/it]Testing:  17%|█▋        | 40/233 [00:48<03:52,  1.20s/it]Testing:  18%|█▊        | 41/233 [00:49<03:50,  1.20s/it]Testing:  18%|█▊        | 42/233 [00:50<03:48,  1.20s/it]Testing:  18%|█▊        | 43/233 [00:52<03:45,  1.18s/it]Testing:  19%|█▉        | 44/233 [00:53<04:01,  1.28s/it]Testing:  19%|█▉        | 45/233 [00:54<03:54,  1.25s/it]Testing:  20%|█▉        | 46/233 [00:55<03:48,  1.22s/it]Testing:  20%|██        | 47/233 [00:57<03:45,  1.21s/it]Testing:  21%|██        | 48/233 [00:58<03:42,  1.20s/it]Testing:  21%|██        | 49/233 [01:05<09:11,  3.00s/it]Testing:  21%|██▏       | 50/233 [01:06<07:28,  2.45s/it]Testing:  22%|██▏       | 51/233 [01:07<06:16,  2.07s/it]Testing:  22%|██▏       | 52/233 [01:09<05:30,  1.82s/it]Testing:  23%|██▎       | 53/233 [01:10<04:51,  1.62s/it]Testing:  23%|██▎       | 54/233 [01:11<04:26,  1.49s/it]Testing:  24%|██▎       | 55/233 [01:12<04:08,  1.40s/it]Testing:  24%|██▍       | 56/233 [01:13<03:54,  1.33s/it]Testing:  24%|██▍       | 57/233 [01:14<03:45,  1.28s/it]Testing:  25%|██▍       | 58/233 [01:16<03:39,  1.26s/it]Testing:  25%|██▌       | 59/233 [01:17<03:33,  1.23s/it]Testing:  26%|██▌       | 60/233 [01:18<03:31,  1.22s/it]Testing:  26%|██▌       | 61/233 [01:19<03:31,  1.23s/it]Testing:  27%|██▋       | 62/233 [01:20<03:29,  1.23s/it]Testing:  27%|██▋       | 63/233 [01:22<03:28,  1.23s/it]Testing:  27%|██▋       | 64/233 [01:23<03:26,  1.22s/it]Testing:  28%|██▊       | 65/233 [01:24<03:23,  1.21s/it]Testing:  28%|██▊       | 66/233 [01:25<03:19,  1.20s/it]Testing:  29%|██▉       | 67/233 [01:26<03:18,  1.20s/it]Testing:  29%|██▉       | 68/233 [01:28<03:20,  1.21s/it]Testing:  30%|██▉       | 69/233 [01:29<03:18,  1.21s/it]Testing:  30%|███       | 70/233 [01:30<03:15,  1.20s/it]Testing:  30%|███       | 71/233 [01:31<03:14,  1.20s/it]Testing:  31%|███       | 72/233 [01:32<03:12,  1.19s/it]Testing:  31%|███▏      | 73/233 [01:34<03:13,  1.21s/it]Testing:  32%|███▏      | 74/233 [01:35<03:16,  1.23s/it]Testing:  32%|███▏      | 75/233 [01:36<03:12,  1.22s/it]Testing:  33%|███▎      | 76/233 [01:37<03:09,  1.21s/it]Testing:  33%|███▎      | 77/233 [01:38<03:07,  1.20s/it]Testing:  33%|███▎      | 78/233 [01:40<03:07,  1.21s/it]Testing:  34%|███▍      | 79/233 [01:41<03:06,  1.21s/it]Testing:  34%|███▍      | 80/233 [01:42<03:06,  1.22s/it]Testing:  35%|███▍      | 81/233 [01:44<03:15,  1.28s/it]Testing:  35%|███▌      | 82/233 [01:45<03:10,  1.26s/it]Testing:  36%|███▌      | 83/233 [01:46<03:06,  1.24s/it]Testing:  36%|███▌      | 84/233 [01:47<03:05,  1.24s/it]Testing:  36%|███▋      | 85/233 [01:48<03:01,  1.23s/it]Testing:  37%|███▋      | 86/233 [01:50<03:00,  1.23s/it]Testing:  37%|███▋      | 87/233 [01:51<03:00,  1.23s/it]Testing:  38%|███▊      | 88/233 [01:52<02:58,  1.23s/it]Testing:  38%|███▊      | 89/233 [01:53<02:54,  1.21s/it]Testing:  39%|███▊      | 90/233 [01:55<02:52,  1.21s/it]Testing:  39%|███▉      | 91/233 [01:56<02:51,  1.21s/it]Testing:  39%|███▉      | 92/233 [01:57<02:51,  1.21s/it]Testing:  40%|███▉      | 93/233 [01:58<02:48,  1.21s/it]Testing:  40%|████      | 94/233 [01:59<02:46,  1.20s/it]Testing:  41%|████      | 95/233 [02:01<02:45,  1.20s/it]Testing:  41%|████      | 96/233 [02:02<02:43,  1.19s/it]Testing:  42%|████▏     | 97/233 [02:03<02:43,  1.20s/it]Testing:  42%|████▏     | 98/233 [02:04<02:40,  1.19s/it]Testing:  42%|████▏     | 99/233 [02:05<02:40,  1.20s/it]Testing:  43%|████▎     | 100/233 [02:07<02:41,  1.21s/it]Testing:  43%|████▎     | 101/233 [02:08<02:39,  1.21s/it]Testing:  44%|████▍     | 102/233 [02:09<02:40,  1.22s/it]Testing:  44%|████▍     | 103/233 [02:10<02:37,  1.21s/it]Testing:  45%|████▍     | 104/233 [02:11<02:37,  1.22s/it]Testing:  45%|████▌     | 105/233 [02:13<02:34,  1.21s/it]Testing:  45%|████▌     | 106/233 [02:14<02:32,  1.20s/it]Testing:  46%|████▌     | 107/233 [02:15<02:30,  1.20s/it]Testing:  46%|████▋     | 108/233 [02:16<02:28,  1.19s/it]Testing:  47%|████▋     | 109/233 [02:17<02:26,  1.18s/it]Testing:  47%|████▋     | 110/233 [02:19<02:27,  1.20s/it]Testing:  48%|████▊     | 111/233 [02:20<02:25,  1.20s/it]Testing:  48%|████▊     | 112/233 [02:21<02:25,  1.20s/it]Testing:  48%|████▊     | 113/233 [02:22<02:26,  1.22s/it]Testing:  49%|████▉     | 114/233 [02:24<02:28,  1.25s/it]Testing:  49%|████▉     | 115/233 [02:25<02:25,  1.24s/it]Testing:  50%|████▉     | 116/233 [02:27<02:42,  1.39s/it]Testing:  50%|█████     | 117/233 [02:28<02:34,  1.34s/it]Testing:  51%|█████     | 118/233 [02:29<02:28,  1.30s/it]Testing:  51%|█████     | 119/233 [02:30<02:25,  1.27s/it]Testing:  52%|█████▏    | 120/233 [02:31<02:25,  1.29s/it]Testing:  52%|█████▏    | 121/233 [02:33<02:24,  1.29s/it]Testing:  52%|█████▏    | 122/233 [02:34<02:25,  1.31s/it]Testing:  53%|█████▎    | 123/233 [02:35<02:21,  1.29s/it]Testing:  53%|█████▎    | 124/233 [02:37<02:17,  1.26s/it]Testing:  54%|█████▎    | 125/233 [02:38<02:13,  1.23s/it]Testing:  54%|█████▍    | 126/233 [02:39<02:14,  1.26s/it]Testing:  55%|█████▍    | 127/233 [02:40<02:11,  1.24s/it]Testing:  55%|█████▍    | 128/233 [02:41<02:10,  1.24s/it]Testing:  55%|█████▌    | 129/233 [02:43<02:10,  1.25s/it]Testing:  56%|█████▌    | 130/233 [02:44<02:07,  1.24s/it]Testing:  56%|█████▌    | 131/233 [02:45<02:05,  1.23s/it]Testing:  57%|█████▋    | 132/233 [02:46<02:05,  1.24s/it]Testing:  57%|█████▋    | 133/233 [02:48<02:03,  1.23s/it]Testing:  58%|█████▊    | 134/233 [02:49<02:01,  1.23s/it]Testing:  58%|█████▊    | 135/233 [02:50<01:59,  1.22s/it]Testing:  58%|█████▊    | 136/233 [02:51<01:59,  1.24s/it]Testing:  59%|█████▉    | 137/233 [02:53<02:01,  1.26s/it]Testing:  59%|█████▉    | 138/233 [02:54<01:58,  1.25s/it]Testing:  60%|█████▉    | 139/233 [02:55<01:58,  1.26s/it]Testing:  60%|██████    | 140/233 [02:56<01:54,  1.23s/it]Testing:  61%|██████    | 141/233 [02:58<01:54,  1.24s/it]Testing:  61%|██████    | 142/233 [02:59<01:52,  1.24s/it]Testing:  61%|██████▏   | 143/233 [03:00<01:50,  1.22s/it]Testing:  62%|██████▏   | 144/233 [03:01<01:47,  1.20s/it]Testing:  62%|██████▏   | 145/233 [03:02<01:45,  1.20s/it]Testing:  63%|██████▎   | 146/233 [03:04<01:43,  1.19s/it]Testing:  63%|██████▎   | 147/233 [03:05<01:42,  1.19s/it]Testing:  64%|██████▎   | 148/233 [03:06<01:41,  1.19s/it]Testing:  64%|██████▍   | 149/233 [03:07<01:43,  1.23s/it]Testing:  64%|██████▍   | 150/233 [03:08<01:41,  1.22s/it]Testing:  65%|██████▍   | 151/233 [03:10<01:39,  1.21s/it]Testing:  65%|██████▌   | 152/233 [03:11<01:37,  1.20s/it]Testing:  66%|██████▌   | 153/233 [03:12<01:37,  1.21s/it]Testing:  66%|██████▌   | 154/233 [03:13<01:34,  1.20s/it]Testing:  67%|██████▋   | 155/233 [03:14<01:33,  1.20s/it]Testing:  67%|██████▋   | 156/233 [03:16<01:32,  1.20s/it]Testing:  67%|██████▋   | 157/233 [03:17<01:31,  1.20s/it]Testing:  68%|██████▊   | 158/233 [03:18<01:31,  1.22s/it]Testing:  68%|██████▊   | 159/233 [03:19<01:34,  1.28s/it]Testing:  69%|██████▊   | 160/233 [03:21<01:30,  1.25s/it]Testing:  69%|██████▉   | 161/233 [03:22<01:27,  1.22s/it]Testing:  70%|██████▉   | 162/233 [03:23<01:26,  1.21s/it]Testing:  70%|██████▉   | 163/233 [03:24<01:24,  1.21s/it]Testing:  70%|███████   | 164/233 [03:26<01:25,  1.24s/it]Testing:  71%|███████   | 165/233 [03:27<01:23,  1.23s/it]Testing:  71%|███████   | 166/233 [03:28<01:22,  1.23s/it]Testing:  72%|███████▏  | 167/233 [03:29<01:19,  1.21s/it]Testing:  72%|███████▏  | 168/233 [03:30<01:17,  1.19s/it]Testing:  73%|███████▎  | 169/233 [03:31<01:16,  1.20s/it]Testing:  73%|███████▎  | 170/233 [03:33<01:14,  1.18s/it]Testing:  73%|███████▎  | 171/233 [03:34<01:13,  1.19s/it]Testing:  74%|███████▍  | 172/233 [03:35<01:12,  1.18s/it]Testing:  74%|███████▍  | 173/233 [03:36<01:10,  1.17s/it]Testing:  75%|███████▍  | 174/233 [03:37<01:09,  1.17s/it]Testing:  75%|███████▌  | 175/233 [03:39<01:07,  1.17s/it]Testing:  76%|███████▌  | 176/233 [03:40<01:07,  1.19s/it]Testing:  76%|███████▌  | 177/233 [03:41<01:06,  1.18s/it]Testing:  76%|███████▋  | 178/233 [03:42<01:04,  1.17s/it]Testing:  77%|███████▋  | 179/233 [03:43<01:03,  1.18s/it]Testing:  77%|███████▋  | 180/233 [03:45<01:03,  1.21s/it]Testing:  78%|███████▊  | 181/233 [03:46<01:02,  1.20s/it]Testing:  78%|███████▊  | 182/233 [03:47<01:00,  1.19s/it]Testing:  79%|███████▊  | 183/233 [03:48<00:59,  1.20s/it]Testing:  79%|███████▉  | 184/233 [03:49<00:58,  1.20s/it]Testing:  79%|███████▉  | 185/233 [03:50<00:57,  1.20s/it]Testing:  80%|███████▉  | 186/233 [03:52<00:55,  1.19s/it]Testing:  80%|████████  | 187/233 [03:53<00:54,  1.18s/it]Testing:  81%|████████  | 188/233 [03:54<00:53,  1.18s/it]Testing:  81%|████████  | 189/233 [03:55<00:52,  1.19s/it]Testing:  82%|████████▏ | 190/233 [03:56<00:50,  1.18s/it]Testing:  82%|████████▏ | 191/233 [03:58<00:49,  1.18s/it]Testing:  82%|████████▏ | 192/233 [03:59<00:48,  1.18s/it]Testing:  83%|████████▎ | 193/233 [04:00<00:47,  1.19s/it]Testing:  83%|████████▎ | 194/233 [04:01<00:46,  1.20s/it]Testing:  84%|████████▎ | 195/233 [04:02<00:45,  1.19s/it]Testing:  84%|████████▍ | 196/233 [04:04<00:44,  1.19s/it]Testing:  85%|████████▍ | 197/233 [04:05<00:42,  1.18s/it]Testing:  85%|████████▍ | 198/233 [04:06<00:41,  1.18s/it]Testing:  85%|████████▌ | 199/233 [04:07<00:40,  1.19s/it]Testing:  86%|████████▌ | 200/233 [04:08<00:38,  1.18s/it]Testing:  86%|████████▋ | 201/233 [04:09<00:37,  1.18s/it]Testing:  87%|████████▋ | 202/233 [04:11<00:36,  1.18s/it]Testing:  87%|████████▋ | 203/233 [04:12<00:36,  1.22s/it]Testing:  88%|████████▊ | 204/233 [04:13<00:35,  1.22s/it]Testing:  88%|████████▊ | 205/233 [04:14<00:33,  1.20s/it]Testing:  88%|████████▊ | 206/233 [04:15<00:32,  1.19s/it]Testing:  89%|████████▉ | 207/233 [04:17<00:30,  1.18s/it]Testing:  89%|████████▉ | 208/233 [04:18<00:29,  1.17s/it]Testing:  90%|████████▉ | 209/233 [04:19<00:28,  1.17s/it]Testing:  90%|█████████ | 210/233 [04:20<00:27,  1.21s/it]Testing:  91%|█████████ | 211/233 [04:21<00:26,  1.22s/it]Testing:  91%|█████████ | 212/233 [04:23<00:25,  1.21s/it]Testing:  91%|█████████▏| 213/233 [04:24<00:24,  1.20s/it]Testing:  92%|█████████▏| 214/233 [04:25<00:22,  1.19s/it]Testing:  92%|█████████▏| 215/233 [04:26<00:21,  1.18s/it]Testing:  93%|█████████▎| 216/233 [04:27<00:20,  1.19s/it]Testing:  93%|█████████▎| 217/233 [04:29<00:19,  1.19s/it]Testing:  94%|█████████▎| 218/233 [04:30<00:17,  1.19s/it]Testing:  94%|█████████▍| 219/233 [04:31<00:16,  1.19s/it]Testing:  94%|█████████▍| 220/233 [04:32<00:15,  1.19s/it]Testing:  95%|█████████▍| 221/233 [04:33<00:14,  1.19s/it]Testing:  95%|█████████▌| 222/233 [04:35<00:13,  1.19s/it]Testing:  96%|█████████▌| 223/233 [04:36<00:11,  1.19s/it]Testing:  96%|█████████▌| 224/233 [04:37<00:10,  1.19s/it]Testing:  97%|█████████▋| 225/233 [04:38<00:09,  1.18s/it]Testing:  97%|█████████▋| 226/233 [04:39<00:08,  1.18s/it]Testing:  97%|█████████▋| 227/233 [04:40<00:07,  1.18s/it]Testing:  98%|█████████▊| 228/233 [04:42<00:05,  1.18s/it]Testing:  98%|█████████▊| 229/233 [04:43<00:04,  1.18s/it]Testing:  99%|█████████▊| 230/233 [04:44<00:03,  1.17s/it]Testing:  99%|█████████▉| 231/233 [04:45<00:02,  1.18s/it]Testing: 100%|█████████▉| 232/233 [04:46<00:01,  1.17s/it]Testing: 100%|██████████| 233/233 [04:47<00:00,  1.18s/it]/usr/local/lib/python3.8/dist-packages/pytorch_lightning/utilities/distributed.py:52: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 96 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+[INFO] CM IoU - tensor([97.5236, 54.4438, 90.0620])
+[INFO] precision tensor([98.1858, 62.4367, 98.3812], dtype=torch.float64) (86.33456761872912) | recall tensor([99.3132, 80.9629, 91.4167], dtype=torch.float64) (90.56425918682768)
+Testing: 100%|██████████| 233/233 [04:47<00:00,  1.24s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.952052652835846,
+ 'test_acc_w': 0.9493659734725952,
+ 'test_dist_l1': 0.05136139690876007,
+ 'test_dist_l2': 0.058189619332551956,
+ 'test_dist_logl2': 0.01488051749765873,
+ 'test_dist_mistake_severity': 0.0712055042386055,
+ 'test_iou': 0.913573145866394}
+--------------------------------------------------------------------------------
