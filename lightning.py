@@ -129,8 +129,7 @@ class LitSegNet(pl.LightningModule):
                 "multispectralseg": MIRMultispectral,
                 "lostfound": LostFoundDataLoader
             }
-            if self.hparams.dataset_combo is not None:
-                self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
+
 
             if self.hparams.orig_dataset is None and self.hparams.mode in ["affordances", "objects"]:
                 self.hparams.orig_dataset = self.hparams.dataset
@@ -138,6 +137,11 @@ class LitSegNet(pl.LightningModule):
             if not (self.hparams.dataset == "combo"):
                 self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
             else:
+                if self.hparams.dataset_combo is None:
+                    self.hparams.dataset_combo = "freiburg,cityscapes,thermalvoc,synthia,kitti,multispectralseg,freiburgthermal,lostfound"
+
+                self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
+
                 self.orig_dataset = self.get_dataset_combo(set=self.test_set)
 
 
