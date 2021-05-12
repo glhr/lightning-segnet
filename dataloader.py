@@ -1175,8 +1175,13 @@ class SynthiaDataLoader(MMDataLoader):
         }
         self.set = set
 
-        for img in glob.glob(self.path + f'{self.seqs[self.set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
+        self.base_folders = []
 
+        for img in glob.glob(self.path + f'{self.seqs[self.set]}/GT/LABELS/Stereo_Left/' + '**/*.png'):
+            if not set == "full":
+                self.base_folders.append(self.seqs[self.set])
+            else:
+                self.base_folders.append(img.split("/")[-6])
             img = '/'.join(img.split("/")[-2:])
             self.filenames.append(img)
         # print(self.filenames[0])
@@ -1186,13 +1191,13 @@ class SynthiaDataLoader(MMDataLoader):
         self.color_GT = False
 
     def get_rgb(self, sample_id):
-        return Image.open(self.path + f"{self.seqs[self.set]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
+        return Image.open(self.path + f"{self.base_folders[sample_id]}/RGB/Stereo_Left/" + f"{self.filenames[sample_id]}").convert('RGB')
 
     def get_depth(self, sample_id):
-        return self.load_depth(self.path + f"{self.seqs[self.set]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
+        return self.load_depth(self.path + f"{self.base_folders[sample_id]}/Depth/Stereo_Left/" + f"{self.filenames[sample_id]}")
 
     def get_gt(self, sample_id):
-        return np.asarray(imageio.imread(self.path + f"{self.seqs[self.set]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
+        return np.asarray(imageio.imread(self.path + f"{self.base_folders[sample_id]}/GT/LABELS/Stereo_Left/" + f"{self.filenames[sample_id]}", format='PNG-FI'),dtype=np.uint8)[:,:,0]
 
 
 class OwnDataLoader(DemoDataLoader):
