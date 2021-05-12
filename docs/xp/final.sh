@@ -5,7 +5,7 @@ fusioncheckpoints=(
 )
 
 xp=thermo
-arg=$1
+arg="overlay"
 
 for checkpoint in "${fusioncheckpoints[@]}"
 do
