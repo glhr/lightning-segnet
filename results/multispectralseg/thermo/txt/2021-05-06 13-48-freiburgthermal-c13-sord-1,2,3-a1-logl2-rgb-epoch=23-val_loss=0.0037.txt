@@ -1,0 +1,242 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+[WARNING] Testing phase
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               multispectralseg
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+[INFO] ['rgb', 'ir']
+[WARNING] Testing phase
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               multispectralseg
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[WARNING] multispectralseg - train 410 | val 205 | test 820
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 23-12-multispectralseg-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-12 23-12-multispectralseg-c3-None-lw-rgb,ir
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               multispectralseg
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[WARNING] multispectralseg - train 410 | val 205 | test 820
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 23-12-multispectralseg-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-12 23-12-multispectralseg-c3-None-lw-rgb,ir
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037
+Testing: 0it [00:00, ?it/s]Testing:   0%|          | 1/820 [00:01<18:29,  1.35s/it]Testing:   0%|          | 2/820 [00:02<15:53,  1.17s/it]Testing:   0%|          | 3/820 [00:03<15:03,  1.11s/it]Testing:   0%|          | 4/820 [00:04<14:53,  1.09s/it]Testing:   1%|          | 5/820 [00:05<14:32,  1.07s/it]Testing:   1%|          | 6/820 [00:06<14:23,  1.06s/it]Testing:   1%|          | 7/820 [00:07<14:19,  1.06s/it]Testing:   1%|          | 8/820 [00:08<14:10,  1.05s/it]/usr/local/lib/python3.8/dist-packages/pytorch_lightning/utilities/distributed.py:52: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 96 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Traceback (most recent call last):
+  File "fusion-test.py", line 147, in <module>
+    trainer.test(fusionnet)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/trainer.py", line 915, in test
+    results = self.__test_given_model(model, test_dataloaders)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/trainer.py", line 973, in __test_given_model
+    results = self.fit(model)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/trainer.py", line 499, in fit
+    self.dispatch()
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/trainer.py", line 540, in dispatch
+    self.accelerator.start_testing(self)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 76, in start_testing
+    self.training_type_plugin.start_testing(trainer)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 118, in start_testing
+    self._results = trainer.run_test()
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/trainer.py", line 786, in run_test
+    eval_loop_results, _ = self.run_evaluation()
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/trainer.py", line 725, in run_evaluation
+    output = self.evaluation_loop.evaluation_step(batch, batch_idx, dataloader_idx)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/evaluation_loop.py", line 160, in evaluation_step
+    output = self.trainer.accelerator.test_step(args)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/accelerators/accelerator.py", line 195, in test_step
+    return self.training_type_plugin.test_step(*args)
+  File "/usr/local/lib/python3.8/dist-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 134, in test_step
+    return self.lightning_module.test_step(*args, **kwargs)
+  File "/user/student.aau.dk/ghumbl19/learning-driveability-heatmaps/models/pytorch-unet-segnet/lightning.py", line 391, in test_step
+    weight_map = weight_from_target(target_orig)
+  File "/user/student.aau.dk/ghumbl19/learning-driveability-heatmaps/models/pytorch-unet-segnet/metrics.py", line 190, in weight_from_target
+    map = np.array(compute_distmap(target[i].detach().cpu().numpy())["combined_map"],dtype=np.float32)
+  File "/user/student.aau.dk/ghumbl19/learning-driveability-heatmaps/models/pytorch-unet-segnet/metrics.py", line 241, in compute_distmap
+    pow = 1-np.exp(-(distmap_linear[ix, iy])/(1+30*(1-depth_map[ix, iy]**2)**2))
+KeyboardInterrupt
+Exception ignored in: <function tqdm.__del__ at 0x7f69802945e0>
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.8/dist-packages/tqdm/std.py", line 1145, in __del__
+  File "/usr/local/lib/python3.8/dist-packages/tqdm/std.py", line 1299, in close
+  File "/usr/local/lib/python3.8/dist-packages/tqdm/std.py", line 1492, in display
+  File "/usr/local/lib/python3.8/dist-packages/tqdm/std.py", line 1148, in __str__
+  File "/usr/local/lib/python3.8/dist-packages/tqdm/std.py", line 1450, in format_dict
+TypeError: cannot unpack non-iterable NoneType object
