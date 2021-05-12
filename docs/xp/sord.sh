@@ -1,4 +1,21 @@
 ## Freiburg
+
+run() {
+  mkdir -p results/$dataset/$xp/txt
+  for checkpoint in "${checkpoints[@]}"
+  do
+    txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
+    echo "$checkpoint"
+    if [ ! -f "$txtoutput" ]; then
+      echo "--> running eval"
+      python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp sord > "$txtoutput" 2>&1
+    else
+      echo "--> summary"
+      tail -14 "$txtoutput"
+    fi
+  done
+}
+
 xp=sord
 
 dataset=freiburg
@@ -12,13 +29,7 @@ checkpoints=(
 "2021-04-09 09-04-freiburg-c6-sord-1,2,3-a2-logl2-rgb-epoch=74-val_loss=0.0498"
 )
 
-mkdir -p results/$dataset/$xp/txt
-for checkpoint in "${checkpoints[@]}"
-do
-  echo "$checkpoint"
-  txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
-  python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp sord > "$txtoutput" 2>&1
-done
+run
 
 dataset=cityscapes
 checkpoints=(
@@ -29,12 +40,6 @@ checkpoints=(
 "2021-04-08 23-08-cityscapes-c30-sord-1,2,3-a2-l1-rgb-epoch=23-val_loss=0.0391"
 "2021-04-09 00-39-cityscapes-c30-sord-1,2,3-a2-l2-rgb-epoch=23-val_loss=0.0742"
 "2021-04-09 02-09-cityscapes-c30-sord-1,2,3-a2-logl2-rgb-epoch=23-val_loss=0.0236"
-"
+)
 
-mkdir -p results/$dataset/$xp/txt
-for checkpoint in $checkpoints
-do
-  echo "$checkpoint"
-  txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
-  python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp sord > "$txtoutput" 2>&1
-done
+run
