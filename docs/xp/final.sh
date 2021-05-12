@@ -20,7 +20,7 @@ do
       python3 fusion-test.py --bs 1 --fusion custom --modalities rgb,ir --save --save_xp mishmash --decoders multi --fusion_activ softmax --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --loss_weight > "$txtoutput" 2>&1
     fi
   done
-  for dataset in multispectralseg
+  for dataset in multispectralseg thermalvoc
   do
     mkdir -p results/$dataset/$xp/txt
     txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
@@ -70,7 +70,7 @@ do
       fi
     fi
   done
-  for dataset in multispectralseg
+  for dataset in multispectralseg thermalvoc
   do
     if [[ $arg == "overlay" ]]; then
       echo "--> generating overlay"
