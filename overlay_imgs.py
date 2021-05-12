@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 alpha = args.alpha
 
-save_folder = f"overlay_{args.model1}" if args.model2 is None else f"overlay_modelcomp_{args.model1}"
+save_folder = f"overlay_{args.model}" if args.model2 is None else f"overlay_modelcomp_{args.model}"
 if args.model2 is not None:
     save_folder += f"_{args.model2}"
 if args.model3 is not None:
