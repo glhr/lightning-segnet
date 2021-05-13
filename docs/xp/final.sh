@@ -5,7 +5,7 @@ fusioncheckpoints=(
 )
 
 xp=thermo
-arg="overlay"
+arg=$1
 
 for checkpoint in "${fusioncheckpoints[@]}"
 do
@@ -58,7 +58,7 @@ do
     isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
     if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
-      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save -save_xp $xp --modalities rgb --loss_weight > "$txtoutput" 2>&1
+      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities rgb --loss_weight > "$txtoutput" 2>&1
       if [[ $arg == "overlay" ]]; then
         echo "--> generating overlay"
         python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${singlecheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir --gt
@@ -80,11 +80,11 @@ do
     fi
     mkdir -p results/$dataset/$xp/txt
     txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
-    echo "$checkpoint"
+    echo "$dataset $checkpoint"
     isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
     if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
-      python3 fusion-test.py  --bs 1 --fusion custom --modalities rgb,ir --save --save_xp mishmash --decoders multi --fusion_activ softmax --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --loss_weight --test_set full > "$txtoutput" 2>&1
+      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities rgb --loss_weight > "$txtoutput" 2>&1
       if [[ $arg == "overlay" ]]; then
         echo "--> generating overlay"
         python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${singlecheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir
