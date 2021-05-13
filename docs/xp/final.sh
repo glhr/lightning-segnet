@@ -2,6 +2,7 @@ fusioncheckpoints=(
   "fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038"
   "fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016"
   "fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036"
+  "fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016"
 )
 
 xp=thermo
@@ -84,7 +85,7 @@ do
     isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
     if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
-      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities rgb --loss_weight > "$txtoutput" 2>&1
+      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities rgb --loss_weight --test_set full > "$txtoutput" 2>&1
       if [[ $arg == "overlay" ]]; then
         echo "--> generating overlay"
         python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${singlecheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir
