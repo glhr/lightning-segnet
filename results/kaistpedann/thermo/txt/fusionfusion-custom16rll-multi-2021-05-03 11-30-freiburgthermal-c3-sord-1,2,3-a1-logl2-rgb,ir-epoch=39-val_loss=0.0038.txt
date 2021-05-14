@@ -15,7 +15,7 @@ Global seed set to 2
 "dist_alpha":            1
 "fusion":                custom
 "fusion_activ":          softmax
-"gpus":                  1
+"gpus":                  0
 "init":                  False
 "init_channels":         None
 "late_dilation":         1
@@ -44,8 +44,10 @@ Global seed set to 2
 "viz":                   False
 "wd":                    0
 "workers":               0
-GPU available: True, used: True
+GPU available: True, used: False
 TPU available: None, using: 0 TPU cores
+/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:50: UserWarning: GPU available but not used. Set the --gpus flag when calling the script.
+  warnings.warn(*args, **kwargs)
 [INFO] ['rgb', 'ir']
 [WARNING] Testing phase
 Global seed set to 2
@@ -63,7 +65,7 @@ Global seed set to 2
 "dist_alpha":            1
 "fusion":                custom
 "fusion_activ":          softmax
-"gpus":                  1
+"gpus":                  0
 "init":                  False
 "init_channels":         None
 "late_dilation":         1
@@ -121,8 +123,8 @@ Global seed set to 2
 [INFO] IoU labels: [0, 1, 2]
 [INFO] Confusion matrix labels: [0, 1, 2]
 [INFO] IoU labels: [0, 1, 2]
-[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
-[INFO] fusion-custom16rll-multi-2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+[INFO] 2021-05-14 14-16-kaistpedann-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-14 14-16-kaistpedann-c3-None-lw-rgb,ir
 Global seed set to 2
 [WARNING] params "augment":               False
 "bottleneck":            16
@@ -138,7 +140,7 @@ Global seed set to 2
 "dist_alpha":            1
 "fusion":                custom
 "fusion_activ":          softmax
-"gpus":                  1
+"gpus":                  0
 "init":                  False
 "init_channels":         None
 "late_dilation":         1
@@ -194,8 +196,8 @@ Global seed set to 2
 [INFO] IoU labels: [0, 1, 2]
 [INFO] Confusion matrix labels: [0, 1, 2]
 [INFO] IoU labels: [0, 1, 2]
-[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
-[INFO] fusion-custom16rll-multi-2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+[INFO] 2021-05-14 14-16-kaistpedann-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-14 14-16-kaistpedann-c3-None-lw-rgb,ir
 I01442_labeled.png
 I01442_labeled.png
 I01442_labeled.png
@@ -205,47 +207,19 @@ I01442_labeled.png
 I01442_labeled.png
 I01442_labeled.png
 I01442_labeled.png
-Testing: 0it [00:00, ?it/s]/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:50: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 8 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+Testing: 0it [00:00, ?it/s]Testing:   2%|▏         | 1/55 [00:02<02:15,  2.51s/it]Testing:   4%|▎         | 2/55 [00:04<02:11,  2.48s/it]Testing:   5%|▌         | 3/55 [00:07<02:05,  2.42s/it]Testing:   7%|▋         | 4/55 [00:09<02:01,  2.38s/it]Testing:   9%|▉         | 5/55 [00:11<01:58,  2.37s/it]Testing:  11%|█         | 6/55 [00:14<01:56,  2.37s/it]Testing:  13%|█▎        | 7/55 [00:16<01:53,  2.37s/it]Testing:  15%|█▍        | 8/55 [00:19<01:51,  2.37s/it]Testing:  16%|█▋        | 9/55 [00:21<01:48,  2.37s/it]Testing:  18%|█▊        | 10/55 [00:23<01:46,  2.38s/it]Testing:  20%|██        | 11/55 [00:26<01:44,  2.36s/it]Testing:  22%|██▏       | 12/55 [00:28<01:41,  2.36s/it]Testing:  24%|██▎       | 13/55 [00:30<01:39,  2.38s/it]Testing:  25%|██▌       | 14/55 [00:33<01:37,  2.37s/it]Testing:  27%|██▋       | 15/55 [00:35<01:35,  2.39s/it]Testing:  29%|██▉       | 16/55 [00:38<01:32,  2.38s/it]Testing:  31%|███       | 17/55 [00:40<01:30,  2.38s/it]Testing:  33%|███▎      | 18/55 [00:42<01:28,  2.40s/it]Testing:  35%|███▍      | 19/55 [00:45<01:25,  2.38s/it]Testing:  36%|███▋      | 20/55 [00:47<01:23,  2.38s/it]Testing:  38%|███▊      | 21/55 [00:49<01:20,  2.37s/it]Testing:  40%|████      | 22/55 [00:52<01:18,  2.37s/it]Testing:  42%|████▏     | 23/55 [00:54<01:15,  2.36s/it]Testing:  44%|████▎     | 24/55 [00:57<01:13,  2.36s/it]Testing:  45%|████▌     | 25/55 [00:59<01:11,  2.37s/it]Testing:  47%|████▋     | 26/55 [01:02<01:10,  2.44s/it]Testing:  49%|████▉     | 27/55 [01:05<01:12,  2.59s/it]Testing:  51%|█████     | 28/55 [01:07<01:11,  2.66s/it]Testing:  53%|█████▎    | 29/55 [01:10<01:10,  2.72s/it]Testing:  55%|█████▍    | 30/55 [01:13<01:08,  2.74s/it]Testing:  56%|█████▋    | 31/55 [01:15<01:03,  2.65s/it]Testing:  58%|█████▊    | 32/55 [01:18<00:59,  2.59s/it]Testing:  60%|██████    | 33/55 [01:20<00:56,  2.58s/it]Testing:  62%|██████▏   | 34/55 [01:23<00:53,  2.56s/it]Testing:  64%|██████▎   | 35/55 [01:26<00:53,  2.70s/it]Testing:  65%|██████▌   | 36/55 [01:29<00:54,  2.85s/it]Testing:  67%|██████▋   | 37/55 [01:33<00:55,  3.06s/it]Testing:  69%|██████▉   | 38/55 [01:36<00:53,  3.14s/it]Testing:  71%|███████   | 39/55 [01:39<00:49,  3.12s/it]Testing:  73%|███████▎  | 40/55 [01:43<00:48,  3.22s/it]Testing:  75%|███████▍  | 41/55 [01:46<00:45,  3.22s/it]Testing:  76%|███████▋  | 42/55 [01:49<00:41,  3.22s/it]Testing:  78%|███████▊  | 43/55 [01:52<00:37,  3.09s/it]Testing:  80%|████████  | 44/55 [01:55<00:33,  3.03s/it]Testing:  82%|████████▏ | 45/55 [01:58<00:30,  3.01s/it]Testing:  84%|████████▎ | 46/55 [02:00<00:26,  2.93s/it]Testing:  85%|████████▌ | 47/55 [02:03<00:22,  2.81s/it]Testing:  87%|████████▋ | 48/55 [02:06<00:19,  2.84s/it]Testing:  89%|████████▉ | 49/55 [02:08<00:16,  2.72s/it]Testing:  91%|█████████ | 50/55 [02:11<00:13,  2.68s/it]Testing:  93%|█████████▎| 51/55 [02:13<00:10,  2.62s/it]Testing:  95%|█████████▍| 52/55 [02:16<00:07,  2.57s/it]Testing:  96%|█████████▋| 53/55 [02:18<00:05,  2.55s/it]Testing:  98%|█████████▊| 54/55 [02:21<00:02,  2.50s/it]Testing: 100%|██████████| 55/55 [02:23<00:00,  2.49s/it]/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:50: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 8 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
   warnings.warn(*args, **kwargs)
-Traceback (most recent call last):
-  File "fusion-test.py", line 147, in <module>
-    trainer.test(fusionnet)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 922, in test
-    results = self.__test_given_model(model, test_dataloaders)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 980, in __test_given_model
-    results = self.fit(model)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 513, in fit
-    self.dispatch()
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 547, in dispatch
-    self.accelerator.start_testing(self)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 77, in start_testing
-    self.training_type_plugin.start_testing(trainer)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 115, in start_testing
-    self._results = trainer.run_test()
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 793, in run_test
-    eval_loop_results, _ = self.run_evaluation()
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 732, in run_evaluation
-    output = self.evaluation_loop.evaluation_step(batch, batch_idx, dataloader_idx)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/evaluation_loop.py", line 160, in evaluation_step
-    output = self.trainer.accelerator.test_step(args)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 196, in test_step
-    return self.training_type_plugin.test_step(*args)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 131, in test_step
-    return self.lightning_module.test_step(*args, **kwargs)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/lightning.py", line 389, in test_step
-    pred_orig = self.model(sample)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/fusion.py", line 139, in forward
-    out = self.classifier(feats)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/fusion.py", line 243, in forward
-    i_12_w = self.sm(i_12_w)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
-    result = self.forward(*input, **kwargs)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/activation.py", line 1198, in forward
-    return F.softmax(input, self.dim, _stacklevel=5)
-  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/functional.py", line 1512, in softmax
-    ret = input.softmax(dim)
-RuntimeError: CUDA out of memory. Tried to allocate 58.00 MiB (GPU 0; 1.96 GiB total capacity; 403.20 MiB already allocated; 15.31 MiB free; 436.00 MiB reserved in total by PyTorch)
+[INFO] CM IoU - tensor([93.6911, 27.2860, 86.7265])
+[INFO] precision tensor([98.7148, 32.2619, 95.2429], dtype=torch.float64) (75.40654412159236) | recall tensor([94.8481, 63.8876, 90.6533], dtype=torch.float64) (83.12966972913026)
+Testing: 100%|██████████| 55/55 [02:23<00:00,  2.61s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9183825254440308,
+ 'test_acc_w': 0.9255486726760864,
+ 'test_dist_l1': 0.0916840210556984,
+ 'test_dist_l2': 0.11181706190109253,
+ 'test_dist_logl2': 0.03184625506401062,
+ 'test_dist_mistake_severity': 0.1233377680182457,
+ 'test_iou': 0.8549510836601257}
+--------------------------------------------------------------------------------
