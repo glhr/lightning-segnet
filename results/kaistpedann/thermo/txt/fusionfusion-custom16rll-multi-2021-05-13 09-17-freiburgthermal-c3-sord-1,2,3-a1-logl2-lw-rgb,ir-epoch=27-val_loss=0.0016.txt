@@ -1,0 +1,146 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+[WARNING] Testing phase
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               kaistpedann
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+[INFO] ['rgb', 'ir']
+[WARNING] Testing phase
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               kaistpedann
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[WARNING] kaistpedann - train 55 | val 55 | test 55
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016
+Traceback (most recent call last):
+  File "fusion-test.py", line 145, in <module>
+    fusionnet = fusionnet.load_from_checkpoint(args.test_checkpoint, models = [], conf=args, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, fusion=args.fusion, bottleneck=args.bottleneck, strict=False, decoders=args.decoders, pretrained_last_layer=args.pretrained_last_layer, late_dilation=args.late_dilation, fusion_activ=args.fusion_activ, branches=len(mods), dataset_seq=args.dataset_seq)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/core/saving.py", line 134, in load_from_checkpoint
+    checkpoint = pl_load(checkpoint_path, map_location=lambda storage, loc: storage)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/utilities/cloud_io.py", line 31, in load
+    with fs.open(path_or_url, "rb") as f:
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/fsspec/spec.py", line 936, in open
+    **kwargs
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/fsspec/implementations/local.py", line 117, in _open
+    return LocalFileOpener(path, mode, fs=self, **kwargs)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/fsspec/implementations/local.py", line 199, in __init__
+    self._open()
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/fsspec/implementations/local.py", line 204, in _open
+    self.f = open(self.path, mode=self.mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/lightning_logs/fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016.ckpt'

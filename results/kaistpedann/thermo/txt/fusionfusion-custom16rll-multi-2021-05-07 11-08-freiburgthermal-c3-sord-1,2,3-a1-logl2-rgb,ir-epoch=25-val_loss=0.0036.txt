@@ -1,0 +1,251 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+[WARNING] Testing phase
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               kaistpedann
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+[INFO] ['rgb', 'ir']
+[WARNING] Testing phase
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               kaistpedann
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[WARNING] kaistpedann - train 55 | val 55 | test 55
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+Global seed set to 2
+[WARNING] params "augment":               False
+"bottleneck":            16
+"bs":                    1
+"dataset":               kaistpedann
+"dataset_combo":         None
+"dataset_combo_ntrain":  100
+"dataset_seq":           None
+"debug":                 False
+"decoders":              multi
+"depthwise_conv":        False
+"dist":                  l1
+"dist_alpha":            1
+"fusion":                custom
+"fusion_activ":          softmax
+"gpus":                  1
+"init":                  False
+"init_channels":         None
+"late_dilation":         1
+"loss":                  None
+"loss_weight":           True
+"lr":                    None
+"max_epochs":            1000
+"modalities":            ['rgb', 'ir']
+"mode":                  affordances
+"momentum":              None
+"nopredict":             False
+"num_classes":           3
+"optim":                 None
+"orig_dataset":          None
+"prefix":                None
+"pretrained_last_layer": False
+"ranks":                 1,2,3
+"save":                  True
+"save_xp":               thermo
+"test_checkpoint":       lightning_logs/fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036.ckpt
+"test_samples":          None
+"test_set":              full
+"train":                 False
+"train_checkpoint":      None
+"update_output_layer":   False
+"viz":                   False
+"wd":                    0
+"workers":               0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb', 'ir']
+[INFO] None
+[WARNING] dataset modalities ['rgb', 'ir'], depth completion True
+[WARNING] kaistpedann - train 55 | val 55 | test 55
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+[INFO] fusion-custom16rll-multi-2021-05-14 14-02-kaistpedann-c3-None-lw-rgb,ir
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+Testing: 0it [00:00, ?it/s]/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:50: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 8 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+Traceback (most recent call last):
+  File "fusion-test.py", line 147, in <module>
+    trainer.test(fusionnet)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 922, in test
+    results = self.__test_given_model(model, test_dataloaders)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 980, in __test_given_model
+    results = self.fit(model)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 513, in fit
+    self.dispatch()
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 547, in dispatch
+    self.accelerator.start_testing(self)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 77, in start_testing
+    self.training_type_plugin.start_testing(trainer)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 115, in start_testing
+    self._results = trainer.run_test()
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 793, in run_test
+    eval_loop_results, _ = self.run_evaluation()
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/trainer.py", line 732, in run_evaluation
+    output = self.evaluation_loop.evaluation_step(batch, batch_idx, dataloader_idx)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/trainer/evaluation_loop.py", line 160, in evaluation_step
+    output = self.trainer.accelerator.test_step(args)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/accelerators/accelerator.py", line 196, in test_step
+    return self.training_type_plugin.test_step(*args)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/plugins/training_type/training_type_plugin.py", line 131, in test_step
+    return self.lightning_module.test_step(*args, **kwargs)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/lightning.py", line 389, in test_step
+    pred_orig = self.model(sample)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/fusion.py", line 139, in forward
+    out = self.classifier(feats)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/fusion.py", line 243, in forward
+    i_12_w = self.sm(i_12_w)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/module.py", line 727, in _call_impl
+    result = self.forward(*input, **kwargs)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/modules/activation.py", line 1198, in forward
+    return F.softmax(input, self.dim, _stacklevel=5)
+  File "/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/functional.py", line 1512, in softmax
+    ret = input.softmax(dim)
+RuntimeError: CUDA out of memory. Tried to allocate 58.00 MiB (GPU 0; 1.96 GiB total capacity; 403.20 MiB already allocated; 15.19 MiB free; 436.00 MiB reserved in total by PyTorch)
