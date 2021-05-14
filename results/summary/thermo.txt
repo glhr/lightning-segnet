@@ -1,0 +1,185 @@
+fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038
+fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038
+--> summary
+[INFO] CM IoU - tensor([92.0664,  3.4945,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9972,  5.4682,  0.0000], dtype=torch.float64) (35.15514374884201) | recall tensor([92.0688,  8.8267,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 820/820 [14:42<00:00,  1.08s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8942967653274536,
+ 'test_acc_w': 0.8704556822776794,
+ 'test_dist_l1': 0.13412420451641083,
+ 'test_dist_l2': 0.19096612930297852,
+ 'test_dist_logl2': 0.062305547297000885,
+ 'test_dist_mistake_severity': 0.2688751518726349,
+ 'test_iou': 0.7741038203239441}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038
+--> summary
+[INFO] CM IoU - tensor([95.6144,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.333332154151016) | recall tensor([95.6144,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1466/1466 [31:12<00:00,  1.28s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9561437368392944,
+ 'test_acc_w': 0.943773627281189,
+ 'test_dist_l1': 0.05482174828648567,
+ 'test_dist_l2': 0.076752670109272,
+ 'test_dist_logl2': 0.029037248343229294,
+ 'test_dist_mistake_severity': 0.25003165006637573,
+ 'test_iou': 0.9304367303848267}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016
+fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016
+--> summary
+[INFO] CM IoU - tensor([92.1655,  2.0089,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9965,  3.3312,  0.0000], dtype=torch.float64) (34.44258612048448) | recall tensor([92.1685,  4.8170,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 820/820 [13:51<00:00,  1.01s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8939910531044006,
+ 'test_acc_w': 0.8689529895782471,
+ 'test_dist_l1': 0.13752460479736328,
+ 'test_dist_l2': 0.20055583119392395,
+ 'test_dist_logl2': 0.0643007680773735,
+ 'test_dist_mistake_severity': 0.29729196429252625,
+ 'test_iou': 0.7754229307174683}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016
+--> summary
+[INFO] CM IoU - tensor([95.6481,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333348007648) | recall tensor([95.6481,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1466/1466 [26:47<00:00,  1.10s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.956481397151947,
+ 'test_acc_w': 0.9419324994087219,
+ 'test_dist_l1': 0.05644182488322258,
+ 'test_dist_l2': 0.08228830993175507,
+ 'test_dist_logl2': 0.03029731847345829,
+ 'test_dist_mistake_severity': 0.29695916175842285,
+ 'test_iou': 0.9313881397247314}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036
+fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036
+--> summary
+[INFO] CM IoU - tensor([92.2981,  5.1472,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9984,  8.5744,  0.0000], dtype=torch.float64) (36.19094958016073) | recall tensor([92.2994, 11.4083,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 820/820 [13:58<00:00,  1.02s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8973487019538879,
+ 'test_acc_w': 0.8743297457695007,
+ 'test_dist_l1': 0.13865084946155548,
+ 'test_dist_l2': 0.21064996719360352,
+ 'test_dist_logl2': 0.06660020351409912,
+ 'test_dist_mistake_severity': 0.3506975769996643,
+ 'test_iou': 0.7787538170814514}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-07 11-08-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=25-val_loss=0.0036
+--> summary
+[INFO] CM IoU - tensor([96.7692,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333561034439) | recall tensor([96.7692,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1466/1466 [27:55<00:00,  1.14s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9676920175552368,
+ 'test_acc_w': 0.9553976058959961,
+ 'test_dist_l1': 0.03911534324288368,
+ 'test_dist_l2': 0.05273018404841423,
+ 'test_dist_logl2': 0.020468004047870636,
+ 'test_dist_mistake_severity': 0.21070434153079987,
+ 'test_iou': 0.9424524307250977}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016
+fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016
+--> summary
+[INFO] CM IoU - tensor([92.4273,  5.8266,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9984,  9.8293,  0.0000], dtype=torch.float64) (36.60923933502147) | recall tensor([92.4286, 12.5172,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 820/820 [14:15<00:00,  1.04s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8989512324333191,
+ 'test_acc_w': 0.8775568604469299,
+ 'test_dist_l1': 0.13795757293701172,
+ 'test_dist_l2': 0.21177519857883453,
+ 'test_dist_logl2': 0.06660202145576477,
+ 'test_dist_mistake_severity': 0.3652573227882385,
+ 'test_iou': 0.7808005809783936}
+--------------------------------------------------------------------------------
+fusionfusion-custom16rll-multi-2021-05-13 09-17-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=27-val_loss=0.0016
+--> summary
+[INFO] CM IoU - tensor([96.5689,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333394482161) | recall tensor([96.5689,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1466/1466 [29:11<00:00,  1.19s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9656892418861389,
+ 'test_acc_w': 0.9492459297180176,
+ 'test_dist_l1': 0.04234084486961365,
+ 'test_dist_l2': 0.05840102210640907,
+ 'test_dist_logl2': 0.022318532690405846,
+ 'test_dist_mistake_severity': 0.23403996229171753,
+ 'test_iou': 0.9390965700149536}
+--------------------------------------------------------------------------------
+2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037
+multispectralseg 2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037
+--> summary
+[INFO] CM IoU - tensor([90.3042,  3.4718,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9985,  5.4381,  0.0000], dtype=torch.float64) (35.14553745476974) | recall tensor([90.3054,  8.7606,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 820/820 [13:42<00:00,  1.00s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8772016763687134,
+ 'test_acc_w': 0.8461166620254517,
+ 'test_dist_l1': 0.16837453842163086,
+ 'test_dist_l2': 0.25952693819999695,
+ 'test_dist_logl2': 0.08297184109687805,
+ 'test_dist_mistake_severity': 0.37114670872688293,
+ 'test_iou': 0.7548574805259705}
+--------------------------------------------------------------------------------
+thermalvoc 2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037
+--> summary
+[INFO] CM IoU - tensor([90.3832,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333491473371) | recall tensor([90.3832,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1466/1466 [27:28<00:00,  1.12s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9038320779800415,
+ 'test_acc_w': 0.8592091202735901,
+ 'test_dist_l1': 0.12273551523685455,
+ 'test_dist_l2': 0.17587070167064667,
+ 'test_dist_logl2': 0.06550542265176773,
+ 'test_dist_mistake_severity': 0.276262491941452,
+ 'test_iou': 0.8403701782226562}
+--------------------------------------------------------------------------------
