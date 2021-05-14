@@ -287,7 +287,7 @@ if __name__ == "__main__":
 
     if args.distmap:
         create_folder("results/distmap/")
-        gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/results/kitti/2021-03-30 08-51-cityscapes-c3-kl-rgb-epoch=15-val_loss=0.0915/kitti25-gt_affordances.png'
+        gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/results/cityscapes/test/cityscapes-munster_000061_000019-gt_affordances.png'
         depth_path = '/home/robotlab/rob10/learning-driveability-heatmaps/datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test/depth_gray/b1-09517_Clipped_redict_depth_gray.png'
         pred_path = gt_path
         image_orig = imread(gt_path)
@@ -333,7 +333,7 @@ if __name__ == "__main__":
             ax.axis('off')
 
         plt.tight_layout()
-        # plt.show()
+        plt.show()
 
 
         if args.final:
@@ -347,10 +347,10 @@ if __name__ == "__main__":
 
             axes.axis('off')
 
-            fig.colorbar(im, fraction=0.046, pad=0.04)
+            # fig.colorbar(im, fraction=0.046, pad=0.04)
 
             plt.tight_layout()
-            # plt.show()
+            plt.show()
             plt.savefig("results/distmap/wmap-cbar.png")
 
     if args.iou:
