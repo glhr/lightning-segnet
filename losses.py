@@ -239,6 +239,7 @@ class KLLoss(nn.Module):
         target = F.one_hot(target, num_classes=self.num_classes).float()
         if debug: logger.debug(f"{output},{target}")
         output = torch.nn.LogSoftmax(dim=-1)(output)
+        # target = torch.nn.Softmax(dim=-1)(target)
         loss[mask] = nn.KLDivLoss(reduction='none')(output, target)[mask]
         if weight_map is not None:
             #logger.debug(loss.shape, weight_map.shape)
@@ -415,7 +416,8 @@ if __name__ == '__main__':
 
     # ~ input, target = flatten_tensors(input, target)
     # ~ input = torch.nn.LogSoftmax(dim=-1)(input)
-    cm = np.zeros((3, 3))
+    cm_sord = np.zeros((3, 3))
+    cm_kl = np.zeros((3, 3))
     sord = SORDLoss(n_classes = 3, masking=True, dist=args.dist, alpha=args.alpha)
     kl = KLLoss(n_classes = 3, masking=True)
     # loss = kl(input, target)
@@ -424,17 +426,30 @@ if __name__ == '__main__':
     for p,pred in enumerate(level.keys()):
         for g,gt in enumerate(level.keys()):
             input = torch.tensor([onehot[pred]], requires_grad=True)
+
+
             target = torch.tensor([level[gt]], dtype=torch.long)
+
+            #input_kl = torch.log_softmax(input, dim=-1)
+            loss_kl = kl(input, target, debug=True)
+
             mod_input = torch.tensor([level[pred]], dtype=torch.long)
-            loss = sord(input, target, debug=True, mod_input=mod_input)
-            logger.debug(f"SORD -> {loss}")
-            cm[g][p] = loss.item()
-    logger.debug(cm)
+            loss_sord = sord(torch.clone(input), torch.clone(target), debug=True, mod_input=mod_input)
+
+
+
+            logger.debug(f"SORD -> {loss_sord}")
+            cm_sord[g][p] = loss_sord.item()
+            cm_kl[g][p] = loss_kl.item()
+            if cm_kl[g][p] < 0.0000001:
+                cm_kl[g][p] = 0
+    logger.debug(cm_sord)
 
     rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
 
     from plotting import plot_confusion_matrix
-    plot_confusion_matrix(cm, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}-dist{args.dist}-alpha{args.alpha}", folder="results/sordloss", vmax=None, cmap="Blues", cbar=True, annot=False, vmin=0)
+    plot_confusion_matrix(cm_sord, labels=["impossible","possible","preferable"], filename=f"sordloss-{rankings}-dist{args.dist}-alpha{args.alpha}", folder="results/sordloss", vmax=None, cmap="gray_r", cbar=False, annot=True, vmin=0)
+    plot_confusion_matrix(cm_kl, labels=["impossible","possible","preferable"], filename=f"klloss", folder="results/sordloss", vmax=None, cmap="gray_r", cbar=False, annot=True, vmin=0)
     # #
     # # level = {
     # #     "pref": 2,

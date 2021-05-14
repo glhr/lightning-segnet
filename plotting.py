@@ -30,7 +30,7 @@ def plot_confusion_matrix(array, labels=None, filename=None, folder="", vmax=0.9
     plt.xlabel("Prediction")
     plt.tight_layout()
 
-    f = f"{filename}-cm.png" if filename is not None else "cm.png"
+    f = f"{filename}-cm.pdf" if filename is not None else "cm.pdf"
     f = f"{folder}/{f}" if len(folder) else f
     plt.savefig(f)
 
