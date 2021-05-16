@@ -423,26 +423,26 @@ if __name__ == '__main__':
     # loss = kl(input, target)
     logger.debug(f"SORD {sord(input, target)}")
 
-    for p,pred in enumerate(level.keys()):
-        for g,gt in enumerate(level.keys()):
-            input = torch.tensor([onehot[pred]], requires_grad=True)
+    for p_cls,p_idx in level.items():
+        for g_cls,g_idx in level.items():
+            input = torch.tensor([onehot[p_cls]], requires_grad=True)
 
 
-            target = torch.tensor([level[gt]], dtype=torch.long)
+            target = torch.tensor([level[g_cls]], dtype=torch.long)
 
             #input_kl = torch.log_softmax(input, dim=-1)
             loss_kl = kl(input, target, debug=True)
 
-            mod_input = torch.tensor([level[pred]], dtype=torch.long)
+            mod_input = torch.tensor([level[p_cls]], dtype=torch.long)
             loss_sord = sord(torch.clone(input), torch.clone(target), debug=True, mod_input=mod_input)
 
 
-
+            logger.info(f"pred {p_idx+1} | target {g_idx+1} -> loss {loss_sord}")
             logger.debug(f"SORD -> {loss_sord}")
-            cm_sord[g][p] = loss_sord.item()
-            cm_kl[g][p] = loss_kl.item()
-            if cm_kl[g][p] < 0.0000001:
-                cm_kl[g][p] = 0
+            cm_sord[g_idx][p_idx] = loss_sord.item()
+            cm_kl[g_idx][p_idx] = loss_kl.item()
+            if cm_kl[g_idx][p_idx] < 0.0000001:
+                cm_kl[g_idx][p_idx] = 0
     logger.debug(cm_sord)
 
     rankings = "|"+"|".join([str(l) for l in level.values()])+"|"
