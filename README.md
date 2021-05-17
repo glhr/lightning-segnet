@@ -1,14 +1,40 @@
-# pytorch-unet-segnet
+# Visualization
 
-These architectures have shown good results in semantic segmentation, image reconstruction (denoising, super-resolution).
+### Data samples
 
-|Paper|File|Figure|
-|-------|--------|----------|
-|[Unet](https://arxiv.org/abs/1505.04597)|[unet.py](https://github.com/trypag/pytorch-unet-segnet/blob/master/unet.py)|![Unet](https://github.com/trypag/pytorch-unet-segnet/blob/master/docs/unet/u-net-architecture.png)|
-|[SegNet](https://arxiv.org/abs/1511.00561)|[segnet.py](https://github.com/trypag/pytorch-unet-segnet/blob/master/segnet.py)|![SegNet](https://github.com/trypag/pytorch-unet-segnet/blob/master/docs/segnet/segnet.png)|
-|[ModSegNet](https://link.springer.com/chapter/10.1007/978-3-030-00931-1_68)|[modsegnet.py](https://github.com/trypag/pytorch-unet-segnet/blob/master/unet.py)|![ModSegNet](https://github.com/trypag/pytorch-unet-segnet/blob/master/docs/modsegnet/1.png)|
+will show image before and after pre-processing/data aug
 
+python3 lightning.py --dataset kaistped --viz --modalities rgb,ir
+python3 lightning.py --dataset kaistpedann --viz --modalities rgb,ir
+python3 lightning.py --dataset freiburg --viz --modalities rgb,depth,ir
+python3 lightning.py --dataset cityscapes --viz --modalities rgb,depthraw
+python3 lightning.py --dataset cityscapes --viz --modalities rgb,depth
+python3 lightning.py --dataset kitti --viz --modalities rgb,depthraw
+python3 lightning.py --dataset kitti --viz --modalities rgb,depth
+python3 lightning.py --dataset thermalvoc --viz --modalities rgb,ir
 
-**I would encourage you to use SegNet if you don't see any major performance decrease with Unet: SegNet will be lighter and faster !** SegNet uses maximum unpooling during the upsampling step, reusing the maximum pooling indices from the encoding step. Making the upsampling procedure parameter free, where Unet makes use of transpose convolution (filters) to learn how to upsample.
+optionally, add --augment to see effect of augmentation on test samples
+can also add --test_set train/val/test
 
-We provide an updated version of SegNet, which was designed for medical image segmentation: [Semi-supervised Learning for Segmentation Under Semantic Constraint, MICCAI 2018](https://link.springer.com/chapter/10.1007/978-3-030-00931-1_68)
+### Loss weighting
+```bash
+
+ # visualize pixel loss on predictions
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-27 14-54-cityscapes-c3-kl-rgb-epoch=191-val_loss=0.0958.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --loss compare --test_samples 10 --debug
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset freiburg --loss compare --test_samples 10 --debug
+
+# visualize a loss weight map
+python3 metrics.py --distmap
+```
+
+### Soft labels
+
+```bash
+python3 losses.py --dist l1 --alpha 2
+```
+
+### Dataset stats
+
+will output the proportion of pixels in each class
+
+python3 lightning.py --nopredict --test_set full --workers 10 --dataset freiburg

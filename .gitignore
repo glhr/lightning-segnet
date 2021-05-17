@@ -96,3 +96,7 @@ results/
 wandb/
 
 lightning_logs/
+
+loaders/
+
+*.mp4

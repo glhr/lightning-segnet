@@ -1,0 +1,162 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              kaistpedann
+"dataset_combo":        None
+"dataset_combo_ntrain": 100
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               None
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              thermo
+"test_checkpoint":      lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt
+"test_samples":         None
+"test_set":             full
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] kaistpedann - train 55 | val 55 | test 55
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              kaistpedann
+"dataset_combo":        None
+"dataset_combo_ntrain": 100
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               2021-05-14 14-02-kaistpedann-c3-None-lw-rgb
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              thermo
+"test_checkpoint":      lightning_logs/2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037.ckpt
+"test_samples":         None
+"test_set":             full
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading full set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading full set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] kaistpedann - train 55 | val 55 | test 55
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-14 14-02-kaistpedann-c3-None-lw-rgb
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+I01442_labeled.png
+Testing: 0it [00:00, ?it/s]Testing:   2%|▏         | 1/55 [00:01<01:18,  1.46s/it]Testing:   4%|▎         | 2/55 [00:02<01:12,  1.36s/it]Testing:   5%|▌         | 3/55 [00:04<01:09,  1.33s/it]Testing:   7%|▋         | 4/55 [00:05<01:06,  1.31s/it]Testing:   9%|▉         | 5/55 [00:06<01:06,  1.32s/it]Testing:  11%|█         | 6/55 [00:07<01:04,  1.31s/it]Testing:  13%|█▎        | 7/55 [00:09<01:02,  1.31s/it]Testing:  15%|█▍        | 8/55 [00:10<01:01,  1.30s/it]Testing:  16%|█▋        | 9/55 [00:11<00:59,  1.30s/it]Testing:  18%|█▊        | 10/55 [00:13<01:09,  1.54s/it]Testing:  20%|██        | 11/55 [00:15<01:04,  1.47s/it]Testing:  22%|██▏       | 12/55 [00:16<01:00,  1.42s/it]Testing:  24%|██▎       | 13/55 [00:17<00:57,  1.38s/it]Testing:  25%|██▌       | 14/55 [00:19<00:55,  1.36s/it]Testing:  27%|██▋       | 15/55 [00:20<00:53,  1.34s/it]Testing:  29%|██▉       | 16/55 [00:21<00:51,  1.32s/it]Testing:  31%|███       | 17/55 [00:23<00:49,  1.31s/it]Testing:  33%|███▎      | 18/55 [00:24<00:48,  1.31s/it]Testing:  35%|███▍      | 19/55 [00:25<00:46,  1.30s/it]Testing:  36%|███▋      | 20/55 [00:26<00:45,  1.30s/it]Testing:  38%|███▊      | 21/55 [00:28<00:43,  1.29s/it]Testing:  40%|████      | 22/55 [00:29<00:43,  1.31s/it]Testing:  42%|████▏     | 23/55 [00:30<00:41,  1.30s/it]Testing:  44%|████▎     | 24/55 [00:32<00:40,  1.30s/it]Testing:  45%|████▌     | 25/55 [00:33<00:38,  1.30s/it]Testing:  47%|████▋     | 26/55 [00:34<00:37,  1.30s/it]Testing:  49%|████▉     | 27/55 [00:36<00:36,  1.31s/it]Testing:  51%|█████     | 28/55 [00:37<00:35,  1.31s/it]Testing:  53%|█████▎    | 29/55 [00:38<00:34,  1.31s/it]Testing:  55%|█████▍    | 30/55 [00:39<00:32,  1.32s/it]Testing:  56%|█████▋    | 31/55 [00:41<00:31,  1.32s/it]Testing:  58%|█████▊    | 32/55 [00:43<00:35,  1.56s/it]Testing:  60%|██████    | 33/55 [00:44<00:32,  1.48s/it]Testing:  62%|██████▏   | 34/55 [00:45<00:29,  1.42s/it]Testing:  64%|██████▎   | 35/55 [00:47<00:27,  1.38s/it]Testing:  65%|██████▌   | 36/55 [00:48<00:25,  1.36s/it]Testing:  67%|██████▋   | 37/55 [00:49<00:24,  1.34s/it]Testing:  69%|██████▉   | 38/55 [00:51<00:22,  1.33s/it]Testing:  71%|███████   | 39/55 [00:52<00:21,  1.33s/it]Testing:  73%|███████▎  | 40/55 [00:53<00:19,  1.32s/it]Testing:  75%|███████▍  | 41/55 [00:55<00:18,  1.31s/it]Testing:  76%|███████▋  | 42/55 [00:56<00:17,  1.31s/it]Testing:  78%|███████▊  | 43/55 [00:57<00:15,  1.31s/it]Testing:  80%|████████  | 44/55 [00:59<00:14,  1.30s/it]Testing:  82%|████████▏ | 45/55 [01:00<00:12,  1.30s/it]Testing:  84%|████████▎ | 46/55 [01:01<00:11,  1.30s/it]Testing:  85%|████████▌ | 47/55 [01:02<00:10,  1.30s/it]Testing:  87%|████████▋ | 48/55 [01:04<00:09,  1.31s/it]Testing:  89%|████████▉ | 49/55 [01:05<00:07,  1.33s/it]Testing:  91%|█████████ | 50/55 [01:06<00:06,  1.34s/it]Testing:  93%|█████████▎| 51/55 [01:08<00:05,  1.36s/it]Testing:  95%|█████████▍| 52/55 [01:09<00:04,  1.44s/it]Testing:  96%|█████████▋| 53/55 [01:11<00:02,  1.43s/it]Testing:  98%|█████████▊| 54/55 [01:12<00:01,  1.46s/it]Testing: 100%|██████████| 55/55 [01:14<00:00,  1.50s/it]/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/env/lib/python3.6/site-packages/pytorch_lightning/utilities/distributed.py:50: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 8 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+[INFO] CM IoU - tensor([93.4579, 37.6997, 92.1789])
+[INFO] precision tensor([99.0395, 50.6061, 93.8174], dtype=torch.float64) (81.15432872538881) | recall tensor([94.3128, 59.6484, 98.1406], dtype=torch.float64) (84.03390358382885)
+Testing: 100%|██████████| 55/55 [01:14<00:00,  1.36s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9441515207290649,
+ 'test_acc_w': 0.9607712030410767,
+ 'test_dist_l1': 0.07027101516723633,
+ 'test_dist_l2': 0.09911611676216125,
+ 'test_dist_logl2': 0.031148765236139297,
+ 'test_dist_mistake_severity': 0.2582443058490753,
+ 'test_iou': 0.8963578939437866}
+--------------------------------------------------------------------------------

@@ -1,0 +1,163 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              freiburg
+"dataset_combo":        None
+"dataset_combo_ntrain": 100
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          False
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               None
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              sord
+"test_checkpoint":      lightning_logs/2021-04-09 09-04-freiburg-c6-sord-1,2,3-a2-logl2-rgb-epoch=74-val_loss=0.0498.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] freiburg - train 230 | val 136 | test 136
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 22-53-freiburg-c3-None-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              freiburg
+"dataset_combo":        None
+"dataset_combo_ntrain": 100
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          False
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               2021-05-12 22-53-freiburg-c3-None-rgb
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              sord
+"test_checkpoint":      lightning_logs/2021-04-09 09-04-freiburg-c6-sord-1,2,3-a2-logl2-rgb-epoch=74-val_loss=0.0498.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] freiburg - train 230 | val 136 | test 136
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 22-53-freiburg-c3-None-rgb
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b323-5 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b323-5 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+Testing: 0it [00:00, ?it/s]Testing:   1%|          | 1/136 [00:00<00:33,  3.98it/s]Testing:   1%|▏         | 2/136 [00:00<00:30,  4.38it/s]Testing:   2%|▏         | 3/136 [00:00<00:29,  4.50it/s]Testing:   3%|▎         | 4/136 [00:00<00:29,  4.52it/s]Testing:   4%|▎         | 5/136 [00:01<00:30,  4.34it/s]Testing:   4%|▍         | 6/136 [00:01<00:28,  4.48it/s]Testing:   5%|▌         | 7/136 [00:01<00:28,  4.50it/s]Testing:   6%|▌         | 8/136 [00:01<00:28,  4.47it/s]Testing:   7%|▋         | 9/136 [00:02<00:27,  4.56it/s]Testing:   7%|▋         | 10/136 [00:02<00:26,  4.67it/s]Testing:   8%|▊         | 11/136 [00:02<00:27,  4.59it/s]Testing:   9%|▉         | 12/136 [00:02<00:26,  4.67it/s]Testing:  10%|▉         | 13/136 [00:02<00:26,  4.68it/s]Testing:  10%|█         | 14/136 [00:03<00:25,  4.71it/s]Testing:  11%|█         | 15/136 [00:03<00:25,  4.70it/s]Testing:  12%|█▏        | 16/136 [00:03<00:26,  4.61it/s]Testing:  12%|█▎        | 17/136 [00:03<00:25,  4.65it/s]Testing:  13%|█▎        | 18/136 [00:03<00:25,  4.70it/s]Testing:  14%|█▍        | 19/136 [00:04<00:24,  4.75it/s]Testing:  15%|█▍        | 20/136 [00:04<00:26,  4.33it/s]Testing:  15%|█▌        | 21/136 [00:04<00:25,  4.45it/s]Testing:  16%|█▌        | 22/136 [00:04<00:25,  4.53it/s]Testing:  17%|█▋        | 23/136 [00:05<00:25,  4.43it/s]Testing:  18%|█▊        | 24/136 [00:05<00:25,  4.48it/s]Testing:  18%|█▊        | 25/136 [00:05<00:24,  4.48it/s]Testing:  19%|█▉        | 26/136 [00:05<00:24,  4.56it/s]Testing:  20%|█▉        | 27/136 [00:05<00:23,  4.57it/s]Testing:  21%|██        | 28/136 [00:06<00:23,  4.66it/s]Testing:  21%|██▏       | 29/136 [00:06<00:22,  4.70it/s]Testing:  22%|██▏       | 30/136 [00:06<00:22,  4.69it/s]Testing:  23%|██▎       | 31/136 [00:06<00:22,  4.58it/s]Testing:  24%|██▎       | 32/136 [00:07<00:22,  4.55it/s]Testing:  24%|██▍       | 33/136 [00:07<00:22,  4.59it/s]Testing:  25%|██▌       | 34/136 [00:07<00:22,  4.60it/s]Testing:  26%|██▌       | 35/136 [00:07<00:21,  4.64it/s]Testing:  26%|██▋       | 36/136 [00:07<00:22,  4.52it/s]Testing:  27%|██▋       | 37/136 [00:08<00:21,  4.58it/s]Testing:  28%|██▊       | 38/136 [00:08<00:21,  4.64it/s]Testing:  29%|██▊       | 39/136 [00:08<00:20,  4.66it/s]Testing:  29%|██▉       | 40/136 [00:08<00:20,  4.70it/s]Testing:  30%|███       | 41/136 [00:08<00:20,  4.75it/s]Testing:  31%|███       | 42/136 [00:09<00:19,  4.74it/s]Testing:  32%|███▏      | 43/136 [00:09<00:20,  4.64it/s]Testing:  32%|███▏      | 44/136 [00:09<00:19,  4.64it/s]Testing:  33%|███▎      | 45/136 [00:09<00:20,  4.51it/s]Testing:  34%|███▍      | 46/136 [00:10<00:19,  4.62it/s]Testing:  35%|███▍      | 47/136 [00:10<00:19,  4.56it/s]Testing:  35%|███▌      | 48/136 [00:10<00:19,  4.52it/s]Testing:  36%|███▌      | 49/136 [00:10<00:19,  4.47it/s]Testing:  37%|███▋      | 50/136 [00:10<00:19,  4.46it/s]Testing:  38%|███▊      | 51/136 [00:11<00:19,  4.42it/s]Testing:  38%|███▊      | 52/136 [00:11<00:18,  4.45it/s]Testing:  39%|███▉      | 53/136 [00:11<00:18,  4.44it/s]Testing:  40%|███▉      | 54/136 [00:11<00:18,  4.45it/s]Testing:  40%|████      | 55/136 [00:12<00:17,  4.54it/s]Testing:  41%|████      | 56/136 [00:12<00:17,  4.51it/s]Testing:  42%|████▏     | 57/136 [00:12<00:17,  4.58it/s]Testing:  43%|████▎     | 58/136 [00:12<00:16,  4.64it/s]Testing:  43%|████▎     | 59/136 [00:12<00:16,  4.68it/s]Testing:  44%|████▍     | 60/136 [00:13<00:16,  4.61it/s]Testing:  45%|████▍     | 61/136 [00:13<00:16,  4.49it/s]Testing:  46%|████▌     | 62/136 [00:13<00:16,  4.47it/s]Testing:  46%|████▋     | 63/136 [00:13<00:16,  4.55it/s]Testing:  47%|████▋     | 64/136 [00:14<00:15,  4.59it/s]Testing:  48%|████▊     | 65/136 [00:14<00:15,  4.54it/s]Testing:  49%|████▊     | 66/136 [00:14<00:15,  4.62it/s]Testing:  49%|████▉     | 67/136 [00:14<00:15,  4.57it/s]Testing:  50%|█████     | 68/136 [00:14<00:14,  4.59it/s]Testing:  51%|█████     | 69/136 [00:15<00:14,  4.65it/s]Testing:  51%|█████▏    | 70/136 [00:15<00:14,  4.71it/s]Testing:  52%|█████▏    | 71/136 [00:15<00:13,  4.71it/s]Testing:  53%|█████▎    | 72/136 [00:15<00:13,  4.76it/s]Testing:  54%|█████▎    | 73/136 [00:15<00:13,  4.75it/s]Testing:  54%|█████▍    | 74/136 [00:16<00:13,  4.74it/s]Testing:  55%|█████▌    | 75/136 [00:16<00:12,  4.74it/s]Testing:  56%|█████▌    | 76/136 [00:16<00:12,  4.70it/s]Testing:  57%|█████▋    | 77/136 [00:16<00:12,  4.54it/s]Testing:  57%|█████▋    | 78/136 [00:17<00:12,  4.63it/s]Testing:  58%|█████▊    | 79/136 [00:17<00:12,  4.48it/s]Testing:  59%|█████▉    | 80/136 [00:17<00:12,  4.49it/s]Testing:  60%|█████▉    | 81/136 [00:17<00:12,  4.56it/s]Testing:  60%|██████    | 82/136 [00:17<00:11,  4.60it/s]Testing:  61%|██████    | 83/136 [00:18<00:11,  4.45it/s]Testing:  62%|██████▏   | 84/136 [00:18<00:11,  4.52it/s]Testing:  62%|██████▎   | 85/136 [00:18<00:11,  4.45it/s]Testing:  63%|██████▎   | 86/136 [00:18<00:11,  4.47it/s]Testing:  64%|██████▍   | 87/136 [00:19<00:10,  4.58it/s]Testing:  65%|██████▍   | 88/136 [00:19<00:10,  4.63it/s]Testing:  65%|██████▌   | 89/136 [00:19<00:10,  4.57it/s]Testing:  66%|██████▌   | 90/136 [00:19<00:09,  4.67it/s]Testing:  67%|██████▋   | 91/136 [00:19<00:09,  4.74it/s]Testing:  68%|██████▊   | 92/136 [00:20<00:09,  4.73it/s]Testing:  68%|██████▊   | 93/136 [00:20<00:09,  4.69it/s]Testing:  69%|██████▉   | 94/136 [00:20<00:09,  4.56it/s]Testing:  70%|██████▉   | 95/136 [00:20<00:08,  4.64it/s]Testing:  71%|███████   | 96/136 [00:20<00:08,  4.63it/s]Testing:  71%|███████▏  | 97/136 [00:21<00:08,  4.60it/s]Testing:  72%|███████▏  | 98/136 [00:21<00:08,  4.51it/s]Testing:  73%|███████▎  | 99/136 [00:21<00:08,  4.53it/s]Testing:  74%|███████▎  | 100/136 [00:21<00:07,  4.59it/s]Testing:  74%|███████▍  | 101/136 [00:22<00:07,  4.67it/s]Testing:  75%|███████▌  | 102/136 [00:22<00:07,  4.72it/s]Testing:  76%|███████▌  | 103/136 [00:22<00:06,  4.76it/s]Testing:  76%|███████▋  | 104/136 [00:22<00:06,  4.78it/s]Testing:  77%|███████▋  | 105/136 [00:22<00:06,  4.74it/s]Testing:  78%|███████▊  | 106/136 [00:23<00:06,  4.75it/s]Testing:  79%|███████▊  | 107/136 [00:23<00:06,  4.65it/s]Testing:  79%|███████▉  | 108/136 [00:23<00:05,  4.67it/s]Testing:  80%|████████  | 109/136 [00:23<00:05,  4.69it/s]Testing:  81%|████████  | 110/136 [00:23<00:05,  4.67it/s]Testing:  82%|████████▏ | 111/136 [00:24<00:05,  4.66it/s]Testing:  82%|████████▏ | 112/136 [00:24<00:05,  4.69it/s]Testing:  83%|████████▎ | 113/136 [00:24<00:04,  4.74it/s]Testing:  84%|████████▍ | 114/136 [00:24<00:04,  4.68it/s]Testing:  85%|████████▍ | 115/136 [00:25<00:04,  4.75it/s]Testing:  85%|████████▌ | 116/136 [00:25<00:04,  4.62it/s]Testing:  86%|████████▌ | 117/136 [00:25<00:04,  4.65it/s]Testing:  87%|████████▋ | 118/136 [00:25<00:03,  4.54it/s]Testing:  88%|████████▊ | 119/136 [00:25<00:03,  4.58it/s]Testing:  88%|████████▊ | 120/136 [00:26<00:03,  4.65it/s]Testing:  89%|████████▉ | 121/136 [00:26<00:03,  4.71it/s]Testing:  90%|████████▉ | 122/136 [00:26<00:02,  4.76it/s]Testing:  90%|█████████ | 123/136 [00:26<00:02,  4.54it/s]Testing:  91%|█████████ | 124/136 [00:26<00:02,  4.60it/s]Testing:  92%|█████████▏| 125/136 [00:27<00:02,  4.47it/s]Testing:  93%|█████████▎| 126/136 [00:27<00:02,  4.55it/s]Testing:  93%|█████████▎| 127/136 [00:27<00:01,  4.54it/s]Testing:  94%|█████████▍| 128/136 [00:27<00:01,  4.62it/s]Testing:  95%|█████████▍| 129/136 [00:28<00:01,  4.67it/s]Testing:  96%|█████████▌| 130/136 [00:28<00:01,  4.70it/s]Testing:  96%|█████████▋| 131/136 [00:28<00:01,  4.72it/s]Testing:  97%|█████████▋| 132/136 [00:28<00:00,  4.75it/s]Testing:  98%|█████████▊| 133/136 [00:28<00:00,  4.78it/s]Testing:  99%|█████████▊| 134/136 [00:29<00:00,  4.82it/s]Testing:  99%|█████████▉| 135/136 [00:29<00:00,  4.76it/s]Testing: 100%|██████████| 136/136 [00:29<00:00,  4.81it/s]/usr/local/lib/python3.8/dist-packages/pytorch_lightning/utilities/distributed.py:52: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 96 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+[INFO] CM IoU - tensor([93.9170, 80.1172, 78.4551])
+[INFO] precision tensor([95.3873, 89.8250, 97.5574], dtype=torch.float64) (94.25654607270152) | recall tensor([98.3853, 88.1139, 80.0271], dtype=torch.float64) (88.8420971564178)
+Testing: 100%|██████████| 136/136 [00:29<00:00,  4.61it/s]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9408209323883057,
+ 'test_acc_w': 0.9408209323883057,
+ 'test_dist_l1': 0.05998295545578003,
+ 'test_dist_l2': 0.061590775847435,
+ 'test_dist_logl2': 0.023364074528217316,
+ 'test_dist_mistake_severity': 0.013584348373115063,
+ 'test_iou': 0.8903694152832031}
+--------------------------------------------------------------------------------

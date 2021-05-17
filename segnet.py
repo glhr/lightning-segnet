@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils import RANDOM_SEED
+from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
@@ -16,6 +16,26 @@ np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
 
+def new_input_channels(segnet, channels):
+    conv1 = segnet.encoders[0].features[0]
+    new_layer = nn.Conv2d(channels, 64, 3, 1, 1)
+    copy_weights = 0  # Here will initialize the weights from new channel with the red channel weights
+
+    # Copying the weights from the old to the new layer
+    new_layer.weight[:, :conv1.in_channels, :, :] = conv1.weight.clone()
+
+    # Copying the weights of the `copy_weights` channel of the old layer to the extra channels of the new layer
+    for i in range(channels - conv1.in_channels):
+        channel = conv1.in_channels + i
+        new_layer.weight[:, channel:channel+1, :, :] = conv1.weight[:, copy_weights:copy_weights+1, : :].clone()
+    new_layer.weight = nn.Parameter(new_layer.weight)
+
+    segnet.encoders[0].features[0] = new_layer
+    return segnet
+
+def new_output_channels(segnet, channels):
+    segnet.classifier = nn.Conv2d(segnet.filter_config[0], channels, 3, 1, 1)
+    return segnet
 
 class SegNet(nn.Module):
     """SegNet: A Deep Convolutional Encoder-Decoder Architecture for
@@ -28,7 +48,7 @@ class SegNet(nn.Module):
         filter_config (list of 5 ints): number of output features at each level
     """
     def __init__(self, num_classes, n_init_features=1, drop_rate=0.5,
-                 filter_config=(64, 128, 256, 512, 512)):
+                 filter_config=(64, 128, 256, 512, 512), depthwise_conv=False):
         super(SegNet, self).__init__()
 
         self.encoders = nn.ModuleList()
@@ -38,12 +58,14 @@ class SegNet(nn.Module):
         encoder_filter_config = (n_init_features,) + filter_config
         decoder_n_layers = (3, 3, 3, 2, 1)
         decoder_filter_config = filter_config[::-1] + (filter_config[0],)
+        self.filter_config = filter_config
 
         for i in range(0, 5):
+            dw = (depthwise_conv) and (i == 0)
             # encoder architecture
             self.encoders.append(_Encoder(encoder_filter_config[i],
                                           encoder_filter_config[i + 1],
-                                          encoder_n_layers[i], drop_rate))
+                                          encoder_n_layers[i], drop_rate, depthwise=dw))
 
             # decoder architecture
             self.decoders.append(_Decoder(decoder_filter_config[i],
@@ -72,7 +94,7 @@ class SegNet(nn.Module):
 
 
 class _Encoder(nn.Module):
-    def __init__(self, n_in_feat, n_out_feat, n_blocks=2, drop_rate=0.5):
+    def __init__(self, n_in_feat, n_out_feat, n_blocks=2, drop_rate=0.5, depthwise=False):
         """Encoder layer follows VGG rules + keeps pooling indices
         Args:
             n_in_feat (int): number of input features
@@ -81,8 +103,9 @@ class _Encoder(nn.Module):
             drop_rate (float): dropout rate to use
         """
         super(_Encoder, self).__init__()
+        # print(f"encoder {n_in_feat}, {n_out_feat}")
 
-        layers = [nn.Conv2d(n_in_feat, n_out_feat, 3, 1, 1),
+        layers = [nn.Conv2d(n_in_feat, n_out_feat, 3, 1, 1, groups=n_in_feat if depthwise else 1),
                   nn.BatchNorm2d(n_out_feat),
                   nn.ReLU(inplace=True)]
 
@@ -97,7 +120,9 @@ class _Encoder(nn.Module):
 
     def forward(self, x):
         output = self.features(x)
-        return F.max_pool2d(output, 2, 2, return_indices=True), output.size()
+        pooled = F.max_pool2d(output, 2, 2, return_indices=True)
+        #print(pooled.size)
+        return pooled, output.size()
 
 
 class _Decoder(nn.Module):
@@ -127,4 +152,16 @@ class _Decoder(nn.Module):
 
     def forward(self, x, indices, size):
         unpooled = F.max_unpool2d(x, indices, 2, 2, 0, size)
+        #print(unpooled.size)
         return self.features(unpooled)
+
+
+if __name__ == '__main__':
+    from torchsummary import summary
+    segnet = SegNet(num_classes=3)
+    print(segnet)
+    #print(summary(segnet, (1, 480, 240)))
+
+    channels = 2
+    segnet = new_input_channels(segnet, channels)
+    #print(segnet)

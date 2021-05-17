@@ -1,0 +1,163 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   16
+"dataset":              freiburg
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               None
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-10 22-40-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=52-val_loss=0.0023.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] freiburg - train 230 | val 136 | test 136
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 07-38-freiburg-c3-None-lw-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   16
+"dataset":              freiburg
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               2021-05-12 07-38-freiburg-c3-None-lw-rgb
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-10 22-40-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=52-val_loss=0.0023.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] freiburg - train 230 | val 136 | test 136
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 07-38-freiburg-c3-None-lw-rgb
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b323-5 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b323-5 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/train
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+b46-4456 ../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test
+Testing: 0it [00:00, ?it/s]Testing:  11%|█         | 1/9 [00:17<02:20, 17.56s/it]Testing:  22%|██▏       | 2/9 [00:34<02:01, 17.39s/it]Testing:  33%|███▎      | 3/9 [00:52<01:43, 17.31s/it]Testing:  44%|████▍     | 4/9 [01:09<01:26, 17.25s/it]Testing:  56%|█████▌    | 5/9 [01:26<01:09, 17.26s/it]Testing:  67%|██████▋   | 6/9 [01:43<00:51, 17.30s/it]Testing:  78%|███████▊  | 7/9 [02:00<00:34, 17.23s/it]Testing:  89%|████████▉ | 8/9 [02:18<00:17, 17.19s/it]Testing: 100%|██████████| 9/9 [02:26<00:00, 14.50s/it]/usr/local/lib/python3.8/dist-packages/pytorch_lightning/utilities/distributed.py:52: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 96 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+[INFO] CM IoU - tensor([95.4117, 81.3212, 70.2571])
+[INFO] precision tensor([97.4810, 87.2278, 93.4866], dtype=torch.float64) (92.7317663908307) | recall tensor([97.8236, 92.3133, 73.8732], dtype=torch.float64) (88.00337339583231)
+Testing: 100%|██████████| 9/9 [02:26<00:00, 16.29s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9431584477424622,
+ 'test_acc_w': 0.9385953545570374,
+ 'test_dist_l1': 0.057079821825027466,
+ 'test_dist_l2': 0.057556357234716415,
+ 'test_dist_logl2': 0.01915244571864605,
+ 'test_dist_mistake_severity': 0.004191800951957703,
+ 'test_iou': 0.8925695419311523}
+--------------------------------------------------------------------------------

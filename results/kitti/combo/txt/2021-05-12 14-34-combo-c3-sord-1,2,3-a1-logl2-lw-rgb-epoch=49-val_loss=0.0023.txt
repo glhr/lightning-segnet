@@ -1,0 +1,155 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              kitti
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               None
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] kitti - train 180 | val 20 | test 20
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 19-11-kitti-c3-None-lw-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              kitti
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               2021-05-12 19-11-kitti-c3-None-lw-rgb
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] kitti - train 180 | val 20 | test 20
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-12 19-11-kitti-c3-None-lw-rgb
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Testing: 0it [00:00, ?it/s]Testing:   5%|▌         | 1/20 [00:01<00:24,  1.27s/it]Testing:  10%|█         | 2/20 [00:02<00:20,  1.15s/it]Testing:  15%|█▌        | 3/20 [00:03<00:19,  1.13s/it]Testing:  20%|██        | 4/20 [00:04<00:17,  1.11s/it]Testing:  25%|██▌       | 5/20 [00:05<00:16,  1.11s/it]Testing:  30%|███       | 6/20 [00:06<00:15,  1.11s/it]Testing:  35%|███▌      | 7/20 [00:07<00:14,  1.11s/it]Testing:  40%|████      | 8/20 [00:08<00:13,  1.10s/it]Testing:  45%|████▌     | 9/20 [00:10<00:12,  1.10s/it]Testing:  50%|█████     | 10/20 [00:11<00:10,  1.09s/it]Testing:  55%|█████▌    | 11/20 [00:12<00:09,  1.10s/it]Testing:  60%|██████    | 12/20 [00:13<00:08,  1.09s/it]Testing:  65%|██████▌   | 13/20 [00:14<00:07,  1.08s/it]Testing:  70%|███████   | 14/20 [00:15<00:06,  1.09s/it]Testing:  75%|███████▌  | 15/20 [00:16<00:05,  1.08s/it]Testing:  80%|████████  | 16/20 [00:17<00:04,  1.10s/it]Testing:  85%|████████▌ | 17/20 [00:18<00:03,  1.10s/it]Testing:  90%|█████████ | 18/20 [00:19<00:02,  1.09s/it]Testing:  95%|█████████▌| 19/20 [00:20<00:01,  1.09s/it]Testing: 100%|██████████| 20/20 [00:21<00:00,  1.08s/it]/usr/local/lib/python3.8/dist-packages/pytorch_lightning/utilities/distributed.py:52: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 96 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+[INFO] CM IoU - tensor([94.2098, 60.9592, 86.1138])
+[INFO] precision tensor([95.4402, 78.5225, 95.4976], dtype=torch.float64) (89.82010284395491) | recall tensor([98.6501, 73.1571, 89.7579], dtype=torch.float64) (87.18838682435907)
+Testing: 100%|██████████| 20/20 [00:21<00:00,  1.10s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9336613416671753,
+ 'test_acc_w': 0.9385281205177307,
+ 'test_dist_l1': 0.07067999243736267,
+ 'test_dist_l2': 0.07936269044876099,
+ 'test_dist_logl2': 0.02656947635114193,
+ 'test_dist_mistake_severity': 0.06544226408004761,
+ 'test_iou': 0.8769506216049194}
+--------------------------------------------------------------------------------

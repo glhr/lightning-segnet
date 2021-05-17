@@ -1,0 +1,157 @@
+[W Context.cpp:69] Warning: torch.set_deterministic is in beta, and its design and  functionality may change in the future. (function operator())
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              thermalvoc
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               None
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-10 19-34-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=49-val_loss=0.0053.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] thermalvoc - train 1173 | val 147 | test 146
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+/usr/local/lib/python3.8/dist-packages/torch/nn/_reduction.py:44: UserWarning: size_average and reduce args will be deprecated, please use reduction='none' instead.
+  warnings.warn(warning.format(ret))
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-10 20-42-thermalvoc-c3-None-lw-rgb
+[WARNING] Testing phase
+GPU available: True, used: True
+TPU available: None, using: 0 TPU cores
+Global seed set to 2
+[WARNING] params "augment":              False
+"bs":                   1
+"dataset":              thermalvoc
+"dataset_combo":        None
+"dataset_combo_ntrain": 180
+"dataset_seq":          None
+"debug":                False
+"depthwise_conv":       False
+"dist":                 l1
+"dist_alpha":           1
+"gpus":                 1
+"init":                 False
+"init_channels":        None
+"loss":                 None
+"loss_weight":          True
+"lr":                   None
+"max_epochs":           1000
+"modalities":           ['rgb']
+"mode":                 affordances
+"momentum":             None
+"nopredict":            False
+"num_classes":          3
+"optim":                None
+"orig_dataset":         None
+"prefix":               2021-05-10 20-42-thermalvoc-c3-None-lw-rgb
+"ranks":                1,2,3
+"save":                 True
+"save_xp":              combo
+"test_checkpoint":      lightning_logs/2021-05-10 19-34-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=49-val_loss=0.0053.ckpt
+"test_samples":         None
+"test_set":             test
+"train":                False
+"train_checkpoint":     None
+"update_output_layer":  False
+"viz":                  False
+"wd":                   0
+"workers":              0
+[INFO] Save True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading train set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading test set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[INFO] Loading val set
+[INFO] ['rgb']
+[INFO] None
+[WARNING] dataset modalities ['rgb'], depth completion True
+[WARNING] thermalvoc - train 1173 | val 147 | test 146
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] SORD ranks: [1, 2, 3]
+[INFO] SORD alpha 1
+[INFO] Distance ranks [1, 2, 3]
+[INFO] Distances: mistakes from 1 to 2
+[INFO] IoU labels: [0, 1, 2]
+[INFO] Confusion matrix labels: [0, 1, 2]
+[INFO] IoU labels: [0, 1, 2]
+[INFO] 2021-05-10 20-42-thermalvoc-c3-None-lw-rgb
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Testing: 0it [00:00, ?it/s]Testing:   1%|          | 1/146 [00:01<02:55,  1.21s/it]Testing:   1%|▏         | 2/146 [00:02<02:46,  1.16s/it]Testing:   2%|▏         | 3/146 [00:03<02:45,  1.16s/it]Testing:   3%|▎         | 4/146 [00:04<02:41,  1.14s/it]Testing:   3%|▎         | 5/146 [00:05<02:38,  1.12s/it]Testing:   4%|▍         | 6/146 [00:06<02:37,  1.12s/it]Testing:   5%|▍         | 7/146 [00:07<02:37,  1.13s/it]Testing:   5%|▌         | 8/146 [00:09<02:35,  1.13s/it]Testing:   6%|▌         | 9/146 [00:10<02:35,  1.13s/it]Testing:   7%|▋         | 10/146 [00:11<02:32,  1.12s/it]Testing:   8%|▊         | 11/146 [00:12<02:31,  1.12s/it]Testing:   8%|▊         | 12/146 [00:13<02:29,  1.11s/it]Testing:   9%|▉         | 13/146 [00:14<02:26,  1.10s/it]Testing:  10%|▉         | 14/146 [00:15<02:26,  1.11s/it]Testing:  10%|█         | 15/146 [00:16<02:26,  1.12s/it]Testing:  11%|█         | 16/146 [00:17<02:25,  1.12s/it]Testing:  12%|█▏        | 17/146 [00:19<02:24,  1.12s/it]Testing:  12%|█▏        | 18/146 [00:20<02:27,  1.15s/it]Testing:  13%|█▎        | 19/146 [00:21<02:24,  1.14s/it]Testing:  14%|█▎        | 20/146 [00:22<02:22,  1.13s/it]Testing:  14%|█▍        | 21/146 [00:23<02:21,  1.13s/it]Testing:  15%|█▌        | 22/146 [00:24<02:21,  1.14s/it]Testing:  16%|█▌        | 23/146 [00:25<02:16,  1.11s/it]Testing:  16%|█▋        | 24/146 [00:26<02:13,  1.09s/it]Testing:  17%|█▋        | 25/146 [00:28<02:12,  1.10s/it]Testing:  18%|█▊        | 26/146 [00:29<02:12,  1.10s/it]Testing:  18%|█▊        | 27/146 [00:30<02:11,  1.10s/it]Testing:  19%|█▉        | 28/146 [00:31<02:12,  1.12s/it]Testing:  20%|█▉        | 29/146 [00:32<02:08,  1.10s/it]Testing:  21%|██        | 30/146 [00:33<02:07,  1.10s/it]Testing:  21%|██        | 31/146 [00:34<02:06,  1.10s/it]Testing:  22%|██▏       | 32/146 [00:35<02:06,  1.11s/it]Testing:  23%|██▎       | 33/146 [00:36<02:05,  1.11s/it]Testing:  23%|██▎       | 34/146 [00:38<02:04,  1.11s/it]Testing:  24%|██▍       | 35/146 [00:39<02:01,  1.10s/it]Testing:  25%|██▍       | 36/146 [00:40<02:00,  1.10s/it]Testing:  25%|██▌       | 37/146 [00:41<01:58,  1.09s/it]Testing:  26%|██▌       | 38/146 [00:42<01:58,  1.09s/it]Testing:  27%|██▋       | 39/146 [00:43<01:59,  1.12s/it]Testing:  27%|██▋       | 40/146 [00:44<01:59,  1.13s/it]Testing:  28%|██▊       | 41/146 [00:45<01:57,  1.12s/it]Testing:  29%|██▉       | 42/146 [00:46<01:56,  1.12s/it]Testing:  29%|██▉       | 43/146 [00:48<01:56,  1.13s/it]Testing:  30%|███       | 44/146 [00:49<01:54,  1.13s/it]Testing:  31%|███       | 45/146 [00:50<01:53,  1.13s/it]Testing:  32%|███▏      | 46/146 [00:51<01:52,  1.12s/it]Testing:  32%|███▏      | 47/146 [00:52<01:48,  1.10s/it]Testing:  33%|███▎      | 48/146 [00:53<01:49,  1.12s/it]Testing:  34%|███▎      | 49/146 [00:54<01:47,  1.11s/it]Testing:  34%|███▍      | 50/146 [00:55<01:46,  1.11s/it]Testing:  35%|███▍      | 51/146 [00:57<01:47,  1.13s/it]Testing:  36%|███▌      | 52/146 [00:58<01:48,  1.15s/it]Testing:  36%|███▋      | 53/146 [00:59<01:45,  1.13s/it]Testing:  37%|███▋      | 54/146 [01:00<01:44,  1.14s/it]Testing:  38%|███▊      | 55/146 [01:01<01:43,  1.13s/it]Testing:  38%|███▊      | 56/146 [01:02<01:41,  1.12s/it]Testing:  39%|███▉      | 57/146 [01:03<01:40,  1.13s/it]Testing:  40%|███▉      | 58/146 [01:04<01:37,  1.11s/it]Testing:  40%|████      | 59/146 [01:05<01:36,  1.11s/it]Testing:  41%|████      | 60/146 [01:07<01:35,  1.11s/it]Testing:  42%|████▏     | 61/146 [01:08<01:35,  1.12s/it]Testing:  42%|████▏     | 62/146 [01:09<01:33,  1.11s/it]Testing:  43%|████▎     | 63/146 [01:10<01:32,  1.11s/it]Testing:  44%|████▍     | 64/146 [01:11<01:31,  1.11s/it]Testing:  45%|████▍     | 65/146 [01:12<01:30,  1.12s/it]Testing:  45%|████▌     | 66/146 [01:13<01:30,  1.13s/it]Testing:  46%|████▌     | 67/146 [01:14<01:28,  1.12s/it]Testing:  47%|████▋     | 68/146 [01:16<01:26,  1.11s/it]Testing:  47%|████▋     | 69/146 [01:17<01:25,  1.11s/it]Testing:  48%|████▊     | 70/146 [01:18<01:24,  1.12s/it]Testing:  49%|████▊     | 71/146 [01:19<01:22,  1.11s/it]Testing:  49%|████▉     | 72/146 [01:20<01:25,  1.15s/it]Testing:  50%|█████     | 73/146 [01:21<01:23,  1.14s/it]Testing:  51%|█████     | 74/146 [01:22<01:22,  1.14s/it]Testing:  51%|█████▏    | 75/146 [01:23<01:19,  1.12s/it]Testing:  52%|█████▏    | 76/146 [01:25<01:18,  1.13s/it]Testing:  53%|█████▎    | 77/146 [01:26<01:17,  1.12s/it]Testing:  53%|█████▎    | 78/146 [01:27<01:16,  1.12s/it]Testing:  54%|█████▍    | 79/146 [01:28<01:14,  1.11s/it]Testing:  55%|█████▍    | 80/146 [01:29<01:12,  1.09s/it]Testing:  55%|█████▌    | 81/146 [01:30<01:11,  1.10s/it]Testing:  56%|█████▌    | 82/146 [01:31<01:10,  1.10s/it]Testing:  57%|█████▋    | 83/146 [01:32<01:11,  1.13s/it]Testing:  58%|█████▊    | 84/146 [01:34<01:10,  1.13s/it]Testing:  58%|█████▊    | 85/146 [01:35<01:09,  1.14s/it]Testing:  59%|█████▉    | 86/146 [01:36<01:07,  1.13s/it]Testing:  60%|█████▉    | 87/146 [01:37<01:05,  1.10s/it]Testing:  60%|██████    | 88/146 [01:38<01:03,  1.10s/it]Testing:  61%|██████    | 89/146 [01:39<01:02,  1.10s/it]Testing:  62%|██████▏   | 90/146 [01:40<01:02,  1.11s/it]Testing:  62%|██████▏   | 91/146 [01:41<01:00,  1.10s/it]Testing:  63%|██████▎   | 92/146 [01:42<00:59,  1.11s/it]Testing:  64%|██████▎   | 93/146 [01:43<00:57,  1.09s/it]Testing:  64%|██████▍   | 94/146 [01:45<00:57,  1.11s/it]Testing:  65%|██████▌   | 95/146 [01:46<00:57,  1.12s/it]Testing:  66%|██████▌   | 96/146 [01:47<00:55,  1.11s/it]Testing:  66%|██████▋   | 97/146 [01:48<00:54,  1.11s/it]Testing:  67%|██████▋   | 98/146 [01:49<00:53,  1.11s/it]Testing:  68%|██████▊   | 99/146 [01:50<00:52,  1.12s/it]Testing:  68%|██████▊   | 100/146 [01:51<00:51,  1.13s/it]Testing:  69%|██████▉   | 101/146 [01:52<00:50,  1.13s/it]Testing:  70%|██████▉   | 102/146 [01:54<00:49,  1.13s/it]Testing:  71%|███████   | 103/146 [01:55<00:48,  1.12s/it]Testing:  71%|███████   | 104/146 [01:56<00:46,  1.11s/it]Testing:  72%|███████▏  | 105/146 [01:57<00:45,  1.10s/it]Testing:  73%|███████▎  | 106/146 [01:58<00:43,  1.09s/it]Testing:  73%|███████▎  | 107/146 [01:59<00:42,  1.09s/it]Testing:  74%|███████▍  | 108/146 [02:00<00:41,  1.10s/it]Testing:  75%|███████▍  | 109/146 [02:01<00:41,  1.12s/it]Testing:  75%|███████▌  | 110/146 [02:02<00:40,  1.13s/it]Testing:  76%|███████▌  | 111/146 [02:04<00:39,  1.13s/it]Testing:  77%|███████▋  | 112/146 [02:05<00:37,  1.11s/it]Testing:  77%|███████▋  | 113/146 [02:06<00:35,  1.09s/it]Testing:  78%|███████▊  | 114/146 [02:07<00:35,  1.10s/it]Testing:  79%|███████▉  | 115/146 [02:08<00:34,  1.11s/it]Testing:  79%|███████▉  | 116/146 [02:09<00:33,  1.12s/it]Testing:  80%|████████  | 117/146 [02:10<00:32,  1.12s/it]Testing:  81%|████████  | 118/146 [02:11<00:31,  1.11s/it]Testing:  82%|████████▏ | 119/146 [02:12<00:30,  1.12s/it]Testing:  82%|████████▏ | 120/146 [02:13<00:28,  1.10s/it]Testing:  83%|████████▎ | 121/146 [02:15<00:28,  1.13s/it]Testing:  84%|████████▎ | 122/146 [02:16<00:26,  1.12s/it]Testing:  84%|████████▍ | 123/146 [02:17<00:25,  1.10s/it]Testing:  85%|████████▍ | 124/146 [02:18<00:24,  1.11s/it]Testing:  86%|████████▌ | 125/146 [02:20<00:27,  1.33s/it]Testing:  86%|████████▋ | 126/146 [02:21<00:25,  1.27s/it]Testing:  87%|████████▋ | 127/146 [02:22<00:23,  1.24s/it]Testing:  88%|████████▊ | 128/146 [02:23<00:21,  1.18s/it]Testing:  88%|████████▊ | 129/146 [02:24<00:19,  1.16s/it]Testing:  89%|████████▉ | 130/146 [02:25<00:18,  1.14s/it]Testing:  90%|████████▉ | 131/146 [02:26<00:16,  1.13s/it]Testing:  90%|█████████ | 132/146 [02:28<00:15,  1.13s/it]Testing:  91%|█████████ | 133/146 [02:29<00:14,  1.13s/it]Testing:  92%|█████████▏| 134/146 [02:30<00:13,  1.11s/it]Testing:  92%|█████████▏| 135/146 [02:31<00:12,  1.11s/it]Testing:  93%|█████████▎| 136/146 [02:32<00:11,  1.10s/it]Testing:  94%|█████████▍| 137/146 [02:33<00:09,  1.10s/it]Testing:  95%|█████████▍| 138/146 [02:34<00:08,  1.11s/it]Testing:  95%|█████████▌| 139/146 [02:35<00:07,  1.11s/it]Testing:  96%|█████████▌| 140/146 [02:36<00:06,  1.12s/it]Testing:  97%|█████████▋| 141/146 [02:38<00:05,  1.12s/it]Testing:  97%|█████████▋| 142/146 [02:39<00:04,  1.11s/it]Testing:  98%|█████████▊| 143/146 [02:40<00:03,  1.09s/it]Testing:  99%|█████████▊| 144/146 [02:41<00:02,  1.10s/it]Testing:  99%|█████████▉| 145/146 [02:42<00:01,  1.09s/it]Testing: 100%|██████████| 146/146 [02:43<00:00,  1.09s/it]/usr/local/lib/python3.8/dist-packages/pytorch_lightning/utilities/distributed.py:52: UserWarning: The dataloader, test dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 96 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  warnings.warn(*args, **kwargs)
+[INFO] CM IoU - tensor([99.6570,  0.0000,  0.0000])
+/usr/local/lib/python3.8/dist-packages/torch/tensor.py:521: RuntimeWarning: invalid value encountered in multiply
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333399821943) | recall tensor([99.6570,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 146/146 [02:43<00:00,  1.12s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9965701699256897,
+ 'test_acc_w': 0.9932122826576233,
+ 'test_dist_l1': 0.0035800172481685877,
+ 'test_dist_l2': 0.003880387404933572,
+ 'test_dist_logl2': 0.001756981946527958,
+ 'test_dist_mistake_severity': 0.043787866830825806,
+ 'test_iou': 0.9900636076927185}
+--------------------------------------------------------------------------------

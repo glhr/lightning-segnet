@@ -1,0 +1,240 @@
+--> summary for freiburg | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+[INFO] CM IoU - tensor([94.8594, 78.8241, 66.6330])
+[INFO] precision tensor([96.5896, 86.8604, 91.1269], dtype=torch.float64) (91.52563586998758) | recall tensor([98.1466, 89.4954, 71.2562], dtype=torch.float64) (86.29942135620064)
+Testing: 100%|██████████| 136/136 [02:34<00:00,  1.13s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9355033040046692,
+ 'test_acc_w': 0.9268800616264343,
+ 'test_dist_l1': 0.06481075286865234,
+ 'test_dist_l2': 0.06543894112110138,
+ 'test_dist_logl2': 0.02172456681728363,
+ 'test_dist_mistake_severity': 0.004869953263550997,
+ 'test_iou': 0.8808630704879761}
+--------------------------------------------------------------------------------
+--> summary for freiburg | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+[INFO] CM IoU - tensor([94.4883, 77.6035, 66.3503])
+[INFO] precision tensor([95.5962, 87.7372, 91.6633], dtype=torch.float64) (91.66557536610611) | recall tensor([98.7884, 87.0447, 70.6113], dtype=torch.float64) (85.48145839834382)
+Testing: 100%|██████████| 136/136 [02:33<00:00,  1.13s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.932571291923523,
+ 'test_acc_w': 0.9212062358856201,
+ 'test_dist_l1': 0.06779564917087555,
+ 'test_dist_l2': 0.06852953881025314,
+ 'test_dist_logl2': 0.023153800517320633,
+ 'test_dist_mistake_severity': 0.0054419697262346745,
+ 'test_iou': 0.8761379718780518}
+--------------------------------------------------------------------------------
+--> summary for cityscapes | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+[INFO] CM IoU - tensor([97.5066, 53.5109, 89.2735])
+[INFO] precision tensor([98.1679, 60.4822, 98.5723], dtype=torch.float64) (85.74078742844384) | recall tensor([99.3138, 82.2776, 90.4430], dtype=torch.float64) (90.67814709130081)
+Testing: 100%|██████████| 233/233 [04:50<00:00,  1.25s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9493425488471985,
+ 'test_acc_w': 0.9456127285957336,
+ 'test_dist_l1': 0.054326802492141724,
+ 'test_dist_l2': 0.06166544929146767,
+ 'test_dist_logl2': 0.015543464571237564,
+ 'test_dist_mistake_severity': 0.07243397831916809,
+ 'test_iou': 0.909353494644165}
+--------------------------------------------------------------------------------
+--> summary for cityscapes | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+[INFO] CM IoU - tensor([97.5236, 54.4438, 90.0620])
+[INFO] precision tensor([98.1858, 62.4367, 98.3812], dtype=torch.float64) (86.33456761872912) | recall tensor([99.3132, 80.9629, 91.4167], dtype=torch.float64) (90.56425918682768)
+Testing: 100%|██████████| 233/233 [04:47<00:00,  1.24s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.952052652835846,
+ 'test_acc_w': 0.9493659734725952,
+ 'test_dist_l1': 0.05136139690876007,
+ 'test_dist_l2': 0.058189619332551956,
+ 'test_dist_logl2': 0.01488051749765873,
+ 'test_dist_mistake_severity': 0.0712055042386055,
+ 'test_iou': 0.913573145866394}
+--------------------------------------------------------------------------------
+--> summary for thermalvoc | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.33333267655547) | recall tensor([99.2596,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 146/146 [02:59<00:00,  1.23s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9925955533981323,
+ 'test_acc_w': 0.9866588711738586,
+ 'test_dist_l1': 0.008329534903168678,
+ 'test_dist_l2': 0.010179792530834675,
+ 'test_dist_logl2': 0.004229571670293808,
+ 'test_dist_mistake_severity': 0.12494304776191711,
+ 'test_iou': 0.9774366617202759}
+--------------------------------------------------------------------------------
+--> summary for thermalvoc | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([100.0000,   0.0000,   0.0000], dtype=torch.float64) (33.333334184701854) | recall tensor([99.6214,     nan,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 146/146 [02:49<00:00,  1.16s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9962144494056702,
+ 'test_acc_w': 0.9943677186965942,
+ 'test_dist_l1': 0.004151611123234034,
+ 'test_dist_l2': 0.004883779678493738,
+ 'test_dist_logl2': 0.002084726467728615,
+ 'test_dist_mistake_severity': 0.09670635312795639,
+ 'test_iou': 0.982850193977356}
+--------------------------------------------------------------------------------
+--> summary for synthia | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+[INFO] CM IoU - tensor([91.0872, 54.6412, 81.7026])
+[INFO] precision tensor([97.1430, 62.2810, 90.0480], dtype=torch.float64) (83.15734612824902) | recall tensor([93.5945, 81.6663, 89.8124], dtype=torch.float64) (88.3577309620459)
+Testing: 100%|██████████| 2968/2968 [59:06<00:00,  1.19s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9160844683647156,
+ 'test_acc_w': 0.8992573618888855,
+ 'test_dist_l1': 0.11513170599937439,
+ 'test_dist_l2': 0.1775640994310379,
+ 'test_dist_logl2': 0.05506577342748642,
+ 'test_dist_mistake_severity': 0.3719955384731293,
+ 'test_iou': 0.8577612042427063}
+--------------------------------------------------------------------------------
+--> summary for synthia | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+[INFO] CM IoU - tensor([91.0695, 57.6502, 82.3362])
+[INFO] precision tensor([97.0561, 67.2871, 89.1045], dtype=torch.float64) (84.48259003852581) | recall tensor([93.6566, 80.1006, 91.5537], dtype=torch.float64) (88.43697680850563)
+Testing: 100%|██████████| 2968/2968 [57:08<00:00,  1.16s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9201411604881287,
+ 'test_acc_w': 0.9038234949111938,
+ 'test_dist_l1': 0.1139766052365303,
+ 'test_dist_l2': 0.18221214413642883,
+ 'test_dist_logl2': 0.056559618562459946,
+ 'test_dist_mistake_severity': 0.42722588777542114,
+ 'test_iou': 0.8645972609519958}
+--------------------------------------------------------------------------------
+--> summary for kitti | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+[INFO] CM IoU - tensor([94.2721, 61.3990, 85.3263])
+[INFO] precision tensor([95.8227, 76.0826, 96.0290], dtype=torch.float64) (89.31142094867633) | recall tensor([98.3124, 76.0844, 88.4471], dtype=torch.float64) (87.61463457962009)
+Testing: 100%|██████████| 20/20 [00:21<00:00,  1.10s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9325137138366699,
+ 'test_acc_w': 0.9364778995513916,
+ 'test_dist_l1': 0.07167743146419525,
+ 'test_dist_l2': 0.08005977421998978,
+ 'test_dist_logl2': 0.026464121416211128,
+ 'test_dist_mistake_severity': 0.06210405379533768,
+ 'test_iou': 0.875113308429718}
+--------------------------------------------------------------------------------
+--> summary for kitti | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+[INFO] CM IoU - tensor([94.2098, 60.9592, 86.1138])
+[INFO] precision tensor([95.4402, 78.5225, 95.4976], dtype=torch.float64) (89.82010284395491) | recall tensor([98.6501, 73.1571, 89.7579], dtype=torch.float64) (87.18838682435907)
+Testing: 100%|██████████| 20/20 [00:21<00:00,  1.10s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9336613416671753,
+ 'test_acc_w': 0.9385281205177307,
+ 'test_dist_l1': 0.07067999243736267,
+ 'test_dist_l2': 0.07936269044876099,
+ 'test_dist_logl2': 0.02656947635114193,
+ 'test_dist_mistake_severity': 0.06544226408004761,
+ 'test_iou': 0.8769506216049194}
+--------------------------------------------------------------------------------
+--> summary for multispectralseg | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9994, 10.0392,  0.0000], dtype=torch.float64) (36.679542494498676) | recall tensor([97.6642, 63.1011,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 205/205 [03:35<00:00,  1.05s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9753085374832153,
+ 'test_acc_w': 0.9708472490310669,
+ 'test_dist_l1': 0.026141496375203133,
+ 'test_dist_l2': 0.029041480273008347,
+ 'test_dist_logl2': 0.012468262575566769,
+ 'test_dist_mistake_severity': 0.05872434377670288,
+ 'test_iou': 0.9354774951934814}
+--------------------------------------------------------------------------------
+--> summary for multispectralseg | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([99.9996, 10.0900,  0.0000], dtype=torch.float64) (36.696527058719155) | recall tensor([97.6857, 61.3066,     nan], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 205/205 [03:29<00:00,  1.02s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9754533171653748,
+ 'test_acc_w': 0.9733113646507263,
+ 'test_dist_l1': 0.02652164362370968,
+ 'test_dist_l2': 0.0304715596139431,
+ 'test_dist_logl2': 0.012757613323628902,
+ 'test_dist_mistake_severity': 0.08045722544193268,
+ 'test_iou': 0.9337319135665894}
+--------------------------------------------------------------------------------
+--> summary for freiburgthermal | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+[INFO] CM IoU - tensor([95.6038, 43.8224, 81.9676])
+[INFO] precision tensor([96.5680, 55.7825, 94.9566], dtype=torch.float64) (82.43568577940508) | recall tensor([98.9664, 67.1475, 85.6985], dtype=torch.float64) (83.93747814568741)
+Testing: 100%|██████████| 1115/1115 [20:38<00:00,  1.11s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.924379825592041,
+ 'test_acc_w': 0.9194197058677673,
+ 'test_dist_l1': 0.08679673820734024,
+ 'test_dist_l2': 0.10914992541074753,
+ 'test_dist_logl2': 0.029363291338086128,
+ 'test_dist_mistake_severity': 0.14779913425445557,
+ 'test_iou': 0.8641914129257202}
+--------------------------------------------------------------------------------
+--> summary for freiburgthermal | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+[INFO] CM IoU - tensor([95.5893, 44.7965, 82.7353])
+[INFO] precision tensor([96.5687, 57.9548, 94.6558], dtype=torch.float64) (83.05976841430362) | recall tensor([98.9501, 66.3644, 86.7894], dtype=torch.float64) (84.03461957209984)
+Testing: 100%|██████████| 1115/1115 [22:14<00:00,  1.20s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9271026849746704,
+ 'test_acc_w': 0.9225762486457825,
+ 'test_dist_l1': 0.08456793427467346,
+ 'test_dist_l2': 0.10790925472974777,
+ 'test_dist_logl2': 0.02930348925292492,
+ 'test_dist_mistake_severity': 0.16009736061096191,
+ 'test_iou': 0.8690115809440613}
+--------------------------------------------------------------------------------
+--> summary for lostfound | 2021-05-12 11-24-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=42-val_loss=0.0060
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([55.4411,  0.0000, 99.8649], dtype=torch.float64) (51.76869782589506) | recall tensor([61.5059,     nan, 89.8000], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1203/1203 [22:23<00:00,  1.12s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.8958203792572021,
+ 'test_acc_w': 0.9191992878913879,
+ 'test_dist_l1': 0.10919205099344254,
+ 'test_dist_l2': 0.11921674758195877,
+ 'test_dist_logl2': 0.02290913462638855,
+ 'test_dist_mistake_severity': 0.048112496733665466,
+ 'test_iou': 0.8281299471855164}
+--------------------------------------------------------------------------------
+--> summary for lostfound | 2021-05-12 14-34-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=49-val_loss=0.0023
+  return self.to(torch.get_default_dtype()).reciprocal() * other
+[INFO] precision tensor([54.0989,  0.0000, 99.8386], dtype=torch.float64) (51.3125182293777) | recall tensor([58.7135,     nan, 91.4497], dtype=torch.float64) (nan)
+Testing: 100%|██████████| 1203/1203 [22:39<00:00,  1.13s/it]
+--------------------------------------------------------------------------------
+DATALOADER:0 TEST RESULTS
+{'cm': 0.0,
+ 'test_acc': 0.9119752049446106,
+ 'test_acc_w': 0.933761715888977,
+ 'test_dist_l1': 0.09332839399576187,
+ 'test_dist_l2': 0.10393545776605606,
+ 'test_dist_logl2': 0.020542090758681297,
+ 'test_dist_mistake_severity': 0.060250360518693924,
+ 'test_iou': 0.8484342694282532}
+--------------------------------------------------------------------------------
