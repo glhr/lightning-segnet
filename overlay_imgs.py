@@ -38,7 +38,10 @@ save_folder = save_folder.replace("overlay",f"overlay{description}")
 try:
     create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
 except OSError:
-    save_folder = save_folder[:100]
+    save_folder = f"overlay_" if args.model2 is None else f"overlay_modelcomp_"
+    for model in [args.model, args.model2, args.model3]:
+        if model is not None:
+            save_folder += model[-20:]
     create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
 
 filenames = []

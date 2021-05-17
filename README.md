@@ -27,6 +27,12 @@ python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16
 python3 metrics.py --distmap
 ```
 
+### Soft labels
+
+```bash
+python3 losses.py --dist l1 --alpha 2
+```
+
 ### Dataset stats
 
 will output the proportion of pixels in each class

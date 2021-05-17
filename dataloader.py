@@ -10,6 +10,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import cv2
 from PIL import Image, ImageFile
+import cmapy
 import imageio
 imageio.plugins.freeimage.download()
 
@@ -303,7 +304,7 @@ class MMDataLoader(Dataset):
 
         return mask_out
 
-    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None):
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None, colorize=False):
         if filename_prefix is None:
             filename_prefix = self.name
 
@@ -367,9 +368,16 @@ class MMDataLoader(Dataset):
         if pred_proba is not None:
             if torch.is_tensor(pred_proba): pred_proba = pred_proba.detach().cpu().numpy()
             # print(np.unique(proba))
-            proba = pred_proba/2
-            proba = (proba*255).astype(np.uint8)
-            proba = np.stack((proba,)*3, axis=-1)
+            if colorize:
+                proba = pred_proba + 2
+                # print(np.unique(proba))
+                proba = (255 * (proba/4)).astype(np.uint8)
+                # print(np.unique(proba))
+                proba = cv2.cvtColor(cv2.applyColorMap(proba, cmapy.cmap('bwr_r')), cv2.COLOR_BGR2RGB)
+            else:
+                proba = pred_proba/2
+                proba = (proba*255).astype(np.uint8)
+                proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)
 
         # for d in concat:
@@ -380,7 +388,10 @@ class MMDataLoader(Dataset):
         folder = "" if folder is None else folder
         dataset_name = self.name if dataset_name is None else dataset_name
         if orig is None:
-            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
+            try:
+                img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
+            except Exception as e:
+                logger.warning(f"{e} - skipping")
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
