@@ -1,15 +1,18 @@
 import torch
 from torch import nn
 import torch.utils.benchmark as benchmark
+import pickle
+from pathlib import Path
 
 from segnet import SegNet
 from fusion import FusionNet
 
-from utils import logger
+from utils import logger, create_folder
 
 num_classes = 3
 
 logger.info(f"... setting up models ...")
+create_folder("results/benchmark")
 
 model_segnet_1 = SegNet(num_classes=num_classes, n_init_features=1)
 model_segnet_2 = SegNet(num_classes=num_classes, n_init_features=2)
@@ -52,6 +55,7 @@ models = [
     ]
 
 num_threads = 1
+min_run_time = 1
 
 for model in models:
     # label and sub_label are the rows
@@ -61,16 +65,30 @@ for model in models:
     input_size = (1, channels, 240, 480)
     sub_label = model
     x = 255*torch.rand(size=input_size)
-    logger.info(f"-> running eval for {model}")
-    results.append(benchmark.Timer(
-        stmt=f'{model}(x)',
-        setup=f'from __main__ import {model}',
-        globals={'x': x},
-        num_threads=num_threads,
-        label=label,
-        sub_label=sub_label,
-        description='test',
-    ).blocked_autorange(min_run_time=60))
+
+    save = f'results/benchmark/{model} {num_threads}threads {min_run_time}s.pickle'
+    if not Path(save).is_file():
+        logger.info(f"-> running eval for {model}")
+        result = benchmark.Timer(
+            stmt=f'{model}(x)',
+            setup=f'from __main__ import {model}',
+            globals={'x': x},
+            num_threads=num_threads,
+            label=label,
+            sub_label=sub_label,
+            description='test',
+        ).blocked_autorange(min_run_time=min_run_time)
+        with open(save, 'wb') as handle:
+            pickle.dump(result, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    else:
+        logger.info(f"-> found eval for {model}, loading pickle")
+        with open(save, 'rb') as handle:
+            result = pickle.load(handle)
+
+    results.append(result)
+
 
 compare = benchmark.Compare(results)
+compare.trim_significant_figures()
+compare.colorize()
 compare.print()
