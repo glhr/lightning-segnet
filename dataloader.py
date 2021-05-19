@@ -1224,7 +1224,7 @@ class OwnDataLoader(DemoDataLoader):
         self.viz = viz
 
         print(self.path + self.split_path + "rgb/*.jpg")
-        for img in glob.glob(self.path + self.split_path + "rgb/*.jpg"):
+        for img in glob.glob(self.path + self.split_path + "rgb/*.jpg") + glob.glob(self.path + self.split_path + "rgb/*.JPG"):
             img = img.split("/")[-1]
             # print(img)
             self.filenames.append(img)

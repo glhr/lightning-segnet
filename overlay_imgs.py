@@ -16,6 +16,8 @@ parser.add_argument('--model3', default=None)
 parser.add_argument('--ir', default=False, action="store_true")
 parser.add_argument('--rgb', default=False, action="store_true")
 parser.add_argument('--gt', default=False, action="store_true")
+parser.add_argument('--error', default=False, action="store_true")
+parser.add_argument('--nospacing', default=False, action="store_true")
 parser.add_argument('--alpha', type=float, default=0.4)
 args = parser.parse_args()
 
@@ -52,6 +54,9 @@ for file in glob.glob(f"results/{args.dataset}/{args.xp}/{args.dataset}-*-cls-{a
     print("-->",file)
     filenames.append(file)
 
+if not len(filenames):
+    print(f"couldn't find anything matching results/{args.dataset}/{args.xp}/{args.dataset}-*-cls-{args.model}.png")
+
 i = 1
 for i in filenames:
     try:
@@ -61,6 +66,10 @@ for i in filenames:
         f_pred = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model}.png"
         f_pred2 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model2}.png"
         f_pred3 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model3}.png"
+
+        f_error1=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model}.png"
+        f_error2=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model2}.png"
+        f_error3=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model3}.png"
 
         print(f_rgb)
         img_rgb = cv.imread(f_rgb)
@@ -76,32 +85,60 @@ for i in filenames:
         spacing = np.ones_like(img_rgb)[:,:10,:]*255
 
         stack = []
-        if args.rgb:
+        errormaps = []
 
+
+        if args.rgb:
             stack.append(img_rgb)
-            stack.append(spacing)
+            if not args.nospacing: stack.append(spacing)
+            if args.error:
+                errormaps.append(255*np.ones_like(img_rgb))
+                if not args.nospacing: errormaps.append(spacing)
         if args.ir:
             print(f_ir)
             img_ir = cv.imread(f_ir)
             stack.append(img_ir)
-            stack.append(spacing)
+            if not args.nospacing: stack.append(spacing)
         if args.gt:
             stack.append(img_gt)
-            stack.append(spacing)
-
+            if not args.nospacing: stack.append(spacing)
+            if args.error:
+                errormaps.append(255*np.ones_like(img_rgb))
+                if not args.nospacing: errormaps.append(spacing)
         stack.append(dst)
+        if args.error:
+            print(f_error1)
+            img_error1 = cv.imread(f_error1)
+            errormaps.append(img_error1)
+
         if args.model2:
-            stack.append(spacing)
+            if not args.nospacing: stack.append(spacing)
             img_pred2 = cv.imread(f_pred2)
             dst2 = cv.addWeighted(img_rgb, alpha, img_pred2, beta, 0.0)
             stack.append(dst2)
+            if args.error:
+                print(f_error2)
+                if not args.nospacing: errormaps.append(spacing)
+                img_error2 = cv.imread(f_error2)
+                errormaps.append(img_error2)
         if args.model3:
-            stack.append(spacing)
+            if not args.nospacing: stack.append(spacing)
             img_pred3 = cv.imread(f_pred3)
             dst3 = cv.addWeighted(img_rgb, alpha, img_pred3, beta, 0.0)
             stack.append(dst3)
+            if args.error:
+                print(f_error3)
+                if not args.nospacing: errormaps.append(spacing)
+                img_error3 = cv.imread(f_error3)
+                errormaps.append(img_error3)
 
         out = np.hstack(stack)
+
+        if args.error:
+            errormaps_out = np.hstack(errormaps)
+            out = np.vstack([out,errormaps_out])
+
+
         # cv.imshow('dst', out)
         # cv.waitKey(0)
         # cv.destroyAllWindows()
