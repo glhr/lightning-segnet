@@ -26,14 +26,7 @@ num_classes = 3
 logger.info(f"... setting up models ...")
 create_folder("results/benchmark")
 
-# input_size = (1, 1, 240, 480)
-# x = 255*torch.rand(size=input_size)
-# with profiler.profile(record_shapes=True, profile_memory=True) as prof:
-#     with profiler.record_function("model_inference"):
-#         model_segnet_1(x)
-#
-# # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=1))
-# print(prof.key_averages().table(sort_by="cpu_memory_usage", row_limit=10))
+
 
 model_dict = {
   "model_segnet_1": SegNet(num_classes=num_classes, n_init_features=1),
@@ -64,6 +57,11 @@ model_dict = {
 for model_str,m in model_dict.items():
     if args.cuda:
         m = m.cuda()
+    m.eval()
+
+def forward(model_str, x):
+    with torch.no_grad():
+        model_dict[f"{model_str}"](x)
 
 results = []
 
@@ -71,6 +69,7 @@ num_threads = args.threads
 device = "cuda" if args.cuda else f"cpu_{num_threads}threads"
 
 for model_str in model_dict.keys():
+    logger.warning(model_str)
     # label and sub_label are the rows
     # description is the column
     channels = int(model_str.split("_")[-1])
@@ -82,19 +81,27 @@ for model_str in model_dict.keys():
     else:
         x = 255*torch.rand(size=input_size)
 
+    with profiler.profile(record_shapes=False, profile_memory=True) as prof:
+        with profiler.record_function("model_inference"):
+            model_dict[f"{model_str}"](x)
+    prof.export_chrome_trace(f'results/benchmark/{model_str} - {device}.json')
+
+    # print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=1))
+    print(prof.key_averages().table(sort_by="cpu_memory_usage", row_limit=1))
+
     save = f'results/benchmark/{model_str} - {device}.pickle'
     if args.force or not Path(save).is_file():
         logger.info(f"-> running eval for {model_str}")
         model = model_dict[f"{model_str}"]
         result = benchmark.Timer(
-            stmt=f'model(x)',
-            setup=f'from __main__ import model',
-            globals={'x': x},
+            stmt=f'forward(model_str,x)',
+            setup=f'from __main__ import forward',
+            globals={'x': x, 'model_str': model_str},
             num_threads=num_threads,
             label=label,
             sub_label=sub_label,
             description='test',
-        ).adaptive_autorange(threshold=0.025, max_run_time=300)
+        ).adaptive_autorange(threshold=0.015, max_run_time=300)
         with open(save, 'wb') as handle:
             pickle.dump(result, handle, protocol=pickle.HIGHEST_PROTOCOL)
     else:
