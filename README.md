@@ -38,3 +38,13 @@ python3 losses.py --dist l1 --alpha 2
 will output the proportion of pixels in each class
 
 python3 lightning.py --nopredict --test_set full --workers 10 --dataset freiburg
+
+# Results
+
+## Benchmarking
+
+python3 benchmark.py # CPU-only, will use all available threads
+python3 benchmark.py --cuda --force # inference on GPU
+
+this will load existing result pickle files from results/benchmarking/* and display them
+to re-run the tests, add the --force argument (will overwrite existing results)
