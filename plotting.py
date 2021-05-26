@@ -84,3 +84,11 @@ def visualize_data_aug(imgs, augmented):
 
     plt.tight_layout()
     plt.show()
+
+def plot_scatter(x,y):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.scatter(x = x, y = y)
+    # plt.xlabel("Living Area Above Ground")
+    # plt.ylabel("House Price")
+
+    plt.show()

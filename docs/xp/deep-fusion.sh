@@ -1,5 +1,10 @@
 ## Freiburg
 
+xp=coolfusion
+dataset=freiburg
+arg=$1
+
+
 checkpoints_ssma=(
 "fusionfusion-ssma16-single-2021-04-26 06-40-freiburg-c3-kl-rgb,depth-epoch=75-val_loss=0.1338"
 "fusionfusion-ssma16-multi-2021-04-26 07-35-freiburg-c3-kl-rgb,depth-epoch=102-val_loss=0.1500"
@@ -13,6 +18,30 @@ checkpoints_ssma=(
 "fusionfusion-ssma16-multi-2021-04-25 20-49-freiburg-c3-kl-rgb,depth,ir-epoch=125-val_loss=0.1195"
 "fusionfusion-ssma16-late-2021-04-30 16-29-freiburg-c3-kl-rgb,depth,ir-epoch=64-val_loss=0.1264"
 )
+
+
+run() {
+  mkdir -p results/$dataset/$xp/txt
+  txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
+  echo "$checkpoint"
+  isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
+  if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
+    echo "--> running eval"
+    python3 fusion-test.py  --bs 1 --fusion $unit --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --gpus 0 > "$txtoutput" 2>&1
+  fi
+  echo "--> summary"
+  tail -14 "$txtoutput"
+  if [[ $arg == "overlay" ]]; then
+    echo "--> generating overlay"
+    python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoints[0]}_affordances" --model2 "${checkpoints[1]}_affordances" --gt
+  fi
+}
+
+unit=ssma
+decoders=single
+checkpoint="fusionfusion-ssma16-single-2021-04-26 06-40-freiburg-c3-kl-rgb,depth-epoch=75-val_loss=0.1338"
+modalities="rgb,depth"
+run
 
 checkpoints_custom=(
 "fusionfusion-custom16-single-2021-04-20 18-31-freiburg-c3-kl-rgb,depth-epoch=43-val_loss=0.1429"

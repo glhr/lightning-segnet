@@ -280,6 +280,7 @@ if __name__ == "__main__":
     parser.add_argument('--depth', default=False, action="store_true")
     parser.add_argument('--iou', default=False, action="store_true")
     parser.add_argument('--debug', default=True, action="store_true")
+    parser.add_argument('--input', default="results/cityscapes/test/cityscapes-munster_000061_000019")
     args = parser.parse_args()
     logger.debug(args)
 
@@ -287,8 +288,9 @@ if __name__ == "__main__":
 
     if args.distmap:
         create_folder("results/distmap/")
-        gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/models/pytorch-unet-segnet/results/cityscapes/test/cityscapes-munster_000061_000019-gt_affordances.png'
-        depth_path = '/home/robotlab/rob10/learning-driveability-heatmaps/datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test/depth_gray/b1-09517_Clipped_redict_depth_gray.png'
+        gt_path = f'{args.input}-gt_affordances.png'
+        vis_path = f'{args.input}-orig-rgb_affordances.png'
+        depth_path = 'datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test/depth_gray/b1-09517_Clipped_redict_depth_gray.png'
         pred_path = gt_path
         image_orig = imread(gt_path)
         image_orig = cv2.resize(image_orig, dsize=(480,240))
@@ -333,25 +335,31 @@ if __name__ == "__main__":
             ax.axis('off')
 
         plt.tight_layout()
-        plt.show()
+        # plt.show()
 
 
         if args.final:
 
-            fig, axes = plt.subplots(ncols=1, sharex=True, sharey=True,
-                                     figsize=(8, 4))
+            filename = args.input.split("/")[-1]
+            vis_img = imread(vis_path, as_gray=True)
 
-            # axes[0].imshow(result["image_orig"])
+            fig, axes = plt.subplots(ncols=3, sharex=True, sharey=True,
+                                     figsize=(24, 3.95))
 
-            im = axes.imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0.1)
+            axes[1].imshow(result["image_orig"])
+            axes[0].imshow(vis_img, cmap=plt.cm.gray)
 
-            axes.axis('off')
+            im = axes[2].imshow(result["combined_map"], cmap=plt.cm.jet, vmin=0.1)
 
-            # fig.colorbar(im, fraction=0.046, pad=0.04)
+            axes[0].axis('off')
+            axes[1].axis('off')
+            axes[2].axis('off')
+
+            fig.colorbar(im, fraction=0.046, pad=0.04)
 
             plt.tight_layout()
-            plt.show()
-            plt.savefig("results/distmap/wmap-cbar.png")
+            # plt.show()
+            plt.savefig(f"results/distmap/wmap-cbar-{filename}.pdf")
 
     if args.iou:
         gt_path = '/home/robotlab/rob10/learning-driveability-heatmaps/report/diagrams/cato-iou-gt-2.png'

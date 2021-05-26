@@ -25,6 +25,14 @@ python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16
 
 # visualize a loss weight map
 python3 metrics.py --distmap
+python3 metrics.py --distmap --final --input results/freiburg/driv_freiburg/freiburg105
+python3 metrics.py --distmap --final --input results/kitti/driv_freiburg/kitti156
+python3 metrics.py --distmap --final --input results/freiburgthermal/thermo/freiburgthermal-1579080512_296238130
+python3 metrics.py --distmap --final --input results/multispectralseg/thermo/multispectralseg-00081D
+python3 metrics.py --distmap --final --input results/thermalvoc/thermo/thermalvoc-IMG_7270
+python3 metrics.py --distmap --final --input results/kaistpedann/thermo/kaistpedann-I00630_labeled
+python3 metrics.py --distmap --final --input results/synthia/test/synthia-Omni_B_000115
+python3 metrics.py --distmap --final --input results/lostfound/test/lostfound-07_Festplatz_Flugfeld_000002_000410
 ```
 
 ### Soft labels
