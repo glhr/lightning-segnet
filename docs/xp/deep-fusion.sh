@@ -184,6 +184,32 @@ checkpoints_customRLL=(
 
 ## Cityscapes
 
+dataset=cityscapes
+unit=ssma
+modalities="rgb,depthraw"
+
+decoders=single
+checkpoint="fusionfusion-ssma16-multi-2021-05-01 15-44-cityscapes-c3-kl-rgb,depthraw-epoch=24-val_loss=0.0876"
+run
+decoders=multi
+checkpoint="fusionfusion-ssma16-single-2021-05-01 09-20-cityscapes-c3-kl-rgb,depthraw-epoch=17-val_loss=0.0901"
+run
+decoders=late
+checkpoint="fusionfusion-ssma16-late-2021-05-01 02-36-cityscapes-c3-kl-rgb,depthraw-epoch=21-val_loss=0.0879"
+run
+
+modalities="rgb,depth"
+
+decoders=single
+checkpoint="fusionfusion-ssma16-multi-2021-05-01 18-18-cityscapes-c3-kl-rgb,depth-epoch=23-val_loss=0.0904"
+run
+decoders=multi
+checkpoint="fusionfusion-ssma16-single-2021-04-26 10-54-cityscapes-c3-kl-rgb,depth-epoch=24-val_loss=0.0884"
+run
+decoders=late
+checkpoint="fusionfusion-ssma16-late-2021-05-01 00-55-cityscapes-c3-kl-rgb,depth-epoch=22-val_loss=0.0872"
+run
+
 checkpoints_ssma=(
 "fusionfusion-ssma16-multi-2021-05-01 15-44-cityscapes-c3-kl-rgb,depthraw-epoch=24-val_loss=0.0876"
 "fusionfusion-ssma16-single-2021-05-01 09-20-cityscapes-c3-kl-rgb,depthraw-epoch=17-val_loss=0.0901"
@@ -194,6 +220,31 @@ checkpoints_ssma=(
 "fusionfusion-ssma16-late-2021-05-01 00-55-cityscapes-c3-kl-rgb,depth-epoch=22-val_loss=0.0872"
 )
 
+unit=custom
+modalities="rgb,depthraw"
+
+decoders=single
+checkpoint="fusionfusion-custom16-multi-2021-04-21 00-22-cityscapes-c3-kl-rgb,depthraw-epoch=23-val_loss=0.0873"
+run
+decoders=multi
+checkpoint="fusionfusion-custom16-single-2021-04-21 07-16-cityscapes-c3-kl-rgb,depthraw-epoch=2-val_loss=0.0920"
+run
+decoders=late
+checkpoint="fusionfusion-custom16-late-2021-04-29 22-42-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0883"
+run
+
+modalities="rgb,depth"
+
+decoders=single
+checkpoint="fusionfusion-custom16-multi-2021-04-21 14-31-cityscapes-c3-kl-rgb,depth-epoch=5-val_loss=0.0876"
+run
+decoders=multi
+checkpoint="fusionfusion-custom16-single-2021-04-21 16-17-cityscapes-c3-kl-rgb,depth-epoch=17-val_loss=0.0901"
+run
+decoders=late
+checkpoint="fusionfusion-custom16-late-2021-04-30 07-53-cityscapes-c3-kl-rgb,depth-epoch=5-val_loss=0.0878"
+run
+
 checkpoints_custom=(
 "fusionfusion-custom16-multi-2021-04-21 00-22-cityscapes-c3-kl-rgb,depthraw-epoch=23-val_loss=0.0873"
 "fusionfusion-custom16-single-2021-04-21 07-16-cityscapes-c3-kl-rgb,depthraw-epoch=2-val_loss=0.0920"
@@ -203,6 +254,25 @@ checkpoints_custom=(
 "fusionfusion-custom16-single-2021-04-21 16-17-cityscapes-c3-kl-rgb,depth-epoch=17-val_loss=0.0901"
 "fusionfusion-custom16-late-2021-04-30 07-53-cityscapes-c3-kl-rgb,depth-epoch=5-val_loss=0.0878"
 )
+
+unit=customrll
+modalities="rgb,depthraw"
+
+decoders=multi
+checkpoint="fusionfusion-custom16rll-multi-2021-04-23 10-38-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0888"
+run
+decoders=late
+checkpoint="fusionfusion-custom16rll-late-2021-04-30 23-13-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0891"
+run
+
+modalities="rgb,depth"
+
+decoders=multi
+checkpoint="fusionfusion-custom16rll-multi-2021-04-24 05-51-cityscapes-c3-kl-rgb,depth-epoch=7-val_loss=0.0880"
+run
+decoders=late
+checkpoint="fusionfusion-custom16rll-late-2021-04-30 21-32-cityscapes-c3-kl-rgb,depth-epoch=20-val_loss=0.0892"
+run
 
 checkpoints_customRLL=(
 "fusionfusion-custom16rll-multi-2021-04-23 10-38-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0888"
