@@ -1,5 +1,7 @@
 checkpoints=(
 "2021-04-08 14-28-freiburg-c6-sord-1,2,3-a1-logl2-rgb-epoch=74-val_loss=0.0061"
+"2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474"
+"2021-04-07 11-31-freiburg-c6-kl-0,1,2-rgb-epoch=43-val_loss=0.0771"
 )
 
 dataset=freiburgraw
