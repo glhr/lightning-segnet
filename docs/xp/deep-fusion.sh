@@ -27,7 +27,7 @@ run() {
   isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
   if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
     echo "--> running eval"
-    python3 fusion-test.py  --bs 1 --fusion $unit --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --gpus 0 > "$txtoutput" 2>&1
+    python3 fusion-test.py  --bs 1 --fusion $unit --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" > "$txtoutput" 2>&1
   fi
   echo "--> summary"
   tail -14 "$txtoutput"
@@ -38,9 +38,27 @@ run() {
 }
 
 unit=ssma
+modalities="rgb,depth"
+
 decoders=single
 checkpoint="fusionfusion-ssma16-single-2021-04-26 06-40-freiburg-c3-kl-rgb,depth-epoch=75-val_loss=0.1338"
-modalities="rgb,depth"
+run
+decoders=multi
+checkpoint="fusionfusion-ssma16-multi-2021-04-26 07-35-freiburg-c3-kl-rgb,depth-epoch=102-val_loss=0.1500"
+run
+decoders=late
+checkpoint="fusionfusion-ssma16-late-2021-04-30 18-58-freiburg-c3-kl-rgb,depth-epoch=119-val_loss=0.1430"
+run
+
+modalities="rgb,ir"
+decoders=single
+checkpoint="fusionfusion-ssma16-single-2021-04-26 09-56-freiburg-c3-kl-rgb,ir-epoch=79-val_loss=0.1066"
+run
+decoders=multi
+checkpoint="fusionfusion-ssma16-multi-2021-04-26 08-44-freiburg-c3-kl-rgb,ir-epoch=80-val_loss=0.1199"
+run
+decoders=late
+checkpoint="fusionfusion-ssma16-late-2021-04-30 20-05-freiburg-c3-kl-rgb,ir-epoch=119-val_loss=0.1183"
 run
 
 checkpoints_custom=(
