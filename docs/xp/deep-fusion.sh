@@ -51,7 +51,6 @@ run() {
           eval_customrll
           ;;
       esac
-    python3 fusion-test.py  --bs 1 --fusion $unit --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" > "$txtoutput" 2>&1
   fi
   echo "--> summary"
   tail -14 "$txtoutput"
