@@ -15,8 +15,8 @@ from segnet import SegNet, new_input_channels, new_output_channels
 from fusion import FusionNet
 from losses import SORDLoss, KLLoss, CompareLosses
 from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
-from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader, FreiburgThermalDataLoader, KAISTPedestrianDataLoader, KAISTPedestrianAnnDataLoader, MIRMultispectral, LostFoundDataLoader
-from plotting import plot_confusion_matrix
+from dataloader import FreiburgDataLoader, CityscapesDataLoader, KittiDataLoader, OwnDataLoader, ThermalVOCDataLoader, SynthiaDataLoader, FreiburgThermalDataLoader, KAISTPedestrianDataLoader, KAISTPedestrianAnnDataLoader, MIRMultispectral, LostFoundDataLoader, FreiburgForestRawDataLoader
+from plotting import plot_confusion_matrix, plot_scatter
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 
 from argparse import ArgumentParser
@@ -127,7 +127,8 @@ class LitSegNet(pl.LightningModule):
                 "kaistped": KAISTPedestrianDataLoader,
                 "kaistpedann": KAISTPedestrianAnnDataLoader,
                 "multispectralseg": MIRMultispectral,
-                "lostfound": LostFoundDataLoader
+                "lostfound": LostFoundDataLoader,
+                "freiburgraw": FreiburgForestRawDataLoader
             }
 
 
@@ -364,6 +365,18 @@ class LitSegNet(pl.LightningModule):
 
         return count
 
+    def input_corr(self, sample):
+        n_mods = sample.shape[1]
+
+        x = sample[:,0,::].detach().cpu().numpy().flat
+        y = sample[:,1,::].detach().cpu().numpy().flat
+
+        plot_scatter(x,y)
+
+        # np.random.shuffle(x)
+
+        print(np.corrcoef(y,x)[0, 1])
+
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
 
@@ -498,6 +511,7 @@ class LitSegNet(pl.LightningModule):
 
         else:
             count = self.gt_stats(target_orig)
+            # corr = self.input_corr(sample)
             self.log('gt_cls_count', count, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_stats)
 
 
@@ -592,7 +606,7 @@ if __name__ == '__main__':
     if args.debug: enable_debug()
 
     logger.debug(args)
-    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq, save=args.save, save_xp=args.save_xp, test_set=args.test_set, nopredict=args.nopredict)
+    segnet_model = LitSegNet(conf=args, viz=args.viz, dataset_seq=args.dataset_seq, save=args.save, save_xp=args.save_xp, test_set=args.test_set, nopredict=args.nopredict, test_max = args.test_samples)
 
     if args.prefix is None:
         args.prefix = segnet_model.hparams.save_prefix
