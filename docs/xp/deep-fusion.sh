@@ -4,6 +4,12 @@ xp=coolfusion
 dataset=freiburg
 arg=$1
 
+if [[ $arg == "nogpu" ]]; then
+  gpu="--gpus 0"
+else
+  gpu=""
+fi
+
 
 checkpoints_ssma=(
 "fusionfusion-ssma16-single-2021-04-26 06-40-freiburg-c3-kl-rgb,depth-epoch=75-val_loss=0.1338"
@@ -19,13 +25,16 @@ checkpoints_ssma=(
 "fusionfusion-ssma16-late-2021-04-30 16-29-freiburg-c3-kl-rgb,depth,ir-epoch=64-val_loss=0.1264"
 )
 
+eval_baseline() {
+  python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --loss kl --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities $modalities $gpu > "$txtoutput" 2>&1
+}
 
 eval_ssma() {
-  python3 fusion-test.py  --bs 1 --fusion $unit --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" > "$txtoutput" 2>&1
+  python3 fusion-test.py  --bs 1 --fusion $unit --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" $gpu > "$txtoutput" 2>&1
 }
 
 eval_custom() {
-  python3 fusion-test.py  --bs 1 --fusion custom --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --fusion_activ softmax --pretrained_last_layer > "$txtoutput" 2>&1
+  python3 fusion-test.py  --bs 1 --fusion custom --dataset $dataset --modalities $modalities --save --bs 1 --save_xp $xp --decoders $decoders --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --fusion_activ softmax --pretrained_last_layer $gpu > "$txtoutput" 2>&1
 }
 
 eval_customrll() {
@@ -49,6 +58,9 @@ run() {
           ;;
       'customrll')
           eval_customrll
+          ;;
+      'none')
+          eval_baseline
           ;;
       esac
   fi
@@ -184,9 +196,27 @@ checkpoints_customRLL=(
 ## Cityscapes
 
 dataset=cityscapes
+
+
+unit=none
+checkpoints_baselines=(
+"2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918"
+"2021-04-18 10-12-cityscapes-c30-kl-rgb,depthraw-epoch=23-val_loss=0.1024"
+"2021-04-18 00-48-cityscapes-c30-kl-rgb,depth-epoch=23-val_loss=0.0999"
+)
+modalities=rgb
+checkpoint="2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918"
+run
+modalities=rgb,depthraw
+checkpoint="2021-04-18 10-12-cityscapes-c30-kl-rgb,depthraw-epoch=23-val_loss=0.1024"
+run
+modalities=rgb,depth
+checkpoint="2021-04-18 00-48-cityscapes-c30-kl-rgb,depth-epoch=23-val_loss=0.0999"
+run
+
+
 unit=ssma
 modalities="rgb,depthraw"
-
 decoders=single
 checkpoint="fusionfusion-ssma16-single-2021-05-01 09-20-cityscapes-c3-kl-rgb,depthraw-epoch=17-val_loss=0.0901"
 run
