@@ -72,6 +72,26 @@ run() {
   fi
 }
 
+unit=none
+checkpoints_baselines=(
+"2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474"
+"2021-04-17 18-57-freiburg-c6-kl-rgb,depth-epoch=87-val_loss=0.1472"
+"2021-04-17 19-40-freiburg-c6-kl-rgb,ir-epoch=149-val_loss=0.1349"
+"2021-04-17 20-25-freiburg-c6-kl-rgb,depth,ir-epoch=81-val_loss=0.1352"
+)
+modalities=rgb
+checkpoint="2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474"
+run
+modalities=rgb,depth
+checkpoint="2021-04-17 18-57-freiburg-c6-kl-rgb,depth-epoch=87-val_loss=0.1472"
+run
+modalities=rgb,ir
+checkpoint="2021-04-17 19-40-freiburg-c6-kl-rgb,ir-epoch=149-val_loss=0.1349"
+run
+modalities=rgb,depth,ir
+checkpoint="2021-04-17 20-25-freiburg-c6-kl-rgb,depth,ir-epoch=81-val_loss=0.1352"
+run
+
 unit=ssma
 modalities="rgb,depth"
 
