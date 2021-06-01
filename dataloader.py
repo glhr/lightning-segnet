@@ -1319,6 +1319,34 @@ class FreiburgForestRawDataLoader(DemoDataLoader):
     def get_rgb(self, sample_id):
         return Image.open(f"{self.base_folders[sample_id]}/{self.filenames[sample_id]}").convert('RGB')
 
+class CityscapesRawDataLoader(DemoDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/cityscapesraw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, dataset_seq=None):
+        super().__init__(modalities, resize=resize, name="cityscapesraw", mode=mode, augment=augment)
+        self.path = path
+        logger.warning(dataset_seq)
+        sequences = ["stuttgart_00" if dataset_seq is None else dataset_seq]
+        self.viz = viz
+        self.base_folders = []
+
+        for filepath in glob.glob(self.path + 'leftImg8bit/demoVideo/*/*.png'):
+            img = filepath.split("/")[-1]
+            seq = filepath.split("/")[-2]
+            # print(seq, set)
+            if seq in sequences:
+                self.filenames.append(img)
+                self.base_folders.append(self.path + 'leftImg8bit/demoVideo/' + seq)
+
+        if len(self.filenames):
+            logger.debug(f"{self.filenames[0]}, {self.base_folders[0]}")
+
+        self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(f"{self.base_folders[sample_id]}/{self.filenames[sample_id]}").convert('RGB')
+
 class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
     # /home/robotlab/rob10/learning-driveability-heatmaps/datasets/kaist-pedestrian/data/kaist-rgbt/images/set00/V000

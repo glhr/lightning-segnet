@@ -21,7 +21,7 @@ run_single() {
 run_comp() {
     echo "--> generating overlay"
     mods=$1
-    python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoints[0]}_affordances" --model2 "${checkpoints[1]}_affordances" --model3 "${checkpoints[2]}_affordances" --model4 "${checkpoints[3]}_affordances" ${mods}
+    python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoints[0]}_affordances" --model2 "${checkpoints[1]}_affordances" ${mods}
 }
 
 
@@ -66,6 +66,12 @@ run_comp() {
 # "fusionfusion-custom16rll-multi-2021-04-24 16-46-freiburg-c3-kl-rgb,depth,ir-epoch=62-val_loss=0.1102"
 # )
 # run_comp "--prefix rgb,d,ir-archcomp-customrll"
+
+checkpoints=(
+"fusionfusion-ssma16-multi-2021-04-25 20-49-freiburg-c3-kl-rgb,depth,ir-epoch=125-val_loss=0.1195"
+"fusionfusion-custom16rll-multi-2021-04-24 16-46-freiburg-c3-kl-rgb,depth,ir-epoch=62-val_loss=0.1102"
+)
+run_comp "--prefix unitcomp-middual --gt"
 
 unit=none
 checkpoints_baselines=(
@@ -123,7 +129,21 @@ checkpoints=(
 )
 run_single "--gt --rgb --depthraw --nopred"
 run_single "--gt --rgb --depth --depthraw --nopred"
-# run_comp "--prefix rgb,draw-archcomp-customrll"
+run_comp "--prefix rgb,draw-archcomp-custom"
+
+checkpoints=(
+"fusionfusion-custom16-late-2021-04-29 22-42-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0883"
+"fusionfusion-custom16-late-2021-04-30 07-53-cityscapes-c3-kl-rgb,depth-epoch=5-val_loss=0.0878"
+"fusionfusion-custom16-multi-2021-04-21 00-22-cityscapes-c3-kl-rgb,depthraw-epoch=23-val_loss=0.0873"
+"fusionfusion-custom16-multi-2021-04-21 14-31-cityscapes-c3-kl-rgb,depth-epoch=5-val_loss=0.0876"
+)
+run_comp "--prefix depthcomp-latedual-custom"
+
+checkpoints=(
+"fusionfusion-ssma16-multi-2021-05-01 15-44-cityscapes-c3-kl-rgb,depthraw-epoch=24-val_loss=0.0876"
+"fusionfusion-custom16rll-multi-2021-04-23 10-38-cityscapes-c3-kl-rgb,depthraw-epoch=13-val_loss=0.0888"
+)
+run_comp "--prefix unitcomp-middual --gt"
 
 checkpoints_baselines=(
 "2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918"
