@@ -18,7 +18,7 @@ do
   for i in ${!checkpoints[@]}
   do
     echo ${txt[$i]}
-    ffmpeg -r 90 -f image2 -pattern_type glob -i "results/$dataset/*/overlayRgb-_${checkpoints[$i]}_affordances/${dataset}*-pred_overlay.png" -c:v libx264 -qp 0 -vf "drawtext=text='${txt[$i]}':x=700:y=20:fontsize=24:fontcolor=white" "results/$dataset/$xp-${checkpoints[$i]}.mp4"
+    ffmpeg -r 90 -f image2 -pattern_type glob -i "results/$dataset/$xp/overlayRgb-_${checkpoints[$i]}_affordances/${dataset}*-pred_overlay.png" -c:v libx264 -qp 0 -vf "drawtext=text='${txt[$i]}':x=700:y=20:fontsize=24:fontcolor=white" "results/$dataset/$xp-${checkpoints[$i]}.mp4"
   done
   ffmpeg -i "results/$dataset/$xp-${checkpoints[0]}.mp4" -i "results/$dataset/$xp-${checkpoints[1]}.mp4" -i "results/$dataset/$xp-${checkpoints[2]}.mp4" -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 "results/$dataset/$dataset-$xp.mp4"
 done
