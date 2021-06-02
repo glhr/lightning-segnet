@@ -1,8 +1,8 @@
 dataset=freiburgraw
 arg=$1
 checkpoints=(
-"2021-04-08 14-28-freiburg-c6-sord-1,2,3-a1-logl2-rgb-epoch=74-val_loss=0.0061"
 "2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474"
+"2021-04-08 14-28-freiburg-c6-sord-1,2,3-a1-logl2-rgb-epoch=74-val_loss=0.0061"
 "2021-04-07 11-31-freiburg-c6-kl-0,1,2-rgb-epoch=43-val_loss=0.0771"
 )
 
@@ -12,11 +12,14 @@ txt=(
   "Loss weighting"
 )
 
-for checkpoint in "${checkpoints[@]}"
+for set in demo-2016-03-01-11-50-45
 do
-  for set in demo-2016-03-01-11-50-45
+  xp="${set}"
+  for i in ${!checkpoints[@]}
   do
-    xp="${set}"
-    ffmpeg -y -r 80 -f image2 -pattern_type glob -i "results/$dataset/*/overlayRgb-_${checkpoint}_affordances/${dataset}*-pred_overlay.png" -vf "drawtext=text='${txt[$i]}':x=1000:y=20:fontsize=24:fontcolor=white" -c:v libx264 -qp 0 "results/$dataset/$xp-${checkpoint}.mp4"
+    ffmpeg -y -r 90 -f image2 -pattern_type glob -i "results/$dataset/*/overlayRgb-_${checkpoints[$i]}_affordances/${dataset}*-pred_overlay.png" -vf "drawtext=text='${txt[$i]}':x=1000:y=20:fontsize=24:fontcolor=white" -c:v libx264 -qp 0 "results/$dataset/$xp-${checkpoints[$i]}.mp4"
   done
+  ffmpeg -y -i "results/$dataset/$xp-${checkpoints[0]}.mp4" -i "results/$dataset/$xp-${checkpoints[1]}.mp4" -i "results/$dataset/$xp-${checkpoints[2]}.mp4" -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 "results/$dataset/$dataset-$xp.mp4"
 done
+
+# ffmpeg -y -i results/cityscapesraw/cityscapesraw-base.mp4 -i results/cityscapesraw/cityscapesraw-sord.mp4 -i results/cityscapesraw/cityscapesraw-lw.mp4 -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 results/cityscapesraw/cityscapesraw.mp4
