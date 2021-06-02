@@ -1329,7 +1329,9 @@ class CityscapesRawDataLoader(DemoDataLoader):
         self.viz = viz
         self.base_folders = []
 
-        for filepath in glob.glob(self.path + 'leftImg8bit/demoVideo/*/*.png'):
+        pattern = glob.glob(self.path + 'leftImg8bit/demoVideo/*/*.png') + glob.glob(self.path + 'leftImg8bit/demoVideo/*/*.jpg')
+
+        for filepath in pattern:
             img = filepath.split("/")[-1]
             seq = filepath.split("/")[-2]
             # print(seq, set)
