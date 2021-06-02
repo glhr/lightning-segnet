@@ -12,14 +12,15 @@ txt=(
   "Loss weighting"
 )
 
-for set in demo-2016-03-01-11-50-45
+for set in demo-2016-03-01-11-44-50 demo-2016-02-22-12-32-18 demo-2016-03-01-11-50-45
 do
   xp="${set}"
   for i in ${!checkpoints[@]}
   do
-    ffmpeg -y -r 90 -f image2 -pattern_type glob -i "results/$dataset/*/overlayRgb-_${checkpoints[$i]}_affordances/${dataset}*-pred_overlay.png" -vf "drawtext=text='${txt[$i]}':x=1000:y=20:fontsize=24:fontcolor=white" -c:v libx264 -qp 0 "results/$dataset/$xp-${checkpoints[$i]}.mp4"
+    echo ${txt[$i]}
+    ffmpeg -r 90 -f image2 -pattern_type glob -i "results/$dataset/*/overlayRgb-_${checkpoints[$i]}_affordances/${dataset}*-pred_overlay.png" -c:v libx264 -qp 0 -vf "drawtext=text='${txt[$i]}':x=700:y=20:fontsize=24:fontcolor=white" "results/$dataset/$xp-${checkpoints[$i]}.mp4"
   done
-  ffmpeg -y -i "results/$dataset/$xp-${checkpoints[0]}.mp4" -i "results/$dataset/$xp-${checkpoints[1]}.mp4" -i "results/$dataset/$xp-${checkpoints[2]}.mp4" -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 "results/$dataset/$dataset-$xp.mp4"
+  ffmpeg -i "results/$dataset/$xp-${checkpoints[0]}.mp4" -i "results/$dataset/$xp-${checkpoints[1]}.mp4" -i "results/$dataset/$xp-${checkpoints[2]}.mp4" -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 "results/$dataset/$dataset-$xp.mp4"
 done
 
 # ffmpeg -y -i results/cityscapesraw/cityscapesraw-base.mp4 -i results/cityscapesraw/cityscapesraw-sord.mp4 -i results/cityscapesraw/cityscapesraw-lw.mp4 -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 results/cityscapesraw/cityscapesraw.mp4
