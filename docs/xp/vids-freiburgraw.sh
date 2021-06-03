@@ -23,4 +23,6 @@ do
   ffmpeg -i "results/$dataset/$xp-${checkpoints[0]}.mp4" -i "results/$dataset/$xp-${checkpoints[1]}.mp4" -i "results/$dataset/$xp-${checkpoints[2]}.mp4" -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 "results/$dataset/$dataset-$xp.mp4"
 done
 
+ffmpeg -y -f concat -safe 0 -i results/freiburgraw/freiburgraw-demo.txt -c copy results/freiburgraw/freiburgraw-v.mp4
+
 # ffmpeg -y -i results/cityscapesraw/cityscapesraw-base.mp4 -i results/cityscapesraw/cityscapesraw-sord.mp4 -i results/cityscapesraw/cityscapesraw-lw.mp4 -filter_complex vstack=inputs=3 -c:v libx264 -qp 0 results/cityscapesraw/cityscapesraw.mp4
