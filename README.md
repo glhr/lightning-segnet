@@ -1,3 +1,5 @@
+This is a sub-module of https://github.com/glhr/learning-driveability-heatmaps
+
 # Content
 
 ```python
@@ -17,6 +19,26 @@
 ├── utils.py                # useful helper functions
 └── Singularity             # for building container in CLAAUDIA
 ```
+
+# Installation
+
+```bash
+# set up virtual environmen
+python3 -m venv venv
+source venv/bin/activate
+
+# install requirements:
+
+pip install --upgrade pip && pip install -r requirements/requirements.txt  # or requirements/requirements_claaudia.txt
+
+# for Jetson Xavier (Jetpack 4.4):
+pip3 install numpy==1.19.4
+wget -O torch-1.4.0-cp36-cp36m-linux_aarch64.whl https://nvidia.box.com/shared/static/ncgzus5o23uck9i5oth2n8n06k340l6k.whl # see https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-7-0-now-available/72048
+pip install torch-1.4.0-cp36-cp36m-linux_aarch64.whl
+git clone --branch v0.5.0 https://github.com/pytorch/vision torchvision   # see below for version of torchvision to download
+pip install -r requirements_jetson.txt
+```
+
 
 # Visualization
 
