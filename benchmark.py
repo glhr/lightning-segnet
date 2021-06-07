@@ -114,5 +114,5 @@ for model_str in model_dict.keys():
 
 compare = benchmark.Compare(results)
 compare.trim_significant_figures()
-compare.colorize()
+# compare.colorize()
 compare.print()
