@@ -70,13 +70,13 @@ def expected_value(p, ranks=[0,1,2]):
     return proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
 
 idx = 0
-def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map=None, show={"gt","argmax","loss"}):
+def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map=None, show={"gt","argmax","loss"}, filename=None):
     global idx
     idx += 1
     single_row = len(losses) == 1
     single_col = len(show) == 1
 
-    fig, axes = plt.subplots(ncols=len(show), nrows=len(losses), sharex=True, sharey=True,
+    fig, axes = plt.subplots(ncols=len(show), nrows=len(losses), sharex=False, sharey=False,
                              figsize=(5.33*len(show), 2.7*len(losses)))
 
     cols = ["gt","argmax","loss","weight_map"]
@@ -96,8 +96,9 @@ def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map
         for _, elem_name in enumerate(cols):
 
             if elem_name in show:
-                if single_col: ax = ax
-                else: ax = ax[col]
+                if single_col: ax_select = ax
+                else:
+                    ax_select = ax[col]
 
             if elem_name == "gt" and elem_name in show:
                 # logger.debug(target.shape)
@@ -106,8 +107,8 @@ def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map
                 # logger.debug(target.shape)
                 target = torch.reshape(target, (bs,240,480,-1))
                 # logger.debug(torch.unique(target[batch]))
-                ax.imshow(target[batch], cmap=color_ramp, vmin=-1, vmax=2, interpolation='none')
-                ax.axis('off')
+                ax_select.imshow(target[batch], cmap=color_ramp, vmin=-1, vmax=2, interpolation='none')
+                ax_select.axis('off')
                 # for cls in range(0, nclasses):
                 #     axes[i][cls+1].imshow(output[batch][cls], cmap=plt.cm.gray, vmin=0, vmax=1)
                 #     axes[i][cls+1].axis('off')
@@ -115,8 +116,8 @@ def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map
             elif elem_name == "argmax" and elem_name in show:
                 pred = output[batch][0]*0 + output[batch][1]*1 + output[batch][2]*2
                 pred = torch.argmax(output[batch], dim = 0)
-                ax.imshow(pred, cmap=color_ramp, vmin=0, vmax=2)
-                ax.axis('off')
+                ax_select.imshow(pred, cmap=color_ramp, vmin=0, vmax=2)
+                ax_select.axis('off')
 
             elif elem_name == "loss" and elem_name in show:
                 loss_reshaped = torch.reshape(loss,(bs,240,480,-1))
@@ -125,34 +126,32 @@ def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map
                 if weight_map is not None: weight_map = torch.reshape(weight_map, (bs,240,480,-1))
                 mask = target[batch].ge(0)
 
-                if weight_map is None or not use_w[loss_name]:
+                if weight_map is not None:
+                    logger.debug(weight_map.shape)
+                    nsamples = torch.sum(weight_map[batch][mask])
+                    logger.debug(f"weight map - nsamples {nsamples}")
+                else:
                     nsamples = torch.sum(torch.ones_like(target[batch][mask]),axis=-1)
                     logger.debug(f"unweighted - nsamples {nsamples}")
-                    loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
-                    logger.debug(f"loss viz MAX {np.max(loss_viz)}")
-                    loss_viz = loss_viz/nsamples
-                else:
-                    logger.debug(weight_map.shape)
-                    nsamples = torch.sum(weight_map[batch][mask],axis=-1)
-                    logger.debug(f"weight map - nsamples {nsamples}")
-                    loss_viz = loss_reshaped[batch].squeeze().numpy()
-                    logger.debug(f"loss viz MAX {np.max(loss_viz)}")
-                    loss_viz = loss_viz/nsamples
+                loss_viz = torch.sum(loss_reshaped[batch].squeeze(), axis=-1).numpy()
+                logger.debug(f"loss viz MAX {np.max(loss_viz)}")
+                loss_viz = loss_viz/nsamples
                 # logger.debug(loss_reshaped[batch].shape, f"loss sum {np.sum(loss_viz)}")
-                im = ax.imshow(loss_viz, cmap=plt.cm.jet)
-                cbar = fig.colorbar(im, fraction=0.046, pad=0.04)
-                cbar.ax.locator_params(nbins=5)
-                ax.axis('off')
+                im = ax_select.imshow(loss_viz, cmap=plt.cm.jet, vmin=0)
+                #cbar = fig.colorbar(im, fraction=0.046, pad=0.04)
+                #cbar.ax.locator_params(nbins=5)
+                ax_select.axis('off')
                 # axes[i][2].set_title(loss_name)
                 # logger.debug("unique loss values",np.unique(loss_viz))
 
                 logger.debug(f"loss {loss.shape} | reshaped {loss_reshaped.shape}")
 
             elif elem_name == "weight_map" and elem_name in show:
-                im = ax.imshow(weight_map[batch], cmap=plt.cm.jet)
-                cbar = fig.colorbar(im, fraction=0.046, pad=0.04)
-                cbar.ax.locator_params(nbins=5)
-                ax.axis('off')
+                print(np.unique(weight_map[batch]),weight_map[batch].shape)
+                im = ax_select.imshow(weight_map[batch].numpy(), cmap=plt.cm.jet, vmin=0)
+                #cbar = fig.colorbar(im, fraction=0.046, pad=0.04)
+                #cbar.ax.locator_params(nbins=5)
+                ax_select.axis('off')
 
             if elem_name in show:
                 col += 1
@@ -164,7 +163,10 @@ def viz_loss(output, losses, bs, nclasses, target=None, use_w = None, weight_map
     plt.axis('off')
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f"results/loss_weight/cityscapes/{loss_name} - cityscapes - test{idx} - 2021-03-27 14-54-cityscapes-c3-kl-rgb-epoch=191-val_loss=0.0958.png")
+    if filename is not None:
+        plt.savefig(f"results/loss_weight/{filename}.png".replace("lossname",f"{loss_name}|{','.join(show)}"))
+    else:
+        plt.show()
 
 
 def prepare_sample(output_orig, target_orig, weight_map=None, masking=True):
@@ -186,7 +188,7 @@ class CompareLosses(nn.Module):
         self.sord = SORDLoss(n_classes=self.num_classes, masking=self.masking, ranks=self.ranks, dist=dist)
         self.returnloss = returnloss
 
-    def forward(self, output, target, weight_map=None, debug=True, viz=True):
+    def forward(self, output, target, weight_map=None, debug=True, viz=True, filename=None):
         # target = torch.fliplr(target)
         # for i in range(target.shape[0]):
             # driveable = torch.zeros_like(target[i])
@@ -201,7 +203,7 @@ class CompareLosses(nn.Module):
         # weight_map = None
 
         losses = {
-            #"kldiv": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=None, debug=debug, reduce=False),
+            "kldiv": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=None, debug=debug, reduce=False),
             "kldiv_w": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
             #"sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
         }
@@ -209,7 +211,13 @@ class CompareLosses(nn.Module):
             "kldiv": False,
             "kldiv_w": True
         }
-        viz_loss(output, losses = losses, use_w = use_w, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"loss"}, target=target)
+
+        for l in losses:
+            viz_loss(output, losses = {l: losses[l]}, use_w = use_w, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"loss"}, target=target, filename=filename)
+            if use_w[l]:
+                viz_loss(output, losses = {l: losses[l]}, use_w = use_w, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"gt","weight_map"}, target=target, filename=filename)
+
+
         return losses["kldiv_w"][1]
 
 

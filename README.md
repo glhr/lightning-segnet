@@ -4,7 +4,7 @@ This is a sub-module of https://github.com/glhr/learning-driveability-heatmaps
 
 ```python
 .
-├── docs                    # bash scripts for getting experiment results + summaries of evaluation runs 
+├── docs                    # bash scripts for getting experiment results + summaries of evaluation runs
 ├── requirements            # separate pip requirements.txt files for setting this up on different platforms
 ├── results                 # raw output of evaluation runs
 ├── misc                    # miscellaneous utility scripts
@@ -64,8 +64,11 @@ can also add `--test_set` train/val/test
 ```bash
 
  # visualize pixel loss on predictions
-python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-03-27 14-54-cityscapes-c3-kl-rgb-epoch=191-val_loss=0.0958.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --loss compare --test_samples 10 --debug
-python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/2021-04-01 00-16-freiburg-c3-kl-rgb-epoch=686-val_loss=0.1479.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset freiburg --loss compare --test_samples 10 --debug
+CHECKPOINT="2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918"
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/${CHECKPOINT}.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset cityscapes --loss compare --test_samples 10 --debug --viz
+
+CHECKPOINT="2021-04-08 13-31-freiburg-c6-kl-rgb-epoch=43-val_loss=0.1474"
+python3 lightning.py --gpus 0 --test_checkpoint "lightning_logs/${CHECKPOINT}.ckpt" --num_classes 3 --bs 1 --mode affordances --dataset freiburg --loss compare --test_samples 10 --debug --viz
 
 # visualize a loss weight map
 python3 metrics.py --distmap

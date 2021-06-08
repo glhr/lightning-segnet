@@ -195,6 +195,9 @@ class LitSegNet(pl.LightningModule):
             create_folder(f"{self.result_folder}/gt")
             create_folder(f"{self.result_folder}/orig")
 
+        if self.hparams.loss == "compare":
+            create_folder(f"results/loss_weight/{self.hparams.dataset}")
+
 
     def update_model(self):
         channels = len(self.hparams.modalities)
@@ -213,7 +216,7 @@ class LitSegNet(pl.LightningModule):
         embedding = self.model(x)
         return embedding
 
-    def compute_loss(self, x_hat, y, loss="ce", weight_map=None):
+    def compute_loss(self, x_hat, y, loss="ce", weight_map=None, filename=None):
         if loss == "ce":
             return self.ce(x_hat, y)
         elif loss == "sord":
@@ -221,7 +224,7 @@ class LitSegNet(pl.LightningModule):
         elif loss == "kl":
             return self.kl(x_hat, y, weight_map=weight_map)
         elif loss == "compare":
-            return self.loss(x_hat, y, weight_map=weight_map)
+            return self.loss(x_hat, y, weight_map=weight_map, filename=filename)
 
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
@@ -407,7 +410,8 @@ class LitSegNet(pl.LightningModule):
                     weight_map = weight_from_target(target_orig, lwmap_range=self.hparams.lwmap_range)
                 else:
                     weight_map = None
-                if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss, weight_map=weight_map)
+                filename = f'{self.hparams.dataset}/{self.hparams.dataset} - {batch["filename"][0]} - {self.test_checkpoint} - lossname'
+                if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss, weight_map=weight_map, filename=filename)
                 pred_orig = torch.softmax(pred_orig, dim=1)
                 pred_cls_orig = torch.argmax(pred_orig, dim=1)
 
