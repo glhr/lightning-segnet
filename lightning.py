@@ -73,6 +73,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dataset_combo_ntrain', type=int, default=100)
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss_weight', action="store_true", default=False)
+        parser.add_argument('--lwmap_range', default="0.1,1")
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default=None)
         parser.add_argument('--modalities', default="rgb")
@@ -109,6 +110,7 @@ class LitSegNet(pl.LightningModule):
             self.hparams.resize = (480, 240)
             self.hparams.masking = True
             self.hparams.normalize = False
+            self.hparams.lwmap_range = tuple([float(i) for i in self.hparams.lwmap_range.split(",")])
             self.test_checkpoint = test_checkpoint
             self.test_max = test_max
             self.test_set = test_set if test_set is not None else "test"
@@ -244,7 +246,7 @@ class LitSegNet(pl.LightningModule):
         x_hat = self.model(x)
 
         if self.hparams.loss_weight:
-            weight_map = weight_from_target(y)
+            weight_map = weight_from_target(y, lwmap_range=self.hparams.lwmap_range)
         else:
             weight_map = None
 
@@ -402,7 +404,7 @@ class LitSegNet(pl.LightningModule):
                 # logger.debug(torch.min(sample),torch.max(sample))
                 pred_orig = self.model(sample)
                 if self.hparams.loss_weight:
-                    weight_map = weight_from_target(target_orig)
+                    weight_map = weight_from_target(target_orig, lwmap_range=self.hparams.lwmap_range)
                 else:
                     weight_map = None
                 if self.hparams.loss == "compare": loss = self.compute_loss(pred_orig, target_orig, loss=self.hparams.loss, weight_map=weight_map)

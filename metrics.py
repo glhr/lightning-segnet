@@ -182,12 +182,15 @@ class MaskedIoU(nn.Module):
         return iou_micro
 
 
-def weight_from_target(target):
+def weight_from_target(target, lwmap_range=(0.1,1)):
 
     # logger.debug(target.shape)
     distmap = torch.zeros_like(target).float()
     for i,sample in enumerate(target):
-        map = np.array(compute_distmap(target[i].detach().cpu().numpy())["combined_map"],dtype=np.float32)
+        map = np.array(compute_distmap(
+            target[i].detach().cpu().numpy(),
+            lwmap_range=lwmap_range)["combined_map"],
+            dtype=np.float32)
         # logger.debug("map",np.unique(map),map.dtype)
         distmap[i] = torch.from_numpy(map).float()
         # logger.debug("map", torch.unique(distmap[i]))
@@ -201,7 +204,7 @@ def compute_hmap(image_gray):
 
 hmap = None
 
-def compute_distmap(image_orig, depth_map=None):
+def compute_distmap(image_orig, lwmap_range, depth_map=None):
     global hmap
     # logger.debug("img shape",image_orig.shape)
     img_h, img_w = image_orig.shape[:2]
@@ -257,7 +260,7 @@ def compute_distmap(image_orig, depth_map=None):
 
     combined_map = distmap * depth_map
     print_range(combined_map, nameof(combined_map))
-    combined_map = rescale_intensity(combined_map, out_range=(0.1, 1))
+    combined_map = rescale_intensity(combined_map, out_range=lwmap_range)
     # combined_map = distmap
     print_range(combined_map, nameof(combined_map))
 
@@ -284,6 +287,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     logger.debug(args)
 
+    lwmap_range=(0,10)
+
     if args.debug: enable_debug()
 
     if args.distmap:
@@ -300,9 +305,9 @@ if __name__ == "__main__":
             depth_gray = cv2.resize(depth_gray, dsize=(480,240))
             depth_gray = np.max(depth_gray) - depth_gray
             logger.debug(np.unique(depth_gray))
-            result = compute_distmap(image_orig, depth_map=depth_gray)
+            result = compute_distmap(image_orig, depth_map=depth_gray, lwmap_range=lwmap_range)
         else:
-            result = compute_distmap(image_orig)
+            result = compute_distmap(image_orig, lwmap_range=lwmap_range)
 
         fig, axes = plt.subplots(ncols=5, sharex=True, sharey=True,
                                  figsize=(15, 4))
