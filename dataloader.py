@@ -391,7 +391,7 @@ class MMDataLoader(Dataset):
             try:
                 img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
             except Exception as e:
-                logger.warning(f"{e} - skipping")
+                logger.debug(f"{e} - skipping")
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
