@@ -388,7 +388,7 @@ class LitSegNet(pl.LightningModule):
 
         dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.dataset.datasets[0].dataset
 
-        orig_dataset_obj = self.orig_dataset.dataset
+        orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.dataset.datasets[0].dataset
 
         sample, target_orig = batch["sample"]
 
