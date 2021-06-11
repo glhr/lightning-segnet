@@ -139,6 +139,8 @@ for i in filenames:
             img_error1 = cv.imread(f_error1)
             errormaps.append(img_error1)
 
+
+
         if args.model2 and not args.nopred:
             if not args.nospacing: stack.append(spacing)
             img_pred2 = cv.imread(f_pred2)
