@@ -40,9 +40,15 @@ done
 
 singlecheckpoints=(
   "2021-05-06 13-48-freiburgthermal-c13-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0037"
+  "2021-06-11 22-51-freiburgthermal-c13-sord-1,2,3-a1-logl2-ir-epoch=63-val_loss=0.0059"
 )
 
-for checkpoint in "${singlecheckpoints[@]}"
+modalities=(
+  "rgb"
+  "ir"
+)
+
+for i in ${!singlecheckpoints[@]}
 do
   for dataset in freiburgthermal
   do
@@ -56,12 +62,12 @@ do
       python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${fusioncheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir --gt
     fi
     mkdir -p results/$dataset/$xp/txt
-    txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
+    txtoutput="results/${dataset}/${xp}/txt/${singlecheckpoints[$i]}.txt"
     echo "$dataset | $checkpoint"
     isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
     if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
-      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities rgb --loss_weight > "$txtoutput" 2>&1
+      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${singlecheckpoints[$i]}.ckpt" --save --save_xp $xp --modalities ${modalities[$i]} --loss_weight > "$txtoutput" 2>&1
       if [[ $arg == "overlay" ]]; then
         echo "--> generating overlay"
         python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${singlecheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir --gt
@@ -84,12 +90,12 @@ do
       python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${fusioncheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir
     fi
     mkdir -p results/$dataset/$xp/txt
-    txtoutput="results/${dataset}/${xp}/txt/${checkpoint}.txt"
+    txtoutput="results/${dataset}/${xp}/txt/${singlecheckpoints[$i]}.txt"
     echo "$dataset | $checkpoint"
     isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
     if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
-      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}.ckpt" --save --save_xp $xp --modalities rgb --loss_weight --test_set full > "$txtoutput" 2>&1
+      python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${singlecheckpoints[$i]}.ckpt" --save --save_xp $xp --modalities ${modalities[$i]} --loss_weight --test_set full > "$txtoutput" 2>&1
       if [[ $arg == "overlay" ]]; then
         echo "--> generating overlay"
         python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${singlecheckpoints[0]}_affordances" --model2 "${fusioncheckpoints[2]}_affordances" --rgb --ir
