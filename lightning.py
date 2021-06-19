@@ -2,6 +2,8 @@ import os
 import numpy as np
 import random
 
+from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
+
 import torch
 from torch import nn
 from torchvision import transforms
@@ -14,7 +16,6 @@ from pytorch_lightning.callbacks.base import Callback
 from segnet import SegNet, new_input_channels, new_output_channels
 from fusion import FusionNet
 from losses import SORDLoss, KLLoss, CompareLosses
-from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
 from dataloader import *
 from plotting import plot_confusion_matrix, plot_scatter
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
