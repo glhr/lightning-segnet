@@ -375,7 +375,7 @@ class MMDataLoader(Dataset):
                 # print(np.unique(proba))
                 proba = cv2.cvtColor(cv2.applyColorMap(proba, cmapy.cmap('bwr_r')), cv2.COLOR_BGR2RGB)
             else:
-                proba = pred_proba/2
+                proba = pred_proba
                 proba = (proba*255).astype(np.uint8)
                 proba = np.stack((proba,)*3, axis=-1)
             concat.append(proba)

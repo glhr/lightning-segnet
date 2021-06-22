@@ -451,7 +451,11 @@ class LitSegNet(pl.LightningModule):
                         proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
                         proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
                         proba_pref = p.squeeze()[orig_dataset_obj.aff_idx["preferable"]]
-                        expected = proba_imposs * 0 + proba_poss * 1 + proba_pref * 2
+                        expected = proba_imposs
+                        # expected = expected - torch.min(expected)
+                        # expected = expected/torch.max(expected)
+                        # print(torch.min(expected),torch.max(expected))
+                        # expected = 1 - expected
 
                     iter = batch_idx*self.hparams.bs + i
 

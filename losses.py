@@ -204,12 +204,13 @@ class CompareLosses(nn.Module):
 
         losses = {
             "kldiv": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=None, debug=debug, reduce=False),
-            "kldiv_w": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
-            #"sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
+            #"kldiv_w": self.kl(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
+            "sord": self.sord(output_orig=output, target_orig=torch.clone(target), weight_map=weight_map, debug=debug, reduce=False),
         }
         use_w = {
             "kldiv": False,
-            "kldiv_w": True
+            "kldiv_w": True,
+            "sord": False,
         }
 
         for l in losses:
@@ -218,7 +219,7 @@ class CompareLosses(nn.Module):
                 viz_loss(output, losses = {l: losses[l]}, use_w = use_w, weight_map = weight_map, bs=target.shape[0], nclasses=self.num_classes, show={"gt","weight_map"}, target=target, filename=filename)
 
 
-        return losses["kldiv_w"][1]
+        return losses["sord"][1]
 
 
 class KLLoss(nn.Module):

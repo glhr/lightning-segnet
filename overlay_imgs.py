@@ -104,13 +104,15 @@ for i in filenames:
         stack = []
         errormaps = []
 
-
         if args.rgb:
+
             stack.append(img_rgb)
             if not args.nospacing: stack.append(spacing)
             if args.error:
                 errormaps.append(255*np.ones_like(img_rgb))
                 if not args.nospacing: errormaps.append(spacing)
+
+
         if args.depthraw:
             # print(f_d)
             img_d = cv.imread(f_draw)
