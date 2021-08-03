@@ -133,7 +133,8 @@ class LitSegNet(pl.LightningModule):
                 "lostfound": LostFoundDataLoader,
                 "freiburgraw": FreiburgForestRawDataLoader,
                 "cityscapesraw": CityscapesRawDataLoader,
-                "rugd": RUGDDataLoader
+                "rugd": RUGDDataLoader,
+                "wilddash": WildDashDataLoader
             }
 
 
