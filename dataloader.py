@@ -3,6 +3,7 @@ import numpy as np
 import random
 import json
 import glob
+import traceback
 
 import torch
 from torchvision import transforms
@@ -161,11 +162,10 @@ class MMDataLoader(Dataset):
 
     def remap_classes(self, idx_to_color):
 
-        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone','curve','color_cone',
-        'bus','truck','trafficlight','trafficsign','wall','fence','train','trailer','caravan','polegroup','dynamic','licenseplate','static','bridge','tunnel','car','truck','minibus','bus','cat','dog','human','building','boat','pedestrian','_background_','fence','vegetation']
-        void = ['void','egovehicle','outofroi','rectificationborder','unlabeled','_ignore_']
-        driveable = ['road','path','ground','lanemarking','curb']
-        between = ['grass','terrain','sidewalk','parking','railtrack','ground_sidewalk','bump']
+        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock']
+        void = ['void', 'egovehicle', 'outofroi', 'rectificationborder', 'unlabeled', '_ignore_']
+        driveable = ['road', 'path', 'ground', 'lanemarking', 'curb', 'asphalt', 'concrete', 'gravel']
+        between = ['grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -503,6 +503,7 @@ class MMDataLoader(Dataset):
                 sample = self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
                 return {"sample": sample, "filename" : filename }
             except Exception as e:
+                traceback.print_exc()
                 logger.warning(f"{self.name} {sample_id} couldn't load sample: {e}")
         except IOError as e:
             print("Error loading " + self.filenames[sample_id], e)
@@ -1424,6 +1425,60 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
         pilDep = None
 
         return pilRGB, pilDep, pilIR, imgGT
+
+
+class RUGDDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/rugd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="rugd", mode=mode, augment=augment)
+        self.path = path
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        if self.mode == "objects":
+            self.cls_labels = [0]*len(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+            if self.mode == "objects":
+                self.cls_labels[x[4]] = x[0].lower()
+
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        self.augment = augment
+        self.viz = viz
+
+        self.base_folders = []
+
+        for filepath in glob.glob(self.path + 'RUGD_annotations/*/*.png'):
+            img = filepath.split("/")[-1].split(".")[0]
+            # print(img)
+            self.filenames.append(img)
+            self.base_folders.append(filepath.split("/")[-2])
+        print(self.filenames[0], self.base_folders[0])
+
+        self.color_GT = True
+
+        self.write_loader(set)
+
+    def get_image_pairs(self, sample_id):
+        pilRGB = Image.open(f"{self.path}/RUGD_frames-with-annotations/{self.base_folders[sample_id]}/{self.filenames[sample_id]}.png").convert('RGB')
+
+        # imgGT = cv2.imread(self.path + "GT_color/" + a + suffixes['gt'], cv2.IMREAD_UNCHANGED).astype(np.int8)
+        imgGT = Image.open(f"{self.path}/RUGD_annotations/{self.base_folders[sample_id]}/{self.filenames[sample_id]}.png").convert('RGB')
+
+        return pilRGB, None, None, imgGT
 
 if __name__ == '__main__':
 

@@ -132,7 +132,8 @@ class LitSegNet(pl.LightningModule):
                 "multispectralseg": MIRMultispectral,
                 "lostfound": LostFoundDataLoader,
                 "freiburgraw": FreiburgForestRawDataLoader,
-                "cityscapesraw": CityscapesRawDataLoader
+                "cityscapesraw": CityscapesRawDataLoader,
+                "rugd": RUGDDataLoader
             }
 
 
