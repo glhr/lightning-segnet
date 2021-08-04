@@ -134,7 +134,8 @@ class LitSegNet(pl.LightningModule):
                 "freiburgraw": FreiburgForestRawDataLoader,
                 "cityscapesraw": CityscapesRawDataLoader,
                 "rugd": RUGDDataLoader,
-                "wilddash": WildDashDataLoader
+                "wilddash": WildDashDataLoader,
+                "mapillary": MapillaryDataLoader
             }
 
 

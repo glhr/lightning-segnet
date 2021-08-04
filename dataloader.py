@@ -162,10 +162,10 @@ class MMDataLoader(Dataset):
 
     def remap_classes(self, idx_to_color):
 
-        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van']
+        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'catch-basin', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage']
         void = ['void', 'egovehicle', 'outofroi', 'rectificationborder', 'unlabeled', '_ignore_']
-        driveable = ['road', 'path', 'ground', 'lanemarking', 'curb', 'asphalt', 'concrete', 'gravel', 'road-marking']
-        between = ['grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch']
+        driveable = ['road', 'path', 'ground', 'lanemarking', 'curb', 'asphalt', 'concrete', 'gravel', 'road-marking', 'marking', 'bike-lane', 'service-lane', 'driveway', 'pedestrian-area']
+        between = ['grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island','water-valve', 'manhole','crosswalk-plain', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -861,7 +861,7 @@ class CityscapesDataLoader(MMDataLoader):
         # print(self.filenames[0])
         # print(len(self.filenames))
 
-        self.color_GT = False
+        self.color_GT = True
 
         self.write_loader(set)
 
@@ -1531,6 +1531,78 @@ class WildDashDataLoader(MMDataLoader):
 
     def get_gt(self, sample_id):
         return Image.open(f"{self.path}labels/{self.filenames[sample_id]}.png").convert('L')
+
+
+class MapillaryDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/mapillary/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="mapillary", mode=mode, augment=augment)
+        self.path = path
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+
+        if set == "train":
+            self.split_path = 'training/'
+        elif set == "val":
+            self.split_path = 'validation/'
+        elif set == "test":
+            self.split_path = 'testing/'
+        else:
+            self.split_path = ['training/','validation/']
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+
+        if set == "full":
+            file_pattern = []
+            for i,folder in enumerate(self.split_path):
+                file_pattern += glob.glob(f'{self.path}{self.split_path}v2.0/labels/*.png')
+        else:
+            file_pattern = glob.glob(f'{self.path}{self.split_path}v2.0/labels/*.png')
+            logger.warning(f'{self.path}{self.split_path}v2.0/labels/*.png')
+
+        for filepath in file_pattern:
+            img = filepath.split("/")[-1].split(".")[0]
+            base_folder = filepath.split("/")[-4]
+            self.filenames.append(img)
+            self.base_folders.append(base_folder)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = True
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(f"{self.path}{self.base_folders[sample_id]}/images/{self.filenames[sample_id]}.jpg").convert('RGB')
+
+    def get_gt(self, sample_id):
+        return Image.open(f"{self.path}{self.base_folders[sample_id]}/v2.0/labels/{self.filenames[sample_id]}.png").convert('RGB')
 
 if __name__ == '__main__':
 
