@@ -137,7 +137,8 @@ class LitSegNet(pl.LightningModule):
                 "rugd": RUGDDataLoader,
                 "wilddash": WildDashDataLoader,
                 "mapillary": MapillaryDataLoader,
-                "tas500": TAS500DataLoader
+                "tas500": TAS500DataLoader,
+                "acdc": ACDCDataLoader
             }
 
 

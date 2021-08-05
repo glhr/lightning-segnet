@@ -1591,6 +1591,70 @@ class TAS500DataLoader(MMDataLoader):
         return Image.open(f"{self.path}{self.split_path}_labels_ids/{self.filenames[sample_id]}.png").convert('L')
 
 
+class ACDCDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/acdc/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="acdc", mode=mode, augment=augment)
+        self.path = path
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+        self.suffixes = []
+
+        if set == "full":
+            self.split_path = ['train','val']
+        else:
+            self.split_path = set
+
+        file_pattern = glob.glob(f'{self.path}rgb_anon/*/{self.split_path}/*/*.png')
+        # logger.warning(file_pattern)
+
+        for filepath in file_pattern:
+
+            img = '_'.join(filepath.split("/")[-1].split(".")[0].split("_")[:3])
+            suffix = '_'.join(filepath.split("/")[-1].split(".")[0].split("_")[3:])
+            base_folder = '/'.join(filepath.split("/")[-4:-1])
+            self.filenames.append(img)
+            self.suffixes.append(suffix)
+            self.base_folders.append(base_folder)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = False
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(f"{self.path}rgb_anon/{self.base_folders[sample_id]}/{self.filenames[sample_id]}_{self.suffixes[sample_id]}.png").convert('RGB')
+
+    def get_gt(self, sample_id):
+        return Image.open(f'{self.path}gt/{self.base_folders[sample_id].replace("_ref","")}/{self.filenames[sample_id]}_gt_labelIds.png').convert('L')
+
+
+
 class MapillaryDataLoader(MMDataLoader):
 
     def __init__(self, resize, set="train", path = "../../datasets/mapillary/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
