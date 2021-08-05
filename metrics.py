@@ -208,7 +208,7 @@ def compute_distmap(image_orig, lwmap_range, depth_map=None):
     global hmap
     # logger.debug("img shape",image_orig.shape)
     img_h, img_w = image_orig.shape[:2]
-    if image_orig.shape[-1] == 3:
+    if image_orig.shape[-1] >= 3:
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
     else:
         image_gray = image_orig
@@ -283,6 +283,7 @@ if __name__ == "__main__":
     parser.add_argument('--depth', default=False, action="store_true")
     parser.add_argument('--iou', default=False, action="store_true")
     parser.add_argument('--debug', default=True, action="store_true")
+    parser.add_argument('--gray', default=False, action="store_true")
     parser.add_argument('--input', default="results/cityscapes/test/cityscapes-munster_000061_000019")
     args = parser.parse_args()
     logger.debug(args)
@@ -346,7 +347,8 @@ if __name__ == "__main__":
         if args.final:
 
             filename = args.input.split("/")[-1]
-            vis_img = imread(vis_path, as_gray=True)
+            vis_img = imread(vis_path, as_gray=args.gray)
+            vis_img = cv2.resize(vis_img, dsize=(480,240))
 
             fig, axes = plt.subplots(ncols=3, sharex=True, sharey=True,
                                      figsize=(24, 3.95))
