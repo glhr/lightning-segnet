@@ -53,7 +53,7 @@ parser.add_argument('--update_output_layer', default=False, action="store_true")
 parser.add_argument('--init', default=False, action="store_true")
 parser.add_argument('--dataset_seq', default=None)
 parser.add_argument('--nopredict', default=False, action="store_true")
-parser.add_argument('--accelerator', default="dp")
+# parser.add_argument('--accelerator', default="dp")
 
 import inspect
 
@@ -138,7 +138,8 @@ class LitSegNet(pl.LightningModule):
                 "wilddash": WildDashDataLoader,
                 "mapillary": MapillaryDataLoader,
                 "tas500": TAS500DataLoader,
-                "acdc": ACDCDataLoader
+                "acdc": ACDCDataLoader,
+                "idd": IDDDataLoader
             }
 
 
