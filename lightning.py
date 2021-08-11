@@ -139,7 +139,8 @@ class LitSegNet(pl.LightningModule):
                 "mapillary": MapillaryDataLoader,
                 "tas500": TAS500DataLoader,
                 "acdc": ACDCDataLoader,
-                "idd": IDDDataLoader
+                "idd": IDDDataLoader,
+                "bdd": BDDDataLoader
             }
 
 
@@ -150,7 +151,7 @@ class LitSegNet(pl.LightningModule):
                 self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
             else:
                 if self.hparams.dataset_combo is None:
-                    self.hparams.dataset_combo = "freiburg,cityscapes,thermalvoc,synthia,kitti,multispectralseg,freiburgthermal,lostfound"
+                    self.hparams.dataset_combo = "cityscapes,mapillary,acdc,rugd,tas500,idd,bdd"
 
                 self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
 

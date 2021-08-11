@@ -485,9 +485,12 @@ class MMDataLoader(Dataset):
             return pilRGB, pilDep, pilIR
 
         else:
-            imgGT = self.get_gt(sample_id)
-            # assert pilRGB.size == imgGT.size
-            return pilRGB, pilDep, pilIR, imgGT
+            try:
+                imgGT = self.get_gt(sample_id)
+                # assert pilRGB.size == imgGT.size
+                return pilRGB, pilDep, pilIR, imgGT
+            except Exception as e:
+                return pilRGB, pilDep, pilIR, np.zeros_like(pilRGB) if self.color_GT else np.zeros_like(pilRGB)[:,:,0]
 
     def sample(self, sample_id, augment):
 
@@ -827,17 +830,10 @@ class CityscapesDataLoader(MMDataLoader):
 
         self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
 
-        if set == "train":
-            self.split_path = 'train/'
-        elif set in ["test", "val"]:
-            self.split_path = 'val/'
+        if set == "full":
+            self.split_path = ['train','val']
         else:
-            self.split_path = ['train/','val/']
-
-        cities = {
-            "val": ["frankfurt"],
-            "test": ["lindau", "munster"]
-        }
+            self.split_path = set
 
         self.augment = augment
         self.viz = viz
@@ -846,18 +842,17 @@ class CityscapesDataLoader(MMDataLoader):
         if set == "full":
             file_pattern = []
             for i,folder in enumerate(self.split_path):
-                file_pattern += glob.glob(self.path + 'gtFine/' + self.split_path[i] + f'**/*labelIds.png')
+                file_pattern += glob.glob(self.path + 'leftImg8bit/' + self.split_path[i] + f'/**/*leftImg8bit.png')
         else:
-            file_pattern = glob.glob(self.path + 'gtFine/' + self.split_path + f'**/*labelIds.png')
+            file_pattern = glob.glob(self.path + 'leftImg8bit/' + self.split_path + f'/**/*leftImg8bit.png')
 
         for filepath in file_pattern:
 
             img = '_'.join('/'.join(filepath.split("/")[-2:]).split("_")[:3])
             city = img.split("/")[0]
             base_folder = filepath.split("/")[-3]
-            if set in ["train","full"] or city in cities[set]:
-                self.filenames.append(img)
-                self.base_folders.append(base_folder)
+            self.filenames.append(img)
+            self.base_folders.append(base_folder)
         # print(self.filenames[0])
         # print(len(self.filenames))
 
@@ -1461,11 +1456,20 @@ class RUGDDataLoader(MMDataLoader):
 
         self.base_folders = []
 
-        for filepath in glob.glob(self.path + 'RUGD_annotations/*/*.png'):
+        if set == "test":
+            self.sequences = ["creek","park-1","trail-7","trail-13"]
+        elif set == "val":
+            self.sequences = ["park-8","trail-5"]
+        elif set == "train":
+            self.sequences = ["park-2","trail","trail-3","trail-4","trail-6","trail-9","trail-10","trail-11","trail-12","trail-14","trail-15","village"]
+
+        for filepath in glob.glob(self.path + 'RUGD_frames-with-annotations/*/*.png'):
             img = filepath.split("/")[-1].split(".")[0]
+            sequence = filepath.split("/")[-2]
             # print(img)
-            self.filenames.append(img)
-            self.base_folders.append(filepath.split("/")[-2])
+            if sequence in self.sequences:
+                self.filenames.append(img)
+                self.base_folders.append(filepath.split("/")[-2])
         print(self.filenames[0], self.base_folders[0])
 
         self.color_GT = True
@@ -1570,7 +1574,7 @@ class TAS500DataLoader(MMDataLoader):
         else:
             self.split_path = set
 
-        file_pattern = glob.glob(self.path + f'{self.split_path}_labels_ids/*.png')
+        file_pattern = glob.glob(self.path + f'{self.split_path}/*.png')
         # logger.warning(file_pattern)
 
         for filepath in file_pattern:
@@ -1578,7 +1582,7 @@ class TAS500DataLoader(MMDataLoader):
             img = filepath.split("/")[-1].split(".")[0]
             self.filenames.append(img)
         # print(self.filenames[0])
-        # print(len(self.filenames))
+        print(len(self.filenames))
 
         self.color_GT = False
 
@@ -1703,14 +1707,14 @@ class MapillaryDataLoader(MMDataLoader):
         if set == "full":
             file_pattern = []
             for i,folder in enumerate(self.split_path):
-                file_pattern += glob.glob(f'{self.path}{self.split_path}v2.0/labels/*.png')
+                file_pattern += glob.glob(f'{self.path}{self.split_path}images/*.jpg')
         else:
-            file_pattern = glob.glob(f'{self.path}{self.split_path}v2.0/labels/*.png')
-            logger.warning(f'{self.path}{self.split_path}v2.0/labels/*.png')
+            file_pattern = glob.glob(f'{self.path}{self.split_path}images/*.jpg')
+            logger.warning(f'{self.path}{self.split_path}images/*.jpg')
 
         for filepath in file_pattern:
             img = filepath.split("/")[-1].split(".")[0]
-            base_folder = filepath.split("/")[-4]
+            base_folder = filepath.split("/")[-3]
             self.filenames.append(img)
             self.base_folders.append(base_folder)
         # print(self.filenames[0])
@@ -1766,9 +1770,9 @@ class IDDDataLoader(MMDataLoader):
         if set == "full":
             file_pattern = []
             for i,folder in enumerate(self.split_path):
-                file_pattern += glob.glob(self.path + 'gtFine/' + self.split_path[i] + f'**/*labellevel3Ids.png')
+                file_pattern += glob.glob(self.path + 'leftImg8bit/' + self.split_path[i] + f'**/*leftImg8bit.jpg')
         else:
-            file_pattern = glob.glob(self.path + 'gtFine/' + self.split_path + f'/**/*labellevel3Ids.png')
+            file_pattern = glob.glob(self.path + 'leftImg8bit/' + self.split_path + f'/**/*leftImg8bit.jpg')
 
         for filepath in file_pattern:
 
@@ -1789,6 +1793,70 @@ class IDDDataLoader(MMDataLoader):
 
     def get_gt(self, sample_id):
         return Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labellevel3Ids.png").convert('L')
+
+class BDDDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/bdd100k/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="bdd", mode=mode, augment=augment)
+        self.path = path
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if set == "full":
+            self.split_path = ['train','val']
+        else:
+            set = self.split_path = set
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+
+        if set == "full":
+            file_pattern = []
+            for i,folder in enumerate(self.split_path):
+                file_pattern += glob.glob(self.path + 'images/10k/' + self.split_path[i] + f'/*.jpg')
+        else:
+            file_pattern = glob.glob(self.path + 'images/10k/' + self.split_path + f'/*.jpg')
+
+        for filepath in file_pattern:
+
+            img = filepath.split("/")[-1].split(".")[0]
+            base_folder = filepath.split("/")[-2]
+            self.filenames.append(img)
+            self.base_folders.append(base_folder)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = False
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + "images/10k/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}.jpg").convert('RGB')
+
+    def get_gt(self, sample_id):
+        return Image.open(self.path + "sem_seg/masks/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}.png").convert('L')
+
 
 if __name__ == '__main__':
 
