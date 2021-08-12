@@ -126,8 +126,8 @@ class MMDataLoader(Dataset):
 
         modGT = self.prepare_GT(modGT, color_GT)
 
-        if use["rgb"]:
-            if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
+        # if use["rgb"]:
+        #    if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
             # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
         if use["depth"]:
             if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
@@ -139,7 +139,7 @@ class MMDataLoader(Dataset):
         if save:
             orig_imgs = self.data_augmentation(img_dict, apply='resize_only')
             imgRGB_orig, imgGT_orig = orig_imgs['image'], orig_imgs['mask']
-            imgRGB_orig = imgRGB_orig[: , :, 2]
+            # imgRGB_orig = imgRGB_orig[: , :, 2]
             imgGT_orig = self.prepare_GT(imgGT_orig, color_GT)
             # print(np.unique(modGT))
             self.result_to_image(gt=modGT, orig=modRGB, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-tf")
@@ -155,17 +155,18 @@ class MMDataLoader(Dataset):
             if use[mod] and img.get(mod) is not None:
                 imgs.append(torch.from_numpy(img[mod].copy()).float())
                 # print(self.name, modGT.shape, img[mod].shape)
-                assert modGT.shape == img[mod].shape
+                assert modGT.shape[:2] == img[mod].shape[:2]
         # logger.debug(torch.unique(modGT))
 
-        return [torch.stack(imgs), modGT]
+        # print(img["rgb"].shape)
+        return [imgs[0].permute(2,0,1), modGT]
 
     def remap_classes(self, idx_to_color):
 
-        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'catch-basin', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw','obs-str-bar-fallback','fallbackbackground']
+        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'catch-basin', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw', 'obs-str-bar-fallback', 'fallbackbackground', 'vehiclefallback']
         void = ['void', 'egovehicle', 'outofroi', 'rectificationborder', 'unlabeled', '_ignore_']
         driveable = ['road', 'path', 'ground', 'lanemarking', 'curb', 'asphalt', 'concrete', 'gravel', 'road-marking', 'marking', 'bike-lane', 'service-lane', 'driveway', 'pedestrian-area']
-        between = ['grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island','water-valve', 'manhole','crosswalk-plain', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole', 'soil', 'sand', 'lowgrass', 'highgrass', 'non-drivablefallback']
+        between = ['grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island','water-valve', 'manhole','crosswalk-plain', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole', 'soil', 'sand', 'lowgrass', 'highgrass', 'non-drivablefallback','drivablefallback']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -304,7 +305,7 @@ class MMDataLoader(Dataset):
 
         return mask_out
 
-    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None, colorize=False):
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, overlay=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None, colorize=False):
         if filename_prefix is None:
             filename_prefix = self.name
 
@@ -328,7 +329,7 @@ class MMDataLoader(Dataset):
                 if modality.shape[-1] != 3:
                     modality = np.stack((modality,)*3, axis=-1)
                     # print(np.min(orig),np.max(orig))
-                    concat = concat + [modality]
+                    # concat = concat + [modality]
 
                     folder = "" if folder is None else folder
                     dataset_name = self.name if dataset_name is None else dataset_name
@@ -348,6 +349,26 @@ class MMDataLoader(Dataset):
             gt = self.labels_to_color(gt_numpy, mode=self.mode)
             concat.append(gt)
             # concat.append(np.stack((gt,)*3, axis=-1))
+
+        if overlay is not None:
+            if torch.is_tensor(overlay):
+                overlay = overlay.detach().cpu().numpy()
+            overlay = self.labels_to_color(overlay, mode=self.mode)
+            if np.max(overlay) <= 1: overlay = (overlay*255)
+            overlay = overlay.astype(np.uint8)
+
+            if torch.is_tensor(orig):
+                orig = orig.detach().cpu().numpy()
+
+            orig = orig[0]
+            if np.max(orig) <= 1: orig = (orig*255)
+            orig = orig.astype(np.uint8)
+            if orig.shape[-1] != 3:
+                orig = np.stack((orig,)*3, axis=-1)
+
+
+            overlay = cv2.addWeighted(orig, 0.5, overlay, 0.5, 0.0)
+            concat.append(overlay)
 
         if pred_cls is not None:
             if torch.is_tensor(pred_cls): pred_cls = pred_cls.detach().cpu().numpy()
@@ -387,7 +408,7 @@ class MMDataLoader(Dataset):
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
         dataset_name = self.name if dataset_name is None else dataset_name
-        if orig is None:
+        if (overlay is not None) or (orig is None):
             try:
                 img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
             except Exception as e:
@@ -447,19 +468,19 @@ class MMDataLoader(Dataset):
 
         if apply == 'resize_only':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
-            transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
-            if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
-            if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
-            transformed_final = transformed_gray
+            # transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
+            # if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
+            # if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
+            transformed_final = transformed_resized
 
         elif apply == 'all':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
             transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"], ir=transformed_color["ir"])
-            transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
-            if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
-            if "ir" in imgs: transformed_gray["ir"] = transformed_geom["ir"]
-            transformed_final = resize_transform(image=transformed_gray['image'], mask=transformed_gray['mask'], depth=transformed_gray["depth"], ir=transformed_gray["ir"])
+            # transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
+            # if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
+            # if "ir" in imgs: transformed_gray["ir"] = transformed_geom["ir"]
+            transformed_final = resize_transform(image=transformed_geom['image'], mask=transformed_geom['mask'], depth=transformed_geom["depth"], ir=transformed_geom["ir"])
 
         # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))
@@ -597,8 +618,8 @@ class DemoDataLoader(MMDataLoader):
         if use["ir"]:
             modIR = transformed_imgs['ir']
 
-        if use["rgb"]:
-            if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
+        # if use["rgb"]:
+        #    if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
             # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
         if use["depth"]:
             if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
@@ -619,7 +640,8 @@ class DemoDataLoader(MMDataLoader):
 
         # logger.debug(torch.unique(modGT))
 
-        return [torch.stack(imgs), torch.zeros_like(imgs[0])]
+        print(imgs.shape)
+        return [imgs, torch.zeros_like(imgs[0])]
 
     def __getitem__(self, idx):
         # print(self.sample(idx))
@@ -1784,7 +1806,7 @@ class IDDDataLoader(MMDataLoader):
         # print(self.filenames[0])
         # print(len(self.filenames))
 
-        self.color_GT = False
+        self.color_GT = True
 
         self.write_loader(set)
 
@@ -1792,7 +1814,8 @@ class IDDDataLoader(MMDataLoader):
         return Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.jpg").convert('RGB')
 
     def get_gt(self, sample_id):
-        return Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labellevel3Ids.png").convert('L')
+        gt = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelColors.png").convert('RGB')
+        return gt
 
 class BDDDataLoader(MMDataLoader):
 

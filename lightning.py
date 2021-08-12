@@ -209,7 +209,7 @@ class LitSegNet(pl.LightningModule):
 
 
     def update_model(self):
-        channels = len(self.hparams.modalities)
+        channels = len(self.hparams.modalities) if self.hparams.init_channels is None else self.hparams.init_channels
         self.model = new_input_channels(self.model, channels)
         logger.warning(f"Model has {channels} input channels")
 
@@ -268,22 +268,22 @@ class LitSegNet(pl.LightningModule):
         pred_cls = torch.argmax(x_hat, dim=1)
         # iou = self.IoU(x_hat, y)
 
-        if self.hparams.mode == "convert":
-            # self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, num_cls=self.num_cls, proba=True)
-            pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
-            target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
-            # iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
-            # self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
-            mistakes = self.dist(pred_proba_aff, target_aff, weight_map=weight_map)
-        elif self.hparams.mode == "affordances":
-            # self.log(f'{set}_iou_aff', iou, on_epoch=True)
-            mistakes = self.dist(x_hat, y, weight_map=weight_map)
-        elif self.hparams.mode == "objects":
-            # self.log(f'{set}_iou_obj', iou, on_epoch=True)
-            mistakes = self.dist(x_hat, y, weight_map=weight_map)
-
-        self.log_mistakes(mistakes, prefix=set)
+        # if self.hparams.mode == "convert":
+        #     # self.log(f'{set}_iou_obj', iou, on_epoch=True)
+        #     pred_proba_aff = self.train_set.dataset.labels_obj_to_aff(x_hat, num_cls=self.num_cls, proba=True)
+        #     pred_cls_aff = torch.argmax(pred_proba_aff, dim=1)
+        #     target_aff = self.train_set.dataset.labels_obj_to_aff(y, num_cls=self.num_cls)
+        #     # iou_aff = self.IoU_conv(pred_proba_aff, target_aff)
+        #     # self.log(f'{set}_iou_aff', iou_aff, on_epoch=True)
+        #     mistakes = self.dist(pred_proba_aff, target_aff, weight_map=weight_map)
+        # elif self.hparams.mode == "affordances":
+        #     # self.log(f'{set}_iou_aff', iou, on_epoch=True)
+        #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
+        # elif self.hparams.mode == "objects":
+        #     # self.log(f'{set}_iou_obj', iou, on_epoch=True)
+        #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
+        # #
+        # self.log_mistakes(mistakes, prefix=set)
         self.log(f'{set}_loss', loss, on_epoch=True)
 
         if save:
@@ -485,11 +485,13 @@ class LitSegNet(pl.LightningModule):
                         # self.orig_dataset.dataset.result_to_image(iter=batch_idx+i, pred_proba=test, folder=folder, filename_prefix=f"proba-{self.test_checkpoint}", dataset_name=self.hparams.dataset)
                         # logger.debug("Generating argmax pred")
                         mod = ','.join(self.hparams.modalities)
-                        orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                        # orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                         # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                        dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
+                        # dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
+                        dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                         if not dataset_obj.noGT:
-                            dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                            # dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                            dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt", dataset_name=self.hparams.dataset, filename = filename)
 
                         error_map = t - c
                         error_map[t == -1] = 0
@@ -519,9 +521,9 @@ class LitSegNet(pl.LightningModule):
                     # logger.debug(cm.shape)
                     iou = self.IoU_conv(pred, target)
 
-                    mistakes = self.dist(pred, target, weight_map=weight_map)
-                    logger.debug(mistakes)
-                    self.log_mistakes(mistakes, prefix="test")
+                    # mistakes = self.dist(pred, target, weight_map=weight_map)
+                    # logger.debug(mistakes)
+                    # self.log_mistakes(mistakes, prefix="test")
 
 
                     self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
@@ -564,15 +566,17 @@ class LitSegNet(pl.LightningModule):
             augment = self.hparams.augment if set == "train" else False
 
         n_samples = self.hparams.dataset_combo_ntrain if set == "train" else int(self.hparams.dataset_combo_ntrain/9)
+        total_length = 0
 
         for name in self.hparams.dataset_combo:
             # print(name, set)
             dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False)
             random_indices = np.random.choice(range(len(dataset)), replace=True, size=n_samples)
-            subsets.append(Subset(dataset, indices=random_indices))
+            subsets.append(Subset(dataset, indices=range(len(dataset))))
+            total_length += len(dataset)
 
         combo = ConcatDataset(subsets)
-        out = Subset(combo, indices=range(n_samples*len(subsets)))
+        out = Subset(combo, indices=range(total_length))
         #print(dir(out.dataset),out.dataset.datasets[0].dataset)
         return out
 
