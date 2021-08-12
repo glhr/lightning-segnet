@@ -322,25 +322,29 @@ class MMDataLoader(Dataset):
             if torch.is_tensor(orig):
                 orig = orig.detach().cpu().numpy()
             n_modalities = len(orig)
-            for m,modality in enumerate(orig):
-                # print("orig shape",modality.shape)
-                if np.max(modality) <= 1: modality = (modality*255)
-                modality = modality.astype(np.uint8)
-                if modality.shape[-1] != 3:
-                    modality = np.stack((modality,)*3, axis=-1)
-                    # print(np.min(orig),np.max(orig))
-                    # concat = concat + [modality]
 
-                    folder = "" if folder is None else folder
-                    dataset_name = self.name if dataset_name is None else dataset_name
-                    # mod_i =  if n_modalities > 1 else ''
-                    mod_i = '' if modalities is None else f'{modalities[m]}'
-                    # if mod_i == "depth":
-                    #     modality = 255 - cv2.applyColorMap(
-                    #         np.uint8(modality / np.amax(modality) * 255),
-                    #         cv2.COLORMAP_JET)
-                    img = Image.fromarray(modality, 'RGB')
-                    img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
+            modality = orig
+            # print("orig shape",modality.shape)
+            if np.max(modality) <= 1: modality = (modality*255)
+            modality = modality.astype(np.uint8)
+            modality = np.transpose(modality,(1,2,0))
+            if modality.shape[-1] != 3:
+                modality = np.stack((modality,)*3, axis=-1)
+
+                # print(np.min(orig),np.max(orig))
+                # concat = concat + [modality]
+
+            folder = "" if folder is None else folder
+            dataset_name = self.name if dataset_name is None else dataset_name
+            # mod_i =  if n_modalities > 1 else ''
+            mod_i = 'rgb'
+            # if mod_i == "depth":
+            #     modality = 255 - cv2.applyColorMap(
+            #         np.uint8(modality / np.amax(modality) * 255),
+            #         cv2.COLORMAP_JET)
+            img = Image.fromarray(modality, 'RGB')
+            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
+            return
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()

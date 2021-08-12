@@ -487,7 +487,7 @@ class LitSegNet(pl.LightningModule):
                         mod = ','.join(self.hparams.modalities)
                         # orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                         # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                        # dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
+                        dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                         if not dataset_obj.noGT:
                             # dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
