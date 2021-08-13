@@ -342,9 +342,7 @@ class MMDataLoader(Dataset):
             #     modality = 255 - cv2.applyColorMap(
             #         np.uint8(modality / np.amax(modality) * 255),
             #         cv2.COLORMAP_JET)
-            img = Image.fromarray(modality, 'RGB')
-            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
-            return
+            concat.append(modality)
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
@@ -361,17 +359,9 @@ class MMDataLoader(Dataset):
             if np.max(overlay) <= 1: overlay = (overlay*255)
             overlay = overlay.astype(np.uint8)
 
-            if torch.is_tensor(orig):
-                orig = orig.detach().cpu().numpy()
+            # print(modality.shape,overlay.shape)
 
-            orig = orig[0]
-            if np.max(orig) <= 1: orig = (orig*255)
-            orig = orig.astype(np.uint8)
-            if orig.shape[-1] != 3:
-                orig = np.stack((orig,)*3, axis=-1)
-
-
-            overlay = cv2.addWeighted(orig, 0.5, overlay, 0.5, 0.0)
+            overlay = cv2.addWeighted(modality, 0.5, overlay, 0.5, 0.0)
             concat.append(overlay)
 
         if pred_cls is not None:
@@ -417,6 +407,8 @@ class MMDataLoader(Dataset):
                 img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
             except Exception as e:
                 logger.debug(f"{e} - skipping")
+        else:
+            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
@@ -444,6 +436,7 @@ class MMDataLoader(Dataset):
             imgs["image"] = np.zeros_like(imgs[self.modalities[0]])
             imgs["image"] = np.dstack([imgs["image"]] * 3)
         else:
+            # print(imgs["image"].shape)
             img_height, img_width = imgs["image"].shape[:2]
         rand_crop = np.random.uniform(low=0.8, high=0.9)
 
