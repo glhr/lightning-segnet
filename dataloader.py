@@ -35,7 +35,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class MMDataLoader(Dataset):
-    def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False, **kwargs):
+    def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False, rgb=False, **kwargs):
         self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
@@ -79,6 +79,8 @@ class MMDataLoader(Dataset):
         self.viz = viz
 
         self.noGT = False
+
+        self.rgb = rgb
 
     def read_img(self, path, grayscale=True):
         return np.array(Image.open(path).convert('L'))
@@ -126,8 +128,8 @@ class MMDataLoader(Dataset):
 
         modGT = self.prepare_GT(modGT, color_GT)
 
-        # if use["rgb"]:
-        #    if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
+        if use["rgb"] and not self.rgb:
+           if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
             # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
         if use["depth"]:
             if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
@@ -158,8 +160,11 @@ class MMDataLoader(Dataset):
                 assert modGT.shape[:2] == img[mod].shape[:2]
         # logger.debug(torch.unique(modGT))
 
-        # print(img["rgb"].shape)
-        return [imgs[0].permute(2,0,1), modGT]
+        # print(self.rgb, imgs[0].shape)
+        if self.rgb:
+            return [imgs[0].permute(2,0,1), modGT]
+        else:
+            return [torch.stack(imgs), modGT]
 
     def remap_classes(self, idx_to_color):
 
@@ -329,7 +334,7 @@ class MMDataLoader(Dataset):
             modality = modality.astype(np.uint8)
             modality = np.transpose(modality,(1,2,0))
             if modality.shape[-1] != 3:
-                modality = np.stack((modality,)*3, axis=-1)
+                modality = np.repeat(modality,3, axis=-1)
 
                 # print(np.min(orig),np.max(orig))
                 # concat = concat + [modality]
@@ -429,7 +434,7 @@ class MMDataLoader(Dataset):
         #     depth_image_8u = depth_image_8u*100
         return depth_image_8u
 
-    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all'):
+    def data_augmentation(self, imgs, gt=None, p=0.5, save=True, apply='all', rgb=False):
         # print(imgs)
         if imgs["image"] is None:
             img_height, img_width = imgs[self.modalities[0]].shape[:2]
@@ -451,9 +456,13 @@ class MMDataLoader(Dataset):
         gray_transform = A.Compose([
             A.ToGray(p=1)
             ], p=1)
-        color_transform = A.Compose([
+        color_transform_gray = A.Compose([
             A.RandomToneCurve(scale=0.1, p=p),
             A.RandomBrightnessContrast(brightness_limit=0.4, contrast_limit=0.4, brightness_by_max=False, p=p)
+            ], p=1, additional_targets=additional_targets)
+        color_transform = A.Compose([
+            A.RandomToneCurve(scale=0.1, p=p),
+            A.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.4, p=p)
             ], p=1, additional_targets=additional_targets)
         geom_transform = A.Compose([
             A.GridDistortion(num_steps=3, p=p),
@@ -465,19 +474,22 @@ class MMDataLoader(Dataset):
 
         if apply == 'resize_only':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
-            # transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
+            if not self.rgb: transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
+            else: transformed_gray = transformed_resized
             # if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
             # if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
-            transformed_final = transformed_resized
+            transformed_final = transformed_gray
 
         elif apply == 'all':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
-            transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
+            if self.rgb: transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
+            else: transformed_color = color_transform_gray(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
             transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"], ir=transformed_color["ir"])
-            # transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
-            # if "depth" in imgs: transformed_gray["depth"] = transformed_geom["depth"]
-            # if "ir" in imgs: transformed_gray["ir"] = transformed_geom["ir"]
-            transformed_final = resize_transform(image=transformed_geom['image'], mask=transformed_geom['mask'], depth=transformed_geom["depth"], ir=transformed_geom["ir"])
+            if not self.rgb: transformed_gray = gray_transform(image=transformed_geom['image'], mask=transformed_geom['mask'])
+            else: transformed_gray = transformed_geom
+            transformed_gray["depth"] = transformed_geom["depth"] if "depth" in imgs else None
+            transformed_gray["ir"] = transformed_geom["ir"] if "ir" in imgs else None
+            transformed_final = resize_transform(image=transformed_gray['image'], mask=transformed_gray['mask'], depth=transformed_gray["depth"], ir=transformed_gray["ir"])
 
         # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))
@@ -548,7 +560,7 @@ class MMDataLoader(Dataset):
 
 
 class DemoDataLoader(MMDataLoader):
-    def __init__(self, modalities, name, resize, transform=None, viz=False, **kwargs):
+    def __init__(self, modalities, name, resize, transform=None, viz=False, rgb=False, **kwargs):
         super().__init__(mode="affordances", augment=False, modalities=modalities, name=name, resize=resize, transform=transform, viz=viz)
         self.name = name
 
@@ -651,7 +663,7 @@ class DemoDataLoader(MMDataLoader):
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -704,6 +716,7 @@ class FreiburgDataLoader(MMDataLoader):
             "ir": ".tif"
         }
         self.color_GT = True
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -727,7 +740,7 @@ class FreiburgDataLoader(MMDataLoader):
 
 class FreiburgThermalDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-thermal/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-thermal/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -823,7 +836,7 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -876,6 +889,7 @@ class CityscapesDataLoader(MMDataLoader):
         # print(len(self.filenames))
 
         self.color_GT = False
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -894,7 +908,7 @@ class CityscapesDataLoader(MMDataLoader):
 
 class LostFoundDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/lostfound/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/lostfound/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -969,7 +983,7 @@ class LostFoundDataLoader(MMDataLoader):
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1014,6 +1028,7 @@ class KittiDataLoader(MMDataLoader):
                 self.filenames.append(img)
         # print(self.filenames)
         self.color_GT = False
+        self.rgb = rgb
         self.write_loader(set)
 
     def get_rgb(self, sample_id):
@@ -1028,7 +1043,7 @@ class KittiDataLoader(MMDataLoader):
 
 class ThermalVOCDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1096,7 +1111,7 @@ class ThermalVOCDataLoader(MMDataLoader):
 
 class MIRMultispectral(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/mir-multispectral-seg/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/mir-multispectral-seg/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1229,7 +1244,7 @@ class SynthiaDataLoader(MMDataLoader):
 
 
 class OwnDataLoader(DemoDataLoader):
-    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         super().__init__(modalities, resize=resize, name="own", mode=mode, augment=augment)
         self.path = path
 
@@ -1368,7 +1383,7 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
     # /home/robotlab/rob10/learning-driveability-heatmaps/datasets/kaist-pedestrian/data/kaist-rgbt/images/set00/V000
 
-    def __init__(self, resize, set="train", path = "../../datasets/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1443,7 +1458,7 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
 class RUGDDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/rugd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/rugd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1505,7 +1520,7 @@ class RUGDDataLoader(MMDataLoader):
 
 class WildDashDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/wilddash/wd_public_02/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/wilddash/wd_public_02/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1558,7 +1573,7 @@ class WildDashDataLoader(MMDataLoader):
 
 class TAS500DataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/tas500/tas500v1.1/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/tas500/tas500v1.1/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1616,7 +1631,7 @@ class TAS500DataLoader(MMDataLoader):
 
 class ACDCDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/acdc/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/acdc/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1680,7 +1695,7 @@ class ACDCDataLoader(MMDataLoader):
 
 class MapillaryDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/mapillary/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/mapillary/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1751,7 +1766,7 @@ class MapillaryDataLoader(MMDataLoader):
 
 class IDDDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/idd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/idd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1789,7 +1804,7 @@ class IDDDataLoader(MMDataLoader):
         if set == "full":
             file_pattern = []
             for i,folder in enumerate(self.split_path):
-                file_pattern += glob.glob(self.path + 'leftImg8bit/' + self.split_path[i] + f'**/*leftImg8bit.jpg')
+                file_pattern += glob.glob(self.path + 'leftImg8bit/' + self.split_path[i] + f'/**/*leftImg8bit.jpg')
         else:
             file_pattern = glob.glob(self.path + 'leftImg8bit/' + self.split_path + f'/**/*leftImg8bit.jpg')
 
@@ -1798,7 +1813,7 @@ class IDDDataLoader(MMDataLoader):
             img = '_'.join('/'.join(filepath.split("/")[-2:]).split("_")[:1])
             city = img.split("/")[0]
             base_folder = filepath.split("/")[-3]
-            self.filenames.append(img)
+            self.filenames.append(img.replace("/","-"))
             self.base_folders.append(base_folder)
         # print(self.filenames[0])
         # print(len(self.filenames))
@@ -1808,15 +1823,15 @@ class IDDDataLoader(MMDataLoader):
         self.write_loader(set)
 
     def get_rgb(self, sample_id):
-        return Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_leftImg8bit.jpg").convert('RGB')
+        return Image.open(self.path + "leftImg8bit/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id].replace('-','/')}_leftImg8bit.jpg").convert('RGB')
 
     def get_gt(self, sample_id):
-        gt = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelColors.png").convert('RGB')
+        gt = Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id].replace('-','/')}_gtFine_labelColors.png").convert('RGB')
         return gt
 
 class BDDDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/bdd100k/", modalities=["rgb"], mode="affordances", augment=False, viz=False, **kwargs):
+    def __init__(self, resize, set="train", path = "../../datasets/bdd100k/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data

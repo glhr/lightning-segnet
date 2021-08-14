@@ -521,9 +521,9 @@ class LitSegNet(pl.LightningModule):
                     # logger.debug(cm.shape)
                     iou = self.IoU_conv(pred, target)
 
-                    # mistakes = self.dist(pred, target, weight_map=weight_map)
+                    mistakes = self.dist(pred, target, weight_map=weight_map)
                     # logger.debug(mistakes)
-                    # self.log_mistakes(mistakes, prefix="test")
+                    self.log_mistakes(mistakes, prefix="test")
 
 
                     self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
@@ -553,7 +553,7 @@ class LitSegNet(pl.LightningModule):
             augment = self.hparams.augment if set == "train" else False
         logger.info(self.hparams.modalities)
         logger.info(self.dataset_seq)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:
