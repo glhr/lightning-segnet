@@ -168,10 +168,10 @@ class MMDataLoader(Dataset):
 
     def remap_classes(self, idx_to_color):
 
-        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'catch-basin', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw', 'obs-str-bar-fallback', 'fallbackbackground', 'vehiclefallback']
+        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw', 'obs-str-bar-fallback', 'fallbackbackground', 'vehiclefallback','non-traversable-low-vegetation','high-vegetation','curb']
         void = ['void', 'egovehicle', 'outofroi', 'rectificationborder', 'unlabeled', '_ignore_']
-        driveable = ['road', 'path', 'ground', 'lanemarking', 'curb', 'asphalt', 'concrete', 'gravel', 'road-marking', 'marking', 'bike-lane', 'service-lane', 'driveway', 'pedestrian-area']
-        between = ['grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island','water-valve', 'manhole','crosswalk-plain', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole', 'soil', 'sand', 'lowgrass', 'highgrass', 'non-drivablefallback','drivablefallback']
+        driveable = ['road', 'path', 'ground', 'lanemarking', 'asphalt', 'concrete', 'gravel', 'road-marking', 'marking', 'bike-lane', 'service-lane', 'driveway', 'pedestrian-area','water-valve', 'manhole','crosswalk-plain','smooth-trail','rough-trail', 'catch-basin','curb-cut']
+        between = ['between','grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole', 'soil', 'sand', 'lowgrass', 'highgrass', 'non-drivablefallback','drivablefallback','traversable-grass']
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -284,7 +284,7 @@ class MMDataLoader(Dataset):
         # check the present values in the mask, 0 and 255 in my case
         # print('unique values rgb    ', torch.unique(mask))
         # -> unique values rgb     tensor([  0, 255], dtype=torch.uint8)
-
+        # print(np.unique(mask.reshape(-1,3),axis=0))
         class_mask = mask
         class_mask = class_mask.permute(2, 0, 1).contiguous()
         # print('unique values rgb    ', torch.unique(class_mask))
@@ -292,15 +292,19 @@ class MMDataLoader(Dataset):
         # print(h,w)
         mask_out = torch.zeros(h, w, dtype=torch.long)
 
-        for k in self.color_to_idx[mode]:
+        for k in [tuple(x) for x in np.unique(mask.reshape(-1,3),axis=0).tolist()]:
             # print(k)
             # print(torch.unique(class_mask), torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
-            idx = (class_mask == torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
-            # print(idx)
-            validx = (idx.sum(0) == 3)
-            # print(validx[0])
 
-            mask_out[validx] = torch.tensor(self.color_to_idx[mode][k], dtype=torch.long)
+            try:
+                idx = (class_mask == torch.tensor(k, dtype=torch.uint8).unsqueeze(1).unsqueeze(2))
+                # print(idx)
+                validx = (idx.sum(0) == 3)
+                # print(validx[0])
+
+                mask_out[validx] = torch.tensor(self.color_to_idx[mode][k], dtype=torch.long)
+            except KeyError as e:
+                logger.error(f"color {k} not defined, check classes.txt")
 
             #print(mask_out[validx])
 
@@ -402,7 +406,7 @@ class MMDataLoader(Dataset):
 
         # for d in concat:
         #     print(d.shape)
-        data = np.concatenate(concat, axis=1)
+        data = np.concatenate(concat, axis=0)
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
@@ -1908,6 +1912,72 @@ class BDDDataLoader(MMDataLoader):
 
     def get_gt(self, sample_id):
         return Image.open(self.path + "sem_seg/masks/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}.png").convert('L')
+
+class YCORDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/yamaha_v0/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="ycor", mode=mode, augment=augment)
+        self.path = path
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if set == "full":
+            self.split_path = ['train','valid']
+        elif set == "val":
+            self.split_path = "valid"
+        else:
+            set = self.split_path = set
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+
+        if set == "full":
+            file_pattern = []
+            for i,folder in enumerate(self.split_path):
+                file_pattern += glob.glob(self.path + self.split_path[i] + '/*/rgb.jpg')
+        else:
+            file_pattern = glob.glob(self.path + self.split_path + '/*/rgb.jpg')
+
+        for filepath in file_pattern:
+
+            img = filepath.split("/")[-2]
+            base_folder = filepath.split("/")[-2]
+            self.filenames.append(img)
+            self.base_folders.append(base_folder)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = True
+        self.rgb=rgb
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + self.split_path + f"/{self.filenames[sample_id]}/rgb.jpg").convert('RGB')
+
+    def get_gt(self, sample_id):
+        return Image.open(self.path + self.split_path + f"/{self.filenames[sample_id]}/labels.png").convert('RGB')
 
 
 if __name__ == '__main__':
