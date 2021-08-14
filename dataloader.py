@@ -472,6 +472,7 @@ class MMDataLoader(Dataset):
             A.HorizontalFlip(p=p)
             ], p=1, additional_targets=additional_targets)
 
+        # logger.info(f"augment: {apply}")
         if apply == 'resize_only':
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             if not self.rgb: transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
@@ -481,6 +482,7 @@ class MMDataLoader(Dataset):
             transformed_final = transformed_gray
 
         elif apply == 'all':
+
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             if self.rgb: transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
             else: transformed_color = color_transform_gray(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
@@ -800,6 +802,7 @@ class FreiburgThermalDataLoader(MMDataLoader):
             "gt": "fl_rgb_labels"
         }
         self.color_GT = False
+        self.rgb=rgb
 
         self.write_loader(set)
 
@@ -966,6 +969,8 @@ class LostFoundDataLoader(MMDataLoader):
 
         self.color_GT = False
 
+        self.rgb = rgb
+
         self.write_loader(set)
 
     def get_rgb(self, sample_id):
@@ -1096,6 +1101,7 @@ class ThermalVOCDataLoader(MMDataLoader):
         self.write_loader(set)
 
         self.color_GT = True
+        self.rgb = rgb
 
     def get_rgb(self, sample_id):
         return Image.open(self.path + "ColorImages/" + self.filenames[sample_id]).convert('RGB')
@@ -1162,6 +1168,7 @@ class MIRMultispectral(MMDataLoader):
 
         self.write_loader(set)
         self.color_GT = False
+        self.rgb = rgb
 
     def load_ir(self,path):
         try:
@@ -1232,6 +1239,7 @@ class SynthiaDataLoader(MMDataLoader):
 
         self.write_loader(set)
         self.color_GT = False
+        self.rgb = rgb
 
     def get_rgb(self, sample_id):
         return Image.open(self.path + f"{self.base_folders[sample_id]}/RGB/Stereo_Left/" + f"{self.filenames_short[sample_id]}").convert('RGB')
@@ -1262,6 +1270,7 @@ class OwnDataLoader(DemoDataLoader):
         self.color_GT = False
         self.has_affordance_labels = True
         self.noGT = True
+        self.rgb = rgb
 
     def get_rgb(self, sample_id):
         return Image.open(self.path + self.split_path + "rgb/" + f"{self.filenames[sample_id]}").convert('RGB')
@@ -1429,6 +1438,7 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
             print(self.filenames[0])
 
         self.color_GT = True
+        self.rgb = rgb
         self.has_affordance_labels = True
 
         self.write_loader(set)
@@ -1507,6 +1517,7 @@ class RUGDDataLoader(MMDataLoader):
         print(self.filenames[0], self.base_folders[0])
 
         self.color_GT = True
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -1561,6 +1572,7 @@ class WildDashDataLoader(MMDataLoader):
         # print(len(self.filenames))
 
         self.color_GT = False
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -1619,6 +1631,7 @@ class TAS500DataLoader(MMDataLoader):
         print(len(self.filenames))
 
         self.color_GT = False
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -1682,6 +1695,7 @@ class ACDCDataLoader(MMDataLoader):
         # print(len(self.filenames))
 
         self.color_GT = False
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -1755,6 +1769,7 @@ class MapillaryDataLoader(MMDataLoader):
         # print(len(self.filenames))
 
         self.color_GT = True
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -1819,6 +1834,7 @@ class IDDDataLoader(MMDataLoader):
         # print(len(self.filenames))
 
         self.color_GT = True
+        self.rgb = rgb
 
         self.write_loader(set)
 
@@ -1883,6 +1899,7 @@ class BDDDataLoader(MMDataLoader):
         # print(len(self.filenames))
 
         self.color_GT = False
+        self.rgb=rgb
 
         self.write_loader(set)
 

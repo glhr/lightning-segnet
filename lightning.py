@@ -552,8 +552,9 @@ class LitSegNet(pl.LightningModule):
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
         logger.info(self.hparams.modalities)
+        logger.info(f"{set} augment: {augment}")
         logger.info(self.dataset_seq)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:
@@ -570,7 +571,7 @@ class LitSegNet(pl.LightningModule):
 
         for name in self.hparams.dataset_combo:
             # print(name, set)
-            dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False)
+            dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, sort=False, rgb=(self.hparams.init_channels > 1))
             random_indices = np.random.choice(range(len(dataset)), replace=True, size=n_samples)
             subsets.append(Subset(dataset, indices=range(len(dataset))))
             total_length += len(dataset)
