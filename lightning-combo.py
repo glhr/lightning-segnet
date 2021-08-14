@@ -321,18 +321,20 @@ class LitSegNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx, dataset_idx="combo"):
         loss = self.predict(batch, batch_idx=batch_idx, dataset=dataset_idx, set="train")
-        self.log(f'{set}_loss', loss, on_epoch=True)
+        self.log(f'train_loss', loss, on_epoch=True)
         return loss
 
     def validation_step(self, batch, batch_idx, dataset_idx):
         loss = self.predict(batch, batch_idx=batch_idx, dataset=dataset_idx, set="val")
+        self.log("val_loss", loss, on_epoch=True)
         return loss
 
     def validation_epoch_end(self, outputs):
         # print(outputs)
         avg_loss = torch.FloatTensor([loss for d in outputs for loss in d]).flatten().mean()
         #log = {'val_loss': avg_loss}
-        self.log("val_loss", avg_loss)
+        self.log("val_loss", avg_loss, on_epoch=True)
+
 
     def reduce_cm(self, cms, save=False):
 
