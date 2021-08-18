@@ -14,4 +14,4 @@ Combo
 driv, one-hot, rgb "lightning_logs/2021-08-14 18-55-combo-c30-kl-rgb-epoch=68-val_loss=0.1411.ckpt"
 driv, one-hot, gray "lightning_logs/2021-08-15 11-58-combo-c30-kl-rgb-epoch=82-val_loss=0.1474.ckpt"
 driv, SORD, gray "lightning_logs/2021-08-16 09-02-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=78-val_loss=0.0062.ckpt"
-driv, SORD, gray + LW 
+driv, SORD, gray + LW_0,10 "lightning_logs/2021-08-17 09-47-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=85-val_loss=0.0216.ckpt"
