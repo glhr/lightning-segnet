@@ -339,7 +339,7 @@ class LitSegNet(pl.LightningModule):
     def reduce_cm(self, cms, save=False):
 
         if self.hparams.dataset_combo is not None:
-            labels = self.train_set.dataset.datasets[0].dataset.cls_labels
+            labels = self.train_set.datasets[0].cls_labels
         else:
             labels = self.train_set.dataset.cls_labels
 
