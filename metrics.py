@@ -206,9 +206,9 @@ hmap = None
 
 def compute_distmap(image_orig, lwmap_range, depth_map=None):
     global hmap
-    # logger.debug("img shape",image_orig.shape)
+    # logger.warning(f"img shape {image_orig.shape}")
     img_h, img_w = image_orig.shape[:2]
-    if image_orig.shape[-1] >= 3:
+    if len(image_orig.shape) > 2 and image_orig.shape[-1] >= 3:
         image_gray = cv2.cvtColor(image_orig, cv2.COLOR_BGR2GRAY)
     else:
         image_gray = image_orig

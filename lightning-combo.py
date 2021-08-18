@@ -166,12 +166,12 @@ class LitSegNet(pl.LightningModule):
                 # print(len(self.train_set["cityscapes"]))
                 self.hparams.train_set = sum(len(set) for set in self.train_set.values())
                 self.hparams.val_set = sum(len(set) for set in self.val_set.values())
-                self.hparams.test_set = sum(len(set) for set in self.test_set.values())
+                self.hparams.test_set =  len(self.test_set)
                 logger.warning(f"{self.hparams.dataset} - train {self.hparams.train_set} | val {self.hparams.val_set} | test {self.hparams.test_set}")
 
 
 
-                self.orig_dataset = self.test_set["cityscapes"]
+                self.orig_dataset = self.test_set
 
 
 
@@ -429,11 +429,12 @@ class LitSegNet(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
 
-        dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set["cityscapes"]
+        # print(self.hparams.dataset_combo)
+        dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.datasets[0]
 
-        orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset["cityscapes"]
+        orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.datasets[0]
 
-        sample, target_orig = batch["cityscapes"]["sample"]
+        sample, target_orig = batch["sample"]
 
         if self.hparams.save_xp is None:
             result_folder = f"{self.result_folder}/{self.test_checkpoint}"
@@ -602,20 +603,30 @@ class LitSegNet(pl.LightningModule):
 
     def get_dataset_combo(self, set, augment=None):
         subsets = []
+        total_length = 0
+        sets=dict()
         if augment is None:
             augment = self.hparams.augment if set == "train" else False
 
-        total_length = 0
-        sets=dict()
+        if set == "test":
+            for name in self.hparams.dataset_combo:
+                # print(name, set)
+                dataset = self.datasets[name](set="val", resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, sort=False, rgb=(self.hparams.init_channels > 1))
+                total_length += len(dataset)
+                logger.info(f"{name}: {len(dataset)}")
+                sets[name] = dataset
+            combo = ConcatDataset([d for d in sets.values()])
+            # print(combo)
+            return combo
+        else:
+            for name in self.hparams.dataset_combo:
+                # print(name, set)
+                dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, sort=False, rgb=(self.hparams.init_channels > 1))
+                total_length += len(dataset)
+                logger.info(f"{name}: {len(dataset)}")
+                sets[name] = dataset
 
-        for name in self.hparams.dataset_combo:
-            # print(name, set)
-            dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, sort=False, rgb=(self.hparams.init_channels > 1))
-            total_length += len(dataset)
-            logger.info(f"{name}: {len(dataset)}")
-            sets[name] = dataset
-
-        return sets
+            return sets
 
     def get_dataset_splits(self, normalize=False):
         dataset_func = self.get_dataset_combo if self.hparams.dataset == "combo" else self.get_dataset
@@ -650,7 +661,7 @@ class LitSegNet(pl.LightningModule):
             return loaders
 
     def test_dataloader(self):
-        if not (self.hparams.dataset == "combo"):
+        if not (self.hparams.dataset == "combo") or self.test_samples == "test":
             return DataLoader(self.test_set, batch_size=self.hparams.bs, num_workers=self.hparams.workers, shuffle=(self.test_samples in ["train"]))
         else:
             loaders = {
@@ -715,7 +726,7 @@ if __name__ == '__main__':
                 logger=wandb_logger,
                 # checkpoint_callback=,
                 callbacks=callbacks + [checkpoint_callback],
-                #multiple_trainloader_mode='min_size',
+                multiple_trainloader_mode='min_size',
                 resume_from_checkpoint=args.train_checkpoint)
                 #reload_dataloaders_every_n_epochs=1)
         trainer.fit(segnet_model)
