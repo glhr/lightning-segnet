@@ -450,7 +450,7 @@ class LitSegNet(pl.LightningModule):
 
 
             # logger.debug(torch.min(sample),torch.max(sample))
-            logger.info(f"{batch_idx} / {self.test_max}")
+            # logger.info(f"{batch_idx} / {self.test_max}")
             if not self.nopredict:
                 pred_orig = self.model(sample)
                 if self.hparams.loss_weight:
@@ -496,7 +496,7 @@ class LitSegNet(pl.LightningModule):
             # logger.debug("pred",pred_cls.shape,"target",target.shape)
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-                print(f"{i} - {batch_idx} / {self.test_max}")
+                # print(f"{i} - {batch_idx} / {self.test_max}")
                 if not self.hparams.dataset == "combo":
                     proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
                     proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
@@ -529,10 +529,10 @@ class LitSegNet(pl.LightningModule):
                     mod = ','.join(self.hparams.modalities)
                     # orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    # dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
+                    dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
                     if not self.nopredict: dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     if not dataset_obj.noGT:
-                        # dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt", dataset_name=self.hparams.dataset, filename = filename)
 
                     if not self.nopredict:
@@ -563,7 +563,7 @@ class LitSegNet(pl.LightningModule):
                 cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
                 iou = self.IoU_conv(pred, target)
-                print(iou)
+                # print(iou)
 
                 mistakes = self.dist(pred, target, weight_map=weight_map)
                 # logger.debug(mistakes)

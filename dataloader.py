@@ -351,7 +351,7 @@ class MMDataLoader(Dataset):
             #     modality = 255 - cv2.applyColorMap(
             #         np.uint8(modality / np.amax(modality) * 255),
             #         cv2.COLORMAP_JET)
-            concat.append(modality)
+            if overlay is None: concat.append(modality)
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
@@ -406,7 +406,7 @@ class MMDataLoader(Dataset):
 
         # for d in concat:
         #     print(d.shape)
-        data = np.concatenate(concat, axis=0)
+        data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
         folder = "" if folder is None else folder
