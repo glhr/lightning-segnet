@@ -11,7 +11,7 @@ run() {
     isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
     if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] ; then
       echo "--> running eval"
-      python3 lightning.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}" --save --save_xp $xp --workers 10 --gpu 1 --save_xp $xp --init_channels $channels --test_set test --bs 1 > "$txtoutput" 2>&1
+      python3 lightning-combo.py --num_classes 3 --bs 1 --mode affordances --dataset $dataset --test_checkpoint "lightning_logs/${checkpoint}" --save --save_xp $xp --workers 10 --gpu 1 --save_xp $xp --init_channels $channels --test_set test --bs 1 > "$txtoutput" 2>&1
     fi
     echo "--> summary"
     tail -14 "$txtoutput"
