@@ -339,7 +339,7 @@ class LitSegNet(pl.LightningModule):
     def reduce_cm(self, cms, save=False):
 
         if self.hparams.dataset_combo is not None:
-            labels = self.train_set.datasets[0].cls_labels
+            labels = self.train_set["cityscapes"].cls_labels
         else:
             labels = self.train_set.dataset.cls_labels
 
@@ -429,25 +429,28 @@ class LitSegNet(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         # return self.validation_step(batch, batch_idx)
 
-        # print(self.hparams.dataset_combo)
-        dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.datasets[0]
-
-        orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.datasets[0]
-
-        sample, target_orig = batch["sample"]
-
-        if self.hparams.save_xp is None:
-            result_folder = f"{self.result_folder}/{self.test_checkpoint}"
-            gt_folder = f"{self.result_folder}/gt/"
-            orig_folder = f"{self.result_folder}/orig/"
-        else:
-            result_folder = f"{self.result_folder}/{self.hparams.save_xp}"
-            gt_folder = result_folder
-            orig_folder = result_folder
-            create_folder(result_folder)
-
         if self.test_max is None or batch_idx < self.test_max:
+
+            # print(self.hparams.dataset_combo)
+            dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.datasets[0]
+
+            orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.datasets[0]
+
+            sample, target_orig = batch["sample"]
+
+            if self.hparams.save_xp is None:
+                result_folder = f"{self.result_folder}/{self.test_checkpoint}"
+                gt_folder = f"{self.result_folder}/gt/"
+                orig_folder = f"{self.result_folder}/orig/"
+            else:
+                result_folder = f"{self.result_folder}/{self.hparams.save_xp}"
+                gt_folder = result_folder
+                orig_folder = result_folder
+                create_folder(result_folder)
+
+
             # logger.debug(torch.min(sample),torch.max(sample))
+            logger.info(f"{batch_idx} / {self.test_max}")
             if not self.nopredict:
                 pred_orig = self.model(sample)
                 if self.hparams.loss_weight:
@@ -493,7 +496,7 @@ class LitSegNet(pl.LightningModule):
             # logger.debug("pred",pred_cls.shape,"target",target.shape)
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-                # logger.debug(p.shape)
+                print(f"{i} - {batch_idx} / {self.test_max}")
                 if not self.hparams.dataset == "combo":
                     proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
                     proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
@@ -560,6 +563,7 @@ class LitSegNet(pl.LightningModule):
                 cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
                 iou = self.IoU_conv(pred, target)
+                print(iou)
 
                 mistakes = self.dist(pred, target, weight_map=weight_map)
                 # logger.debug(mistakes)
