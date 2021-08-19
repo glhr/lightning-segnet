@@ -1,4 +1,4 @@
-channels=2
+channels=1
 dataset=combo
 xp=paper
 
