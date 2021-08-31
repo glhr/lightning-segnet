@@ -79,7 +79,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--loss', default=None)
         parser.add_argument('--orig_dataset', default=None)
         parser.add_argument('--modalities', default="rgb")
-        parser.add_argument('--init_channels', type=int, default=None)
+        parser.add_argument('--init_channels', type=int, default=1)
         parser.add_argument('--depthwise_conv', action="store_true", default=False)
         parser.add_argument('--ranks', default="1,2,3")
         parser.add_argument('--dist', default="l1")
@@ -133,6 +133,7 @@ class LitSegNet(pl.LightningModule):
                 "multispectralseg": MIRMultispectral,
                 "lostfound": LostFoundDataLoader,
                 "freiburgraw": FreiburgForestRawDataLoader,
+                "kittiraw": KittiRawDataLoader,
                 "cityscapesraw": CityscapesRawDataLoader,
                 "rugd": RUGDDataLoader,
                 "wilddash": WildDashDataLoader,
@@ -414,7 +415,9 @@ class LitSegNet(pl.LightningModule):
             create_folder(result_folder)
 
         if self.test_max is None or batch_idx < self.test_max:
-            # logger.debug(torch.min(sample),torch.max(sample))
+        # print(batch["filename"])
+        # if "us0279" in batch["filename"][0]:
+            # logger.info("Saving shit")
             if not self.nopredict:
                 pred_orig = self.model(sample)
                 if self.hparams.loss_weight:
@@ -493,10 +496,10 @@ class LitSegNet(pl.LightningModule):
                     mod = ','.join(self.hparams.modalities)
                     # orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
-                    # dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
-                    if not self.nopredict: dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                    dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
+                    if not self.nopredict and self.test_checkpoint is not None: dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     if not dataset_obj.noGT:
-                        # dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt", dataset_name=self.hparams.dataset, filename = filename)
 
                     if not self.nopredict:
@@ -524,17 +527,18 @@ class LitSegNet(pl.LightningModule):
 
             if not dataset_obj.noGT and not self.nopredict:
                 #try:
-                cm = self.CM(pred, target)
+                pass
+                # cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
-                iou = self.IoU_conv(pred, target)
+                # iou = self.IoU_conv(pred, target)
 
-                mistakes = self.dist(pred, target, weight_map=weight_map)
+                # mistakes = self.dist(pred, target, weight_map=weight_map)
                 # logger.debug(mistakes)
-                self.log_mistakes(mistakes, prefix="test")
+                # self.log_mistakes(mistakes, prefix="test")
 
 
-                self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-                self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                # self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                # self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
 
             return pred
 
@@ -586,6 +590,7 @@ class LitSegNet(pl.LightningModule):
         combo = ConcatDataset(subsets)
         out = Subset(combo, indices=range(total_length))
         #print(dir(out.dataset),out.dataset.datasets[0].dataset)
+
         return out
 
     def get_dataset_splits(self, normalize=False):
@@ -674,16 +679,14 @@ if __name__ == '__main__':
                 check_val_every_n_epoch=1,
                 # ~ log_every_n_steps=10,
                 logger=wandb_logger,
-                checkpoint_callback=checkpoint_callback,
-                callbacks=callbacks)
+                callbacks=callbacks + [checkpoint_callback])
         else:
             segnet_model.update_model()
             trainer = pl.Trainer.from_argparse_args(args,
                 check_val_every_n_epoch=1,
                 # ~ log_every_n_steps=10,
                 logger=wandb_logger,
-                checkpoint_callback=checkpoint_callback,
-                callbacks=callbacks,
+                callbacks=callbacks + [checkpoint_callback],
                 resume_from_checkpoint=args.train_checkpoint)
         trainer.fit(segnet_model)
 

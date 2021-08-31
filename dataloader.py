@@ -272,7 +272,10 @@ class MMDataLoader(Dataset):
             new_labels = torch.zeros_like(labels)
 
             for old_idx in torch.unique(labels):
-                new_labels[labels==old_idx] = self.idx_to_idx["convert"][old_idx.item()]
+                if not self.noGT:
+                    new_labels[labels==old_idx] = self.idx_to_idx["convert"][old_idx.item()]
+                else:
+                    new_labels[labels==old_idx] = 0
                 # print(old_idx,"->",self.idx_to_idx["convert"][old_idx.item()])
             return new_labels
 
@@ -567,7 +570,7 @@ class MMDataLoader(Dataset):
 
 class DemoDataLoader(MMDataLoader):
     def __init__(self, modalities, name, resize, transform=None, viz=False, rgb=False, **kwargs):
-        super().__init__(mode="affordances", augment=False, modalities=modalities, name=name, resize=resize, transform=transform, viz=viz)
+        super().__init__(mode="affordances", augment=False, modalities=modalities, name=name, resize=resize, transform=transform, viz=viz, rgb=rgb)
         self.name = name
 
         self.modalities = modalities.copy()
@@ -600,6 +603,7 @@ class DemoDataLoader(MMDataLoader):
         self.viz = viz
         self.noGT = True
         self.has_affordance_labels = True
+        self.rgb = rgb
 
     def sample(self, sample_id, augment):
         filename = self.filenames[sample_id].replace(".png","").split("/")[-1]
@@ -633,7 +637,8 @@ class DemoDataLoader(MMDataLoader):
         if use["ir"]:
             modIR = transformed_imgs['ir']
 
-        # if use["rgb"]:
+        if use["rgb"] and not self.rgb:
+           if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
         #    if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
             # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
         if use["depth"]:
@@ -652,11 +657,14 @@ class DemoDataLoader(MMDataLoader):
         for mod in self.modalities:
             if use[mod] and img.get(mod) is not None:
                 imgs.append(torch.from_numpy(img[mod].copy()).float())
-
+                # print(self.name, modGT.shape, img[mod].shape)
         # logger.debug(torch.unique(modGT))
 
-        print(imgs.shape)
-        return [imgs, torch.zeros_like(imgs[0])]
+        # print(self.rgb, imgs[0].shape)
+        if self.rgb:
+            return [imgs[0].permute(2,0,1), torch.zeros_like(imgs[0],dtype=int)]
+        else:
+            return [torch.stack(imgs), torch.zeros_like(imgs[0],dtype=int)]
 
     def __getitem__(self, idx):
         # print(self.sample(idx))
@@ -1336,31 +1344,76 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
 
 class FreiburgForestRawDataLoader(DemoDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest-raw/freiburg_forest_raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, dataset_seq=None):
+    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest-raw/freiburg_forest_raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None):
         super().__init__(modalities, resize=resize, name="freiburgraw", mode=mode, augment=augment)
         self.path = path
         logger.warning(dataset_seq)
-        sequences = ["2016-03-01-12-40-50" if dataset_seq is None else dataset_seq]
+        sequences = ["2016-02-22-12-32-18" if dataset_seq is None else dataset_seq]
         self.viz = viz
         self.base_folders = []
+        self.filepaths = []
 
-        for filepath in glob.glob(self.path + '*/*.jpg'):
+        files = glob.glob(self.path + '*/*.jpg')
+        files.sort()
+        for filepath in files:
             img = filepath.split("/")[-1]
             seq = filepath.split("/")[-2]
+            name = '-'.join(filepath.split("/")[-2:]).split(".")[0]
             # print(seq, set)
             if seq in sequences:
-                self.filenames.append(img)
+                self.filenames.append(name)
+                self.filepaths.append(img)
                 self.base_folders.append(self.path + seq)
 
         if len(self.filenames):
-            logger.debug(f"{self.filenames[0]}, {self.base_folders[0]}")
+            print(f"{self.filenames[0]}", f"{self.filepaths[0]}, {self.base_folders[0]}")
 
         self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
 
-        self.write_loader(set)
+        self.rgb = rgb
+
+        # self.write_loader(set)
 
     def get_rgb(self, sample_id):
-        return Image.open(f"{self.base_folders[sample_id]}/{self.filenames[sample_id]}").convert('RGB')
+        # print(sample_id, f"{self.filenames[sample_id]}", f"{self.filepaths[sample_id]}, {self.base_folders[sample_id]}")
+        return Image.open(f"{self.base_folders[sample_id]}/{self.filepaths[sample_id]}").convert('RGB')
+
+class KittiRawDataLoader(DemoDataLoader):
+
+    def __init__(self, resize, set="train", path = "../../datasets/kitti-raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None):
+        super().__init__(modalities, resize=resize, name="kittiraw", mode=mode, augment=augment)
+        self.path = path
+        logger.warning(dataset_seq)
+        sequences = ["2011_09_29_drive_0071_sync" if dataset_seq is None else dataset_seq]
+        self.viz = viz
+        self.base_folders = []
+        self.filepaths = []
+
+        files = glob.glob(self.path + '*/image_02/data/*.png')
+        files.sort()
+        for filepath in files:
+            img = filepath.split("/")[-1]
+            seq = filepath.split("/")[-4]
+
+            # print(seq, set)
+            if seq in sequences:
+                name = seq + '-' + img.split(".")[0]
+                self.filenames.append(name)
+                self.filepaths.append(img)
+                self.base_folders.append(self.path + seq + '/image_02/data/')
+
+        if len(self.filenames):
+            print(f"{self.filenames[0]}", f"{self.filepaths[0]}, {self.base_folders[0]}")
+
+        self.filenames, self.base_folders = (list(t) for t in zip(*sorted(zip(self.filenames, self.base_folders))))
+
+        self.rgb = rgb
+
+        # self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        # print(sample_id, f"{self.filenames[sample_id]}", f"{self.filepaths[sample_id]}, {self.base_folders[sample_id]}")
+        return Image.open(f"{self.base_folders[sample_id]}/{self.filepaths[sample_id]}").convert('RGB')
 
 class CityscapesRawDataLoader(DemoDataLoader):
 

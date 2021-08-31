@@ -8,17 +8,17 @@ from utils import create_folder
 # fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016_affordances
 
 parser = ArgumentParser()
-parser.add_argument('--dataset', default="freiburgthermal")
-parser.add_argument('--xp', default="mishmash")
-parser.add_argument('--model', default="fusionfusion-custom16rll-multi-2021-05-03 11-30-freiburgthermal-c3-sord-1,2,3-a1-logl2-rgb,ir-epoch=39-val_loss=0.0038_affordances")
-parser.add_argument('--model2', default=None)
+parser.add_argument('--dataset', default="kittiraw")
+parser.add_argument('--xp', default="demo-2011_09_28_drive_0039_sync")
+parser.add_argument('--model', default="2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310_affordances")
+parser.add_argument('--model2', default="2021-08-26 07-09-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=109-val_loss=0.0212_affordances")
 parser.add_argument('--model3', default=None)
 parser.add_argument('--model4', default=None)
 parser.add_argument('--ir', default=False, action="store_true")
 parser.add_argument('--nopred', default=False, action="store_true")
 parser.add_argument('--depth', default=False, action="store_true")
 parser.add_argument('--depthraw', default=False, action="store_true")
-parser.add_argument('--rgb', default=False, action="store_true")
+parser.add_argument('--rgb', default=True, action="store_true")
 parser.add_argument('--gt', default=False, action="store_true")
 parser.add_argument('--error', default=False, action="store_true")
 parser.add_argument('--nospacing', default=False, action="store_true")
@@ -60,9 +60,9 @@ except OSError:
 
 filenames = []
 
-for file in glob.glob(f"results/{args.dataset}/{args.xp}/{args.dataset}-*-cls-{args.model}.png"):
+for file in glob.glob(f"results/{args.dataset}/{args.xp}/{args.dataset}-*-overlay-pred-{args.model}.png"):
     file = file.replace(f"results/{args.dataset}/{args.xp}/{args.dataset}-","")
-    file = file.replace(f"-cls-{args.model}.png","")
+    file = file.replace(f"-overlay-pred-{args.model}.png","")
     # print("-->",file)
     filenames.append(file)
 
@@ -78,10 +78,10 @@ for i in filenames:
         f_ir = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-ir_affordances.png"
         f_d = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-depth_affordances.png"
         f_draw = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-depthraw_affordances.png"
-        f_pred = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model}.png"
-        f_pred2 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model2}.png"
-        f_pred3 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model3}.png"
-        f_pred4 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-cls-{args.model4}.png"
+        f_pred = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model}.png"
+        f_pred2 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model2}.png"
+        f_pred3 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model3}.png"
+        f_pred4 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model4}.png"
 
         f_error1=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model}.png"
         f_error2=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model2}.png"
@@ -101,13 +101,17 @@ for i in filenames:
 
         spacing = np.ones_like(img_rgb)[:,:10,:]*255
 
+        topstack = []
+        botstack = []
         stack = []
         errormaps = []
 
         if args.rgb:
 
-            stack.append(img_rgb)
-            if not args.nospacing: stack.append(spacing)
+            topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
+            topstack.append(img_rgb)
+            topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
+            # if not args.nospacing: stack.append(spacing)
             if args.error:
                 errormaps.append(255*np.ones_like(img_rgb))
                 if not args.nospacing: errormaps.append(spacing)
@@ -135,7 +139,7 @@ for i in filenames:
                 errormaps.append(255*np.ones_like(img_rgb))
                 if not args.nospacing: errormaps.append(spacing)
         if not args.nopred:
-            stack.append(dst)
+            botstack.append(img_pred)
         if args.error:
             # print(f_error1)
             img_error1 = cv.imread(f_error1)
@@ -144,10 +148,10 @@ for i in filenames:
 
 
         if args.model2 and not args.nopred:
-            if not args.nospacing: stack.append(spacing)
+            if not args.nospacing: botstack.append(spacing)
             img_pred2 = cv.imread(f_pred2)
             dst2 = cv.addWeighted(img_rgb, alpha, img_pred2, beta, 0.0)
-            stack.append(dst2)
+            botstack.append(img_pred2)
             if args.error:
                 print(f_error2)
                 if not args.nospacing: errormaps.append(spacing)
@@ -169,7 +173,9 @@ for i in filenames:
             dst4 = cv.addWeighted(img_rgb, alpha, img_pred4, beta, 0.0)
             stack.append(dst4)
 
-        out = np.hstack(stack)
+        botout = np.hstack(botstack)
+        topout = np.hstack(topstack)
+        out = np.vstack([botout, np.ones_like(topout)[:10,:,:]*255, topout])
 
         if args.error:
             errormaps_out = np.hstack(errormaps)
@@ -187,6 +193,7 @@ for i in filenames:
 
         cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}{args.prefix}-pred_overlay.png",out)
     except Exception as e:
+    	print(f_pred)
     	print(f"stopped at i={i}",e)
 
 
