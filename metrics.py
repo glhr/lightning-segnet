@@ -78,14 +78,19 @@ class Mistakes(nn.Module):
         correct = (target == output)
 
         target_red = (target == 1)
+        target_green = (target == 3)
         pred_red = (output == 1)
+        pred_green = (output == 3)
         #print(target)
         # print(target_red.type(), weight_map.type())
+        samples_precision = torch.sum(torch.where(pred_green, weight_map, torch.zeros_like(weight_map)), dim=0, keepdim=False)
         samples_recall = torch.sum(torch.where(target_red, weight_map, torch.zeros_like(weight_map)), dim=0, keepdim=False)
         #print(samples_recall)
         obstacle_recall = (target_red & pred_red) * weight_map
+        path_precision = (target_green & pred_green) * weight_map
         #print(obstacle_recall)
         obstacle_recall = torch.sum(obstacle_recall, dim=0, keepdim=False)
+        path_precision = torch.sum(path_precision, dim=0, keepdim=False)
         # print(obstacle_recall,samples_recall)
 
         if weight_map is not None:
@@ -120,7 +125,9 @@ class Mistakes(nn.Module):
             "correct_w": correct_w,
             "samples_w": samples_w,
             "obstacle_recall": obstacle_recall,
-            "samples_obstacle_recall": samples_recall
+            "samples_obstacle_recall": samples_recall,
+            "path_precision": path_precision,
+            "samples_path_precision": samples_precision
         }
 
         return result
