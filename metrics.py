@@ -77,6 +77,17 @@ class Mistakes(nn.Module):
         incorrect = (target != output)
         correct = (target == output)
 
+        target_red = (target == 1)
+        pred_red = (output == 1)
+        #print(target)
+        # print(target_red.type(), weight_map.type())
+        samples_recall = torch.sum(torch.where(target_red, weight_map, torch.zeros_like(weight_map)), dim=0, keepdim=False)
+        #print(samples_recall)
+        obstacle_recall = (target_red & pred_red) * weight_map
+        #print(obstacle_recall)
+        obstacle_recall = torch.sum(obstacle_recall, dim=0, keepdim=False)
+        # print(obstacle_recall,samples_recall)
+
         if weight_map is not None:
             correct_w = correct.long() * weight_map
             logger.debug(f"correct_w {correct_w}, {weight_map}")
@@ -107,7 +118,9 @@ class Mistakes(nn.Module):
             "dist_mistake_severity": (mistake_severity - self.mistake_min)/(self.mistake_max - self.mistake_min),
             "correct": correct,
             "correct_w": correct_w,
-            "samples_w": samples_w
+            "samples_w": samples_w,
+            "obstacle_recall": obstacle_recall,
+            "samples_obstacle_recall": samples_recall
         }
 
         return result
@@ -294,8 +307,8 @@ if __name__ == "__main__":
 
     if args.distmap:
         create_folder("results/distmap/")
-        gt_path = f'{args.input}-gt_affordances.png'
-        vis_path = f'{args.input}-orig-rgb_affordances.png'
+        gt_path = f'{args.input}-gt_convert.png'
+        vis_path = f'{args.input}-orig-rgb_convert.png'
         depth_path = 'datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/test/depth_gray/b1-09517_Clipped_redict_depth_gray.png'
         pred_path = gt_path
         image_orig = imread(gt_path)
@@ -335,7 +348,7 @@ if __name__ == "__main__":
         im = axes[4].imshow(result["combined_map"], cmap=plt.cm.gray, vmin=0, vmax=1)
         axes[4].set_title('Combined map')
 
-        cv2.imwrite("results/distmap/wmap.png", rescale_intensity(result["combined_map"], out_range=(0, 255)))
+        cv2.imwrite("results/distmap/wmap.png", cv2.applyColorMap(cv2.normalize(src=result["combined_map"], dst=None, alpha=0, beta=255, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_8U),cv2.COLORMAP_JET))
 
         for ax in axes:
             ax.axis('off')
