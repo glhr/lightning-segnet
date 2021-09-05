@@ -81,6 +81,9 @@ class Mistakes(nn.Module):
         target_green = (target == 3)
         pred_red = (output == 1)
         pred_green = (output == 3)
+
+        if weight_map is None:
+            weight_map = torch.ones_like(output)
         #print(target)
         # print(target_red.type(), weight_map.type())
         samples_precision = torch.sum(torch.where(pred_green, weight_map, torch.zeros_like(weight_map)), dim=0, keepdim=False)

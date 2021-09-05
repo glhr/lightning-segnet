@@ -383,12 +383,24 @@ class LitSegNet(pl.LightningModule):
         acc = torch.sum(correct_w["correct_w"], dim=0, keepdim=False) / torch.sum(correct_w["samples_w"], dim=0, keepdim=False)
         return acc
 
+    def reduce_recall_w(self, recall):
+        acc = torch.sum(recall["obstacle_recall"], dim=0, keepdim=False) / torch.sum(recall["samples_obstacle_recall"], dim=0, keepdim=False)
+        return acc
+
+    def reduce_precision_w(self, precision):
+        acc = torch.sum(precision["path_precision"], dim=0, keepdim=False) / torch.sum(precision["samples_path_precision"], dim=0, keepdim=False)
+        return acc
+
     def log_mistakes(self, mistakes, prefix=""):
         underscore = '_' * int(len(prefix) > 0)
         for k, v in mistakes.items():
             if k == "correct_w":
                 if prefix != "train":
                     self.log(f"{prefix}{underscore}acc_w", {"correct_w": mistakes["correct_w"], "samples_w": mistakes["samples_w"]}, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_acc_w)
+            elif k == "obstacle_recall":
+                self.log(f"{prefix}{underscore}recall_w", {"obstacle_recall": mistakes["obstacle_recall"], "samples_obstacle_recall": mistakes["samples_obstacle_recall"]}, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_recall_w)
+            elif k == "path_precision":
+                self.log(f"{prefix}{underscore}precision_w", {"path_precision": mistakes["path_precision"], "samples_path_precision": mistakes["samples_path_precision"]}, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_precision_w)
             elif "dist" in k:
                 self.log(f"{prefix}{underscore}{k}", v, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_dist)
             elif k == "correct":
@@ -560,18 +572,18 @@ class LitSegNet(pl.LightningModule):
 
             if not dataset_obj.noGT and not self.nopredict:
                 #try:
-                cm = self.CM(pred, target)
+                # cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
-                iou = self.IoU_conv(pred, target)
+                # iou = self.IoU_conv(pred, target)
                 # print(iou)
 
                 mistakes = self.dist(pred, target, weight_map=weight_map)
                 # logger.debug(mistakes)
                 self.log_mistakes(mistakes, prefix="test")
 
-
-                self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-                self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+                #
+                # self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                # self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
 
             return pred
 
