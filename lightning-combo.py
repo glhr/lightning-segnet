@@ -97,11 +97,11 @@ class LitSegNet(pl.LightningModule):
         self.hparams.modalities = self.hparams.modalities.split(",")
         logger.warning(f"params {self.hparams}")
 
-        init_channels = len(self.hparams.modalities) if self.hparams.init_channels is None else self.hparams.init_channels
+        self.hparams.init_channels = len(self.hparams.modalities)
 
         self.model = SegNet(
             num_classes=self.hparams.num_classes if num_classes is None else num_classes,
-            n_init_features=init_channels,
+            n_init_features=self.hparams.init_channels,
             depthwise_conv=self.hparams.depthwise_conv
         )
 
@@ -501,7 +501,7 @@ class LitSegNet(pl.LightningModule):
             else:
                 target = target_orig
 
-            if args.nopredict:
+            if self.nopredict:
                 pred = target
                 pred_cls = target
 
@@ -610,7 +610,7 @@ class LitSegNet(pl.LightningModule):
         logger.info(self.hparams.modalities)
         logger.info(f"{set} augment: {augment}")
         logger.info(self.dataset_seq)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:
@@ -627,7 +627,7 @@ class LitSegNet(pl.LightningModule):
         if set == "test":
             for name in self.hparams.dataset_combo:
                 # print(name, set)
-                dataset = self.datasets[name](set="val", resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, sort=False, rgb=(self.hparams.init_channels > 1))
+                dataset = self.datasets[name](set="val", resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, sort=False, rgb=(self.hparams.init_channels > 1))
                 total_length += len(dataset)
                 logger.info(f"{name}: {len(dataset)}")
                 sets[name] = dataset

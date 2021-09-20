@@ -164,6 +164,7 @@ class MMDataLoader(Dataset):
         if self.rgb:
             return [imgs[0].permute(2,0,1), modGT]
         else:
+            print(torch.stack(imgs).shape)
             return [torch.stack(imgs), modGT]
 
     def remap_classes(self, idx_to_color):
@@ -484,8 +485,8 @@ class MMDataLoader(Dataset):
             transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             if not self.rgb: transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
             else: transformed_gray = transformed_resized
-            # if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
-            # if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
+            if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
+            if "ir" in imgs: transformed_gray["ir"] = transformed_resized["ir"]
             transformed_final = transformed_gray
 
         elif apply == 'all':
