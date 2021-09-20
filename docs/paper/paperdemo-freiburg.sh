@@ -9,8 +9,11 @@ commands=(
 )
 
 seqs=(
-2016-02-22-12-32-18
-2016-03-01-12-40-50
+# 2016-02-22-12-32-18
+# 2016-03-01-12-40-50
+2016-03-01-11-44-50
+2016-02-26-14-47-29
+2016-03-01-12-05-22
 )
 
 dataset=freiburgraw
@@ -31,6 +34,5 @@ do
         # python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint}_affordances" --rgb
         python3 overlay_imgs.py --xp $xp --dataset $dataset
       fi
-
   done
 done

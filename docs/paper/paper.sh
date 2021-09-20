@@ -1,8 +1,8 @@
 datasets=(
-wilddash
+cityscapes
 )
 xp=paper
-test=test
+test=val
 
 run() {
   mkdir -p results/$dataset/$xp/txt
@@ -51,7 +51,7 @@ run
 mode=affordances
 cls=3
 checkpoints=(
- "2021-08-15 11-58-combo-c30-kl-rgb-epoch=82-val_loss=0.1474.ckpt" #gray
+"2021-08-15 11-58-combo-c30-kl-rgb-epoch=82-val_loss=0.1474.ckpt" #gray
 # "2021-04-09 03-40-cityscapes-c30-kl-rgb-epoch=18-val_loss=0.0918.ckpt"
 #"2021-04-08 21-07-cityscapes-c30-sord-1,2,3-a1-logl2-rgb-epoch=23-val_loss=0.0034.ckpt"
 # "2021-06-11 13-18-cityscapes-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=32-val_loss=0.0044.ckpt"

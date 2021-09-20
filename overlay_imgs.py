@@ -8,17 +8,17 @@ from utils import create_folder
 # fusionfusion-custom16rll-multi-2021-05-03 22-03-freiburgthermal-c3-sord-1,2,3-a1-logl2-lw-rgb,ir-epoch=41-val_loss=0.0016_affordances
 
 parser = ArgumentParser()
-parser.add_argument('--dataset', default="kittiraw")
-parser.add_argument('--xp', default="demo-2011_09_28_drive_0039_sync")
-parser.add_argument('--model', default="2021-03-29 09-16-cityscapes-c30-kl-rgb-epoch=190-val_loss=0.4310_affordances")
-parser.add_argument('--model2', default="2021-08-26 07-09-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=109-val_loss=0.0212_affordances")
-parser.add_argument('--model3', default=None)
+parser.add_argument('--dataset', default="combo")
+parser.add_argument('--xp', default="paper")
+parser.add_argument('--model', default="2021-08-15 11-58-combo-c30-kl-rgb-epoch=82-val_loss=0.1474_affordances")
+parser.add_argument('--model2', default="2021-08-16 09-02-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=78-val_loss=0.0062_affordances")
+parser.add_argument('--model3', default="2021-08-22 10-21-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=92-val_loss=0.0215_affordances")
 parser.add_argument('--model4', default=None)
 parser.add_argument('--ir', default=False, action="store_true")
 parser.add_argument('--nopred', default=False, action="store_true")
 parser.add_argument('--depth', default=False, action="store_true")
 parser.add_argument('--depthraw', default=False, action="store_true")
-parser.add_argument('--rgb', default=True, action="store_true")
+parser.add_argument('--rgb', default=False, action="store_true")
 parser.add_argument('--gt', default=False, action="store_true")
 parser.add_argument('--error', default=False, action="store_true")
 parser.add_argument('--nospacing', default=False, action="store_true")
@@ -67,7 +67,7 @@ for file in glob.glob(f"results/{args.dataset}/{args.xp}/{args.dataset}-*-overla
     filenames.append(file)
 
 if not len(filenames):
-    print(f"couldn't find anything matching results/{args.dataset}/{args.xp}/{args.dataset}-*-cls-{args.model}.png")
+    print(f"couldn't find anything matching results/{args.dataset}/{args.xp}/{args.dataset}-*-overlay-pred-{args.model}.png")
 
 print(args)
 i = 1
@@ -89,7 +89,7 @@ for i in filenames:
         f_error4=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model4}.png"
 
         # print(f_rgb)
-        img_rgb = cv.imread(f_rgb)
+
         # print(f_gt)
         img_gt = cv.imread(f_gt)
 
@@ -97,9 +97,9 @@ for i in filenames:
         img_pred = cv.imread(f_pred)
         beta = (1.0 - alpha)
 
-        dst = cv.addWeighted(img_rgb, alpha, img_pred, beta, 0.0)
+        # dst = cv.addWeighted(img_rgb, alpha, img_pred, beta, 0.0)
 
-        spacing = np.ones_like(img_rgb)[:,:10,:]*255
+        spacing = np.ones_like(img_pred)[:,:10,:]*255
 
         topstack = []
         botstack = []
@@ -107,7 +107,7 @@ for i in filenames:
         errormaps = []
 
         if args.rgb:
-
+            img_rgb = cv.imread(f_rgb)
             topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
             topstack.append(img_rgb)
             topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
@@ -150,7 +150,7 @@ for i in filenames:
         if args.model2 and not args.nopred:
             if not args.nospacing: botstack.append(spacing)
             img_pred2 = cv.imread(f_pred2)
-            dst2 = cv.addWeighted(img_rgb, alpha, img_pred2, beta, 0.0)
+            #dst2 = cv.addWeighted(img_rgb, alpha, img_pred2, beta, 0.0)
             botstack.append(img_pred2)
             if args.error:
                 print(f_error2)
@@ -160,8 +160,8 @@ for i in filenames:
         if args.model3 and not args.nopred:
             if not args.nospacing: stack.append(spacing)
             img_pred3 = cv.imread(f_pred3)
-            dst3 = cv.addWeighted(img_rgb, alpha, img_pred3, beta, 0.0)
-            stack.append(dst3)
+            #dst3 = cv.addWeighted(img_rgb, alpha, img_pred3, beta, 0.0)
+            botstack.append(img_pred3)
             if args.error:
                 print(f_error3)
                 if not args.nospacing: errormaps.append(spacing)
@@ -170,12 +170,13 @@ for i in filenames:
         if args.model4 and not args.nopred:
             if not args.nospacing: stack.append(spacing)
             img_pred4 = cv.imread(f_pred4)
-            dst4 = cv.addWeighted(img_rgb, alpha, img_pred4, beta, 0.0)
+            #dst4 = cv.addWeighted(img_rgb, alpha, img_pred4, beta, 0.0)
             stack.append(dst4)
 
         botout = np.hstack(botstack)
-        topout = np.hstack(topstack)
-        out = np.vstack([botout, np.ones_like(topout)[:10,:,:]*255, topout])
+        #topout = np.hstack(topstack)
+        # out = np.vstack([botout, np.ones_like(topout)[:10,:,:]*255, topout])
+        out = botout
 
         if args.error:
             errormaps_out = np.hstack(errormaps)

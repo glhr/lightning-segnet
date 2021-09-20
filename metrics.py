@@ -74,6 +74,10 @@ class Mistakes(nn.Module):
             target[target_orig==i] = r
             output[output_orig==i] = r
 
+        output[target == 1] = 3
+        output[target == 2] = 0
+        output[target == 3] = 1
+
         incorrect = (target != output)
         correct = (target == output)
 

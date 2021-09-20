@@ -66,7 +66,7 @@ def forward(model_str, x):
 results = []
 
 num_threads = args.threads
-device = "cuda" if args.cuda else f"cpu_{num_threads}threads"
+device = "cuda:0" if args.cuda else f"cpu_{num_threads}threads"
 
 for model_str in model_dict.keys():
     logger.warning(model_str)
