@@ -32,7 +32,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-
+DATASET_FOLDER = "../../datasets"
+DATASET_FOLDER = "/media/gala/DataDisk/2021 gala_driv/learning-driveability-heatmaps/datasets"
 
 class MMDataLoader(Dataset):
     def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False, rgb=False, **kwargs):
@@ -164,7 +165,7 @@ class MMDataLoader(Dataset):
         if self.rgb:
             return [imgs[0].permute(2,0,1), modGT]
         else:
-            print(torch.stack(imgs).shape)
+            # print(torch.stack(imgs).shape)
             return [torch.stack(imgs), modGT]
 
     def remap_classes(self, idx_to_color):
@@ -678,7 +679,7 @@ class DemoDataLoader(MMDataLoader):
 
 class FreiburgDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/freiburg-forest/freiburg_forest_multispectral_annotated/freiburg_forest_annotated/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -755,7 +756,7 @@ class FreiburgDataLoader(MMDataLoader):
 
 class FreiburgThermalDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-thermal/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/freiburg-thermal/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -852,7 +853,7 @@ class FreiburgThermalDataLoader(MMDataLoader):
 
 class CityscapesDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/cityscapes/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/cityscapes/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -924,7 +925,7 @@ class CityscapesDataLoader(MMDataLoader):
 
 class LostFoundDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/lostfound/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/lostfound/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1001,7 +1002,7 @@ class LostFoundDataLoader(MMDataLoader):
 
 class KittiDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1061,7 +1062,7 @@ class KittiDataLoader(MMDataLoader):
 
 class ThermalVOCDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/thermalworld-voc/dataset/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1130,7 +1131,7 @@ class ThermalVOCDataLoader(MMDataLoader):
 
 class MIRMultispectral(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/mir-multispectral-seg/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/mir-multispectral-seg/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1205,7 +1206,7 @@ class MIRMultispectral(MMDataLoader):
 
 class SynthiaDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/synthia/", modalities=["rgb"], mode="affordances", augment=False, viz=False, sort=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/synthia/", modalities=["rgb"], mode="affordances", augment=False, viz=False, sort=False, **kwargs):
         super().__init__(modalities, resize=resize, name="synthia", mode=mode, augment=augment)
         self.path = path
 
@@ -1265,7 +1266,7 @@ class SynthiaDataLoader(MMDataLoader):
 
 
 class OwnDataLoader(DemoDataLoader):
-    def __init__(self, resize, set="train", path = "../../datasets/own/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/own/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         super().__init__(modalities, resize=resize, name="own", mode=mode, augment=augment)
         self.path = path
 
@@ -1293,7 +1294,7 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
 
     # /home/robotlab/rob10/learning-driveability-heatmaps/datasets/kaist-pedestrian/data/kaist-rgbt/images/set00/V000
 
-    def __init__(self, resize, set="train", path = "../../datasets/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, dataset_seq=None):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, dataset_seq=None):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1345,7 +1346,7 @@ class KAISTPedestrianDataLoader(DemoDataLoader):
 
 class FreiburgForestRawDataLoader(DemoDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/freiburg-forest-raw/freiburg_forest_raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/freiburg-forest-raw/freiburg_forest_raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None):
         super().__init__(modalities, resize=resize, name="freiburgraw", mode=mode, augment=augment)
         self.path = path
         logger.warning(dataset_seq)
@@ -1381,7 +1382,7 @@ class FreiburgForestRawDataLoader(DemoDataLoader):
 
 class KittiRawDataLoader(DemoDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/kitti-raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kitti-raw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None):
         super().__init__(modalities, resize=resize, name="kittiraw", mode=mode, augment=augment)
         self.path = path
         logger.warning(dataset_seq)
@@ -1418,7 +1419,7 @@ class KittiRawDataLoader(DemoDataLoader):
 
 class CityscapesRawDataLoader(DemoDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/cityscapesraw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, dataset_seq=None):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/cityscapesraw/", modalities=["rgb"], mode="affordances", augment=False, viz=False, dataset_seq=None):
         super().__init__(modalities, resize=resize, name="cityscapesraw", mode=mode, augment=augment)
         self.path = path
         logger.warning(dataset_seq)
@@ -1450,7 +1451,7 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
     # /home/robotlab/rob10/learning-driveability-heatmaps/datasets/kaist-pedestrian/data/kaist-rgbt/images/set00/V000
 
-    def __init__(self, resize, set="train", path = "../../datasets/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kaist-pedestrian/data/kaist-rgbt/images/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1526,7 +1527,7 @@ class KAISTPedestrianAnnDataLoader(MMDataLoader):
 
 class RUGDDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/rugd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/rugd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1589,7 +1590,7 @@ class RUGDDataLoader(MMDataLoader):
 
 class WildDashDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/wilddash/wd_public_02/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/wilddash/wd_public_02/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1635,7 +1636,7 @@ class WildDashDataLoader(MMDataLoader):
         self.write_loader(set)
 
     def get_rgb(self, sample_id):
-        return Image.open(f"{self.path}images/{self.filenames[sample_id]}.jpg").convert('RGB')
+        return Image.open(f"{self.path}images_wd/{self.filenames[sample_id]}.jpg").convert('RGB')
 
     def get_gt(self, sample_id):
         return Image.open(f"{self.path}labels/{self.filenames[sample_id]}.png").convert('L')
@@ -1643,7 +1644,7 @@ class WildDashDataLoader(MMDataLoader):
 
 class TAS500DataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/tas500/tas500v1.1/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/tas500/tas500v1.1/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1702,7 +1703,7 @@ class TAS500DataLoader(MMDataLoader):
 
 class ACDCDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/acdc/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/acdc/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1767,7 +1768,7 @@ class ACDCDataLoader(MMDataLoader):
 
 class MapillaryDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/mapillary/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/mapillary/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1839,7 +1840,7 @@ class MapillaryDataLoader(MMDataLoader):
 
 class IDDDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/idd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/idd/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1905,7 +1906,7 @@ class IDDDataLoader(MMDataLoader):
 
 class BDDDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/bdd100k/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/bdd100k/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1969,7 +1970,7 @@ class BDDDataLoader(MMDataLoader):
 
 class YCORDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = "../../datasets/yamaha_v0/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/yamaha_v0/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data

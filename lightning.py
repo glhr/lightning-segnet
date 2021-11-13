@@ -258,7 +258,11 @@ class LitSegNet(pl.LightningModule):
     def predict(self, batch, set, save=False, batch_idx=None):
         x, y = batch["sample"]
 
-        x_hat = self.model(x)
+        if set == "test":
+            with torch.no_grad():
+                x_hat = self.model(x)
+        else:
+            x_hat = self.model(x)
 
         if self.hparams.loss_weight:
             weight_map = weight_from_target(y, lwmap_range=self.hparams.lwmap_range)
@@ -480,9 +484,11 @@ class LitSegNet(pl.LightningModule):
                     proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
                     proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
                     proba_pref = p.squeeze()[orig_dataset_obj.aff_idx["preferable"]]
-                    expected = proba_imposs
-                    # expected = expected - torch.min(expected)
-                    # expected = expected/torch.max(expected)
+                    # expected = proba_imposs
+
+                    expected = 1*proba_imposs + 2*proba_poss + 3*proba_pref
+                    expected = expected - torch.min(expected)
+                    expected = expected/torch.max(expected)
                     # print(torch.min(expected),torch.max(expected))
                     # expected = 1 - expected
 
@@ -509,7 +515,8 @@ class LitSegNet(pl.LightningModule):
                     # orig_dataset_obj.result_to_image(iter=batch_idx+i, pred_cls=c, folder=result_folder, filename_prefix=f"cls-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, orig=o, folder=folder, filename_prefix=f"ref-dual", dataset_name=self.hparams.dataset)
                     dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
-                    if not self.nopredict and self.test_checkpoint is not None: dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                    if not self.nopredict and self.test_checkpoint is not None:
+                        dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     if not dataset_obj.noGT:
                         dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt", dataset_name=self.hparams.dataset, filename = filename)
@@ -704,7 +711,8 @@ if __name__ == '__main__':
 
     else:
         logger.warning("Testing phase")
-        trainer = pl.Trainer.from_argparse_args(args)
+        trainer = pl.Trainer.from_argparse_args(args,
+        move_metrics_to_cpu=True)
         if args.test_checkpoint is not None:
             chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
             if args.save_xp is None:
@@ -713,6 +721,7 @@ if __name__ == '__main__':
         else:
             trained_model = segnet_model
         if args.update_output_layer:
-            segnet_model.new_output()
+            trained_model.new_output()
 
+        trained_model.eval()
         trainer.test(trained_model)
