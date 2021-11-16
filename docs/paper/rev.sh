@@ -22,7 +22,7 @@ do
       isInFile=$(cat "$txtoutput" | grep -c "DATALOADER:0 TEST RESULTS")
       if [ ! -f "$txtoutput" ] || [ $isInFile -eq 0 ] || true; then
         echo "-> saving predictions"
-        python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoints[$i]}" ${commands[$i]} --save --save_xp $xp --gpu 1 --test_set test
+        python3 lightning.py --bs 1 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoints[$i]}" ${commands[$i]} --save --save_xp $xp --gpus 0 --test_set test --loss_weight > "$txtoutput" 2>&1
         # python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint}_affordances" --rgb
 
       fi

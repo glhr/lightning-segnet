@@ -134,6 +134,7 @@ class LitSegNet(pl.LightningModule):
                 "lostfound": LostFoundDataLoader,
                 "freiburgraw": FreiburgForestRawDataLoader,
                 "kittiraw": KittiRawDataLoader,
+                "kittiobj": KittiObjectDataLoader,
                 "cityscapesraw": CityscapesRawDataLoader,
                 "rugd": RUGDDataLoader,
                 "wilddash": WildDashDataLoader,
@@ -472,7 +473,7 @@ class LitSegNet(pl.LightningModule):
             else:
                 target = target_orig
 
-            if args.nopredict:
+            if self.hparams.nopredict:
                 pred = target
                 pred_cls = target
 

@@ -170,7 +170,7 @@ class MMDataLoader(Dataset):
 
     def remap_classes(self, idx_to_color):
 
-        undriveable = ['sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw', 'obs-str-bar-fallback', 'fallbackbackground', 'vehiclefallback','non-traversable-low-vegetation','high-vegetation','curb']
+        undriveable = ["impossible",'sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw', 'obs-str-bar-fallback', 'fallbackbackground', 'vehiclefallback','non-traversable-low-vegetation','high-vegetation','curb']
         void = ['void', 'egovehicle', 'outofroi', 'rectificationborder', 'unlabeled', '_ignore_']
         driveable = ['road', 'path', 'ground', 'lanemarking', 'asphalt', 'concrete', 'gravel', 'road-marking', 'marking', 'bike-lane', 'service-lane', 'driveway', 'pedestrian-area','water-valve', 'manhole','crosswalk-plain','smooth-trail','rough-trail', 'catch-basin','curb-cut']
         between = ['between','grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole', 'soil', 'sand', 'lowgrass', 'highgrass', 'non-drivablefallback','drivablefallback','traversable-grass']
@@ -291,6 +291,7 @@ class MMDataLoader(Dataset):
         # -> unique values rgb     tensor([  0, 255], dtype=torch.uint8)
         # print(np.unique(mask.reshape(-1,3),axis=0))
         class_mask = mask
+        #print(class_mask.shape)
         class_mask = class_mask.permute(2, 0, 1).contiguous()
         # print('unique values rgb    ', torch.unique(class_mask))
         h, w = class_mask.shape[1], class_mask.shape[2]
@@ -1059,6 +1060,56 @@ class KittiDataLoader(MMDataLoader):
 
     def get_gt(self, sample_id):
         return Image.open(self.path + "data_semantics/" + self.split_path + "semantic/" + f"{self.filenames[sample_id]}").convert('L')
+
+
+class KittiObjectDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="kittiobj", mode=mode, augment=augment)
+        self.path = path
+
+        classes = np.loadtxt(path + "data_object_drivseg_2/classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            print(x,self.idx_to_color['objects'])
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+
+        # print("class to idx: ", self.class_to_idx['objects'])
+        # print("color to idx: ", self.color_to_idx['objects'].values())
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if set in ["train","test","val","full"]:
+            self.split_path = 'training/'
+        else:
+            self.split_path = 'testing/'
+
+        self.augment = augment
+        self.viz = viz
+
+        for img in glob.glob(self.path + "data_object_drivseg_2/" + self.split_path + "drivseg_2/*.png"):
+            img = img.split("/")[-1]
+            # print(img)
+            if set == "full" or set == self.split_path:
+                self.filenames.append(img)
+        # print(self.filenames)
+        self.color_GT = True
+        self.rgb = rgb
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(self.path + "data_object_image_2/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
+
+    def get_gt(self, sample_id):
+        return Image.open(self.path + "data_object_drivseg_2/" + self.split_path + "drivseg_2/" + f"{self.filenames[sample_id]}").convert('RGB')
 
 class ThermalVOCDataLoader(MMDataLoader):
 
