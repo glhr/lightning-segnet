@@ -23,6 +23,8 @@ from utils import create_folder, logger, enable_debug, RANDOM_SEED
 from argparse import ArgumentParser
 from datetime import datetime
 
+import torchmetrics
+
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
 torch.backends.cudnn.deterministic = True
@@ -85,6 +87,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist', default="l1")
         parser.add_argument('--dist_alpha', type=int, default=1)
         parser.add_argument('--save_xp', default=None)
+        parser.add_argument('--gt', default="driv")
         return parser
 
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
@@ -161,6 +164,19 @@ class LitSegNet(pl.LightningModule):
                 self.orig_dataset = self.get_dataset_combo(set=self.test_set)
 
 
+            self.mse = nn.MSELoss()
+            self.test_acc, self.val_acc, self.train_acc = torchmetrics.Accuracy(), torchmetrics.Accuracy(), torchmetrics.Accuracy()
+            self.test_mIoU, self.val_mIoU, self.train_mIoU = torchmetrics.IoU(num_classes=self.hparams.num_classes), torchmetrics.IoU(num_classes=self.hparams.num_classes), torchmetrics.IoU(num_classes=self.hparams.num_classes)
+            self.test_cIoU, self.val_cIoU, self.train_cIoU = torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none")
+            self.accuracy = {
+                "train": self.train_acc, "val": self.val_acc, "test": self.test_acc
+            }
+            self.mIoU = {
+                "train": self.train_mIoU, "val": self.val_mIoU, "test": self.test_mIoU
+            }
+            self.cIoU = {
+                "train": self.train_cIoU, "val": self.val_cIoU, "test": self.test_cIoU
+            }
 
             if self.hparams.loss in ["sord","compare"]:
                 self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
@@ -480,27 +496,27 @@ class LitSegNet(pl.LightningModule):
             # logger.debug("pred",pred_cls.shape,"target",target.shape)
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
-                # logger.debug(p.shape)
-                if not self.hparams.dataset == "combo":
-                    proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
-                    proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
-                    proba_pref = p.squeeze()[orig_dataset_obj.aff_idx["preferable"]]
-                    # expected = proba_imposs
-
-                    expected = 1*proba_imposs + 2*proba_poss + 3*proba_pref
-                    expected = expected - torch.min(expected)
-                    expected = expected/torch.max(expected)
-                    # print(torch.min(expected),torch.max(expected))
-                    # expected = 1 - expected
+            #     # logger.debug(p.shape)
+            #     if not self.hparams.dataset == "combo":
+            #         proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
+            #         proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
+            #         proba_pref = p.squeeze()[orig_dataset_obj.aff_idx["preferable"]]
+            #         # expected = proba_imposs
+            #
+            #         expected = 1*proba_imposs + 2*proba_poss + 3*proba_pref
+            #         expected = expected - torch.min(expected)
+            #         expected = expected/torch.max(expected)
+            #         # print(torch.min(expected),torch.max(expected))
+            #         # expected = 1 - expected
 
                 iter = batch_idx*self.hparams.bs + i
 
                 filename = batch["filename"][i]
 
-                if not self.nopredict:
-                    for cls,map in enumerate(p.squeeze()):
-                        proba_lst = []
-                        proba_lst.append(map)
+                # if not self.nopredict:
+                #     for cls,map in enumerate(p.squeeze()):
+                #         proba_lst = []
+                #         proba_lst.append(map)
                             # self.orig_dataset.dataset.result_to_image(
                             #     iter=batch_idx+i,
                             #     proba_lst=proba_lst,
@@ -518,19 +534,20 @@ class LitSegNet(pl.LightningModule):
                     dataset_obj.result_to_image(iter=batch_idx+i, orig=o, folder=orig_folder, filename_prefix=f"orig-", dataset_name=self.hparams.dataset, modalities = self.hparams.modalities, filename = filename)
                     if not self.nopredict and self.test_checkpoint is not None:
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                        dataset_obj.result_to_image(iter=batch_idx+i, gt=c, folder=gt_folder, filename_prefix=f"pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     if not dataset_obj.noGT:
                         dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt", dataset_name=self.hparams.dataset, filename = filename)
 
-                    if not self.nopredict:
-                        error_map = t - c
-                        error_map[t == -1] = 0
-                        #error_map_w = 2 - error_map
-                        #dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorb-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
-                        dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorw-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=True)
-
-                        if not self.hparams.dataset == "combo":
-                            dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=expected, folder=result_folder + "/exp", filename_prefix=f"exp-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=False)
+                    # if not self.nopredict:
+                    #     error_map = t - c
+                    #     error_map[t == -1] = 0
+                    #     #error_map_w = 2 - error_map
+                    #     #dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorb-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                    #     dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorw-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=True)
+                    #
+                    #     if not self.hparams.dataset == "combo":
+                    #         dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=expected, folder=result_folder + "/exp", filename_prefix=f"exp-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=False)
                         # self.test_set.dataset.result_to_image(
                         #     iter=batch_idx+i,
                         #     orig=o,
@@ -547,14 +564,35 @@ class LitSegNet(pl.LightningModule):
 
             if not dataset_obj.noGT and not self.nopredict:
                 #try:
-                pass
+                # pass
                 # cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
                 # iou = self.IoU_conv(pred, target)
 
-                mistakes = self.dist(pred, target, weight_map=weight_map)
+                # mistakes = self.dist(pred, target, weight_map=weight_map)
+
+                mistakes = dict()
+                target_cls = target[target>=0]
+                pred_cls = torch.argmax(pred, dim=1)[target>=0]
+                mistakes["mse"] = self.mse(pred_cls.float(),target_cls.float())
                 # logger.debug(mistakes)
-                self.log_mistakes(mistakes, prefix="test")
+                # self.log_mistakes(mistakes, prefix="test")
+                # self.log(f'test_acc', v, on_step=False, prog_bar=False, on_epoch=True)
+
+                set = "test"
+
+                torch.set_deterministic(False)
+                self.accuracy[set](pred_cls, target_cls)
+                self.mIoU[set](pred_cls, target_cls)
+                ciou = self.cIoU[set](pred_cls, target_cls)
+
+                self.log(f'{set}_mse', mistakes["mse"], on_epoch=True)
+                self.log(f'{set}_accuracy', self.accuracy[set], on_epoch=True, metric_attribute=f"{set}_acc")
+                self.log(f'{set}_mIoU', self.mIoU[set], on_epoch=True, metric_attribute=f"{set}_mIoU")
+                self.log(f'{set}_cIoU_1', ciou[0], on_epoch=True)
+                self.log(f'{set}_cIoU_2', ciou[1], on_epoch=True)
+                self.log(f'{set}_cIoU_3', ciou[2], on_epoch=True)
+                torch.set_deterministic(True)
 
 
                 # self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
@@ -585,7 +623,8 @@ class LitSegNet(pl.LightningModule):
         logger.info(self.hparams.modalities)
         logger.info(f"{set} augment: {augment}")
         logger.info(self.dataset_seq)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
+        logger.info(self.hparams.gt)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1), gt=self.hparams.gt)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:

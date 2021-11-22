@@ -172,8 +172,19 @@ class MMDataLoader(Dataset):
 
         undriveable = ["impossible",'sky','vegetation','obstacle','person','car','pole','tree','building','guardrail','rider','motorcycle','bicycle','bike','car_stop', 'guardrail', 'cone', 'curve', 'color_cone', 'bus', 'truck', 'trafficlight', 'trafficsign', 'wall','fence', 'train', 'trailer', 'caravan', 'polegroup', 'dynamic', 'licenseplate', 'static', 'bridge', 'tunnel', 'car', 'truck', 'minibus', 'bus', 'cat', 'dog', 'human', 'building', 'boat', 'pedestrian', '_background_', 'fence', 'vegetation', 'wall', 'picnic-table', 'container/generic-object', 'rock-bed', 'log', 'vehicle', 'bush', 'sign', 'rock', 'pickup', 'street-light', 'billboard', 'van', 'animal', 'barrier', 'human', 'cctv-camera', 'traffic-light', 'wheeled-slow', 'other-vehicle', 'mountain', 'barrier', 'pole-group', 'utility-pole', 'trash-can', 'vehicle-group', 'banner', 'fire-hydrant', 'phone-booth', 'junction-box', 'traffic-sign-frame', 'traffic-cone', 'bike-rack', 'car-mount', 'on-rails', 'trash-can', 'other-vehicle', 'parking-meter', 'mailbox', 'bench', 'garage', 'treetrunk', 'treecrown', 'miscveg', 'miscobject', 'forest', 'autorickshaw', 'obs-str-bar-fallback', 'fallbackbackground', 'vehiclefallback','non-traversable-low-vegetation','high-vegetation','curb']
         void = ['void', 'egovehicle', 'outofroi', 'rectificationborder', 'unlabeled', '_ignore_']
+
+
         driveable = ['road', 'path', 'ground', 'lanemarking', 'asphalt', 'concrete', 'gravel', 'road-marking', 'marking', 'bike-lane', 'service-lane', 'driveway', 'pedestrian-area','water-valve', 'manhole','crosswalk-plain','smooth-trail','rough-trail', 'catch-basin','curb-cut']
         between = ['between','grass', 'terrain', 'sidewalk', 'parking', 'railtrack', 'ground_sidewalk', 'bump', 'water', 'sand', 'dirt', 'mulch', 'snow', 'traffic-island', 'road-shoulder', 'parking-aisle', 'rail-track', 'pothole', 'soil', 'sand', 'lowgrass', 'highgrass', 'non-drivablefallback','drivablefallback','traversable-grass']
+
+        logger.warning(self.gt)
+        if self.gt == "road_seg":
+            undriveable.extend(between)
+            between = []
+        elif self.gt == "freespace_seg":
+            driveable.extend(between)
+            between = []
+
         objclass_to_driveidx = dict()
 
         idx_mappings = {
@@ -1064,7 +1075,7 @@ class KittiDataLoader(MMDataLoader):
 
 class KittiObjectDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kitti/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, dataset_seq=None, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1094,22 +1105,41 @@ class KittiObjectDataLoader(MMDataLoader):
 
         self.augment = augment
         self.viz = viz
+        self.ds = []
+        self.seqs = []
 
-        for img in glob.glob(self.path + "data_object_drivseg_2/" + self.split_path + "drivseg_2/*.png"):
-            img = img.split("/")[-1]
+        # globs =     glob.glob(self.path + "data_object_drivseg_2/" + self.split_path + "drivseg_2/*.png") + glob.glob(self.path + "data_tracking_drivseg_2/" + self.split_path + "drivseg_2/*.png")
+        if dataset_seq == "tracking":
+            globs =     glob.glob(self.path + "data_tracking_drivseg_2/" + self.split_path + "drivseg_2/*.png")
+        else:
+            globs =     glob.glob(self.path + "data_object_drivseg_2/" + self.split_path + "drivseg_2/*.png")
+
+        for g in globs:
+            img = g.split("/")[-1]
             # print(img)
             if set == "full" or set == self.split_path:
                 self.filenames.append(img)
+                ds = g.split("/")[-4].split("_")[1]
+                self.ds.append(ds)
+                if ds == "tracking": self.seqs.append(img.split("-")[0].replace("track00",""))
+                else: self.seqs.append("")
         # print(self.filenames)
         self.color_GT = True
         self.rgb = rgb
         self.write_loader(set)
 
+        self.img_paths = {
+            "tracking": f"image_02/seq/",
+            "object": f"image_2/",
+        }
+
     def get_rgb(self, sample_id):
-        return Image.open(self.path + "data_object_image_2/" + self.split_path + "image_2/" + f"{self.filenames[sample_id]}").convert('RGB')
+        return Image.open(self.path + f"data_{self.ds[sample_id]}_image_2/" + \
+            self.split_path + self.img_paths[self.ds[sample_id]].replace("seq",self.seqs[sample_id]) + \
+            f'{self.filenames[sample_id].split("-")[-1]}').convert('RGB')
 
     def get_gt(self, sample_id):
-        return Image.open(self.path + "data_object_drivseg_2/" + self.split_path + "drivseg_2/" + f"{self.filenames[sample_id]}").convert('RGB')
+        return Image.open(self.path + f"data_{self.ds[sample_id]}_drivseg_2/" + self.split_path + "drivseg_2/" + f"{self.filenames[sample_id]}").convert('RGB')
 
 class ThermalVOCDataLoader(MMDataLoader):
 
@@ -1641,12 +1671,13 @@ class RUGDDataLoader(MMDataLoader):
 
 class WildDashDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/wilddash/wd_public_02/", modalities=["rgb"], mode="affordances", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/wilddash/wd_public_02/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
         """
         super().__init__(modalities, resize=resize, name="wildash", mode=mode, augment=augment)
+        self.gt = gt
         self.path = path
 
         print(modalities)
@@ -1683,6 +1714,7 @@ class WildDashDataLoader(MMDataLoader):
 
         self.color_GT = False
         self.rgb = rgb
+
 
         self.write_loader(set)
 
