@@ -34,6 +34,23 @@ def iou_from_confmat(
 
     return scores
 
+from torchmetrics import Metric
+
+class RecallMetric(Metric):
+    def __init__(self, dist_sync_on_step=False):
+        super().__init__(dist_sync_on_step=dist_sync_on_step)
+
+        self.add_state("correct", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+
+    def update(self, correct, total):
+
+        self.correct += correct
+        self.total += total
+
+    def compute(self):
+        return self.correct.float() / self.total
+
 class Mistakes(nn.Module):
     def __init__(self, ranks, masking=True):
         super().__init__()
@@ -113,24 +130,25 @@ class Mistakes(nn.Module):
 
         target, output = target.float(), output.float()
 
-        dist_l1 = self.l1(output, target)
-        dist_l2 = self.l2(output, target)
-        dist_logl2 = self.logl2(output, target)
+        #dist_l1 = self.l1(output, target)
+        #dist_l2 = self.l2(output, target)
+        #dist_logl2 = self.logl2(output, target)
         #dist_logl1 = self.logl1(output, target)
 
         mistake_severity = self.l1(output[incorrect], target[incorrect])
-        logger.debug(f"L1 distance {dist_l1}")
-        logger.debug(f"L1 distance {dist_l1}")
+
+        #logger.debug(f"L1 distance {dist_l1}")
+        #logger.debug(f"L1 distance {dist_l1}")
 
         result = {
-            "dist_l1": dist_l1,
-            "dist_l2": dist_l2,
+            #"dist_l1": dist_l1,
+            #"dist_l2": dist_l2,
             #"dist_logl1": dist_logl1,
-            "dist_logl2": dist_logl2,
+            #"dist_logl2": dist_logl2,
             "dist_mistake_severity": (mistake_severity - self.mistake_min)/(self.mistake_max - self.mistake_min),
-            "correct": correct,
-            "correct_w": correct_w,
-            "samples_w": samples_w,
+            #"correct": correct,
+            #"correct_w": correct_w,
+            #"samples_w": samples_w,
             "obstacle_recall": obstacle_recall,
             "samples_obstacle_recall": samples_recall,
             "path_precision": path_precision,
