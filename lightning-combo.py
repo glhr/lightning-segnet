@@ -85,6 +85,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist', default="l1")
         parser.add_argument('--dist_alpha', type=int, default=1)
         parser.add_argument('--save_xp', default=None)
+        parser.add_argument('--gt', default="driv")
         return parser
 
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
@@ -444,6 +445,7 @@ class LitSegNet(pl.LightningModule):
         if self.test_max is None or batch_idx < self.test_max:
 
             # print(self.hparams.dataset_combo)
+            print(self.test_set)
             dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.datasets[0]
 
             orig_dataset_obj = self.orig_dataset.dataset if self.hparams.dataset_combo is None else self.orig_dataset.datasets[0]
@@ -610,7 +612,7 @@ class LitSegNet(pl.LightningModule):
         logger.info(self.hparams.modalities)
         logger.info(f"{set} augment: {augment}")
         logger.info(self.dataset_seq)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1))
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=self.viz, dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1), gt=self.hparams.gt)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:

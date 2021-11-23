@@ -2,7 +2,7 @@ import os
 import numpy as np
 import random
 
-from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target
+from metrics import MaskedIoU, ConfusionMatrix, Mistakes, iou_from_confmat, weight_from_target, RecallMetric
 
 import torch
 from torch import nn
@@ -88,6 +88,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--dist_alpha', type=int, default=1)
         parser.add_argument('--save_xp', default=None)
         parser.add_argument('--gt', default="driv")
+        parser.add_argument('--noeval', default=False, action="store_true")
         return parser
 
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
@@ -157,7 +158,7 @@ class LitSegNet(pl.LightningModule):
                 self.orig_dataset = self.get_dataset(name=self.hparams.orig_dataset, set=self.test_set)
             else:
                 if self.hparams.dataset_combo is None:
-                    self.hparams.dataset_combo = "cityscapes,mapillary,acdc,rugd,tas500,idd,bdd"
+                    self.hparams.dataset_combo = "cityscapes,mapillary,acdc,rugd,tas500,idd,bdd,ycor"
 
                 self.hparams.dataset_combo = self.hparams.dataset_combo.split(",")
 
@@ -166,8 +167,18 @@ class LitSegNet(pl.LightningModule):
 
             self.mse = nn.MSELoss()
             self.test_acc, self.val_acc, self.train_acc = torchmetrics.Accuracy(), torchmetrics.Accuracy(), torchmetrics.Accuracy()
+            self.test_recall, self.val_recall, self.train_recall = torchmetrics.Recall(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Recall(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Recall(num_classes=self.hparams.num_classes, average="none")
+            self.test_precision, self.val_precision, self.train_precision = torchmetrics.Precision(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Precision(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Precision(num_classes=self.hparams.num_classes, average="none")
             self.test_mIoU, self.val_mIoU, self.train_mIoU = torchmetrics.IoU(num_classes=self.hparams.num_classes), torchmetrics.IoU(num_classes=self.hparams.num_classes), torchmetrics.IoU(num_classes=self.hparams.num_classes)
             self.test_cIoU, self.val_cIoU, self.train_cIoU = torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none")
+
+            self.test_recall_o = RecallMetric()
+            self.precis = {
+                "train": self.train_precision, "val": self.val_precision, "test": self.test_precision
+            }
+            self.recall = {
+                "train": self.train_recall, "val": self.val_recall, "test": self.test_recall
+            }
             self.accuracy = {
                 "train": self.train_acc, "val": self.val_acc, "test": self.test_acc
             }
@@ -562,41 +573,48 @@ class LitSegNet(pl.LightningModule):
                 #     folder=f"{self.result_folder}/viz_per_epoch",
                 #     filename_prefix=f"gt")
 
-            if not dataset_obj.noGT and not self.nopredict:
+            if not dataset_obj.noGT and not self.nopredict and not self.hparams.noeval:
                 #try:
                 # pass
                 # cm = self.CM(pred, target)
                 # logger.debug(cm.shape)
                 # iou = self.IoU_conv(pred, target)
 
-                # mistakes = self.dist(pred, target, weight_map=weight_map)
+                mistakes = self.dist(pred, target, weight_map=weight_map)
+                self.log_mistakes(mistakes, prefix="test")
 
                 mistakes = dict()
                 target_cls = target[target>=0]
                 pred_cls = torch.argmax(pred, dim=1)[target>=0]
                 mistakes["mse"] = self.mse(pred_cls.float(),target_cls.float())
                 # logger.debug(mistakes)
-                # self.log_mistakes(mistakes, prefix="test")
+
                 # self.log(f'test_acc', v, on_step=False, prog_bar=False, on_epoch=True)
 
                 set = "test"
 
                 torch.set_deterministic(False)
-                self.accuracy[set](pred_cls, target_cls)
-                self.mIoU[set](pred_cls, target_cls)
+                acc = self.accuracy[set](pred_cls, target_cls)
+                miou = self.mIoU[set](pred_cls, target_cls)
                 ciou = self.cIoU[set](pred_cls, target_cls)
+                recall = self.recall[set](pred_cls, target_cls)
+                precision = self.precis[set](pred_cls, target_cls)
 
                 self.log(f'{set}_mse', mistakes["mse"], on_epoch=True)
-                self.log(f'{set}_accuracy', self.accuracy[set], on_epoch=True, metric_attribute=f"{set}_acc")
-                self.log(f'{set}_mIoU', self.mIoU[set], on_epoch=True, metric_attribute=f"{set}_mIoU")
+                self.log(f'{set}_accuracy', acc, on_epoch=True)
+
+                self.log(f'{set}_mIoU', miou, on_epoch=True)
+                self.log(f'{set}_recall_r', recall[0], on_epoch=True)
+                self.log(f'{set}_precision_g', precision[2], on_epoch=True)
                 self.log(f'{set}_cIoU_1', ciou[0], on_epoch=True)
                 self.log(f'{set}_cIoU_2', ciou[1], on_epoch=True)
                 self.log(f'{set}_cIoU_3', ciou[2], on_epoch=True)
                 torch.set_deterministic(True)
 
 
-                # self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
-                # self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
+
+                #self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
+                #self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
 
             return pred
 
