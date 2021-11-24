@@ -131,7 +131,7 @@ class Mistakes(nn.Module):
         target, output = target.float(), output.float()
 
         #dist_l1 = self.l1(output, target)
-        #dist_l2 = self.l2(output, target)
+        dist_l2 = self.l2(output, target)
         #dist_logl2 = self.logl2(output, target)
         #dist_logl1 = self.logl1(output, target)
 
@@ -142,7 +142,7 @@ class Mistakes(nn.Module):
 
         result = {
             #"dist_l1": dist_l1,
-            #"dist_l2": dist_l2,
+            "dist_l2": dist_l2,
             #"dist_logl1": dist_logl1,
             #"dist_logl2": dist_logl2,
             "dist_mistake_severity": (mistake_severity - self.mistake_min)/(self.mistake_max - self.mistake_min),
