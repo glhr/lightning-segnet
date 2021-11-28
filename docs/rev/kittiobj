@@ -1,0 +1,59 @@
+---- "2021-08-26 07-09-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=109-val_loss=0.0212.ckpt"
+
+-- objects:
+7481 images
+51865 boxes incl. don't care
+40570 boxes
+
+PR 88.30%
+50% 40470/40570 -> 99.75%
+75% 39371/40570 -> 97.04%
+
+
+-- tracking:
+7854 images
+64212 boxes incl. don't care
+46551 boxes
+
+PR 87.47%
+50% 46421/46551 -> 99.72%
+75% 44245/46551 -> 95.05%
+
+
+-- total
+15335 images
+116077 boxes incl. don't care
+
+SORD+LW 95.98%
+
+
+---- "2021-08-22 10-21-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=92-val_loss=0.0215.ckpt"
+
+-- objects:
+7481 images
+51865 boxes incl. don't care
+40570 boxes
+
+PR 88.47%
+50% 40474/40570 -> 99.76%
+75% 39488/40570 -> 97.33%
+
+
+-- tracking:
+7854 images
+64212 boxes incl. don't care
+46551 boxes
+
+PR 87.72 %
+50% 46423/46551 -> 99.73 %
+75% 44442/46551 -> 95.47 %
+
+
+-- total
+15335 images
+116077 boxes incl. don't care
+
+50% (46423+40474)/(40570+46551) -> 99.74
+75% (39488+44442)/(46551+40570) -> 96.34
+
+SORD+LW

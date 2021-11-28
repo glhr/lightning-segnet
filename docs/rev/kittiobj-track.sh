@@ -31,8 +31,7 @@ do
           echo "-> saving predictions"
           python3 lightning.py --bs 8 --dataset $dataset --test_checkpoint "lightning_logs/${checkpoints[$i]}" ${commands[$i]} --save --gpus 1 --save_xp $xp --test_set full --dataset_seq ${seqs[$s]} > "$txtoutput" 2>&1
           # python3 overlay_imgs.py --dataset $dataset --xp $xp --model "${checkpoint}_affordances" --rgb
-        end
-      fi
+        fi
     done
       # python3 overlay_imgs.py --xp $xp
 

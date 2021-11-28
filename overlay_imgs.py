@@ -11,8 +11,8 @@ parser = ArgumentParser()
 parser.add_argument('--dataset', default="combo")
 parser.add_argument('--xp', default="paper")
 parser.add_argument('--model', default="2021-08-15 11-58-combo-c30-kl-rgb-epoch=82-val_loss=0.1474_affordances")
-parser.add_argument('--model2', default="2021-08-16 09-02-combo-c30-sord-1,2,3-a1-logl2-rgb-epoch=78-val_loss=0.0062_affordances")
-parser.add_argument('--model3', default="2021-08-22 10-21-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=92-val_loss=0.0215_affordances")
+parser.add_argument('--model2', default="2021-08-22 10-21-combo-c3-sord-1,2,3-a1-logl2-lw-rgb-epoch=92-val_loss=0.0215_affordances")
+parser.add_argument('--model3', default=None)
 parser.add_argument('--model4', default=None)
 parser.add_argument('--ir', default=False, action="store_true")
 parser.add_argument('--nopred', default=False, action="store_true")
@@ -49,19 +49,21 @@ if len(description): description += "-"
 
 save_folder = save_folder.replace("overlay",f"overlay{description}")
 
+RESULTS_FOLDER = "/media/gala/DataDisk/2021 gala_driv/learning-driveability-heatmaps/models/pytorch-unet-segnet"
+
 try:
-    create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
+    create_folder(f'{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{save_folder}')
 except OSError:
     save_folder = f"overlay_" if args.model2 is None else f"overlay_modelcomp{args.prefix}_"
     for model in [args.model, args.model2, args.model3, args.model4]:
         if model is not None:
             save_folder += model[-20:]
-    create_folder(f'results/{args.dataset}/{args.xp}/{save_folder}')
+    create_folder(f'{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{save_folder}')
 
 filenames = []
 
-for file in glob.glob(f"results/{args.dataset}/{args.xp}/{args.dataset}-*-overlay-pred-{args.model}.png"):
-    file = file.replace(f"results/{args.dataset}/{args.xp}/{args.dataset}-","")
+for file in glob.glob(f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-*-overlay-pred-{args.model}.png"):
+    file = file.replace(f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-","")
     file = file.replace(f"-overlay-pred-{args.model}.png","")
     # print("-->",file)
     filenames.append(file)
@@ -73,20 +75,20 @@ print(args)
 i = 1
 for i in filenames:
     try:
-        f_rgb = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-rgb_affordances.png"
-        f_gt = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-gt_affordances.png"
-        f_ir = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-ir_affordances.png"
-        f_d = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-depth_affordances.png"
-        f_draw = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-depthraw_affordances.png"
-        f_pred = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model}.png"
-        f_pred2 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model2}.png"
-        f_pred3 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model3}.png"
-        f_pred4 = f"results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model4}.png"
+        f_rgb = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-rgb_affordances.png"
+        f_gt = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-gt_affordances.png"
+        f_ir = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-ir_affordances.png"
+        f_d = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-depth_affordances.png"
+        f_draw = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-orig-depthraw_affordances.png"
+        f_pred = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model}.png"
+        f_pred2 = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model2}.png"
+        f_pred3 = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model3}.png"
+        f_pred4 = f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{args.dataset}-{i}-overlay-pred-{args.model4}.png"
 
-        f_error1=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model}.png"
-        f_error2=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model2}.png"
-        f_error3=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model3}.png"
-        f_error4=f"results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model4}.png"
+        f_error1=f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model}.png"
+        f_error2=f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model2}.png"
+        f_error3=f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model3}.png"
+        f_error4=f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/error/{args.dataset}-{i}-errorw-{args.model4}.png"
 
         # print(f_rgb)
 
@@ -108,9 +110,16 @@ for i in filenames:
 
         if args.rgb:
             img_rgb = cv.imread(f_rgb)
-            topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
-            topstack.append(img_rgb)
-            topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
+            if args.model3 and not args.nopred:
+                topstack.append(np.ones_like(img_rgb)[:,:480,:]*255)
+                topstack.append(np.ones_like(img_rgb)[:,:10,:]*255)
+                topstack.append(img_rgb)
+                topstack.append(np.ones_like(img_rgb)[:,:480,:]*255)
+                topstack.append(np.ones_like(img_rgb)[:,:10,:]*255)
+            else:
+                topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
+                topstack.append(img_rgb)
+                topstack.append(np.ones_like(img_rgb)[:,:245,:]*255)
             # if not args.nospacing: stack.append(spacing)
             if args.error:
                 errormaps.append(255*np.ones_like(img_rgb))
@@ -158,7 +167,7 @@ for i in filenames:
                 img_error2 = cv.imread(f_error2)
                 errormaps.append(img_error2)
         if args.model3 and not args.nopred:
-            if not args.nospacing: stack.append(spacing)
+            if not args.nospacing: botstack.append(spacing)
             img_pred3 = cv.imread(f_pred3)
             #dst3 = cv.addWeighted(img_rgb, alpha, img_pred3, beta, 0.0)
             botstack.append(img_pred3)
@@ -174,9 +183,10 @@ for i in filenames:
             stack.append(dst4)
 
         botout = np.hstack(botstack)
-        #topout = np.hstack(topstack)
-        # out = np.vstack([botout, np.ones_like(topout)[:10,:,:]*255, topout])
-        out = botout
+        topout = np.hstack(topstack)
+        # print(botout.shape,topout.shape)
+        out = np.vstack([botout, np.ones_like(topout)[:10,:,:]*255, topout])
+        #out = botout
 
         if args.error:
             errormaps_out = np.hstack(errormaps)
@@ -192,7 +202,7 @@ for i in filenames:
 
 
 
-        cv.imwrite(f"results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}{args.prefix}-pred_overlay.png",out)
+        cv.imwrite(f"{RESULTS_FOLDER}/results/{args.dataset}/{args.xp}/{save_folder}/{args.dataset}{i_str}-{args.xp}{args.prefix}-pred_overlay.png",out)
     except Exception as e:
     	print(f_pred)
     	print(f"stopped at i={i}",e)

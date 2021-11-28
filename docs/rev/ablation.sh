@@ -30,6 +30,7 @@ arg=$1
 
 
 for d in ${!datasets[@]}
+
   do
   dataset=${datasets[$d]}
   mkdir -p results/$dataset/${xp}-txt

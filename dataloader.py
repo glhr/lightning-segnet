@@ -35,12 +35,16 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 DATASET_FOLDER = "../../datasets"
 DATASET_FOLDER = "/media/gala/DataDisk/2021 gala_driv/learning-driveability-heatmaps/datasets"
 
+RESULT_FOLDER = "."
+RESULT_FOLDER = "/media/gala/DataDisk/2021 gala_driv/learning-driveability-heatmaps/models/pytorch-unet-segnet"
+
 class MMDataLoader(Dataset):
-    def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False, rgb=False, **kwargs):
+    def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False, rgb=False, gt="driv", **kwargs):
         self.idx = 0
         self.name = name
         self.idx_to_color, self.color_to_idx, self.class_to_idx, self.idx_to_idx = {}, {}, {}, {}
         self.idx_to_obj = {}
+        self.gt=gt
 
         self.modalities = modalities.copy()
         if "depthraw" in modalities:
@@ -426,15 +430,15 @@ class MMDataLoader(Dataset):
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
-        folder = "" if folder is None else folder
+        # folder = "" if folder is None else folder
         dataset_name = self.name if dataset_name is None else dataset_name
         if (overlay is not None) or (orig is None):
             try:
-                img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
+                img.save(f'{RESULT_FOLDER}/{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
             except Exception as e:
                 logger.debug(f"{e} - skipping")
         else:
-            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
+            img.save(f'{RESULT_FOLDER}/{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
@@ -1474,14 +1478,16 @@ class FreiburgForestRawDataLoader(DemoDataLoader):
 
 class KittiRawDataLoader(DemoDataLoader):
 
-    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kitti-raw/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, dataset_seq=None):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/kittiraw/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, dataset_seq=None):
         super().__init__(modalities, resize=resize, name="kittiraw", mode=mode, augment=augment)
         self.path = path
+        self.gt=gt
         logger.warning(dataset_seq)
         sequences = ["2011_09_29_drive_0071_sync" if dataset_seq is None else dataset_seq]
         self.viz = viz
         self.base_folders = []
         self.filepaths = []
+
 
         files = glob.glob(self.path + '*/image_02/data/*.png')
         files.sort()

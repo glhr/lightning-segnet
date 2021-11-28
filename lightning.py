@@ -108,6 +108,7 @@ class LitSegNet(pl.LightningModule):
             n_init_features=init_channels,
             depthwise_conv=self.hparams.depthwise_conv
         )
+        print(self.model)
 
         if not model_only:
             self.save = save
@@ -547,8 +548,8 @@ class LitSegNet(pl.LightningModule):
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=c, orig=o, folder=gt_folder, filename_prefix=f"overlay-pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, gt=c, folder=gt_folder, filename_prefix=f"pred-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
                     if not dataset_obj.noGT:
-                        dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
-                        dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt", dataset_name=self.hparams.dataset, filename = filename)
+                        # dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
+                        dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt-{self.hparams.gt}-", dataset_name=self.hparams.dataset, filename = filename)
 
                     # if not self.nopredict:
                     #     error_map = t - c
@@ -593,23 +594,23 @@ class LitSegNet(pl.LightningModule):
 
                 set = "test"
 
-                torch.set_deterministic(False)
-                acc = self.accuracy[set](pred_cls, target_cls)
-                miou = self.mIoU[set](pred_cls, target_cls)
-                ciou = self.cIoU[set](pred_cls, target_cls)
-                recall = self.recall[set](pred_cls, target_cls)
-                precision = self.precis[set](pred_cls, target_cls)
-
-                self.log(f'{set}_mse', mistakes["mse"], on_epoch=True)
-                self.log(f'{set}_accuracy', acc, on_epoch=True)
-
-                self.log(f'{set}_mIoU', miou, on_epoch=True)
-                self.log(f'{set}_recall_r', recall[0], on_epoch=True)
-                self.log(f'{set}_precision_g', precision[2], on_epoch=True)
-                self.log(f'{set}_cIoU_1', ciou[0], on_epoch=True)
-                self.log(f'{set}_cIoU_2', ciou[1], on_epoch=True)
-                self.log(f'{set}_cIoU_3', ciou[2], on_epoch=True)
-                torch.set_deterministic(True)
+                # torch.set_deterministic(False)
+                # acc = self.accuracy[set](pred_cls, target_cls)
+                # miou = self.mIoU[set](pred_cls, target_cls)
+                # ciou = self.cIoU[set](pred_cls, target_cls)
+                # recall = self.recall[set](pred_cls, target_cls)
+                # precision = self.precis[set](pred_cls, target_cls)
+                #
+                # self.log(f'{set}_mse', mistakes["mse"], on_epoch=True)
+                # self.log(f'{set}_accuracy', acc, on_epoch=True)
+                #
+                # self.log(f'{set}_mIoU', miou, on_epoch=True)
+                # self.log(f'{set}_recall_r', recall[0], on_epoch=True)
+                # self.log(f'{set}_precision_g', precision[2], on_epoch=True)
+                # self.log(f'{set}_cIoU_1', ciou[0], on_epoch=True)
+                # self.log(f'{set}_cIoU_2', ciou[1], on_epoch=True)
+                # self.log(f'{set}_cIoU_3', ciou[2], on_epoch=True)
+                # torch.set_deterministic(True)
 
 
 
