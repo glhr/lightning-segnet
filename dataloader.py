@@ -338,7 +338,9 @@ class MMDataLoader(Dataset):
 
         return mask_out
 
-    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, overlay=None, pred_proba=None, proba_lst=[], folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None, colorize=False):
+    def result_to_image(self, iter=None, pred_cls=None, orig=None, gt=None, overlay=None, pred_proba=None, proba_lst=[],
+                        folder=None, filename_prefix=None, filename=None, dataset_name=None, modalities=None, colorize=False,
+                        return_img=False):
         if filename_prefix is None:
             filename_prefix = self.name
 
@@ -433,6 +435,7 @@ class MMDataLoader(Dataset):
         data = np.concatenate(concat, axis=1)
 
         img = Image.fromarray(data, 'RGB')
+        if return_img: return img
         # folder = "" if folder is None else folder
         dataset_name = self.name if dataset_name is None else dataset_name
         if (overlay is not None) or (orig is None):

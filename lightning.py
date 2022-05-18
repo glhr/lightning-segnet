@@ -24,6 +24,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 
 import torchmetrics
+import wandb
 
 from matplotlib import pyplot as plt
 
@@ -289,6 +290,7 @@ class LitSegNet(pl.LightningModule):
 
     def predict(self, batch, set, save=False, batch_idx=None):
         x, y = batch["sample"]
+        filenames = batch["filename"]
 
         if set == "test":
             with torch.no_grad():
@@ -308,6 +310,18 @@ class LitSegNet(pl.LightningModule):
         torch.set_deterministic(False)
         iou = self.mIoU[set](x_hat, y)
         torch.set_deterministic(True)
+
+        pred_cls = torch.argmax(x_hat, dim=1)
+
+        for i,(o,c,t,f) in enumerate(zip(x,pred_cls,y,filenames)):
+            if i == 0:
+                dataset_obj = self.train_set.dataset
+                img = dataset_obj.result_to_image(gt=t, pred_cls=c, orig=o, return_img=True)
+                #images = wandb.Image(img)
+
+                wandb_logger.log_image(key=f"{set}-examples", images=[img], caption=[f])
+
+                #wandb.log({: images})
 
         # if self.hparams.mode == "convert":
         #     # self.log(f'{set}_iou_obj', iou, on_epoch=True)
