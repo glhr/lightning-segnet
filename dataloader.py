@@ -15,6 +15,8 @@ import cmapy
 import imageio
 imageio.plugins.freeimage.download()
 
+from pathlib import Path
+
 import albumentations as A
 
 from utils import RANDOM_SEED, logger
@@ -1872,6 +1874,79 @@ class ACDCDataLoader(MMDataLoader):
         return Image.open(f'{self.path}gt/{self.base_folders[sample_id].replace("_ref","")}/{self.filenames[sample_id]}_gt_labelIds.png').convert('L')
 
 
+class PST900DataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/pst900-rgbt/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="pst900", mode=mode, augment=augment)
+        self.path = path
+        self.gt=gt
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[5]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[5]
+            self.class_to_idx['objects'][x[0].lower()] = x[5]
+            self.idx_to_obj['objects'][x[4]] = x[5]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+        self.suffixes = []
+
+        if set == "full":
+            self.split_path = ['train','val','test']
+        elif set == "val":
+            self.split_path = 'train'
+        else:
+            self.split_path = set
+
+        file_pattern = Path(f'{self.path}PST900_RGBT_Dataset/{self.split_path}/rgb/').glob('*.png')
+        # logger.warning(file_pattern)
+        if set in ['train','val']:
+            filenames = {}
+            with open(path + 'train.txt') as f:
+                filenames["train"] = f.read().splitlines()
+            with open(path + 'val.txt') as f:
+                filenames["val"] = f.read().splitlines()
+            file_pattern = [f for f in file_pattern if f.stem in filenames[set]]
+
+        self.filenames = [f.stem for f in file_pattern]
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = False
+        self.rgb = rgb
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/rgb/{self.filenames[sample_id]}.png").convert('RGB')
+
+    def get_gt(self, sample_id):
+        return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/labels/{self.filenames[sample_id]}.png").convert('L')
+
+    def get_ir(self, sample_id):
+        return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/thermal/{self.filenames[sample_id]}.png").convert('L')
+
+    def get_depth(self, sample_id):
+        return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/depth/{self.filenames[sample_id]}.png").convert('L')
+
+
 
 class MapillaryDataLoader(MMDataLoader):
 
@@ -2151,12 +2226,14 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader, random_split, Subset
 
     print("Cityscapes dataset")
-    train_set = CityscapesDataLoader(set="train", mode="objects", modalities=["rgb"], augment=True)
+    train_set = PST900DataLoader(resize=(480, 240), set="train", mode="objects", modalities=["rgb","ir","depth"], augment=True)
     train_set = Subset(train_set, indices = range(len(train_set)))
     print("-> train", len(train_set.dataset))
-    val_set = CityscapesDataLoader(set="val", mode="objects", modalities=["rgb"], augment=False)
+    val_set = PST900DataLoader(resize=(480, 240), set="val", mode="objects", modalities=["rgb"], augment=False)
     val_set = Subset(val_set, indices = range(len(val_set)))
     print("-> val", len(val_set.dataset))
-    test_set = CityscapesDataLoader(set="test", mode="objects", modalities=["rgb"], augment=False)
+    test_set = PST900DataLoader(resize=(480, 240), set="test", mode="objects", modalities=["rgb"], augment=False)
     test_set = Subset(test_set, indices = range(len(test_set)))
     print("-> test", len(test_set.dataset))
+
+    sample = train_set[0]

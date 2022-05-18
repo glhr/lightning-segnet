@@ -150,7 +150,8 @@ class LitSegNet(pl.LightningModule):
                 "acdc": ACDCDataLoader,
                 "idd": IDDDataLoader,
                 "bdd": BDDDataLoader,
-                "ycor": YCORDataLoader
+                "ycor": YCORDataLoader,
+                "pst900": PST900DataLoader
             }
 
 
@@ -301,10 +302,12 @@ class LitSegNet(pl.LightningModule):
             weight_map = None
 
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss, weight_map=weight_map)
-        print(x_hat, y)
+        #print(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
-        # iou = self.IoU(x_hat, y)
+        torch.set_deterministic(False)
+        iou = self.mIoU[set](x_hat, y)
+        torch.set_deterministic(True)
 
         # if self.hparams.mode == "convert":
         #     # self.log(f'{set}_iou_obj', iou, on_epoch=True)
@@ -317,8 +320,8 @@ class LitSegNet(pl.LightningModule):
         # elif self.hparams.mode == "affordances":
         #     # self.log(f'{set}_iou_aff', iou, on_epoch=True)
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
-        # elif self.hparams.mode == "objects":
-        #     # self.log(f'{set}_iou_obj', iou, on_epoch=True)
+        if self.hparams.mode == "objects":
+            self.log(f'{set}_mIoU_obj', iou, on_epoch=True)
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
         # #
         # self.log_mistakes(mistakes, prefix=set)
@@ -785,7 +788,7 @@ if __name__ == '__main__':
 
     if args.train:
         logger.warning("Training phase")
-        wandb_logger = WandbLogger(project='segnet-freiburg', log_model = False, name = segnet_model.hparams.save_prefix)
+        wandb_logger = WandbLogger(project='fusion-2.0', log_model = False, name = segnet_model.hparams.save_prefix)
         wandb_logger.log_hyperparams(segnet_model.hparams)
         #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
