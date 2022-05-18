@@ -25,6 +25,8 @@ from datetime import datetime
 
 import torchmetrics
 
+from matplotlib import pyplot as plt
+
 torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
 torch.backends.cudnn.deterministic = True
@@ -299,7 +301,7 @@ class LitSegNet(pl.LightningModule):
             weight_map = None
 
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss, weight_map=weight_map)
-
+        print(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
         # iou = self.IoU(x_hat, y)
@@ -509,17 +511,17 @@ class LitSegNet(pl.LightningModule):
 
             for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
             #     # logger.debug(p.shape)
-            #     if not self.hparams.dataset == "combo":
-            #         proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
-            #         proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
-            #         proba_pref = p.squeeze()[orig_dataset_obj.aff_idx["preferable"]]
-            #         # expected = proba_imposs
-            #
-            #         expected = 1*proba_imposs + 2*proba_poss + 3*proba_pref
-            #         expected = expected - torch.min(expected)
-            #         expected = expected/torch.max(expected)
-            #         # print(torch.min(expected),torch.max(expected))
-            #         # expected = 1 - expected
+                if not self.hparams.dataset == "combo":
+                    proba_imposs = p.squeeze()[orig_dataset_obj.aff_idx["impossible"]]
+                    proba_poss = p.squeeze()[orig_dataset_obj.aff_idx["possible"]]
+                    proba_pref = p.squeeze()[orig_dataset_obj.aff_idx["preferable"]]
+                    # expected = proba_imposs
+
+                    expected = 1*proba_imposs + 2*proba_poss + 3*proba_pref
+                    expected = expected - torch.min(expected)
+                    expected = expected/torch.max(expected)
+                    # print(torch.min(expected),torch.max(expected))
+                    # expected = 1 - expected
 
                 iter = batch_idx*self.hparams.bs + i
 
@@ -551,15 +553,15 @@ class LitSegNet(pl.LightningModule):
                         # dataset_obj.result_to_image(iter=batch_idx+i, gt=t, folder=gt_folder, filename_prefix=f"gt", dataset_name=self.hparams.dataset, filename = filename)
                         dataset_obj.result_to_image(iter=batch_idx+i, overlay=t, orig=o, folder=gt_folder, filename_prefix=f"overlay-gt-{self.hparams.gt}-", dataset_name=self.hparams.dataset, filename = filename)
 
-                    # if not self.nopredict:
-                    #     error_map = t - c
-                    #     error_map[t == -1] = 0
-                    #     #error_map_w = 2 - error_map
-                    #     #dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorb-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
-                    #     dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorw-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=True)
-                    #
-                    #     if not self.hparams.dataset == "combo":
-                    #         dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=expected, folder=result_folder + "/exp", filename_prefix=f"exp-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=False)
+                    if not self.nopredict:
+                        # error_map = t - c
+                        # error_map[t == -1] = 0
+                        # #error_map_w = 2 - error_map
+                        # #dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorb-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename)
+                        # dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=error_map, folder=result_folder + "/error", filename_prefix=f"errorw-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=True)
+
+                        if not self.hparams.dataset == "combo":
+                            dataset_obj.result_to_image(iter=batch_idx+i, pred_proba=expected, folder=result_folder + "/exp", filename_prefix=f"exp-{self.test_checkpoint}", dataset_name=self.hparams.dataset, filename = filename, colorize=False)
                         # self.test_set.dataset.result_to_image(
                         #     iter=batch_idx+i,
                         #     orig=o,
@@ -585,24 +587,40 @@ class LitSegNet(pl.LightningModule):
                 self.log_mistakes(mistakes, prefix="test")
 
                 mistakes = dict()
+                #print(target)
                 target_cls = target[target>=0]
                 pred_cls = torch.argmax(pred, dim=1)[target>=0]
+                pred_prob = torch.max(pred, dim=1)[0][target >= 0]
                 mistakes["mse"] = self.mse(pred_cls.float(),target_cls.float())
                 # logger.debug(mistakes)
 
                 # self.log(f'test_acc', v, on_step=False, prog_bar=False, on_epoch=True)
 
                 set = "test"
+                #inp = pred.contiguous()
+                inp = pred_prob.view(-1, )
+
+                t = target_cls.view(-1, )
+                c = pred_cls.view(-1, )
+                correct_pred = inp[c == t].detach().cpu().numpy()
+                incorrect_pred = inp[c != t].detach().cpu().numpy()
+                #print(correct_pred, incorrect_pred)
+                bins = np.arange(0, 1, 0.05)  # fixed bin size
+                counts_c, bins_c = np.histogram(correct_pred, bins=bins)
+                counts_i, bins_i = np.histogram(incorrect_pred, bins=bins)
+
+
+
 
                 # torch.set_deterministic(False)
-                # acc = self.accuracy[set](pred_cls, target_cls)
+                acc = self.accuracy[set](pred_cls, target_cls)
                 # miou = self.mIoU[set](pred_cls, target_cls)
                 # ciou = self.cIoU[set](pred_cls, target_cls)
                 # recall = self.recall[set](pred_cls, target_cls)
                 # precision = self.precis[set](pred_cls, target_cls)
                 #
                 # self.log(f'{set}_mse', mistakes["mse"], on_epoch=True)
-                # self.log(f'{set}_accuracy', acc, on_epoch=True)
+                self.log(f'{set}_accuracy', acc, on_epoch=True)
                 #
                 # self.log(f'{set}_mIoU', miou, on_epoch=True)
                 # self.log(f'{set}_recall_r', recall[0], on_epoch=True)
@@ -617,7 +635,11 @@ class LitSegNet(pl.LightningModule):
                 #self.log('test_iou', iou, on_step=False, prog_bar=False, on_epoch=True)
                 #self.log('cm', cm, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_cm)
 
-            return pred
+            return {
+                "correct_hist": counts_c,
+                "incorrect_hist": counts_i,
+                "bins": bins_c
+            }
 
         # else:
         #     count = self.gt_stats(target_orig)
@@ -625,6 +647,26 @@ class LitSegNet(pl.LightningModule):
         #     self.log('gt_cls_count', count, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_stats)
 
 
+    def test_epoch_end(self, outputs):
+        bins = outputs[0]["bins"]  # fixed bin size
+        #print(len(outputs[0]["correct_hist"]))
+        correct_pred = np.array([item["correct_hist"] for item in outputs if item is not None])
+        correct_pred = np.sum(correct_pred, axis=0)
+
+        incorrect_pred = np.array([item["incorrect_hist"] for item in outputs if item is not None])
+        incorrect_pred = np.sum(incorrect_pred, axis=0)
+        #print(correct_pred)
+        #correct_pred =
+        #incorrect_pred = outputs["incorrect_hist"]
+
+        #print(bins, correct_pred)
+        np.save(f"acdc-night-correct_pred.npy", correct_pred)
+        np.save(f"acdc-night-incorrect_pred.npy", incorrect_pred)
+        np.save(f"acdc-night-bins.npy", bins)
+        counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = correct_pred, alpha=0.5, color = "green")
+
+        counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = incorrect_pred, alpha=0.5, color = "red")
+        plt.show()
 
     def configure_optimizers(self):
         if self.hparams.optim == "SGD":
@@ -757,7 +799,9 @@ if __name__ == '__main__':
                 check_val_every_n_epoch=1,
                 # ~ log_every_n_steps=10,
                 logger=wandb_logger,
-                callbacks=callbacks + [checkpoint_callback])
+                callbacks=callbacks + [checkpoint_callback],
+                accelerator= "dp"
+            )
         else:
             segnet_model.update_model()
             trainer = pl.Trainer.from_argparse_args(args,
@@ -765,7 +809,8 @@ if __name__ == '__main__':
                 # ~ log_every_n_steps=10,
                 logger=wandb_logger,
                 callbacks=callbacks + [checkpoint_callback],
-                resume_from_checkpoint=args.train_checkpoint)
+                resume_from_checkpoint=args.train_checkpoint,
+                accelerator= "dp")
         trainer.fit(segnet_model)
 
     else:

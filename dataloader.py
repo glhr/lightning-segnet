@@ -33,10 +33,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 DATASET_FOLDER = "../../datasets"
-DATASET_FOLDER = "/media/gala/DataDisk/2021 gala_driv/learning-driveability-heatmaps/datasets"
+DATASET_FOLDER = "/media/gala/DataDisk/2021_gala_driv/learning-driveability-heatmaps/datasets"
 
 RESULT_FOLDER = "."
-RESULT_FOLDER = "/media/gala/DataDisk/2021 gala_driv/learning-driveability-heatmaps/models/pytorch-unet-segnet"
+RESULT_FOLDER = "/media/gala/DataDisk/2021_gala_driv/learning-driveability-heatmaps/models/pytorch-unet-segnet"
 
 class MMDataLoader(Dataset):
     def __init__(self, modalities, name, mode, augment, resize, transform=None, viz=False, rgb=False, gt="driv", **kwargs):
@@ -244,10 +244,11 @@ class MMDataLoader(Dataset):
             if mode in ["affordances","convert"]:
                 return self.idx_to_color["affordances"][x]
             else:
-                return self.idx_to_color[mode][x]
+                return self.idx_to_color["objects"][x]
         except KeyError:
             logger.warning(f"mapping {x} to black, idx_to_color: {self.idx_to_color}")
-            return (0,0,255)
+            raise Exception
+            #return (0,0,255)
 
     def labels_to_color(self, labels, mode="objects"):
         bs = labels.shape
@@ -601,9 +602,10 @@ class DemoDataLoader(MMDataLoader):
         self.filenames = []
 
         classes = np.loadtxt("classes.txt", dtype=str)
-        # print(classes)
+        print(classes)
 
         for x in classes:
+            print(x)
             x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
             self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
             self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
@@ -1844,7 +1846,7 @@ class ACDCDataLoader(MMDataLoader):
         else:
             self.split_path = set
 
-        file_pattern = glob.glob(f'{self.path}rgb_anon/*/{self.split_path}/*/*.png')
+        file_pattern = glob.glob(f'{self.path}rgb_anon/night/{self.split_path}/*/*.png')
         # logger.warning(file_pattern)
 
         for filepath in file_pattern:
