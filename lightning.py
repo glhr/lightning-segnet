@@ -44,6 +44,7 @@ timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 
 parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
+parser.add_argument('--lr_finder', action='store_true', default=False)
 parser.add_argument('--gpus', type=int, default=torch.cuda.device_count())
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=None)
@@ -73,6 +74,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--optim', type=str, default=None)
         parser.add_argument('--wd', type=float, default=0)
         parser.add_argument('--num_classes', type=int, default=3)
+        parser.add_argument('--class_weights', default=None)
         parser.add_argument('--workers', type=int, default=0)
         parser.add_argument('--mode', default="affordances")
         parser.add_argument('--dataset', default="freiburg")
@@ -103,6 +105,9 @@ class LitSegNet(pl.LightningModule):
             self.hparams.modalities = modalities
         self.hparams.modalities = self.hparams.modalities.split(",")
         logger.warning(f"params {self.hparams}")
+
+        if self.hparams.class_weights is not None:
+            self.hparams.class_weights = torch.Tensor([float(w) for w in self.hparams.class_weights.split(",")])
 
         init_channels = len(self.hparams.modalities) if self.hparams.init_channels is None else self.hparams.init_channels
 
@@ -209,8 +214,9 @@ class LitSegNet(pl.LightningModule):
     def update_settings(self):
 
         self.sord = SORDLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, alpha = self.hparams.dist_alpha)
-        self.ce = nn.CrossEntropyLoss(ignore_index=-1)
+        #self.ce = nn.CrossEntropyLoss(ignore_index=-1)
         self.kl = KLLoss(n_classes=self.hparams.num_classes, masking=self.hparams.masking)
+        self.ce = nn.CrossEntropyLoss(weight=self.hparams.class_weights, ignore_index=-1)
         self.loss = CompareLosses(n_classes=self.hparams.num_classes, masking=self.hparams.masking, ranks=self.hparams.ranks, dist=self.hparams.dist, returnloss="kl")
         self.dist = Mistakes(ranks=self.hparams.ranks)
         # self.IoU = IoU(num_classes=self.hparams.num_classes, ignore_index=self.hparams.ignore_index)
@@ -303,23 +309,26 @@ class LitSegNet(pl.LightningModule):
         else:
             weight_map = None
 
+        torch.set_deterministic(False)
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss, weight_map=weight_map)
         #print(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
-        torch.set_deterministic(False)
+
         iou = self.mIoU[set](x_hat, y)
         torch.set_deterministic(True)
 
         pred_cls = torch.argmax(x_hat, dim=1)
 
-        for i,(o,c,t,f) in enumerate(zip(x,pred_cls,y,filenames)):
-            if i == 0:
-                dataset_obj = self.train_set.dataset
-                img = dataset_obj.result_to_image(gt=t, pred_cls=c, orig=o, return_img=True)
-                #images = wandb.Image(img)
+        if args.train:
 
-                wandb_logger.log_image(key=f"{set}-examples", images=[img], caption=[f])
+            for i,(o,c,t,f) in enumerate(zip(x,pred_cls,y,filenames)):
+                if i == 0:
+                    dataset_obj = self.train_set.dataset
+                    img = dataset_obj.result_to_image(gt=t, pred_cls=c, orig=o, return_img=True)
+                    #images = wandb.Image(img)
+
+                    wandb_logger.log_image(key=f"{set}-examples", images=[img], caption=[f])
 
                 #wandb.log({: images})
 
@@ -830,6 +839,28 @@ if __name__ == '__main__':
                 accelerator= "dp")
         trainer.fit(segnet_model)
 
+    elif args.lr_finder:
+        trainer = pl.Trainer.from_argparse_args(args,
+                                                check_val_every_n_epoch=1,
+                                                # ~ log_every_n_steps=10,
+                                                callbacks=callbacks + [checkpoint_callback],
+                                                resume_from_checkpoint=args.train_checkpoint,
+                                                accelerator="dp")
+
+        # Run learning rate finder
+        lr_finder = trainer.tuner.lr_find(segnet_model)
+
+        # Results can be found in
+        lr_finder.results
+
+        # Plot with
+        fig = lr_finder.plot(suggest=True)
+        fig.show()
+
+        # Pick point based on plot, or get suggestion
+        new_lr = lr_finder.suggestion()
+
+        print(new_lr)
     else:
         logger.warning("Testing phase")
         trainer = pl.Trainer.from_argparse_args(args,
