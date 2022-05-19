@@ -344,11 +344,11 @@ class LitSegNet(pl.LightningModule):
         #     # self.log(f'{set}_iou_aff', iou, on_epoch=True)
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
         if self.hparams.mode == "objects":
-            self.log(f'{set}_mIoU_obj', iou, on_epoch=True)
+            self.log(f'{set}_mIoU_obj', iou, on_epoch=True, batch_size=self.hparams.bs)
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
         # #
         # self.log_mistakes(mistakes, prefix=set)
-        self.log(f'{set}_loss', loss, on_epoch=True)
+        self.log(f'{set}_loss', loss, on_epoch=True, batch_size=self.hparams.bs)
 
         if save:
             if self.hparams.mode == "convert":
