@@ -711,7 +711,7 @@ class LitSegNet(pl.LightningModule):
         logger.info(f"{set} augment: {augment}")
         logger.info(self.dataset_seq)
         logger.info(self.hparams.gt)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1), gt=self.hparams.gt)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1 and self.hparams.modalities == ["rgb"]), gt=self.hparams.gt)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:

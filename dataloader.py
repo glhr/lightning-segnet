@@ -108,7 +108,7 @@ class MMDataLoader(Dataset):
 
         return modGT
 
-    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False):
+    def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False, filename=""):
 
         use = {
             "rgb": "rgb" in self.modalities and pilRGB is not None,
@@ -137,13 +137,22 @@ class MMDataLoader(Dataset):
 
         if use["rgb"] and not self.rgb:
            if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
-            # logger.debug(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
+           modRGB = modRGB / np.nanmax(modRGB)
+           if np.max(modRGB) == 0:
+               logger.exception(filename)
+           #logger.info(f"RGB range {np.min(modRGB)} {np.max(modRGB)}")
         if use["depth"]:
             if len(modDepth.shape) == 3: modDepth = modDepth[:,:,2]
-            # logger.debug(f"D range {np.min(modDepth)} {np.max(modDepth)}")
+            if np.max(modDepth) == 0:
+                logger.exception(filename)
+            modDepth = modDepth / np.nanmax(modDepth)
+            #logger.info(f"D range {np.min(modDepth)} {np.max(modDepth)}")
         if use["ir"]:
             if len(modIR.shape) == 3: modIR = modIR[:,:,2]
-            # logger.debug(f"IR range {np.min(modIR)} {np.max(modIR)}")
+            if np.max(modIR) == 0:
+                logger.exception(filename)
+            modIR = modIR / np.nanmax(modIR)
+
 
         if save:
             orig_imgs = self.data_augmentation(img_dict, apply='resize_only')
@@ -479,10 +488,12 @@ class MMDataLoader(Dataset):
         additional_targets = dict()
         for modality in ["depth", "ir"]:
             if imgs.get(modality) is not None:
+                #print(type(imgs[modality].flat[0]))
                 additional_targets[modality] = 'image'
 
         resize_transform = A.Compose([
-            A.Resize(height = self.resize[1], width = self.resize[0], p=1)
+            #A.ToFloat(),
+            A.Resize(height = self.resize[1], width = self.resize[0], p=1),
             ], p=1, additional_targets=additional_targets)
         gray_transform = A.Compose([
             A.ToGray(p=1)
@@ -523,6 +534,7 @@ class MMDataLoader(Dataset):
             transformed_gray["depth"] = transformed_geom["depth"] if "depth" in imgs else None
             transformed_gray["ir"] = transformed_geom["ir"] if "ir" in imgs else None
             transformed_final = resize_transform(image=transformed_gray['image'], mask=transformed_gray['mask'], depth=transformed_gray["depth"], ir=transformed_gray["ir"])
+
 
         # print(imgs["image"].shape, transformed_gray["image"].shape)
         # print(np.unique(imgs['mask']))
@@ -566,7 +578,7 @@ class MMDataLoader(Dataset):
 
             try:
                 pilRGB, pilDep, pilIR, imgGT = self.get_image_pairs(sample_id)
-                sample = self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment)
+                sample = self.prepare_data(pilRGB, pilDep, pilIR, imgGT, color_GT=self.color_GT, augment=augment, filename=filename)
                 return {"sample": sample, "filename" : filename }
             except Exception as e:
                 traceback.print_exc()
@@ -1891,6 +1903,7 @@ class PST900DataLoader(MMDataLoader):
         print(modalities)
 
         classes = np.loadtxt(path + "classes.txt", dtype=str)
+        exclude = np.loadtxt(path + "exclude.txt", dtype=str)
         # print(classes)
 
         for x in classes:
@@ -1928,7 +1941,7 @@ class PST900DataLoader(MMDataLoader):
                 filenames["val"] = f.read().splitlines()
             file_pattern = [f for f in file_pattern if f.stem in filenames[set]]
 
-        self.filenames = [f.stem for f in file_pattern]
+        self.filenames = [f.stem for f in file_pattern if f.stem not in exclude]
         # print(self.filenames[0])
         # print(len(self.filenames))
 
@@ -1947,7 +1960,7 @@ class PST900DataLoader(MMDataLoader):
         return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/thermal/{self.filenames[sample_id]}.png").convert('L')
 
     def get_depth(self, sample_id):
-        return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/depth/{self.filenames[sample_id]}.png").convert('L')
+        return Image.open(f"{self.path}PST900_RGBT_Dataset/{self.split_path}/depth/{self.filenames[sample_id]}.png").convert('F')
 
 
 
