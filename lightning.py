@@ -14,6 +14,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from pytorch_lightning.callbacks.base import Callback
 
 from segnet import SegNet, new_input_channels, new_output_channels
+import segmentation_models_pytorch as smp
 from fusion import FusionNet
 from losses import SORDLoss, KLLoss, CompareLosses
 from dataloader import *
@@ -32,10 +33,10 @@ torch.manual_seed(RANDOM_SEED)
 torch.cuda.manual_seed_all(RANDOM_SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
-try:
-    torch.set_deterministic(True)
-except Exception as e:
-    logger.error(e)
+# try:
+#     torch.set_deterministic(True)
+# except Exception as e:
+#     logger.error(e)
 np.random.seed(RANDOM_SEED)
 random.seed(RANDOM_SEED)
 os.environ['PYTHONHASHSEED'] = str(RANDOM_SEED)
@@ -68,6 +69,7 @@ class LitSegNet(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
+        parser.add_argument('--model', default="segnet")
         parser.add_argument('--bs', type=int, default=16)
         parser.add_argument('--lr', type=float, default=None)
         parser.add_argument('--momentum', type=int, default=None)
@@ -96,6 +98,20 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--noeval', default=False, action="store_true")
         return parser
 
+    def get_model(self, model, in_channels, classes):
+        if model=="segnet":
+            return SegNet(
+                num_classes=classes,
+                n_init_features=in_channels,
+                depthwise_conv=self.hparams.depthwise_conv
+            )
+        elif model == "pspnet":
+            return smp.PSPNet(
+                in_channels=in_channels,
+                classes=classes,
+                encoder_weights=None
+            )
+
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
         super().__init__()
         pl.seed_everything(RANDOM_SEED)
@@ -111,11 +127,10 @@ class LitSegNet(pl.LightningModule):
 
         init_channels = len(self.hparams.modalities) if self.hparams.init_channels is None else self.hparams.init_channels
 
-        self.model = SegNet(
-            num_classes=self.hparams.num_classes if num_classes is None else num_classes,
-            n_init_features=init_channels,
-            depthwise_conv=self.hparams.depthwise_conv
-        )
+        self.model = self.get_model(model=self.hparams.model,
+                                    in_channels=init_channels,
+                                    classes=self.hparams.num_classes if num_classes is None else num_classes)
+
         print(self.model)
 
         if not model_only:
@@ -310,14 +325,14 @@ class LitSegNet(pl.LightningModule):
         else:
             weight_map = None
 
-        torch.set_deterministic(False)
+        #torch.set_deterministic(False)
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss, weight_map=weight_map)
         #print(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
 
         iou = self.mIoU[set](pred_cls[y>=0], y[y>=0])
-        torch.set_deterministic(True)
+        #torch.set_deterministic(True)
 
         pred_cls = torch.argmax(x_hat, dim=1)
 
@@ -830,7 +845,7 @@ if __name__ == '__main__':
                 accelerator= "dp"
             )
         else:
-            segnet_model.update_model()
+            #segnet_model.update_model()
             trainer = pl.Trainer.from_argparse_args(args,
                 check_val_every_n_epoch=1,
                 # ~ log_every_n_steps=10,
