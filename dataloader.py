@@ -1319,7 +1319,7 @@ class MIRMultispectral(MMDataLoader):
 
 class SynthiaDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/synthia/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, sort=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/synthia/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, sort=False, dataset_seq=None, rgb=False, **kwargs):
         super().__init__(modalities, resize=resize, name="synthia", mode=mode, augment=augment)
         self.path = path
         self.gt=gt
@@ -1826,7 +1826,7 @@ class TAS500DataLoader(MMDataLoader):
 
 class ACDCDataLoader(MMDataLoader):
 
-    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/acdc/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, **kwargs):
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/acdc/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, dataset_seq=None, **kwargs):
         """
         Initializes the data loader
         :param path: the path to the data
@@ -1863,7 +1863,8 @@ class ACDCDataLoader(MMDataLoader):
         else:
             self.split_path = set
 
-        file_pattern = glob.glob(f'{self.path}rgb_anon/night/{self.split_path}/*/*.png')
+        seq = '**' if dataset_seq is None else dataset_seq
+        file_pattern = glob.glob(f'{self.path}rgb_anon/{seq}/{self.split_path}/*/*.png')
         # logger.warning(file_pattern)
 
         for filepath in file_pattern:

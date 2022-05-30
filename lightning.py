@@ -233,7 +233,8 @@ class LitSegNet(pl.LightningModule):
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
         self.result_folder = f"results/{self.hparams.dataset}/"
-        self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        seq = f"_{self.dataset_seq}-" if self.dataset_seq is not None else ''
+        self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}{seq}-c{self.hparams.num_classes}-{self.hparams.loss}"
         if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
@@ -315,7 +316,7 @@ class LitSegNet(pl.LightningModule):
         x_hat = torch.softmax(x_hat, dim=1)
         pred_cls = torch.argmax(x_hat, dim=1)
 
-        iou = self.mIoU[set](x_hat, y)
+        iou = self.mIoU[set](pred_cls[y>=0], y[y>=0])
         torch.set_deterministic(True)
 
         pred_cls = torch.argmax(x_hat, dim=1)
