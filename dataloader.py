@@ -491,7 +491,7 @@ class MMDataLoader(Dataset):
                 #print(type(imgs[modality].flat[0]))
                 additional_targets[modality] = 'image'
 
-        resize_transform = A.Compose([
+        if self.resize is not None: resize_transform = A.Compose([
             #A.ToFloat(),
             A.Resize(height = self.resize[1], width = self.resize[0], p=1),
             ], p=1, additional_targets=additional_targets)
@@ -506,7 +506,7 @@ class MMDataLoader(Dataset):
             A.RandomToneCurve(scale=0.1, p=p),
             A.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.4, p=p)
             ], p=1, additional_targets=additional_targets)
-        geom_transform = A.Compose([
+        if self.resize is not None: geom_transform = A.Compose([
             A.GridDistortion(num_steps=3, p=p),
             A.Perspective(scale=(0.05, 0.15), pad_mode=cv2.BORDER_CONSTANT, p=p),
             A.Rotate(limit=10, p=p),
@@ -516,7 +516,8 @@ class MMDataLoader(Dataset):
 
         # logger.info(f"augment: {apply}")
         if apply == 'resize_only':
-            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
+            if self.resize is not None: transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
+            else: transformed_resized = imgs
             if not self.rgb: transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
             else: transformed_gray = transformed_resized
             if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
@@ -525,7 +526,8 @@ class MMDataLoader(Dataset):
 
         elif apply == 'all':
 
-            transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
+            if self.resize is not None: transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
+            else: transformed_resized = imgs
             if self.rgb: transformed_color = color_transform(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
             else: transformed_color = color_transform_gray(image=transformed_resized['image'], mask=transformed_resized['mask'], ir=transformed_resized["ir"])
             transformed_geom = geom_transform(image=transformed_color['image'], mask=transformed_color['mask'], depth=transformed_resized["depth"], ir=transformed_color["ir"])

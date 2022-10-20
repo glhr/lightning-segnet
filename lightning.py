@@ -89,6 +89,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--orig_dataset', default=None)
         parser.add_argument('--modalities', default="rgb")
         parser.add_argument('--init_channels', type=int, default=1)
+        parser.add_argument('--resize', default="1920,1080")
         parser.add_argument('--depthwise_conv', action="store_true", default=False)
         parser.add_argument('--ranks', default="1,2,3")
         parser.add_argument('--dist', default="l1")
@@ -110,6 +111,12 @@ class LitSegNet(pl.LightningModule):
                 in_channels=in_channels,
                 classes=classes,
                 encoder_weights=None
+            )
+        elif model == "deeplabv3+":
+            return smp.DeepLabV3Plus(
+                in_channels=in_channels,
+                classes=classes,
+                encoder_weights="imagenet"
             )
 
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
@@ -137,7 +144,7 @@ class LitSegNet(pl.LightningModule):
             self.save = save
             logger.info(f"Save {self.save}")
             self.viz = viz
-            self.hparams.resize = (480, 240)
+            self.hparams.resize = [int(i) for i in self.hparams.resize.split(",")] if self.hparams.resize is not None else None
             self.hparams.masking = True
             self.hparams.normalize = False
             self.hparams.lwmap_range = tuple([float(i) for i in self.hparams.lwmap_range.split(",")])
