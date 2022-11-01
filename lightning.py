@@ -364,7 +364,7 @@ class LitSegNet(pl.LightningModule):
 
         pred_cls = torch.argmax(x_hat, dim=1)
 
-        if args.train:
+        if args.train and not self.global_step % 25:
 
             for i,(o,c,t,f) in enumerate(zip(x["rgb"],pred_cls,y,filenames)):
                 if i == 0:

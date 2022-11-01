@@ -126,6 +126,71 @@ class DeepLabV3PlusDecoder(nn.Module):
         fused_features = self.block2(concat_features)
         return fused_features
 
+class DeepLabV3PlusDecoderMM(nn.Module):
+    def __init__(
+        self,
+        encoder_channels,
+        n_modalities,
+        out_channels=256,
+        atrous_rates=(12, 24, 36),
+        output_stride=16,
+    ):
+        super().__init__()
+        if output_stride not in {8, 16}:
+            raise ValueError("Output stride should be 8 or 16, got {}.".format(output_stride))
+
+        self.out_channels = out_channels
+        self.output_stride = output_stride
+
+        self.aspp = nn.Sequential(
+            ASPP(encoder_channels[-1], out_channels, atrous_rates, separable=True),
+            SeparableConv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+        )
+
+        scale_factor = 2 if output_stride == 8 else 4
+        self.up = nn.UpsamplingBilinear2d(scale_factor=scale_factor)
+
+        highres_in_channels = encoder_channels[-4]
+        highres_out_channels = 48  # proposed by authors of paper
+        self.block1 = nn.Sequential(
+            nn.Conv2d(highres_in_channels, highres_out_channels, kernel_size=1, bias=False),
+            nn.BatchNorm2d(highres_out_channels),
+            nn.ReLU(),
+        )
+        self.block2 = nn.Sequential(
+            SeparableConv2d(
+                highres_out_channels + out_channels,
+                out_channels,
+                kernel_size=3,
+                padding=1,
+                bias=False,
+            ),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+        )
+
+    def forward(self, features, fusion_mode="avg"):
+        device=list(features.values())[0][0].device
+        aspp_features_per_modality = torch.Tensor([]).to(device)
+        high_res_features_per_modality = torch.Tensor([]).to(device)
+
+        for modality in features:
+            aspp_features = self.aspp(features[modality][-1])
+            aspp_features_per_modality = torch.cat((aspp_features_per_modality,self.up(aspp_features).unsqueeze(0)),dim=0)
+            #print(aspp_features_per_modality.shape)
+            high_res_features_per_modality = torch.cat((high_res_features_per_modality,self.block1(features[modality][-4]).unsqueeze(0)),dim=0)
+
+        if fusion_mode == "avg":
+            aspp_features_fused = torch.mean(aspp_features_per_modality,dim=0)
+            #print(aspp_features_fused.shape)
+            assert aspp_features_fused.shape == aspp_features_per_modality.shape[1:]
+            high_res_features_fused = torch.mean(high_res_features_per_modality,dim=0)
+
+        concat_features = torch.cat([aspp_features_fused, high_res_features_fused], dim=1)
+        fused_features = self.block2(concat_features)
+        return fused_features
 
 class ASPPConv(nn.Sequential):
     def __init__(self, in_channels, out_channels, dilation):
@@ -467,8 +532,9 @@ class DeepLabV3PlusMM(SegmentationModelMM):
             )
 
 
-        self.decoder = DeepLabV3PlusDecoder(
+        self.decoder = DeepLabV3PlusDecoderMM(
             encoder_channels=self.encoders["rgb"].out_channels,
+            n_modalities=len(self.modalities),
             out_channels=decoder_channels,
             atrous_rates=decoder_atrous_rates,
             output_stride=encoder_output_stride,
