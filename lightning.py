@@ -20,7 +20,7 @@ from losses import SORDLoss, KLLoss, CompareLosses
 from dataloader import *
 from plotting import plot_confusion_matrix, plot_scatter
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
-from models.CEN import CEN
+from models.deeplab import DeepLabV3Plus
 
 from argparse import ArgumentParser
 from datetime import datetime
@@ -114,7 +114,7 @@ class LitSegNet(pl.LightningModule):
                 encoder_weights=None
             )
         elif model == "deeplabv3+":
-            return smp.DeepLabV3Plus(
+            return DeepLabV3Plus(
                 in_channels=in_channels,
                 classes=classes,
                 encoder_weights="imagenet"
