@@ -20,6 +20,7 @@ from losses import SORDLoss, KLLoss, CompareLosses
 from dataloader import *
 from plotting import plot_confusion_matrix, plot_scatter
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
+from models.CEN import CEN
 
 from argparse import ArgumentParser
 from datetime import datetime
@@ -118,6 +119,8 @@ class LitSegNet(pl.LightningModule):
                 classes=classes,
                 encoder_weights="imagenet"
             )
+        elif model == "cen":
+            return CEN(num_layers=101, num_classes=classes, num_parallel=in_channels, bn_threshold=2e-2)
 
     def __init__(self, conf, viz=False, save=False, test_set=None, test_checkpoint = None, test_max=None, model_only=False, num_classes = None, modalities=None, dataset_seq=None, nopredict=False, **kwargs):
         super().__init__()
@@ -179,7 +182,8 @@ class LitSegNet(pl.LightningModule):
                 "idd": IDDDataLoader,
                 "bdd": BDDDataLoader,
                 "ycor": YCORDataLoader,
-                "pst900": PST900DataLoader
+                "pst900": PST900DataLoader,
+                "muad": MUADDataLoader
             }
 
 
@@ -333,6 +337,9 @@ class LitSegNet(pl.LightningModule):
             weight_map = None
 
         #torch.set_deterministic(False)
+        #print(torch.unique(y))
+        assert torch.all(y < self.hparams.num_classes), f"found y {torch.unique(y)}"
+
         loss = self.compute_loss(x_hat, y, loss=self.hparams.loss, weight_map=weight_map)
         #print(x_hat, y)
         x_hat = torch.softmax(x_hat, dim=1)
@@ -348,6 +355,7 @@ class LitSegNet(pl.LightningModule):
             for i,(o,c,t,f) in enumerate(zip(x,pred_cls,y,filenames)):
                 if i == 0:
                     dataset_obj = self.train_set.dataset
+
                     img = dataset_obj.result_to_image(gt=t, pred_cls=c, orig=o, return_img=True)
                     #images = wandb.Image(img)
 

@@ -268,7 +268,7 @@ class MMDataLoader(Dataset):
 
         for idx in np.unique(labels):
             data[labels==idx] = self.get_color(idx, mode=mode)
-            # print(idx, "->", self.get_color(idx, mode=mode))
+            #print(idx, "->", self.get_color(idx, mode=mode))
         return data
 
     def labels_to_obj(self, gt):
@@ -393,6 +393,7 @@ class MMDataLoader(Dataset):
             #concat.append(self.labels_to_color(gt_numpy, mode="objects"))
             #gt = self.labels_to_color(self.labels_obj_to_aff(gt), mode=self.mode)
             gt = self.labels_to_color(gt_numpy, mode=self.mode)
+            #print(np.unique(gt_numpy), np.unique(gt))
             concat.append(gt)
             # concat.append(np.stack((gt,)*3, axis=-1))
 
@@ -962,6 +963,95 @@ class CityscapesDataLoader(MMDataLoader):
 
     def get_gt(self, sample_id):
         return Image.open(self.path + "gtFine/" + self.base_folders[sample_id] + f"/{self.filenames[sample_id]}_gtFine_labelIds.png").convert('L')
+
+class MUADDataLoader(MMDataLoader):
+
+    def __init__(self, resize, set="train", path = f"{DATASET_FOLDER}/muad/", modalities=["rgb"], mode="affordances", gt="driv", augment=False, viz=False, rgb=False, **kwargs):
+        """
+        Initializes the data loader
+        :param path: the path to the data
+        """
+        super().__init__(modalities, resize=resize, name="muad", mode=mode, augment=augment)
+        self.path = Path(path)
+        self.gt = gt
+
+        print(modalities)
+
+        classes = np.loadtxt(path + "classes.txt", dtype=str)
+        # print(classes)
+
+        for x in classes:
+            x = [int(i) if i.lstrip("-").isdigit() else i for i in x]
+            self.idx_to_color['objects'][x[4]] = tuple([x[1], x[2], x[3]])
+            self.color_to_idx['objects'][tuple([x[1], x[2], x[3]])] = x[4]
+            self.class_to_idx['objects'][x[0].lower()] = x[4]
+            self.idx_to_obj['objects'][x[4]] = x[4]
+
+        logger.debug(f"{self.name} - idx to obj: {self.idx_to_obj['objects']}")
+        logger.debug(f"{self.name} - class to idx: {self.class_to_idx['objects']}")
+        logger.debug(f"{self.name} - color to idx: {self.color_to_idx['objects'].values()}")
+
+        self.color_to_idx['affordances'], self.idx_to_color['affordances'], self.idx_to_color["convert"], self.idx_to_idx["convert"], self.idx_mappings = self.remap_classes(self.idx_to_color['objects'])
+
+        if set == "full":
+            self.split_path = ['train','val']
+        elif set == "test":
+            self.split_path = "test_normal"
+        else:
+            self.split_path = set
+
+        self.augment = augment
+        self.viz = viz
+        self.base_folders = []
+
+        if set == "full":
+            file_pattern = []
+            for i,folder in enumerate(self.split_path):
+                file_pattern += glob.glob(f"{self.split_path[i]}/leftImg8bit/*leftImg8bit.png")
+        else:
+            file_pattern = self.path.glob(f"{self.split_path}/leftImg8bit/*leftImg8bit.png")
+
+        for filepath in file_pattern:
+            img = filepath.stem.split("_")[0]
+            self.filenames.append(img)
+        # print(self.filenames[0])
+        # print(len(self.filenames))
+
+        self.color_GT = False
+        self.rgb = rgb
+
+        self.write_loader(set)
+
+    def get_rgb(self, sample_id):
+        return Image.open(str(self.path / self.split_path / "leftImg8bit" / f"{self.filenames[sample_id]}_leftImg8bit.png")).convert('RGB')
+
+    def get_depth(self, sample_id):
+        pilDep = self.load_depth(str(self.path / self.split_path / "leftDepth" / f"{self.filenames[sample_id]}_leftDepth.exr"))
+        return pilDep
+
+    def get_gt(self, sample_id):
+        gt = Image.open(str(self.path / self.split_path / "leftLabel" / f"{self.filenames[sample_id]}_leftLabel.png")).convert('L')
+        gt = np.array(gt).astype(int)
+        gt[gt == 255] = -1
+        return gt
+
+    def load_depth(self, path, invert=False):
+
+        depth = cv2.imread(path,  cv2.IMREAD_ANYCOLOR | cv2.IMREAD_ANYDEPTH)
+        depth = Image.fromarray(depth)
+        depth = np.array(depth, dtype=np.float32)
+        #depth = 400 * (1 - depth) # the depth in meters
+
+        depth[depth == -np.inf] = 0
+        depth[depth == np.inf] = 0
+        depth = 1 - depth
+
+
+        depth_image_8u = depth - np.min(depth)
+        # logger.debug(f"load_depth {np.min(depth_image_8u)} - {np.max(depth_image_8u)} ({type(depth_image_8u[0][0])})")
+        depth_image_8u = (255 * (depth_image_8u / np.max(depth_image_8u))).astype(np.uint8)
+
+        return depth_image_8u
 
 class LostFoundDataLoader(MMDataLoader):
 
@@ -2245,13 +2335,13 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader, random_split, Subset
 
     print("Cityscapes dataset")
-    train_set = PST900DataLoader(resize=(480, 240), set="train", mode="objects", modalities=["rgb","ir","depth"], augment=True)
+    train_set = MUADDataLoader(resize=(480, 240), set="train", mode="objects", modalities=["rgb","depth"], augment=True)
     train_set = Subset(train_set, indices = range(len(train_set)))
     print("-> train", len(train_set.dataset))
-    val_set = PST900DataLoader(resize=(480, 240), set="val", mode="objects", modalities=["rgb"], augment=False)
+    val_set = MUADDataLoader(resize=(480, 240), set="val", mode="objects", modalities=["rgb"], augment=False)
     val_set = Subset(val_set, indices = range(len(val_set)))
     print("-> val", len(val_set.dataset))
-    test_set = PST900DataLoader(resize=(480, 240), set="test", mode="objects", modalities=["rgb"], augment=False)
+    test_set = MUADDataLoader(resize=(480, 240), set="test", mode="objects", modalities=["rgb"], augment=False)
     test_set = Subset(test_set, indices = range(len(test_set)))
     print("-> test", len(test_set.dataset))
 
