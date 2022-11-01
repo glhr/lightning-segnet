@@ -163,7 +163,7 @@ class MMDataLoader(Dataset):
             self.result_to_image(gt=modGT, orig=modRGB, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-tf")
             self.result_to_image(gt=imgGT_orig, orig=imgRGB_orig, folder=f"results/data_aug/{self.name}", filename_prefix=f"{self.name}-orig")
 
-        imgs = []
+        imgs_torch = {}
         img = {
             'rgb': modRGB if use["rgb"] else None,
             'depth': modDepth if use["depth"] else None,
@@ -171,17 +171,20 @@ class MMDataLoader(Dataset):
         }
         for mod in self.modalities:
             if use[mod] and img.get(mod) is not None:
-                imgs.append(torch.from_numpy(img[mod].copy()).float())
+                imgs_torch[mod] = torch.from_numpy(img[mod].copy()).float()
                 # print(self.name, modGT.shape, img[mod].shape)
                 assert modGT.shape[:2] == img[mod].shape[:2]
+
+        imgs_torch["gt"] = modGT
         # logger.debug(torch.unique(modGT))
 
         # print(self.rgb, imgs[0].shape)
         if self.rgb:
-            return [imgs[0].permute(2,0,1), modGT]
-        else:
-            # print(torch.stack(imgs).shape)
-            return [torch.stack(imgs), modGT]
+            imgs_torch["rgb"] = imgs_torch["rgb"].permute(2,0,1)
+
+        if "depth" in mod:
+            imgs_torch["depth"] = imgs_torch["depth"].unsqueeze(0).repeat(3, 1, 1)
+        return imgs_torch
 
     def remap_classes(self, idx_to_color):
 

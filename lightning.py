@@ -322,7 +322,11 @@ class LitSegNet(pl.LightningModule):
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
 
     def predict(self, batch, set, save=False, batch_idx=None):
-        x, y = batch["sample"]
+        if len(self.hparams.modalities) == 1:
+            x = batch["sample"][self.hparams.modalities[0]]
+        else:
+            raise NotImplementedError
+        y = batch["sample"]["gt"]
         filenames = batch["filename"]
 
         if set == "test":
