@@ -80,7 +80,7 @@ class SegmentationModelMM(torch.nn.Module):
             #print(x[modality].shape)
             features[modality] = self.encoders[modality].cuda()(x[modality])
 
-        decoder_output = self.decoder(features)
+        decoder_output = self.decoder(features, fusion_mode=self.fusion_mode)
 
         masks = self.segmentation_head(decoder_output)
 

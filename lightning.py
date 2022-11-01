@@ -98,6 +98,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--save_xp', default=None)
         parser.add_argument('--gt', default="driv")
         parser.add_argument('--noeval', default=False, action="store_true")
+        parser.add_argument('--fusion_mode', default="avg")
         return parser
 
     def get_model(self, model, in_channels, classes):
@@ -125,7 +126,8 @@ class LitSegNet(pl.LightningModule):
                 classes=classes,
                 encoder_weights="imagenet",
                 modalities = self.hparams.modalities,
-                device=self.device
+                device=self.device,
+                fusion_mode=self.hparams.fusion_mode
             )
         elif model == "cen":
             return CEN(num_layers=101, num_classes=classes, num_parallel=in_channels, bn_threshold=2e-2)
@@ -393,7 +395,7 @@ class LitSegNet(pl.LightningModule):
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
         # #
         # self.log_mistakes(mistakes, prefix=set)
-        self.log(f'{set}_loss', loss, on_epoch=True, batch_size=self.hparams.bs)
+        self.log(f'{set}_loss', loss, on_epoch=True, on_step=True, batch_size=self.hparams.bs)
 
         if save:
             if self.hparams.mode == "convert":

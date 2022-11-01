@@ -171,22 +171,29 @@ class DeepLabV3PlusDecoderMM(nn.Module):
             nn.ReLU(),
         )
 
-    def forward(self, features, fusion_mode="avg"):
+    def forward(self, features, fusion_mode):
         device=list(features.values())[0][0].device
         aspp_features_per_modality = torch.Tensor([]).to(device)
         high_res_features_per_modality = torch.Tensor([]).to(device)
+        modality_idx = dict()
 
-        for modality in features:
+        for n,modality in enumerate(features):
             aspp_features = self.aspp(features[modality][-1])
             aspp_features_per_modality = torch.cat((aspp_features_per_modality,self.up(aspp_features).unsqueeze(0)),dim=0)
             #print(aspp_features_per_modality.shape)
             high_res_features_per_modality = torch.cat((high_res_features_per_modality,self.block1(features[modality][-4]).unsqueeze(0)),dim=0)
+            modality_idx[modality] = n
 
         if fusion_mode == "avg":
             aspp_features_fused = torch.mean(aspp_features_per_modality,dim=0)
             #print(aspp_features_fused.shape)
             assert aspp_features_fused.shape == aspp_features_per_modality.shape[1:]
             high_res_features_fused = torch.mean(high_res_features_per_modality,dim=0)
+
+        elif fusion_mode == "rgb":
+            i = modality_idx["rgb"]
+            aspp_features_fused = aspp_features_per_modality[i]
+            high_res_features_fused = high_res_features_per_modality[i]
 
         concat_features = torch.cat([aspp_features_fused, high_res_features_fused], dim=1)
         fused_features = self.block2(concat_features)
@@ -512,6 +519,7 @@ class DeepLabV3PlusMM(SegmentationModelMM):
         aux_params: Optional[dict] = None,
         modalities: list = ["rgb"],
         device: Optional[str] = None,
+        fusion_mode: str = "avg"
     ):
         super().__init__()
 
@@ -520,6 +528,7 @@ class DeepLabV3PlusMM(SegmentationModelMM):
 
         self.encoders = {}
         self.modalities=modalities
+        self.fusion_mode=fusion_mode
         print(self.modalities)
 
         for modality in self.modalities:
@@ -537,7 +546,7 @@ class DeepLabV3PlusMM(SegmentationModelMM):
             n_modalities=len(self.modalities),
             out_channels=decoder_channels,
             atrous_rates=decoder_atrous_rates,
-            output_stride=encoder_output_stride,
+            output_stride=encoder_output_stride
         )
 
         self.segmentation_head = SegmentationHead(
