@@ -20,7 +20,7 @@ from losses import SORDLoss, KLLoss, CompareLosses
 from dataloader import *
 from plotting import plot_confusion_matrix, plot_scatter
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
-from models.deeplab import DeepLabV3Plus
+from models.deeplab import DeepLabV3PlusMM
 
 from argparse import ArgumentParser
 from datetime import datetime
@@ -118,6 +118,14 @@ class LitSegNet(pl.LightningModule):
                 in_channels=in_channels,
                 classes=classes,
                 encoder_weights="imagenet"
+            )
+        elif model == "deeplabv3+mm":
+            return DeepLabV3PlusMM(
+                in_channels=in_channels,
+                classes=classes,
+                encoder_weights="imagenet",
+                modalities = self.hparams.modalities,
+                device=self.device
             )
         elif model == "cen":
             return CEN(num_layers=101, num_classes=classes, num_parallel=in_channels, bn_threshold=2e-2)
@@ -325,7 +333,9 @@ class LitSegNet(pl.LightningModule):
         if len(self.hparams.modalities) == 1:
             x = batch["sample"][self.hparams.modalities[0]]
         else:
-            raise NotImplementedError
+            x = {
+                mod:batch["sample"][mod] for mod in self.hparams.modalities
+            }
         y = batch["sample"]["gt"]
         filenames = batch["filename"]
 
@@ -356,7 +366,7 @@ class LitSegNet(pl.LightningModule):
 
         if args.train:
 
-            for i,(o,c,t,f) in enumerate(zip(x,pred_cls,y,filenames)):
+            for i,(o,c,t,f) in enumerate(zip(x["rgb"],pred_cls,y,filenames)):
                 if i == 0:
                     dataset_obj = self.train_set.dataset
 
@@ -746,7 +756,7 @@ class LitSegNet(pl.LightningModule):
         logger.info(f"{set} augment: {augment}")
         logger.info(self.dataset_seq)
         logger.info(self.hparams.gt)
-        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1 and self.hparams.modalities == ["rgb"]), gt=self.hparams.gt)
+        dataset = self.datasets[name](set=set, resize=self.hparams.resize, mode=self.hparams.mode, augment=augment, modalities=self.hparams.modalities, viz=(self.viz and set == "train"), dataset_seq=self.dataset_seq, rgb=(self.hparams.init_channels > 1), gt=self.hparams.gt)
         if set == "test" and self.test_max is not None:
             dataset = Subset(dataset, indices=range(self.test_max))
         else:

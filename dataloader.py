@@ -111,6 +111,7 @@ class MMDataLoader(Dataset):
     def prepare_data(self, pilRGB, pilDep, pilIR, imgGT, augment, color_GT=True, save=False, filename=""):
 
         use = {
+            "gray": "gray" in self.modalities and pilRGB is not None,
             "rgb": "rgb" in self.modalities and pilRGB is not None,
             "depth": "depth" in self.modalities and pilDep is not None,
             "ir": "ir" in self.modalities and pilIR is not None
@@ -118,6 +119,7 @@ class MMDataLoader(Dataset):
 
         img_dict = {
             'image': np.array(pilRGB) if use["rgb"] else None,
+            'gray': np.array(pilRGB) if use["gray"] else None,
             'depth': np.array(pilDep) if use["depth"] else None,
             'ir': np.array(pilIR) if use["ir"] else None,
             'mask': np.array(imgGT)
@@ -128,6 +130,8 @@ class MMDataLoader(Dataset):
         modGT = transformed_imgs['mask']
         if use["rgb"]:
             modRGB = transformed_imgs['image']
+        if use["gray"]:
+            modGray = transformed_imgs['gray']
         if use["depth"]:
             modDepth = transformed_imgs['depth']
         if use["ir"]:
@@ -135,7 +139,7 @@ class MMDataLoader(Dataset):
 
         modGT = self.prepare_GT(modGT, color_GT)
 
-        if use["rgb"] and not self.rgb:
+        if use["gray"] and not self.rgb:
            if len(modRGB.shape) == 3: modRGB = modRGB[:,:,2]
            modRGB = modRGB / np.nanmax(modRGB)
            if np.max(modRGB) == 0:
@@ -179,11 +183,14 @@ class MMDataLoader(Dataset):
         # logger.debug(torch.unique(modGT))
 
         # print(self.rgb, imgs[0].shape)
-        if self.rgb:
+        if "rgb" in imgs_torch:
             imgs_torch["rgb"] = imgs_torch["rgb"].permute(2,0,1)
 
-        if "depth" in mod:
+        if "depth" in imgs_torch:
+            #print("unsqueezing depth")
             imgs_torch["depth"] = imgs_torch["depth"].unsqueeze(0).repeat(3, 1, 1)
+
+        #print(imgs_torch["rgb"].shape, imgs_torch["depth"].shape)
         return imgs_torch
 
     def remap_classes(self, idx_to_color):
