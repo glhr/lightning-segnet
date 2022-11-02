@@ -38,6 +38,7 @@ from typing import Optional
 from .segmodel import SegmentationModel, SegmentationModelMM
 from .encoders import get_encoder
 from .modules import Activation
+from .fusion import SSMACustom
 
 __all__ = ["DeepLabV3Decoder"]
 
@@ -131,9 +132,10 @@ class DeepLabV3PlusDecoderMM(nn.Module):
         self,
         encoder_channels,
         n_modalities,
+        fusion_mode,
         out_channels=256,
         atrous_rates=(12, 24, 36),
-        output_stride=16,
+        output_stride=16
     ):
         super().__init__()
         if output_stride not in {8, 16}:
@@ -171,7 +173,23 @@ class DeepLabV3PlusDecoderMM(nn.Module):
             nn.ReLU(),
         )
 
-    def forward(self, features, fusion_mode):
+        self.fusion_mode = fusion_mode
+        if self.fusion_mode == "ssma_custom":
+            self.fusion_block_aspp = SSMACustom(
+                features=out_channels,
+                bottleneck=16,
+                branches=n_modalities,
+                fusion_activ="softmax"
+            )
+            self.fusion_block_highres = SSMACustom(
+                features=highres_out_channels,
+                bottleneck=16,
+                branches=n_modalities,
+                fusion_activ="softmax"
+            )
+
+
+    def forward(self, features):
         device=list(features.values())[0][0].device
         aspp_features_per_modality = torch.Tensor([]).to(device)
         high_res_features_per_modality = torch.Tensor([]).to(device)
@@ -184,16 +202,20 @@ class DeepLabV3PlusDecoderMM(nn.Module):
             high_res_features_per_modality = torch.cat((high_res_features_per_modality,self.block1(features[modality][-4]).unsqueeze(0)),dim=0)
             modality_idx[modality] = n
 
-        if fusion_mode == "avg":
+        if self.fusion_mode == "avg":
             aspp_features_fused = torch.mean(aspp_features_per_modality,dim=0)
             #print(aspp_features_fused.shape)
             assert aspp_features_fused.shape == aspp_features_per_modality.shape[1:]
             high_res_features_fused = torch.mean(high_res_features_per_modality,dim=0)
 
-        elif fusion_mode == "rgb":
+        elif self.fusion_mode == "rgb":
             i = modality_idx["rgb"]
             aspp_features_fused = aspp_features_per_modality[i]
             high_res_features_fused = high_res_features_per_modality[i]
+
+        elif self.fusion_mode == "ssma_custom":
+            aspp_features_fused = self.fusion_block_aspp([f for f in aspp_features_per_modality])
+            high_res_features_fused = self.fusion_block_highres([f for f in high_res_features_per_modality])
 
         concat_features = torch.cat([aspp_features_fused, high_res_features_fused], dim=1)
         fused_features = self.block2(concat_features)
@@ -540,10 +562,10 @@ class DeepLabV3PlusMM(SegmentationModelMM):
                 output_stride=encoder_output_stride,
             )
 
-
         self.decoder = DeepLabV3PlusDecoderMM(
             encoder_channels=self.encoders["rgb"].out_channels,
             n_modalities=len(self.modalities),
+            fusion_mode=self.fusion_mode,
             out_channels=decoder_channels,
             atrous_rates=decoder_atrous_rates,
             output_stride=encoder_output_stride
