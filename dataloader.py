@@ -189,6 +189,8 @@ class MMDataLoader(Dataset):
         if "depth" in imgs_torch:
             #print("unsqueezing depth")
             imgs_torch["depth"] = imgs_torch["depth"].unsqueeze(0).repeat(3, 1, 1)
+        if "ir" in imgs_torch:
+            imgs_torch["ir"] = imgs_torch["ir"].unsqueeze(0).repeat(3, 1, 1)
 
         #print(imgs_torch["rgb"].shape, imgs_torch["depth"].shape)
         return imgs_torch

@@ -47,7 +47,7 @@ timestamp = datetime.now().strftime('%Y-%m-%d %H-%M')
 parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--lr_finder', action='store_true', default=False)
-parser.add_argument('--gpus', type=int, default=torch.cuda.device_count())
+parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('--max_epochs', type=int, default=1000)
 parser.add_argument('--test_samples', type=int, default=None)
 parser.add_argument('--test_checkpoint', default=None)
@@ -99,6 +99,7 @@ class LitSegNet(pl.LightningModule):
         parser.add_argument('--gt', default="driv")
         parser.add_argument('--noeval', default=False, action="store_true")
         parser.add_argument('--fusion_mode', default="avg")
+        parser.add_argument('--encoder', default="resnet50")
         return parser
 
     def get_model(self, model, in_channels, classes):
@@ -127,7 +128,8 @@ class LitSegNet(pl.LightningModule):
                 encoder_weights="imagenet",
                 modalities = self.hparams.modalities,
                 device=self.device,
-                fusion_mode=self.hparams.fusion_mode
+                fusion_mode=self.hparams.fusion_mode,
+                encoder_name=self.hparams.encoder
             )
         elif model == "cen":
             return CEN(num_layers=101, num_classes=classes, num_parallel=in_channels, bn_threshold=2e-2)
@@ -745,7 +747,7 @@ class LitSegNet(pl.LightningModule):
         if self.hparams.optim == "SGD":
             optimizer = torch.optim.SGD(self.parameters(), lr=self.hparams.lr, momentum=self.hparams.momentum)
         else:
-            optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
+            optimizer = torch.optim.Adam(self.parameters(), lr=self.hparams.lr, weight_decay=self.hparams.wd)
         return optimizer
 
     def get_dataset(self, set, name=None, augment=None):
@@ -842,7 +844,7 @@ if __name__ == '__main__':
         args.prefix = segnet_model.hparams.save_prefix
     logger.debug(args.prefix)
 
-    checkpoint_callback = ModelCheckpoint(
+    checkpoint_callback_loss = ModelCheckpoint(
         dirpath='lightning_logs',
         filename=args.prefix+'-{epoch}-{val_loss:.4f}',
         verbose=True,
@@ -850,7 +852,16 @@ if __name__ == '__main__':
         mode='min',
         save_last=True
     )
-    checkpoint_callback.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
+    checkpoint_callback_loss.CHECKPOINT_NAME_LAST = f"{args.prefix}-last"
+
+    checkpoint_callback_miou = ModelCheckpoint(
+        dirpath='lightning_logs',
+        filename=args.prefix+'-{epoch}-{val_mIoU_obj:.4f}',
+        verbose=True,
+        monitor='val_mIoU_obj',
+        mode='max',
+        save_last=False
+    )
 
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
@@ -863,27 +874,19 @@ if __name__ == '__main__':
         #wandb_logger.watch(segnet_model, log='parameters', log_freq=100)
 
 
-
         if args.update_output_layer or args.init:
             segnet_model = segnet_model.load_from_checkpoint(checkpoint_path=args.train_checkpoint, conf=args)
             segnet_model.update_model()
-            if args.update_output_layer: segnet_model.new_output()
-            trainer = pl.Trainer.from_argparse_args(args,
-                check_val_every_n_epoch=1,
-                # ~ log_every_n_steps=10,
-                logger=wandb_logger,
-                callbacks=callbacks + [checkpoint_callback],
-                accelerator= "dp"
-            )
-        else:
-            #segnet_model.update_model()
-            trainer = pl.Trainer.from_argparse_args(args,
-                check_val_every_n_epoch=1,
-                # ~ log_every_n_steps=10,
-                logger=wandb_logger,
-                callbacks=callbacks + [checkpoint_callback],
-                resume_from_checkpoint=args.train_checkpoint,
-                accelerator= "dp")
+
+        trainer = pl.Trainer.from_argparse_args(args,
+            check_val_every_n_epoch=1,
+            # ~ log_every_n_steps=10,
+            logger=wandb_logger,
+            callbacks=callbacks + [checkpoint_callback_loss,checkpoint_callback_miou],
+            resume_from_checkpoint=args.train_checkpoint,
+            accelerator="gpu",
+            devices=[1]
+        )
         trainer.fit(segnet_model)
 
     elif args.lr_finder:
@@ -892,7 +895,8 @@ if __name__ == '__main__':
                                                 # ~ log_every_n_steps=10,
                                                 callbacks=callbacks + [checkpoint_callback],
                                                 resume_from_checkpoint=args.train_checkpoint,
-                                                accelerator="dp")
+                                                accelerator="gpu",
+                                                devices=[args.gpu])
 
         # Run learning rate finder
         lr_finder = trainer.tuner.lr_find(segnet_model)

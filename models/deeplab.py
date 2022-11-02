@@ -563,7 +563,7 @@ class DeepLabV3PlusMM(SegmentationModelMM):
             )
 
         self.decoder = DeepLabV3PlusDecoderMM(
-            encoder_channels=self.encoders["rgb"].out_channels,
+            encoder_channels=self.encoders[list(self.modalities)[0]].out_channels,
             n_modalities=len(self.modalities),
             fusion_mode=self.fusion_mode,
             out_channels=decoder_channels,
