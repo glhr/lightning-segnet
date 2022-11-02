@@ -326,7 +326,7 @@ class LitSegNet(pl.LightningModule):
             else:
                 test = None
             self.test_set.dataset.result_to_image(
-                iter=batch_idx+i, gt=t, orig=o, pred_cls=c, pred_proba=test,
+                iter=batch_idx+i, gt=t, orig=o, pred_cls=c,
                 folder=f"{self.result_folder}/viz_per_epoch",
                 filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-proba")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-cls")
@@ -403,7 +403,7 @@ class LitSegNet(pl.LightningModule):
             if self.hparams.mode == "convert":
                 self.save_result(sample=x, pred=pred_proba_aff, pred_cls=pred_cls_aff, target=target_aff, batch_idx=batch_idx)
             else:
-                self.save_result(sample=x, pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
+                self.save_result(sample=x["rgb"], pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
 
         return loss
 
@@ -518,7 +518,7 @@ class LitSegNet(pl.LightningModule):
         print(np.corrcoef(y,x)[0, 1])
 
     def test_step(self, batch, batch_idx):
-        # return self.validation_step(batch, batch_idx)
+        return self.predict(batch, set="test", save=True, batch_idx=batch_idx)
 
         dataset_obj = self.test_set.dataset if self.hparams.dataset_combo is None else self.test_set.dataset.datasets[0].dataset
 
@@ -722,26 +722,26 @@ class LitSegNet(pl.LightningModule):
         #     self.log('gt_cls_count', count, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_stats)
 
 
-    def test_epoch_end(self, outputs):
-        bins = outputs[0]["bins"]  # fixed bin size
-        #print(len(outputs[0]["correct_hist"]))
-        correct_pred = np.array([item["correct_hist"] for item in outputs if item is not None])
-        correct_pred = np.sum(correct_pred, axis=0)
-
-        incorrect_pred = np.array([item["incorrect_hist"] for item in outputs if item is not None])
-        incorrect_pred = np.sum(incorrect_pred, axis=0)
-        #print(correct_pred)
-        #correct_pred =
-        #incorrect_pred = outputs["incorrect_hist"]
-
-        #print(bins, correct_pred)
-        np.save(f"acdc-night-correct_pred.npy", correct_pred)
-        np.save(f"acdc-night-incorrect_pred.npy", incorrect_pred)
-        np.save(f"acdc-night-bins.npy", bins)
-        counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = correct_pred, alpha=0.5, color = "green")
-
-        counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = incorrect_pred, alpha=0.5, color = "red")
-        plt.show()
+    # def test_epoch_end(self, outputs):
+    #     bins = outputs[0]["bins"]  # fixed bin size
+    #     #print(len(outputs[0]["correct_hist"]))
+    #     correct_pred = np.array([item["correct_hist"] for item in outputs if item is not None])
+    #     correct_pred = np.sum(correct_pred, axis=0)
+    #
+    #     incorrect_pred = np.array([item["incorrect_hist"] for item in outputs if item is not None])
+    #     incorrect_pred = np.sum(incorrect_pred, axis=0)
+    #     #print(correct_pred)
+    #     #correct_pred =
+    #     #incorrect_pred = outputs["incorrect_hist"]
+    #
+    #     #print(bins, correct_pred)
+    #     np.save(f"acdc-night-correct_pred.npy", correct_pred)
+    #     np.save(f"acdc-night-incorrect_pred.npy", incorrect_pred)
+    #     np.save(f"acdc-night-bins.npy", bins)
+    #     counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = correct_pred, alpha=0.5, color = "green")
+    #
+    #     counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = incorrect_pred, alpha=0.5, color = "red")
+    #     plt.show()
 
     def configure_optimizers(self):
         if self.hparams.optim == "SGD":
@@ -885,7 +885,7 @@ if __name__ == '__main__':
             callbacks=callbacks + [checkpoint_callback_loss,checkpoint_callback_miou],
             resume_from_checkpoint=args.train_checkpoint,
             accelerator="gpu",
-            devices=[1]
+            devices=[args.gpu]
         )
         trainer.fit(segnet_model)
 
@@ -893,7 +893,7 @@ if __name__ == '__main__':
         trainer = pl.Trainer.from_argparse_args(args,
                                                 check_val_every_n_epoch=1,
                                                 # ~ log_every_n_steps=10,
-                                                callbacks=callbacks + [checkpoint_callback],
+                                                callbacks=callbacks + [checkpoint_callback_loss,checkpoint_callback_miou],
                                                 resume_from_checkpoint=args.train_checkpoint,
                                                 accelerator="gpu",
                                                 devices=[args.gpu])
@@ -914,8 +914,12 @@ if __name__ == '__main__':
         print(new_lr)
     else:
         logger.warning("Testing phase")
-        trainer = pl.Trainer.from_argparse_args(args,
-        move_metrics_to_cpu=True)
+        trainer = pl.Trainer.from_argparse_args(
+            args,
+            move_metrics_to_cpu=True,
+            accelerator="gpu",
+            devices=[args.gpu]
+        )
         if args.test_checkpoint is not None:
             chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
             if args.save_xp is None:

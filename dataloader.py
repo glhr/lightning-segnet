@@ -2037,7 +2037,7 @@ class PST900DataLoader(MMDataLoader):
             self.split_path = set
 
         file_pattern = Path(f'{self.path}PST900_RGBT_Dataset/{self.split_path}/rgb/').glob('*.png')
-        # logger.warning(file_pattern)
+        #logger.warning(file_pattern)
         if set in ['train','val']:
             filenames = {}
             with open(path + 'train.txt') as f:
