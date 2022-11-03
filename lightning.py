@@ -15,12 +15,13 @@ from pytorch_lightning.callbacks.base import Callback
 
 from segnet import SegNet, new_input_channels, new_output_channels
 import segmentation_models_pytorch as smp
-from fusion import FusionNet
+from cm import compute_output_matrix, compute_iou
 from losses import SORDLoss, KLLoss, CompareLosses
 from dataloader import *
 from plotting import plot_confusion_matrix, plot_scatter
 from utils import create_folder, logger, enable_debug, RANDOM_SEED
 from models.deeplab import DeepLabV3PlusMM
+
 
 from argparse import ArgumentParser
 from datetime import datetime
@@ -364,6 +365,7 @@ class LitSegNet(pl.LightningModule):
         pred_cls = torch.argmax(x_hat, dim=1)
 
         iou = self.mIoU[set](pred_cls[y>=0], y[y>=0])
+        acc = self.accuracy[set](pred_cls[y>=0], y[y>=0])
         #torch.set_deterministic(True)
 
         pred_cls = torch.argmax(x_hat, dim=1)
@@ -392,8 +394,21 @@ class LitSegNet(pl.LightningModule):
         # elif self.hparams.mode == "affordances":
         #     # self.log(f'{set}_iou_aff', iou, on_epoch=True)
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
+
+
+
         if self.hparams.mode == "objects":
             self.log(f'{set}_mIoU_obj', iou, on_epoch=True, batch_size=self.hparams.bs)
+            self.log(f'{set}_acc_obj', acc, on_epoch=True, batch_size=self.hparams.bs)
+
+            if set == "test":
+                if batch_idx == 0:
+                    self.cm = compute_output_matrix(y[y>=0].cpu(), pred_cls[y>=0].cpu(), output_matrix=None, nclasses=self.hparams.num_classes)
+                else:
+                    self.cm = compute_output_matrix(y[y>=0].cpu(), pred_cls[y>=0].cpu(), output_matrix=self.cm)
+                iou_cm = compute_iou(self.cm)
+                self.log(f'{set}_cm_iou', iou_cm, on_epoch=True, batch_size=self.hparams.bs)
+
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
         # #
         # self.log_mistakes(mistakes, prefix=set)
@@ -408,11 +423,11 @@ class LitSegNet(pl.LightningModule):
         return loss
 
     def training_step(self, batch, batch_idx):
-        loss = self.predict(batch, set="train")
+        loss = self.predict(batch, set="train", batch_idx=batch_idx)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        loss = self.predict(batch, set="val")
+        loss = self.predict(batch, set="val", batch_idx=batch_idx)
         return loss
 
     def reduce_cm(self, cms, save=False):
