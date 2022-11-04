@@ -1394,7 +1394,7 @@ class MIRMultispectral(MMDataLoader):
         self.augment = augment
         self.viz = viz
 
-        for img in glob.glob(self.path + 'labels/*D.png'):
+        for img in glob.glob(self.path + 'labels/*.png'):
             img = img.split("/")[-1]
             file = img.replace(".png","")
             if set == "full" or file in filenames[set]:

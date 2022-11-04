@@ -218,8 +218,8 @@ class LitSegNet(pl.LightningModule):
             self.test_acc, self.val_acc, self.train_acc = torchmetrics.Accuracy(), torchmetrics.Accuracy(), torchmetrics.Accuracy()
             self.test_recall, self.val_recall, self.train_recall = torchmetrics.Recall(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Recall(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Recall(num_classes=self.hparams.num_classes, average="none")
             self.test_precision, self.val_precision, self.train_precision = torchmetrics.Precision(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Precision(num_classes=self.hparams.num_classes, average="none"), torchmetrics.Precision(num_classes=self.hparams.num_classes, average="none")
-            self.test_mIoU, self.val_mIoU, self.train_mIoU = torchmetrics.IoU(num_classes=self.hparams.num_classes), torchmetrics.IoU(num_classes=self.hparams.num_classes), torchmetrics.IoU(num_classes=self.hparams.num_classes)
-            self.test_cIoU, self.val_cIoU, self.train_cIoU = torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.IoU(num_classes=self.hparams.num_classes, reduction="none")
+            self.test_mIoU, self.val_mIoU, self.train_mIoU = torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes), torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes), torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes)
+            self.test_cIoU, self.val_cIoU, self.train_cIoU = torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes, reduction="none"), torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes, reduction="none")
 
             self.test_recall_o = RecallMetric()
             self.precis = {
@@ -234,9 +234,17 @@ class LitSegNet(pl.LightningModule):
             self.mIoU = {
                 "train": self.train_mIoU, "val": self.val_mIoU, "test": self.test_mIoU
             }
-            self.cIoU = {
-                "train": self.train_cIoU, "val": self.val_cIoU, "test": self.test_cIoU
-            }
+
+            self.idx_to_class = {v:k for k,v in self.orig_dataset.dataset.class_to_idx['objects'].items()}
+            self.class_names_list = [None] * self.hparams.num_classes
+            for idx in self.idx_to_class:
+                self.class_names_list[idx] = self.idx_to_class[idx]
+            print(self.class_names_list)
+            # ciou = torchmetrics.ClasswiseWrapper(
+            #     torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes, average="none", absent_score=float('nan')),
+            #     labels=self.class_names_list
+            # )
+            self.cIoU = torchmetrics.JaccardIndex(num_classes=self.hparams.num_classes, average=None, absent_score=float('nan'))
 
             if self.hparams.loss in ["sord","compare"]:
                 self.hparams.ranks = [int(r) for r in self.hparams.ranks.split(",")]
@@ -246,6 +254,7 @@ class LitSegNet(pl.LightningModule):
             self.train_set, self.val_set, self.test_set = self.get_dataset_splits(normalize=self.hparams.normalize)
             self.hparams.train_set, self.hparams.val_set, self.hparams.test_set = \
                 len(self.train_set.dataset), len(self.val_set.dataset), len(self.test_set.dataset)
+
 
             self.test_samples = test_set
             self.update_settings()
@@ -370,8 +379,6 @@ class LitSegNet(pl.LightningModule):
         acc = self.accuracy[set](pred_cls[y>=0], y[y>=0])
         #torch.set_deterministic(True)
 
-        pred_cls = torch.argmax(x_hat, dim=1)
-
         if args.train and not self.global_step % 25:
 
             input_imgs = [dict(zip(x,t)) for t in zip(*x.values())]
@@ -399,11 +406,12 @@ class LitSegNet(pl.LightningModule):
         #     # self.log(f'{set}_iou_aff', iou, on_epoch=True)
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
 
+        self.log(f'{set}_loss', loss, on_epoch=True, on_step=True)
 
 
         if self.hparams.mode == "objects":
-            self.log(f'{set}_mIoU_obj', iou, on_epoch=True, batch_size=self.hparams.bs)
-            self.log(f'{set}_acc_obj', acc, on_epoch=True, batch_size=self.hparams.bs)
+            self.log(f'{set}_mIoU_obj', iou, on_epoch=True)
+            self.log(f'{set}_acc_obj', acc, on_epoch=True)
 
             if set == "test":
                 if batch_idx == 0:
@@ -411,12 +419,18 @@ class LitSegNet(pl.LightningModule):
                 else:
                     self.cm = compute_output_matrix(y[y>=0].cpu(), pred_cls[y>=0].cpu(), output_matrix=self.cm)
                 iou_cm = compute_iou(self.cm)
-                self.log(f'{set}_cm_iou', iou_cm, on_epoch=True, batch_size=self.hparams.bs)
+                self.log(f'{set}_cm_iou', iou_cm, on_epoch=True)
+
+                ciou = self.cIoU(pred_cls[y>=0], y[y>=0])
+                #ciou_scores = {f"{set}_cIoU_{c}": score for c, score in ciou.items()}
+                #print(ciou)
+                #k = [f'test_cIoU_' for c in self.class_names_list]
+                #self.log_dict(dict(zip(k,ciou)), on_step=True)
 
         #     mistakes = self.dist(x_hat, y, weight_map=weight_map)
         # #
         # self.log_mistakes(mistakes, prefix=set)
-        self.log(f'{set}_loss', loss, on_epoch=True, on_step=True, batch_size=self.hparams.bs)
+
 
         if save:
             if self.hparams.mode == "convert":
@@ -425,7 +439,12 @@ class LitSegNet(pl.LightningModule):
                 input_imgs = [dict(zip(x,t)) for t in zip(*x.values())]
                 self.save_result(sample=input_imgs, pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
 
-        return loss
+        if set == "test":
+            return {
+                "loss": loss,
+                "ciou": ciou
+            }
+        else: return loss
 
     def training_step(self, batch, batch_idx):
         loss = self.predict(batch, set="train", batch_idx=batch_idx)
@@ -742,26 +761,35 @@ class LitSegNet(pl.LightningModule):
         #     self.log('gt_cls_count', count, on_step=False, prog_bar=False, on_epoch=True, reduce_fx=self.reduce_stats)
 
 
-    # def test_epoch_end(self, outputs):
-    #     bins = outputs[0]["bins"]  # fixed bin size
-    #     #print(len(outputs[0]["correct_hist"]))
-    #     correct_pred = np.array([item["correct_hist"] for item in outputs if item is not None])
-    #     correct_pred = np.sum(correct_pred, axis=0)
-    #
-    #     incorrect_pred = np.array([item["incorrect_hist"] for item in outputs if item is not None])
-    #     incorrect_pred = np.sum(incorrect_pred, axis=0)
-    #     #print(correct_pred)
-    #     #correct_pred =
-    #     #incorrect_pred = outputs["incorrect_hist"]
-    #
-    #     #print(bins, correct_pred)
-    #     np.save(f"acdc-night-correct_pred.npy", correct_pred)
-    #     np.save(f"acdc-night-incorrect_pred.npy", incorrect_pred)
-    #     np.save(f"acdc-night-bins.npy", bins)
-    #     counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = correct_pred, alpha=0.5, color = "green")
-    #
-    #     counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = incorrect_pred, alpha=0.5, color = "red")
-    #     plt.show()
+    def test_epoch_end(self, outputs):
+
+        suff=""
+        stack = torch.stack([tmp[f'ciou'] for tmp in outputs])
+        ciou_across_batches = stack.nanmean(dim=0)
+        k = [f'test_cIoU_{c}' for c in self.class_names_list]
+        ciou_scores = dict(zip(k,ciou_across_batches))
+        print(ciou_scores)
+        self.log_dict(ciou_scores)
+        self.log('test_mIoU_from_cIoU',ciou_across_batches.nanmean())
+        # bins = outputs[0]["bins"]  # fixed bin size
+        # #print(len(outputs[0]["correct_hist"]))
+        # correct_pred = np.array([item["correct_hist"] for item in outputs if item is not None])
+        # correct_pred = np.sum(correct_pred, axis=0)
+        #
+        # incorrect_pred = np.array([item["incorrect_hist"] for item in outputs if item is not None])
+        # incorrect_pred = np.sum(incorrect_pred, axis=0)
+        # #print(correct_pred)
+        # #correct_pred =
+        # #incorrect_pred = outputs["incorrect_hist"]
+        #
+        # #print(bins, correct_pred)
+        # np.save(f"acdc-night-correct_pred.npy", correct_pred)
+        # np.save(f"acdc-night-incorrect_pred.npy", incorrect_pred)
+        # np.save(f"acdc-night-bins.npy", bins)
+        # counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = correct_pred, alpha=0.5, color = "green")
+        #
+        # counts_i, bins_i, _ = plt.hist(bins[:-1], bins, weights = incorrect_pred, alpha=0.5, color = "red")
+        # plt.show()
 
     def configure_optimizers(self):
         if self.hparams.optim == "SGD":
