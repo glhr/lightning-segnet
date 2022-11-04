@@ -50,7 +50,7 @@ parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--lr_finder', action='store_true', default=False)
 parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('--max_epochs', type=int, default=1000)
-parser.add_argument('--test_samples', type=int, default=None)
+parser.add_argument('--test_samples', type=int, default=0)
 parser.add_argument('--test_checkpoint', default=None)
 parser.add_argument('--train_checkpoint', default=None)
 parser.add_argument('--prefix', default=None)
@@ -72,26 +72,26 @@ class LitSegNet(pl.LightningModule):
     def add_model_specific_args(parent_parser):
         parser = ArgumentParser(parents=[parent_parser], add_help=False)
         parser.add_argument('--model', default="segnet")
-        parser.add_argument('--bs', type=int, default=16)
-        parser.add_argument('--lr', type=float, default=None)
+        parser.add_argument('--bs', type=int, default=8)
+        parser.add_argument('--lr', type=float, default=0.001)
         parser.add_argument('--momentum', type=int, default=None)
-        parser.add_argument('--optim', type=str, default=None)
-        parser.add_argument('--wd', type=float, default=0)
+        parser.add_argument('--optim', type=str, default="adam")
+        parser.add_argument('--wd', type=float, default=0.0001)
         parser.add_argument('--num_classes', type=int, default=3)
         parser.add_argument('--class_weights', default=None)
-        parser.add_argument('--workers', type=int, default=0)
-        parser.add_argument('--mode', default="affordances")
+        parser.add_argument('--workers', type=int, default=4)
+        parser.add_argument('--mode', default="objects")
         parser.add_argument('--dataset', default="freiburg")
         parser.add_argument('--dataset_combo', default=None)
         parser.add_argument('--dataset_combo_ntrain', type=int, default=100)
         parser.add_argument('--augment', action="store_true", default=False)
         parser.add_argument('--loss_weight', action="store_true", default=False)
         parser.add_argument('--lwmap_range', default="0.1,1")
-        parser.add_argument('--loss', default=None)
+        parser.add_argument('--loss', default="ce")
         parser.add_argument('--orig_dataset', default=None)
         parser.add_argument('--modalities', default="rgb")
-        parser.add_argument('--init_channels', type=int, default=1)
-        parser.add_argument('--resize', default="1920,1080")
+        parser.add_argument('--init_channels', type=int, default=3)
+        parser.add_argument('--resize', default="480,240")
         parser.add_argument('--depthwise_conv', action="store_true", default=False)
         parser.add_argument('--ranks', default="1,2,3")
         parser.add_argument('--dist', default="l1")
@@ -271,16 +271,18 @@ class LitSegNet(pl.LightningModule):
         # self.IoU_conv = IoU(num_classes=self.num_cls, ignore_index=0)
         self.IoU_conv = MaskedIoU(labels=self.hparams.labels_conv)
 
-        self.result_folder = f"results/{self.hparams.dataset}/"
+        self.result_folder =  f"{RESULT_FOLDER}/results/{self.hparams.dataset}/"
         seq = f"_{self.dataset_seq}-" if self.dataset_seq is not None else ''
-        self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}{seq}-c{self.hparams.num_classes}-{self.hparams.loss}"
+        self.hparams.save_prefix = f"{timestamp}-{self.hparams.dataset}{seq}-c{self.hparams.num_classes}"
         if self.hparams.loss == "sord":
             self.hparams.save_prefix += f'-{",".join([str(r) for r in self.hparams.ranks])}'
             self.hparams.save_prefix += f'-a{self.hparams.dist_alpha}-{self.hparams.dist}'
         if self.hparams.loss_weight:
             self.hparams.save_prefix += "-lw"
         self.hparams.save_prefix += f'-{",".join(self.hparams.modalities)}'
+        self.hparams.save_prefix += f"-{self.hparams.fusion_mode}"
         logger.info(self.hparams.save_prefix)
+        print(self.result_folder)
         if self.hparams.save_xp is None:
             create_folder(f"{self.result_folder}/viz_per_epoch")
             create_folder(f"{self.result_folder}/gt")
@@ -320,16 +322,16 @@ class LitSegNet(pl.LightningModule):
     def save_result(self, sample, pred, pred_cls, target, batch_idx=0):
         for i,(o,p,c,t) in enumerate(zip(sample,pred,pred_cls,target)):
             # logger.debug(p.shape)
-            if self.hparams.ranks is not None:
-                test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * self.hparams.ranks[0] \
-                 + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * self.hparams.ranks[1] \
-                 + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * self.hparams.ranks[2]
-            else:
-                test = None
+            # if self.hparams.ranks is not None:
+            #     test = p.squeeze()[self.test_set.dataset.aff_idx["impossible"]] * self.hparams.ranks[0] \
+            #      + p.squeeze()[self.test_set.dataset.aff_idx["possible"]] * self.hparams.ranks[1] \
+            #      + p.squeeze()[self.test_set.dataset.aff_idx["preferable"]] * self.hparams.ranks[2]
+            # else:
+            #     test = None
             self.test_set.dataset.result_to_image(
                 iter=batch_idx+i, gt=t, orig=o, pred_cls=c,
                 folder=f"{self.result_folder}/viz_per_epoch",
-                filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-proba")
+                filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, pred_cls=c, folder=f"{self.result_folder}", filename_prefix=f"{self.hparams.save_prefix}-epoch{self.current_epoch}-cls")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, gt=t, folder=f"{self.result_folder}", filename_prefix=f"ref")
             # self.test_set.dataset.result_to_image(iter=batch_idx+i, orig=o, folder=f"{self.result_folder}", filename_prefix=f"orig")
@@ -372,7 +374,9 @@ class LitSegNet(pl.LightningModule):
 
         if args.train and not self.global_step % 25:
 
-            for i,(o,c,t,f) in enumerate(zip(x["rgb"],pred_cls,y,filenames)):
+            input_imgs = [dict(zip(x,t)) for t in zip(*x.values())]
+
+            for i,(o,c,t,f) in enumerate(zip(input_imgs,pred_cls,y,filenames)):
                 if i == 0:
                     dataset_obj = self.train_set.dataset
 
@@ -418,7 +422,8 @@ class LitSegNet(pl.LightningModule):
             if self.hparams.mode == "convert":
                 self.save_result(sample=x, pred=pred_proba_aff, pred_cls=pred_cls_aff, target=target_aff, batch_idx=batch_idx)
             else:
-                self.save_result(sample=x["rgb"], pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
+                input_imgs = [dict(zip(x,t)) for t in zip(*x.values())]
+                self.save_result(sample=input_imgs, pred=x_hat, pred_cls=pred_cls, target=y, batch_idx=batch_idx)
 
         return loss
 
@@ -939,6 +944,7 @@ if __name__ == '__main__':
             chkpt = args.test_checkpoint.split("/")[-1].replace(".ckpt", "")
             if args.save_xp is None:
                 create_folder(f"{segnet_model.result_folder}/{chkpt}")
+            print(segnet_model.result_folder)
             trained_model = segnet_model.load_from_checkpoint(checkpoint_path=args.test_checkpoint, test_max = args.test_samples, test_checkpoint=chkpt, save=args.save, viz=args.viz, test_set=args.test_set, conf=args, dataset_seq=args.dataset_seq, nopredict=args.nopredict)
         else:
             trained_model = segnet_model

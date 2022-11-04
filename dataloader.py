@@ -375,30 +375,34 @@ class MMDataLoader(Dataset):
             filename = iter
 
         if orig is not None:
-            if torch.is_tensor(orig):
-                orig = orig.detach().cpu().numpy()
+
             n_modalities = len(orig)
 
-            modality = orig
-            # print("orig shape",modality.shape)
-            if np.max(modality) <= 1: modality = (modality*255)
-            modality = modality.astype(np.uint8)
-            modality = np.transpose(modality,(1,2,0))
-            if modality.shape[-1] != 3:
-                modality = np.repeat(modality,3, axis=-1)
+            if not isinstance(orig,dict):
+                orig = {"img":orig}
+                # print("orig shape",modality.shape)
+            for modality in orig.values():
+                #print(modality)
+                if torch.is_tensor(modality):
+                    modality = modality.detach().cpu().numpy()
+                if np.max(modality) <= 1: modality = (modality*255)
+                modality = modality.astype(np.uint8)
+                modality = np.transpose(modality,(1,2,0))
+                if modality.shape[-1] != 3:
+                    modality = np.repeat(modality,3, axis=-1)
 
-                # print(np.min(orig),np.max(orig))
-                # concat = concat + [modality]
+                    # print(np.min(orig),np.max(orig))
+                    # concat = concat + [modality]
 
-            folder = "" if folder is None else folder
-            dataset_name = self.name if dataset_name is None else dataset_name
-            # mod_i =  if n_modalities > 1 else ''
-            mod_i = 'rgb'
-            # if mod_i == "depth":
-            #     modality = 255 - cv2.applyColorMap(
-            #         np.uint8(modality / np.amax(modality) * 255),
-            #         cv2.COLORMAP_JET)
-            if overlay is None: concat.append(modality)
+                folder = "" if folder is None else folder
+                dataset_name = self.name if dataset_name is None else dataset_name
+                # mod_i =  if n_modalities > 1 else ''
+                mod_i = 'rgb'
+                # if mod_i == "depth":
+                #     modality = 255 - cv2.applyColorMap(
+                #         np.uint8(modality / np.amax(modality) * 255),
+                #         cv2.COLORMAP_JET)
+                if overlay is None: concat.append(modality)
 
         if gt is not None:
             if torch.is_tensor(gt): gt_numpy = gt.detach().cpu().numpy()
@@ -462,11 +466,11 @@ class MMDataLoader(Dataset):
         dataset_name = self.name if dataset_name is None else dataset_name
         if (overlay is not None) or (orig is None):
             try:
-                img.save(f'{RESULT_FOLDER}/{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
+                img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
             except Exception as e:
                 logger.debug(f"{e} - skipping")
         else:
-            img.save(f'{RESULT_FOLDER}/{folder}/{dataset_name}-{filename}-{filename_prefix}{mod_i}_{self.mode}.png')
+            img.save(f'{folder}/{dataset_name}-{filename}-{filename_prefix}_{self.mode}.png')
 
     def load_depth(self, path, invert=False):
         depth_image = cv2.imread(path, cv2.IMREAD_ANYDEPTH)
