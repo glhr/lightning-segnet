@@ -531,10 +531,14 @@ class MMDataLoader(Dataset):
             A.HorizontalFlip(p=p)
             ], p=1, additional_targets=additional_targets)
 
+        #cutout_transform = A.Cutout(num_holes=1, max_h_size=100, max_w_size=100, always_apply=True)
+
         # logger.info(f"augment: {apply}")
         if apply == 'resize_only':
             if self.resize is not None: transformed_resized = resize_transform(image=imgs['image'], mask=imgs['mask'], depth=imgs["depth"], ir=imgs["ir"])
             else: transformed_resized = imgs
+            #transformed_resized['image'][100:200, 100:150] = 0
+            #transformed_resized['image'] = cutout["image"]
             if not self.rgb: transformed_gray = gray_transform(image=transformed_resized['image'], mask=transformed_resized['mask'])
             else: transformed_gray = transformed_resized
             if "depth" in imgs: transformed_gray["depth"] = transformed_resized["depth"]
