@@ -101,3 +101,5 @@ lightning_logs/
 loaders/
 
 *.mp4
+
+MNIST/
