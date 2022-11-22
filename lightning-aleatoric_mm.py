@@ -46,6 +46,7 @@ class MNISTDataModule(LightningDataModule):
         # Assign test dataset for use in dataloader(s)
         if stage == "test":
             self.mnist_test = MNIST(self.data_dir, train=False, transform=self.transform)
+            self.fashion_test = FashionMNIST(self.data_dir, train=False, transform=self.transform, download=True)
 
         if stage == "predict":
             self.mnist_predict = MNIST(self.data_dir, train=False, transform=self.transform)
@@ -57,7 +58,11 @@ class MNISTDataModule(LightningDataModule):
         return DataLoader(self.mnist_val, batch_size=BATCH_SIZE)
 
     def test_dataloader(self):
-        return DataLoader(self.mnist_test, batch_size=1)
+        loaders = {
+             "mnist":DataLoader(self.mnist_test, batch_size=1),
+             "fashion":DataLoader(self.fashion_test, batch_size=1)
+         }
+        return CombinedLoader(loaders, mode="max_size_cycle")
 
     def predict_dataloader(self):
         return DataLoader(self.mnist_predict, batch_size=1)
@@ -72,7 +77,7 @@ class DummyDataModule(LightningDataModule):
                 self.transform = transform
 
         def __len__(self):
-            return 1000
+            return 100
 
         def __getitem__(self, x):
             # open image here as PIL / numpy
@@ -122,24 +127,37 @@ class LitMNIST(LightningModule):
         # Define PyTorch model
         self.feat_extract = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(channels * width * height, hidden_size),
+            nn.Linear(channels * width * height, 200),
+            nn.ReLU(),
+            nn.Linear(200, 100),
             nn.ReLU(),
             #nn.Dropout(0.5),
-            nn.Linear(hidden_size, 2)
+            nn.Linear(100, hidden_size)
         )
         self.classifier = nn.Sequential(
             nn.ReLU(),
             #nn.Dropout(0.5),
-            nn.Linear(2, self.num_classes)
+            nn.Linear(hidden_size, self.num_classes)
+        )
+        self.performance_predictor = nn.Sequential(
+            nn.ReLU(),
+            #nn.Dropout(0.5),
+            nn.Linear(hidden_size, 1)
         )
 
         self.val_accuracy = Accuracy()
         self.test_accuracy = Accuracy()
 
+        self.training_transforms = nn.Sequential(
+            transforms.RandomRotation(degrees=(0, 180)),
+            transforms.RandomResizedCrop(size=(28,28))
+            )
+
     def forward(self, x):
         feat = self.feat_extract(x)
         x = self.classifier(feat)
-        return feat, x
+        perf = self.performance_predictor(feat)
+        return feat, x, perf
 
     def on_test_epoch_start(self):
         def apply_dropout(m):
@@ -167,15 +185,33 @@ class LitMNIST(LightningModule):
         df.hist(column="output_entropy_across_samples",by='dataset',legend=True)
         plt.show()
 
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        logits = F.softmax(self(x)[-1],dim=1)
-        loss = F.cross_entropy(logits, y)
-        return loss
+    def training_step(self, batch, batch_idx, optimizer_idx=None):
+
+        if optimizer_idx == None: optimizer_idx = 0
+        if optimizer_idx == 0: # classifier
+            x, y = batch
+            pred = self(x)
+            logits = F.softmax(pred[1],dim=1)
+
+            loss_ce = F.cross_entropy(logits, y)
+            self.log("train_loss_ce", loss_ce, prog_bar=True)
+            return loss_ce
+
+        elif optimizer_idx == 1: # perf branch
+            x, y = batch
+            x = self.training_transforms(x)
+            pred = self(x)
+            logits = F.softmax(pred[1],dim=1)
+            perf = pred[-1]
+
+            ce_samples = F.cross_entropy(logits, y,reduction="none").unsqueeze(-1)
+            loss_perf = F.mse_loss(perf,ce_samples)
+            self.log("train_loss_perf", loss_perf, prog_bar=True)
+            return loss_perf
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        logits = F.softmax(self(x)[-1],dim=1)
+        logits = F.softmax(self(x)[-2],dim=1)
         loss = F.cross_entropy(logits, y)
         preds = torch.argmax(logits, dim=1)
         self.val_accuracy.update(preds, y)
@@ -193,8 +229,8 @@ class LitMNIST(LightningModule):
             dropout_feats = torch.tensor([]).to(self.device)
             if y > self.num_classes - 1:
                 y =  y -y
-            for i in range(10):
-                feats, out = self(x)
+            for i in range(2):
+                feats, out, perf = self(x)
                 logits = F.softmax(out,dim=1)
                 dropout_predictions = torch.concat([dropout_predictions,logits.unsqueeze(0)])
                 dropout_feats = torch.concat([dropout_feats,feats.unsqueeze(0)])
@@ -243,46 +279,21 @@ class LitMNIST(LightningModule):
         return results
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
+        optimizer_classifier = torch.optim.Adam([
+                    {'params': self.classifier.parameters()},
+                    {'params': self.feat_extract.parameters()}
+                ], lr=self.learning_rate)
+        optimizer_perf = torch.optim.Adam([
+                    {'params': self.performance_predictor.parameters()},
+                    {'params': self.feat_extract.parameters()}
+                ], lr=self.learning_rate)
+        return [optimizer_classifier,optimizer_perf]
 
-    ####################
-    # DATA RELATED HOOKS
-    ####################
-
-    # def prepare_data(self):
-    #     # download
-    #     MNIST(self.data_dir, train=True, download=True)
-    #     MNIST(self.data_dir, train=False, download=True)
-    #
-    # def setup(self, stage=None):
-    #
-    #     # Assign train/val datasets for use in dataloaders
-    #     if stage == "fit" or stage is None:
-    #         mnist_full = MNIST(self.data_dir, train=True, transform=self.transform)
-    #         self.mnist_train, self.mnist_val = random_split(mnist_full, [55000, 5000])
-    #
-    #     # Assign test dataset for use in dataloader(s)
-    #     if stage == "test" or stage is None:
-    #         self.mnist_test = MNIST(self.data_dir, train=False, transform=self.transform)
-    #         self.fasion_test = FashionMNIST(self.data_dir, train=False, transform=self.transform, download=True)
-    #
-    # def train_dataloader(self):
-    #     return DataLoader(self.mnist_train, batch_size=BATCH_SIZE)
-    #
-    # def val_dataloader(self):
-    #     return DataLoader(self.mnist_val, batch_size=BATCH_SIZE)
-    #
-    # def test_dataloader(self):
-    #     loaders = {
-    #          "mnist":DataLoader(self.mnist_test, batch_size=1),
-    #          "fashion":DataLoader(self.fasion_test, batch_size=1)
-    #      }
-    #     return CombinedLoader(loaders, mode="max_size_cycle")
 
 parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
 parser.add_argument('--max_epochs', type=int, default=10)
+parser.add_argument('--test_samples', type=int, default=None)
 
 args = parser.parse_args()
 
@@ -292,13 +303,14 @@ trainer = Trainer(
     max_epochs=args.max_epochs,
     callbacks=[TQDMProgressBar(refresh_rate=20)],
     logger=[CSVLogger(save_dir="logs/"), WandbLogger(project="MNIST")],
-    #limit_test_batches=50
+    limit_test_batches=args.test_samples
 )
 
 
 if args.train:
-    model = LitMNIST(num_classes=2, dims=(1, 28, 28))
-    dm = DummyDataModule()
+    model = LitMNIST(num_classes=10, dims=(1, 28, 28))
+    #dm = DummyDataModule()
+    dm = MNISTDataModule()
     trainer.fit(model,dm)
     trainer.test(model,dm)
 else:
