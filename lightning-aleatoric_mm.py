@@ -11,7 +11,7 @@ from pytorch_lightning.trainer.supporters import CombinedLoader
 from torch import nn
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split, Dataset
-from torchmetrics import Accuracy
+from torchmetrics import Accuracy, CalibrationError
 from torchvision import transforms
 from torchvision.datasets import MNIST, FashionMNIST
 import matplotlib.pyplot as plt
@@ -60,7 +60,7 @@ class MNISTDataModule(LightningDataModule):
     def test_dataloader(self):
         loaders = {
              "mnist":DataLoader(self.mnist_test, batch_size=1),
-             "fashion":DataLoader(self.fashion_test, batch_size=1)
+             #"fashion":DataLoader(self.fashion_test, batch_size=1)
          }
         return CombinedLoader(loaders, mode="max_size_cycle")
 
@@ -111,13 +111,14 @@ class DummyDataModule(LightningDataModule):
         return CombinedLoader(loaders, mode="max_size_cycle")
 
 class LitMNIST(LightningModule):
-    def __init__(self, num_classes, dims, hidden_size=64, learning_rate=2e-3, ):
+    def __init__(self, num_classes, dims, hidden_size=64, learning_rate=2e-3, branches="classifier"):
 
         super().__init__()
 
         # Set our init args as class attributes
         self.hidden_size = hidden_size
         self.learning_rate = learning_rate
+        self.branches = branches.split("+")
 
         # Hardcode some dataset specific attributes
         self.num_classes = num_classes
@@ -139,6 +140,7 @@ class LitMNIST(LightningModule):
             #nn.Dropout(0.5),
             nn.Linear(hidden_size, self.num_classes)
         )
+
         self.performance_predictor = nn.Sequential(
             nn.ReLU(),
             #nn.Dropout(0.5),
@@ -147,6 +149,7 @@ class LitMNIST(LightningModule):
 
         self.val_accuracy = Accuracy()
         self.test_accuracy = Accuracy()
+        self.test_ECE = CalibrationError()
 
         self.training_transforms = nn.Sequential(
             transforms.RandomRotation(degrees=(0, 180)),
@@ -177,7 +180,7 @@ class LitMNIST(LightningModule):
         color_dict ={k:np.random.randint(0,100,size=3).astype(float)/100 for k in df.cls.unique()}
 
 
-        sn.scatterplot(data=df,x='feat_1',y='feat_2',hue="dataset",size="feat_1_var",sizes=(20, 1000))
+        sn.scatterplot(data=df,x='feat_1',y='feat_2',hue="dataset",size="loss",sizes=(20, 100))
         plt.show()
         #fig, axes = plt.subplots(1, 2, figsize=(16,4))
         df.hist(column="output_entropy_across_classes",by='dataset',legend=True)
@@ -199,7 +202,7 @@ class LitMNIST(LightningModule):
 
         elif optimizer_idx == 1: # perf branch
             x, y = batch
-            x = self.training_transforms(x)
+            #x = self.training_transforms(x)
             pred = self(x)
             logits = F.softmax(pred[1],dim=1)
             perf = pred[-1]
@@ -257,11 +260,13 @@ class LitMNIST(LightningModule):
             #print("---")
             loss = F.cross_entropy(mean, y)
             pred_cls = torch.argmax(mean, dim=1)
-            #self.test_accuracy.update(pred_cls, y)
+            self.test_accuracy.update(pred_cls, y)
+            self.test_ECE.update(mean, y)
 
             # Calling self.log will surface up scalars for you in TensorBoard
             self.log("test_loss", loss, prog_bar=True)
-            #self.log("test_acc", self.test_accuracy, prog_bar=True)
+            self.log("test_acc", self.test_accuracy, prog_bar=True)
+            self.log("test_ECE", self.test_ECE, prog_bar=True)
             #self.log("test_variance", variance, prog_bar=True, on_step=True)
 
             #assert pred_cls.shape == y.shape
@@ -274,7 +279,8 @@ class LitMNIST(LightningModule):
             "feat_1": mean_feat.squeeze()[0].item(),
             "feat_1_var": var_feat.squeeze()[0].item() + var_feat.squeeze()[1].item(),
             "feat_2": mean_feat.squeeze()[1].item(),
-            "dataset": dataset
+            "dataset": dataset,
+            "loss": loss.item()
             })
         return results
 
@@ -283,39 +289,59 @@ class LitMNIST(LightningModule):
                     {'params': self.classifier.parameters()},
                     {'params': self.feat_extract.parameters()}
                 ], lr=self.learning_rate)
-        optimizer_perf = torch.optim.Adam([
-                    {'params': self.performance_predictor.parameters()},
-                    {'params': self.feat_extract.parameters()}
-                ], lr=self.learning_rate)
-        return [optimizer_classifier,optimizer_perf]
+        optimizers = [optimizer_classifier]
+        if "perf" in self.branches:
+            optimizer_perf = torch.optim.Adam([
+                        {'params': self.performance_predictor.parameters()},
+                        {'params': self.feat_extract.parameters()}
+                    ], lr=self.learning_rate)
+            optimizers.append(optimizer_perf)
+        return optimizers
 
 
 parser = ArgumentParser()
 parser.add_argument('--train', action='store_true', default=False)
+parser.add_argument('--test', action='store_true', default=False)
 parser.add_argument('--max_epochs', type=int, default=10)
 parser.add_argument('--test_samples', type=int, default=None)
+parser.add_argument('--checkpoint', type=str, default=None)
+parser.add_argument('--branches', type=str, default="classifier")
 
 args = parser.parse_args()
+
+
+wandb_logger = WandbLogger(project="MNIST")
+wandb_logger.log_hyperparams(args)
 
 trainer = Trainer(
     accelerator="auto",
     devices=1 if torch.cuda.is_available() else None,  # limiting got iPython runs
     max_epochs=args.max_epochs,
     callbacks=[TQDMProgressBar(refresh_rate=20)],
-    logger=[CSVLogger(save_dir="logs/"), WandbLogger(project="MNIST")],
+    logger=[CSVLogger(save_dir="logs/"), wandb_logger],
     limit_test_batches=args.test_samples
 )
 
+#dm = DummyDataModule()
+dm = MNISTDataModule()
+branches = args.branches
 
 if args.train:
-    model = LitMNIST(num_classes=10, dims=(1, 28, 28))
-    #dm = DummyDataModule()
-    dm = MNISTDataModule()
+    model = LitMNIST(num_classes=10, dims=(1, 28, 28), branches=branches)
+
     trainer.fit(model,dm)
+
+    checkpoint = trainer.checkpoint_callback.best_model_path
+    print(checkpoint)
+    Path(f"checkpoint-{branches}.txt").write_text(checkpoint)
     trainer.test(model,dm)
-else:
-    model = LitMNIST.load_from_checkpoint("logs/lightning_logs/version_62/checkpoints/epoch=99-step=21500.ckpt")
-    trainer.test(model)
+elif args.test:
+    if args.checkpoint is None:
+        checkpoint = Path(f"checkpoint-{branches}.txt").read_text()
+    else:
+        checkpoint = args.checkpoint
+    model = LitMNIST.load_from_checkpoint(checkpoint, num_classes=10, dims=(1, 28, 28), branches=branches)
+    trainer.test(model,dm)
 
 
 # metrics = pd.read_csv(f"{trainer.logger.log_dir}/metrics.csv")
